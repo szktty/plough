@@ -1,6 +1,6 @@
 # Plough
 
-TODO: Screenshot
+![Image](https://github.com/user-attachments/assets/d97ed817-ea44-479d-8a90-24a071fd6a30)
 
 Plough is a library for creating interactive graph visualizations in Flutter applications.
 
@@ -203,9 +203,13 @@ and the following layout strategies are available:
 
 ### Force-directed Layout
 
+![Image](https://github.com/user-attachments/assets/93347d13-7f31-47e0-974a-5091c0d73c1a)
+
 `GraphForceDirectedLayoutStrategy` applies a force-directed model between nodes and automatically calculates layout. It achieves balanced placement considering repulsive forces between nodes and attractive forces from links.
 
 ### Tree Layout
+
+![Image](https://github.com/user-attachments/assets/685eeb65-7213-4f33-bd6a-a537482f3038)
 
 `GraphTreeLayoutStrategy` is suitable for graphs with hierarchical structure. It arranges nodes hierarchically to visually represent parent-child relationships.
 
@@ -214,6 +218,8 @@ and the following layout strategies are available:
 `GraphRandomLayoutStrategy` places nodes at random positions. It can be used for initial placement or as a base for other layouts.
 
 ### Manual Layout
+
+![Image](https://github.com/user-attachments/assets/a7de5c96-7809-4f95-bb1c-e513254289d8)
 
 `GraphManualLayoutStrategy` is for complete manual control of node positions.
 While node positions can be manually specified in any strategy, this strategy allows more detailed control.
