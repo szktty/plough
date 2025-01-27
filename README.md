@@ -2,7 +2,7 @@
 
 ![iPhone Simulator screenshots](https://github.com/user-attachments/assets/d97ed817-ea44-479d-8a90-24a071fd6a30)
 
-Plough is a library for creating interactive graph visualizations in Flutter applications.
+Plough is a library for creating interactive network graph visualizations in Flutter applications.
 
 ## Features
 
