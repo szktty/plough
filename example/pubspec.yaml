@@ -1,0 +1,32 @@
+name: example
+description: "Examples for Plough library"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  freezed_annotation: ^2.4.4
+  google_fonts: ^6.2.1
+  grouped_list: ^6.0.0
+  platform: ^3.1.6
+  plough:
+    path: ../
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true

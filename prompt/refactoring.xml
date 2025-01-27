@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @formatter:off -->
+<refactoring_rules>
+    <debug_prints>
+        <description>Handling debug output</description>
+        <rules>
+            <rule>Remove all debug prints from production code</rule>
+            <rule>Use the functionality in lib/src/utils/logger.dart for debug output that should be kept</rule>
+            <rule>Check for locations using print or debugPrint statements</rule>
+        </rules>
+        <usage>
+            <example>
+                <description>How to use the logger</description>
+                <code>
+                    import 'package:plough/src/utils/logger.dart';
+
+                    // Output debug message
+                    log.d('Debug message');
+                </code>
+            </example>
+        </usage>
+        <checklist>
+            <item>Search and remove print statements</item>
+            <item>Search and remove debugPrint statements</item>
+            <item>Check developer comments (TODO, FIXME, etc.)</item>
+        </checklist>
+    </debug_prints>
+
+    <code_organization>
+        <description>Code organization rules</description>
+        <rules>
+            <rule>Remove unnecessary commented-out code</rule>
+            <rule>Apply Dart auto-formatting and fixes</rule>
+        </rules>
+        <commands>
+            <command>
+                <name>dart fix --apply</name>
+                <description>Automatically apply Dart recommendations (including removing unused imports)</description>
+            </command>
+            <command>
+                <name>dart format</name>
+                <description>Apply Dart standard formatting</description>
+            </command>
+        </commands>
+        <checklist>
+            <item>Check and remove commented-out code</item>
+            <item>Run dart fix --apply</item>
+            <item>Run dart format</item>
+        </checklist>
+    </code_organization>
+
+    <api_consistency>
+        <description>API consistency check rules</description>
+        <rules>
+            <rule>Verify naming convention consistency</rule>
+            <rule>Verify method parameter order consistency</rule>
+            <rule>Verify return type consistency</rule>
+        </rules>
+        <checklist>
+            <item>Check class naming patterns</item>
+            <item>Check method naming patterns</item>
+            <item>Check parameter order</item>
+            <item>Check null handling</item>
+        </checklist>
+    </api_consistency>
+
+    <error_handling>
+        <description>Error handling rules</description>
+        <rules>
+            <rule>Verify that all exceptions are properly handled</rule>
+            <rule>Verify that error messages are clear and useful</rule>
+            <rule>Verify that appropriate exception classes are used for each error type</rule>
+        </rules>
+        <checklist>
+            <item>Check exception handling</item>
+            <item>Check error messages</item>
+            <item>Check exception class usage</item>
+        </checklist>
+    </error_handling>
+</refactoring_rules>
