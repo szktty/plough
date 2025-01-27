@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @formatter:off -->
+<library_documentation>
+    <metadata>
+        <product>Plough</product>
+        <description>A library for implementing interactive graph drawing in Flutter applications</description>
+        <version>0.1.0</version>
+    </metadata>
+
+    <documentation_structure>
+        <file id="architecture">
+            <name>architecture.xml</name>
+            <description>Provides implementation-related information</description>
+            <primary_use>Understanding and navigating implementation</primary_use>
+            <contents>
+                <item>Library metadata</item>
+                <item>Version management and check rules</item>
+                <item>Directory structure definition</item>
+                <item>Class definitions and basic API reference</item>
+            </contents>
+        </file>
+
+        <file id="documentation">
+            <name>documentation.xml</name>
+            <description>Defines rules for documentation creation</description>
+            <primary_use>Documentation creation and maintenance</primary_use>
+            <version_info>
+                <format>YYYY_MM_DD_NNN</format>
+                <current>2025_01_22_001</current>
+            </version_info>
+            <contents>
+                <item>API documentation format</item>
+                <item>Documentation templates</item>
+                <item>Cross-reference rules</item>
+                <item>Documentation maintenance rules</item>
+                <item>Documentation examples and best practices</item>
+                <item>Progress management overview and reference information</item>
+            </contents>
+        </file>
+
+        <file id="documentation_progress">
+            <name>documentation_progress.xml</name>
+            <description>Defines rules for documentation progress management</description>
+            <primary_use>Documentation progress management</primary_use>
+            <contents>
+                <item>Progress tracking rules</item>
+                <item>Chat history continuation rules</item>
+                <item>Progress status file structure definition</item>
+                <item>Validation rules</item>
+                <item>Update guidelines</item>
+            </contents>
+            <related_files>
+                <file>doc/documentation_progress_status.xml</file>
+            </related_files>
+        </file>
+
+        <file id="refactoring">
+            <name>refactoring.xml</name>
+            <description>Defines rules for code quality maintenance and refactoring</description>
+            <primary_use>Code improvement and quality management</primary_use>
+            <contents>
+                <item>Handling debug output</item>
+                <item>Code organization rules</item>
+                <item>API consistency check rules</item>
+                <item>Error handling rules</item>
+                <item>Code refactoring procedures</item>
+            </contents>
+        </file>
+    </documentation_structure>
+
+    <usage_guidelines>
+        <guideline>Each file can be referenced and updated independently</guideline>
+        <guideline>Keep references between files to a minimum</guideline>
+        <guideline>When updating, verify consistency with manifest.xml contents</guideline>
+    </usage_guidelines>
+
+    <ai_assistant_instructions>
+        <initialization>
+            <step>1. Load manifest.xml to understand document structure</step>
+            <step>2. Reference necessary files according to task requirements</step>
+            <step>3. When information updates are needed, ensure consistency across related files</step>
+        </initialization>
+        <file_selection_guide>
+            <case>
+                <scenario>When implementation understanding or verification is needed</scenario>
+                <file>architecture.xml</file>
+            </case>
+            <case>
+                <scenario>When document creation or updates are needed</scenario>
+                <file>documentation.xml</file>
+            </case>
+            <case>
+                <scenario>When progress management or status checks are needed</scenario>
+                <file>documentation_progress.xml</file>
+            </case>
+            <case>
+                <scenario>When code improvement or quality management is needed</scenario>
+                <file>refactoring.xml</file>
+            </case>
+        </file_selection_guide>
+    </ai_assistant_instructions>
+</library_documentation>
