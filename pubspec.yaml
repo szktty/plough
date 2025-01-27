@@ -1,5 +1,5 @@
 name: plough
-description: "Flutter package to render interactive graph visualizations, featuring multiple layout algorithms, customizable appearance."
+description: "Flutter package to render interactive network graph visualizations, featuring multiple layout algorithms, customizable appearance."
 version: 0.6.0
 homepage: https://github.com/szktty/plough
 license: Apache-2.0
