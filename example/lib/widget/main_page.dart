@@ -1,0 +1,25 @@
+import 'package:example/widget/graph_area.dart';
+import 'package:example/widget/toolbar.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+class MainPage extends StatefulWidget {
+  const MainPage({
+    super.key,
+  });
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        MainPageToolbar(),
+        Expanded(child: GraphArea()),
+      ],
+    );
+  }
+}
