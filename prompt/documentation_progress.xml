@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @formatter:off -->
+<progress_tracking_rules>
+    <meta>
+        <description>Progress tracking rules referenced by AI assistant</description>
+        <latest_doc_rule>2025_01_22_002</latest_doc_rule>
+        <date>2024-01-22</date>
+    </meta>
+
+    <api_documentation_rules>
+        <priority_phases>
+            <phase id="1" priority="highest">
+                <n>Core Data Structures and Main View</n>
+                <criteria>
+                    <criterion>Core data structures of the library</criterion>
+                    <criterion>Public APIs that users first interact with</criterion>
+                    <criterion>Elements widely referenced by other components</criterion>
+                </criteria>
+                <target_categories>
+                    <category name="core_data_structures">
+                        <description>Classes defining basic data structures</description>
+                        <examples>Graph, GraphNode, GraphLink, GraphEntity</examples>
+                    </category>
+                    <category name="main_view">
+                        <description>Main view components</description>
+                        <examples>GraphView, interaction-related classes</examples>
+                    </category>
+                </target_categories>
+            </phase>
+
+            <phase id="2" priority="high">
+                <n>Layout and Rendering System</n>
+                <criteria>
+                    <criterion>Components directly involved in graph visualization</criterion>
+                    <criterion>Customizable core features</criterion>
+                </criteria>
+                <target_categories>
+                    <category name="layouts">
+                        <description>Layout algorithm implementations</description>
+                        <examples>ForceDirectedLayout, TreeLayout</examples>
+                    </category>
+                    <category name="rendering">
+                        <description>Rendering system and customization options</description>
+                    </category>
+                </target_categories>
+            </phase>
+
+            <phase id="3" priority="medium">
+                <n>Auxiliary Features and Utilities</n>
+                <criteria>
+                    <criterion>Optional features and auxiliary tools</criterion>
+                    <criterion>Internal implementation details</criterion>
+                </criteria>
+                <target_categories>
+                    <category name="utilities">
+                        <description>Helper functions and utility classes</description>
+                    </category>
+                    <category name="internal_apis">
+                        <description>APIs for internal use</description>
+                    </category>
+                </target_categories>
+            </phase>
+        </priority_phases>
+
+        <documentation_sequence>
+            <step>Create class-level documentation</step>
+            <step>Detailed explanation of methods and properties</step>
+            <step>Add usage examples</step>
+            <step>Organize cross-references</step>
+        </documentation_sequence>
+    </api_documentation_rules>
+
+    <status_file>
+        <location>doc/documentation_progress_status.xml</location>
+        <version_tracking>
+            <rule>All work records must include the documentation rule version</rule>
+            <rule>Version must follow the format defined in prompt/documentation.xml meta/version</rule>
+            <rule>Record the version of documentation.xml as-is at the start of work</rule>
+            <rule>Set needs_update flag if documentation rules are updated during work</rule>
+        </version_tracking>
+        <structure>
+            <completed_files>
+                <entry>
+                    <file_path>relative path</file_path>
+                    <doc_rule_version type="required">YYYY_MM_DD_NNN format</doc_rule_version>
+                    <last_updated>update date</last_updated>
+                    <changes>
+                        <change>change 1</change>
+                        <change>change 2</change>
+                    </changes>
+                    <needs_update>true/false</needs_update>
+                </entry>
+            </completed_files>
+
+            <in_progress>
+                <entry>
+                    <file_path>relative path</file_path>
+                    <doc_rule_version type="required">YYYY_MM_DD_NNN format</doc_rule_version>
+                    <priority>high/medium/low</priority>
+                    <status>current status</status>
+                    <notes>special notes</notes>
+                    <phase_id>related priority phase ID</phase_id>
+                </entry>
+            </in_progress>
+
+            <todo>
+                <entry>
+                    <file_path>relative path</file_path>
+                    <doc_rule_version type="required">YYYY_MM_DD_NNN format</doc_rule_version>
+                    <priority>priority</priority>
+                    <notes>notes</notes>
+                    <phase_id>related priority phase ID</phase_id>
+                </entry>
+            </todo>
+
+            <next_steps>
+                <step>next action 1</step>
+                <step>next action 2</step>
+            </next_steps>
+        </structure>
+    </status_file>
+
+    <validation_rules>
+        <rule>file_path must be written as a relative path from project root</rule>
+        <rule>last_updated must be written in YYYY-MM-DD format</rule>
+        <rule>priority must use one of: high/medium/low</rule>
+        <rule>Version format must be "YYYY_MM_DD_NNN" (NNN is 3-digit sequence)</rule>
+        <rule>doc_rule_version is mandatory and must be included in all work records</rule>
+        <version_validation>
+            <rule>If doc_rule_version differs from documentation.xml version definition, update is needed</rule>
+            <rule>Set needs_update to true when update is needed</rule>
+        </version_validation>
+    </validation_rules>
+
+    <update_guidelines>
+        <guideline>Always add to in_progress when starting work on new files</guideline>
+        <guideline>Move to completed_files when file processing is complete</guideline>
+        <guideline>Record changes specifically</guideline>
+        <guideline>Set phase_id appropriately for each file to maintain consistency with priorities</guideline>
+        <guideline>Always record the version of documentation.xml at work start</guideline>
+    </update_guidelines>
+
+    <conversation_tracking>
+        <documentation_checklist>
+            <template>
+### Documentation Pre-check Items
+
+1. Related Class Implementation Check
+- Checked files:
+  - [file path 1]
+  - [file path 2]
+- Key findings:
+  - [finding 1]
+  - [finding 2]
+
+2. Inheritance/Interface Check
+- Checked hierarchy:
+  - [class/interface name]
+- Important information:
+  - [info 1]
+  - [info 2]
+
+3. Dependency Check
+- Checked classes:
+  - [class name 1]
+  - [class name 2]
+- Constraints found from dependencies:
+  - [constraint 1]
+  - [constraint 2]
+            </template>
+        </documentation_checklist>
+        <rules>
+            <rule>Always check final progress status from previous session when starting new chat</rule>
+            <rule>Report current file status at chat start</rule>
+            <rule>Record detailed work state if interrupting mid-work</rule>
+            <rule>Always be aware of phase ID for files being worked on and proceed with appropriate priority</rule>
+        </rules>
+        
+        <session_status>
+            <current_chat>
+                <start_time>YYYY-MM-DD HH:MM</start_time>
+                <current_task>
+                    <file_path>working file path</file_path>
+                    <task_description>current work content</task_description>
+                    <progress_notes>work progress notes</progress_notes>
+                    <pending_decisions>list of pending decisions</pending_decisions>
+                    <phase_id>phase ID of current work</phase_id>
+                </current_task>
+            </current_chat>
+            
+            <previous_chat>
+                <reference>previous chat ID or datetime</reference>
+                <key_decisions>important decisions</key_decisions>
+                <unresolved_issues>unresolved issues</unresolved_issues>
+            </previous_chat>
+        </session_status>
+    </conversation_tracking>
+</progress_tracking_rules>

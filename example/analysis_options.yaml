@@ -1,0 +1,15 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - build/**
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    await_only_futures: true
+    public_member_api_docs: false
+    prefer_void_to_null: false
+    avoid_print: false
+    unawaited_futures: true
