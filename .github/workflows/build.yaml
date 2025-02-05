@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'release/**'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [iOS, Android, macOS, Windows]
+        include:
+          - target: iOS
+            os: macos-latest
+            build-args: ios --no-codesign
+          - target: Android
+            os: ubuntu-latest
+            build-args: apk
+          - target: macOS
+            os: macos-latest
+            build-args: macos
+          - target: Windows
+            os: windows-latest
+            build-args: windows
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '>=3.27.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build package
+        run: flutter build ${{ matrix.build-args }}
+
+      - name: Build example app
+        working-directory: example
+        run: |
+          flutter pub get
+          flutter build ${{ matrix.build-args }}
