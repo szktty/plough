@@ -309,25 +309,6 @@ final restoredData = GraphData.fromJson(jsonDecode(jsonString));
 final restoredGraph = Graph.fromData(restoredData);
 ```
 
-### Graph Algorithms
-
-Plough implements several graph theory algorithms:
-
-1. **Cycle Detection**: Identify cycles in the graph
-2. **Path Finding**: Find paths between nodes
-3. **Connected Components**: Identify connected subgraphs
-
-```dart
-// Check if graph contains cycles
-final hasCycles = graph.hasCycles();
-
-// Find path between nodes
-final path = graph.findPath(sourceNode, targetNode);
-
-// Get connected components
-final components = graph.getConnectedComponents();
-```
-
 ### Event Handling
 
 The graph emits events when its state changes, allowing for reactive updates:
