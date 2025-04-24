@@ -12,10 +12,9 @@ Plough is a library for creating interactive network graph visualizations in Flu
 - 🎨 Customizable graph appearance and behavior: nodes and links are widgets, requiring no special rendering implementation.
 - 🎬 Smooth animation of nodes from initial to final positions during first render.
 
-## Documentation for AI assistant
+## Documentation for LLMs
 
-To use AI assistance with this library, load `prompt/user_guide.xml` into the AI assistant.
-`user_guide.xml` contains structured documentation in XML format, including the contents of this README, to help the AI assistant understand the library's functionality.
+To use LLMs with this library, load `llms-full.txt` into the LLMs.
 
 ## Installation
 Add to pubspec.yaml:

@@ -1,0 +1,1211 @@
+# Plough: Interactive Graph Drawing Library for Flutter
+
+## Overview
+
+Plough is a comprehensive Flutter library designed for implementing interactive graph visualizations in Flutter applications. It provides a flexible and powerful framework for creating, manipulating, and visualizing graph data structures with rich interactive capabilities.
+
+Version: 0.1.0
+
+## Key Features
+
+- 📊 **Property Graph Model**: Flexible data structure for storing and managing graph elements
+- 🔄 **Multiple Layout Algorithms**: Various strategies for automatic node positioning
+- 🖱️ **Interactive Operations**: Built-in support for drag-and-drop, selection, and other user interactions
+- 🎨 **Widget-based Customization**: Extensive customization options through Flutter widgets
+- 🎬 **Smooth Animations**: Fluid transitions and initial rendering animations
+
+## Core Concepts
+
+### Graph Data Model
+
+Plough implements a property graph model where both nodes and links (edges) can contain custom properties. This flexible approach allows for rich data representation within the graph structure.
+
+#### Graph
+
+The `Graph` class is the central data structure that manages collections of nodes and links. It provides operations for adding, removing, and updating graph elements, and emits events when the graph state changes.
+
+```dart
+final graph = Graph();
+```
+
+#### Nodes
+
+Nodes represent entities in the graph. Each node has a unique ID, position information, and can hold custom properties. By default, nodes use 'label' for display text and 'description' for tooltips.
+
+```dart
+final node = GraphNode(
+  properties: {
+    'label': 'Node 1',
+    'description': 'First node',
+    'customData': 'value'
+  }
+);
+```
+
+#### Links
+
+Links represent connections between nodes. They can be directional (unidirectional or bidirectional) and can also hold custom properties.
+
+```dart
+final link = GraphLink(
+  source: node1,
+  target: node2,
+  direction: GraphLinkDirection.outgoing,
+  properties: {'label': 'connects'}
+);
+```
+
+### Visualization Components
+
+#### GraphView
+
+The `GraphView` widget is the main component for rendering a graph. It integrates visualization, layout control, and interaction handling.
+
+```dart
+GraphView(
+  graph: graph,
+  layoutStrategy: GraphForceDirectedLayoutStrategy(),
+  behavior: GraphViewDefaultBehavior(),
+)
+```
+
+#### Layout Strategies
+
+Plough provides several layout algorithms to position nodes automatically:
+
+1. **Force-Directed Layout**: Uses a physical model with repulsion between nodes and attraction through links.
+
+```dart
+GraphForceDirectedLayoutStrategy()
+```
+
+2. **Tree Layout**: Organizes nodes in a hierarchical structure.
+
+```dart
+GraphTreeLayoutStrategy(
+  direction: GraphTreeLayoutDirection.topToBottom,
+)
+```
+
+3. **Random Layout**: Places nodes at random positions.
+
+```dart
+GraphRandomLayoutStrategy()
+```
+
+4. **Manual Layout**: Allows explicit positioning of nodes.
+
+```dart
+final positions = GraphNodeLayoutPosition.fromMap({
+  node1.id: const Offset(0, 0),
+  node2.id: const Offset(100, 100),
+});
+
+GraphManualLayoutStrategy(
+  nodePositions: positions,
+  origin: GraphLayoutPositionOrigin.alignCenter,
+)
+```
+
+#### Behaviors
+
+Behaviors define how the graph responds to user interactions and how elements are displayed. The library provides default behaviors that can be customized by extending the `GraphViewBehavior` class.
+
+```dart
+class CustomBehavior extends GraphViewDefaultBehavior {
+  @override
+  GraphNodeViewBehavior createNodeViewBehavior() {
+    return GraphNodeViewBehavior.defaultBehavior(
+      nodeRendererBuilder: (context, graph, node, child) {
+        return GraphDefaultNodeRenderer(
+          node: node,
+          style: const GraphDefaultNodeRendererStyle(
+            shape: GraphDefaultNodeRendererShape.rectangle,
+          ),
+          child: Center(
+            child: Text(node['label']! as String),
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
+Key behavior customization methods include:
+- `createNodeViewBehavior()`: Customizes node display
+- `createLinkViewBehavior()`: Customizes link display
+- `getConnectionPoints()`: Calculates connection points between nodes
+- `onNodeSelect()`: Handles node selection
+- `onNodeTap()`: Handles node tap events
+- `onNodeDragStart/Update/End()`: Handles node drag operations
+
+#### Renderers
+
+Renderers control the visual appearance of graph elements:
+
+1. **Node Renderers**: Control the shape, size, and content of nodes.
+
+```dart
+GraphDefaultNodeRenderer(
+  node: node,
+  style: const GraphDefaultNodeRendererStyle(
+    shape: GraphDefaultNodeRendererShape.rectangle,
+    width: 100,
+    height: 50,
+  ),
+  child: buildContent(node),
+)
+```
+
+2. **Link Renderers**: Control the appearance of links, including line style, arrows, and labels.
+
+```dart
+GraphDefaultLinkRenderer(
+  link: link,
+  style: const GraphDefaultLinkRendererStyle(
+    lineWidth: 2.0,
+    lineColor: Colors.blue,
+    arrowSize: 10.0,
+  ),
+)
+```
+
+### Tooltips
+
+Plough provides built-in tooltip functionality for displaying additional information when hovering over or tapping graph elements.
+
+```dart
+GraphTooltipBehavior(
+  trigger: GraphTooltipTrigger.hover,
+  builder: (context, entity) {
+    return GraphDefaultTooltip(
+      content: Text(entity['description'] as String),
+    );
+  },
+)
+```
+
+#### GraphTooltipBehavior
+
+Controls the display and behavior of tooltips for graph entities (nodes and links). Configured within `GraphNodeViewBehavior` or `GraphLinkViewBehavior`.
+
+##### Constructor
+
+*   `const GraphTooltipBehavior({required GraphTooltipTriggerMode triggerMode, required GraphTooltipPosition position, required GraphTooltipWidgetBuilder builder, Duration showDelay = Duration.zero, Duration hideDelay = Duration.zero, void Function()? onShow, void Function()? onHide, bool Function(GraphEntity entity)? shouldShow})`: Creates a tooltip behavior configuration.
+
+##### Properties
+
+*   `GraphTooltipTriggerMode triggerMode`: When the tooltip should be shown/hidden.
+*   `GraphTooltipPosition position`: Where the tooltip appears relative to the entity.
+*   `GraphTooltipWidgetBuilder builder`: Builds the widget content for the tooltip.
+*   `Duration showDelay`: Duration to wait before showing.
+*   `Duration hideDelay`: Duration to wait before hiding.
+*   `void Function()? onShow`: Called when the tooltip is about to be shown.
+*   `void Function()? onHide`: Called when the tooltip is about to be hidden.
+*   `bool Function(GraphEntity entity)? shouldShow`: Optional callback to decide if the tooltip should show.
+
+#### GraphTooltip
+
+Default widget for displaying tooltips for nodes.
+Used by `GraphTooltipBehavior`'s default builder or can be used directly.
+
+##### Constructor
+
+*   `const GraphTooltip({required GraphNode node, Widget Function(BuildContext context, GraphNode node)? contentBuilder, Key? key})`: Creates the tooltip widget.
+
+##### Properties
+
+*   `GraphNode node`: The node the tooltip is for.
+*   `Widget Function(BuildContext context, GraphNode node)? contentBuilder`: Optional builder for custom content. If null, displays the node's `description` property.
+
+## Implementation Examples
+
+### Minimal Implementation
+
+Here's a minimal example to create a simple graph with two nodes and a link:
+
+```dart
+Widget build(BuildContext context) {
+  final graph = Graph();
+  
+  // Create nodes
+  final alice = GraphNode(properties: {
+    'label': 'Alice',
+    'description': 'Alice node'
+  });
+  final bob = GraphNode(properties: {
+    'label': 'Bob',
+    'description': 'Bob node'
+  });
+  
+  // Create link
+  final follow = GraphLink(
+    source: alice,
+    target: bob,
+    properties: {
+      'label': 'follows',
+      'description': 'Alice follows Bob'
+    },
+    direction: GraphLinkDirection.outgoing,
+  );
+  
+  // Build graph
+  graph
+    ..addNode(alice)
+    ..addNode(bob)
+    ..addLink(follow);
+    
+  // Display
+  return GraphView(
+    graph: graph,
+    layoutStrategy: GraphForceDirectedLayoutStrategy(),
+    behavior: const GraphViewDefaultBehavior(),
+  );
+}
+```
+
+### Custom Layout Example
+
+This example demonstrates a custom triangle layout:
+
+```dart
+final basePositions = {
+  nodeA.id: Offset(0.0, 0.0),      // Top
+  nodeB.id: Offset(-1.0, 1.732),   // Bottom left
+  nodeC.id: Offset(1.0, 1.732),    // Bottom right
+};
+
+final nodePositions = GraphNodeLayoutPosition.fromMap(
+  Map.fromEntries(
+    basePositions.entries.map(
+      (entry) => MapEntry(
+        entry.key,
+        entry.value.scale(scale, scale),
+      ),
+    ),
+  ),
+);
+
+final layoutStrategy = GraphManualLayoutStrategy(
+  nodePositions: nodePositions,
+  origin: GraphLayoutPositionOrigin.alignCenter,
+);
+```
+
+## Advanced Features
+
+### Graph Data Serialization
+
+The `GraphData` class handles graph serialization and deserialization, supporting data persistence in JSON format:
+
+```dart
+// Save graph state
+final graphData = graph.toData();
+final jsonString = jsonEncode(graphData.toJson());
+
+// Restore graph state
+final restoredData = GraphData.fromJson(jsonDecode(jsonString));
+final restoredGraph = Graph.fromData(restoredData);
+```
+
+### Event Handling
+
+The graph emits events when its state changes, allowing for reactive updates:
+
+```dart
+graph.onNodeAdded.listen((node) {
+  print('Node added: ${node.id}');
+});
+
+graph.onLinkAdded.listen((link) {
+  print('Link added: ${link.id}');
+});
+
+graph.onNodePositionChanged.listen((event) {
+  print('Node ${event.node.id} moved to ${event.position}');
+});
+```
+
+### Custom Node Shapes
+
+You can create custom node shapes by implementing the `GraphShape` interface:
+
+```dart
+class DiamondShape implements GraphShape {
+  final double width;
+  final double height;
+  
+  DiamondShape({required this.width, required this.height});
+  
+  @override
+  Path getPath() {
+    final path = Path();
+    path.moveTo(width / 2, 0);
+    path.lineTo(width, height / 2);
+    path.lineTo(width / 2, height);
+    path.lineTo(0, height / 2);
+    path.close();
+    return path;
+  }
+  
+  @override
+  bool containsPoint(Offset point) {
+    // Implementation for hit testing
+    // ...
+  }
+}
+```
+
+### Animation Customization
+
+Plough supports customizing animations for layout changes and interactions:
+
+```dart
+GraphView(
+  graph: graph,
+  layoutStrategy: layoutStrategy,
+  animationDuration: const Duration(milliseconds: 500),
+  animationCurve: Curves.easeInOut,
+)
+```
+
+## Architecture
+
+Plough follows a modular architecture with clear separation of concerns:
+
+1. **Core Graph Model**: Manages the graph data structure and operations
+2. **View Components**: Handles rendering and user interaction
+3. **Layout Strategies**: Implements different algorithms for node positioning
+4. **Renderers**: Controls the visual appearance of graph elements
+5. **Interactive Components**: Manages user interactions like drag, tap, and hover
+
+This architecture allows for extensive customization while maintaining a consistent API.
+
+## Directory Structure
+
+The library is organized as follows:
+
+- `/lib`: Main library directory
+  - `/src`: Primary implementations
+    - `/graph`: Core graph data structures
+    - `/graph_view`: Graph visualization components
+    - `/layout_strategy`: Layout algorithms
+    - `/renderer`: Rendering components
+    - `/tooltip`: Tooltip functionality
+    - `/interactive`: Interaction features
+    - `/utils`: Utility functions and helpers
+
+## API Reference
+
+### Core Classes
+
+#### Graph
+
+The central data structure that manages collections of nodes and links. Provides the foundation for graph visualization through `GraphView`.
+
+The Graph maintains a consistent data model for `GraphView` by automatically handling link cleanup when nodes are removed, managing selection states, and controlling display order of elements. Graph elements can be dynamically added or removed, with automatic relationship maintenance and change notifications to keep the visualization synchronized. The structure supports custom properties for both nodes and links.
+
+See also:
+
+*   `GraphNode`: Represents nodes with custom properties and selection states.
+*   `GraphLink`: Defines directed relationships between nodes.
+*   `GraphEntity`: The base interface for all graph elements.
+*   `GraphOrderManager`: Controls element display ordering.
+*   `GraphView`: Renders and interacts with the graph structure.
+
+##### Properties
+
+*   `GraphId get id`: The unique identifier of this graph.
+*   `Iterable<GraphNode> get nodes`: All nodes currently in the graph. Returns a read-only view. Order is not guaranteed.
+*   `Iterable<GraphLink> get links`: All links currently in the graph. Returns a read-only view. Order is not guaranteed.
+*   `List<GraphEntity> get selectedEntities`: Returns a list of all currently selected nodes and links.
+*   `List<GraphId> get selectedEntityIds`: Returns a list of IDs for all currently selected nodes and links.
+*   `List<GraphNode> get selectedNodes`: Returns a list of all currently selected nodes.
+*   `List<GraphId> get selectedNodeIds`: Returns a list of IDs for all currently selected nodes.
+*   `List<GraphLink> get selectedLinks`: Returns a list of all currently selected links.
+*   `List<GraphId> get selectedLinkIds`: Returns a list of IDs for all currently selected links.
+*   `GraphViewGeometry? get geometry`: The current geometry of the graph visualization. Used by `GraphView`. May be null if no layout has been calculated yet.
+
+##### Methods
+
+*   `void addNode(covariant GraphNode node)`: Adds a node to the graph. Throws `StateError` if the node has already been added to another graph.
+*   `void addNodes(List<GraphNode> nodes)`: Adds multiple nodes to the graph. Throws `StateError` if any node has already been added to another graph.
+*   `GraphNode? getNode(GraphId id)`: Returns the node with the given `id`, or `null` if no such node exists.
+*   `bool hasNode(GraphId id)`: Returns `true` if a node with the given `id` exists in the graph.
+*   `void removeNode(GraphId id)`: Removes the node with the given `id` and all its associated links. Automatically removes any links connected to this node. Throws `ArgumentError` if no node with `id` exists.
+*   `void addLink(covariant GraphLink link)`: Adds a link to the graph. The link's source and target nodes must both exist in the graph. Throws `StateError` if the link has already been added to another graph.
+*   `void addLinks(List<GraphLink> links)`: Adds multiple links to the graph. Each link must have a unique ID and both its source and target nodes must exist in the graph.
+*   `GraphLink? getLink(GraphId id)`: Returns the link with the given `id`, or `null` if no such link exists.
+*   `List<GraphLink> getIncomingLinks(GraphId nodeId)`: Returns all links that have the specified node as their target. Throws `ArgumentError` if no node with `nodeId` exists.
+*   `List<GraphLink> getOutgoingLinks(GraphId nodeId)`: Returns all links that have the specified node as their source. Throws `ArgumentError` if no node with `nodeId` exists.
+*   `void removeLink(GraphId id)`: Removes the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
+*   `void reverseLink(GraphId id)`: Reverses the direction of the link with the given `id` by swapping source and target. Throws `ArgumentError` if no link with `id` exists.
+*   `bool isSelected(GraphId id)`: Returns `true` if the entity with the given `id` is currently selected.
+*   `void selectNode(GraphId id)`: Selects the node with the given `id`. Throws `ArgumentError` if no node with `id` exists.
+*   `void deselectNode(GraphId id)`: Deselects the node with the given `id`. Throws `ArgumentError` if no node with `id` exists.
+*   `void toggleSelectNode(GraphId id)`: Toggles the selection state of the node with the given `id`. Throws `ArgumentError` if no node with `id` exists.
+*   `void selectLink(GraphId id)`: Selects the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
+*   `void deselectLink(GraphId id)`: Deselects the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
+*   `void toggleSelectLink(GraphId id)`: Toggles the selection state of the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
+*   `void markNeedsLayout()`: Marks the graph as needing a layout recalculation, triggering `GraphView` to update.
+*   `void bringToFront(GraphId id)`: Brings the entity (node or link) with the given `id` to the front of the display stack. Throws `ArgumentError` if no entity with `id` exists.
+*   `GraphOrderManager getOrderManager([List<GraphId>? ids])`: Returns a `GraphOrderManager` for controlling the z-order of entities (all entities if `ids` is null, specified entities otherwise). Throws `ArgumentError` if any provided ID doesn't exist.
+*   `GraphOrderManager getOrderManagerSync([List<GraphId>? ids])`: Similar to `getOrderManager` but changes take effect immediately. Throws `ArgumentError` if any provided ID doesn't exist.
+
+#### GraphNode
+
+Represents a node in the graph. Core component of graph visualization that manages visual properties, animation states, and interaction behaviors. Extends `GraphEntity` with node-specific functionality.
+
+See also:
+
+*   `Graph`: Manages collections of nodes and their relationships.
+*   `GraphEntity`: Provides the base functionality.
+*   `GraphShape`: Defines the node's visual representation.
+*   `GraphNodeViewBehavior`: Controls the node's view interactions and appearance.
+
+##### Constructor
+
+*   `GraphNode({GraphId? id, Map<String, Object>? properties})`: Creates a node with optional `id` and `properties`. If `id` is not provided, generates a unique identifier.
+
+##### Properties (inherits from GraphEntity)
+
+*   `id`: Unique identifier.
+*   `properties`: Custom properties map.
+*   `logicalPosition`: Current logical position in the graph (before layout adjustments).
+*   `size`: Node size (usually determined by renderer).
+*   `weight`: Weight used for layout algorithms (e.g., force-directed).
+*   `stackOrder`: Z-index for display order.
+*   `isEnabled`: Whether the node can be interacted with.
+*   `visible`: Whether the node is rendered.
+*   `canSelect`: Whether the node can be selected.
+*   `isSelected`: Whether the node is currently selected.
+
+##### Node-Specific Properties
+
+*   `Offset get animationStartPosition`: The position where animation begins for this node.
+*   `Offset get animatedPosition`: The current animated position of this node during transitions.
+*   `GraphNodeViewGeometry? get geometry`: Geometric information for the node's view representation (size, position on screen).
+*   `GraphShape? get shape`: Shape configuration defining the node's visual appearance.
+
+##### Methods (inherits from GraphEntity)
+
+*   `operator [](String key)`: Access a property value.
+*   `operator []=(String key, dynamic value)`: Set a property value.
+*   `getLinks()`: Get all links connected to this node (implementation likely in `Graph`).
+
+#### GraphLink
+
+Represents a connection between nodes. Manages connections between graph nodes with support for directionality, routing, and visual styling. Extends `GraphEntity` with link-specific functionality.
+
+See also:
+
+*   `Graph`: Manages collections of links and their nodes.
+*   `GraphEntity`: Provides the base functionality.
+*   `GraphLinkViewBehavior`: Controls the link's view interactions.
+*   `GraphNode`: Represents the endpoints of links.
+
+##### Constructor
+
+*   `GraphLink({required GraphNode source, required GraphNode target, required GraphLinkDirection direction, GraphId? id, Map<String, Object>? properties})`: Creates a new link between `source` and `target` nodes. The `direction` specifies the link's directionality. If `id` is not provided, generates a unique link ID.
+
+##### Properties (inherits from GraphEntity)
+
+*   `id`: Unique identifier.
+*   `properties`: Custom properties map.
+*   `logicalPosition`: Current logical position of the link (often the midpoint or a control point).
+*   `weight`: Weight used for layout algorithms.
+*   `stackOrder`: Z-index for display order.
+*   `isEnabled`: Whether the link can be interacted with.
+*   `visible`: Whether the link is rendered.
+*   `canSelect`: Whether the link can be selected.
+*   `isSelected`: Whether the link is currently selected.
+
+##### Link-Specific Properties
+
+*   `GraphNode get source`: The source node where this link begins.
+*   `set source(covariant GraphNode source)`: Sets the source node of this link.
+*   `GraphNode get target`: The target node where this link ends.
+*   `set target(covariant GraphNode target)`: Sets the target node of this link.
+*   `GraphLinkDirection get direction`: The directionality of this link (see `GraphLinkDirection` enum).
+*   `set direction(GraphLinkDirection direction)`: Sets the directionality of this link.
+*   `GraphLinkViewGeometry? get geometry`: Geometric information for the link's view representation (path, connection points).
+
+##### Methods (inherits from GraphEntity)
+
+*   `operator [](String key)`: Access a property value.
+*   `operator []=(String key, dynamic value)`: Set a property value.
+
+#### GraphOrderManager
+
+A utility class for managing the display order (z-index) of graph entities, obtained via `Graph.getOrderManager()` or `Graph.getOrderManagerSync()`.
+
+Provides operations to modify the display order without affecting the underlying graph structure. Useful for view-specific arrangements, z-index management, or temporary order adjustments.
+
+##### Properties
+
+*   `Graph graph`: The graph whose entities are being managed.
+*   `bool sync`: Whether to automatically synchronize with graph changes.
+*   `List<GraphId> get entityIds`: The IDs of the managed entities in their current order.
+*   `List<GraphEntity> get entities`: The managed entities in their current order.
+*   `List<GraphId> get nodeIds`: The IDs of all managed nodes.
+*   `List<GraphId> get linkIds`: The IDs of all managed links.
+*   `List<GraphNode> get nodes`: All managed nodes in their current order.
+*   `List<GraphLink> get links`: All managed links in their current order.
+*   `bool get isEmpty`: Returns `true` if no entities are being managed.
+*   `GraphNode? get frontmostNode`: Returns the node with the highest stack order, or null.
+*   `GraphNode? get backmostNode`: Returns the node with the lowest stack order, or null.
+*   `int get maxStackOrder`: Returns the highest stack order among all managed entities.
+
+##### Methods
+
+*   `void dispose()`: Releases resources and removes graph change listeners if `sync` is true.
+*   `GraphOrderManager copyWith({Iterable<GraphId>? entityIds})`: Creates a copy of this manager.
+*   `void clear()`: Removes all entities from management.
+*   `void add(GraphId entityId)`: Adds an entity to be managed.
+*   `void addAll(List<GraphId> entityIds)`: Adds multiple entities.
+*   `void remove(GraphId entityId)`: Removes an entity from management.
+*   `void filter(bool Function(GraphId entityId) predicate)`: Removes entities that don't satisfy the predicate.
+*   `GraphOrderManager filteredBy(bool Function(GraphEntity) predicate)`: Returns a new manager containing only entities satisfying the predicate.
+*   `void filterByNode()`: Removes all link entities.
+*   `GraphOrderManager filteredByNode()`: Returns a new manager containing only nodes.
+*   `void filterByLink()`: Removes all node entities.
+*   `List<GraphId> filteredByLink()`: Returns a new list containing only link IDs.
+*   `void sortBy(int Function(GraphEntity entity) comparator)`: Sorts entities using the provided comparator.
+*   `List<GraphId> sortedBy(int Function(GraphEntity entity) comparator)`: Returns a new list of entity IDs sorted by the comparator.
+*   `void sortByStackOrder()`: Sorts entities by their stack order (lowest to highest).
+*   `List<GraphId> sortedByStackOrder()`: Returns a new list of entity IDs sorted by stack order.
+*   `GraphEntity? frontmostWhereOrNull(bool Function(GraphEntity entity) predicate)`: Returns the frontmost entity satisfying the predicate, or null.
+
+### Base Classes and Enums
+
+#### GraphEntity
+
+Base interface for all graph elements (nodes and links). Provides common properties for identification, state management, and properties.
+
+Represents a visual element in the graph that can be positioned, interacted with, and customized.
+
+See also:
+
+*   `GraphNode`: Implements this interface for graph vertices.
+*   `GraphLink`: Implements this interface for graph edges.
+*   `Graph`: The container and manager for entities.
+*   `GraphView`: Provides the visual representation of entities.
+
+##### Properties
+
+*   `Graph? get graph`: The owning `Graph` instance. Null until added to a graph.
+*   `GraphId get id`: Unique identifier for this entity.
+*   `Offset get logicalPosition`: The entity's position in the graph's logical coordinate system. Managed by `GraphLayoutStrategy`.
+*   `set logicalPosition(Offset position)`: Sets the logical position.
+*   `double get weight`: A weighting factor used by layout algorithms (interpretation depends on the strategy).
+*   `set weight(double weight)`: Sets the weight.
+*   `int get stackOrder`: The z-order of this entity (higher values are in front).
+*   `set stackOrder(int stackOrder)`: Sets the stack order.
+*   `bool get isEnabled`: Whether this entity is enabled for interaction.
+*   `set isEnabled(bool isEnabled)`: Sets the enabled state.
+*   `bool get visible`: Whether this entity is currently visible.
+*   `set visible(bool visible)`: Sets the visibility state.
+*   `bool get canSelect`: Whether this entity can be selected by user interaction.
+*   `set canSelect(bool canSelect)`: Sets the selectable state.
+*   `bool get isSelected`: Whether this entity is currently selected (read-only, managed by `GraphView`).
+*   `Map<String, Object> get properties`: Custom properties associated with this entity.
+*   `set properties(Map<String, Object> values)`: Sets the custom properties map.
+
+##### Methods
+
+*   `Object? operator [](String key)`: Returns the property value associated with the given key.
+*   `void operator []=(String key, Object value)`: Sets a property value for the given key.
+*   `addListener(VoidCallback listener)`: Registers a callback to listen for state changes (from `Listenable`).
+*   `removeListener(VoidCallback listener)`: Removes a previously registered callback (from `Listenable`).
+
+#### GraphId
+
+A unique identifier for graph elements (`Graph`, `GraphNode`, `GraphLink`).
+
+Each `GraphId` consists of a type indicator (`GraphIdType`) and a unique value (UUIDv7 format),
+ensuring uniqueness across the graph structure.
+
+##### Constructor
+
+*   `const factory GraphId({required GraphIdType type, required String value})`: Creates an identifier with the specified type and value.
+*   `factory GraphId.unique(GraphIdType type)`: Creates an identifier with a new UUIDv7 value for the given type.
+*   `factory GraphId.fromJson(Map<String, Object?> json)`: Creates an identifier from its JSON representation.
+
+##### Properties
+
+*   `GraphIdType type`: The category of graph element this ID represents.
+*   `String value`: The unique identifier string (UUIDv7).
+
+##### Methods
+
+*   `String toString()`: Returns a shortened string representation (e.g., `<N:xxxxxx>`).
+
+#### GraphIdType (Enum)
+
+Identifies the type of graph element an ID belongs to.
+
+*   `graph`: Identifies a complete graph structure (`Graph`).
+*   `node`: Identifies a node within a graph (`GraphNode`).
+*   `link`: Identifies a link between nodes (`GraphLink`).
+
+#### GraphLinkDirection (Enum)
+
+Defines the directionality of a `GraphLink`.
+
+*   `none`: No directional indicator.
+*   `incoming`: Arrow pointing towards the `target` node.
+*   `outgoing`: Arrow pointing away from the `source` node.
+*   `bidirectional`: Arrows on both ends of the link.
+
+#### GraphLinkRouting (Enum)
+
+Specifies how links connect between nodes.
+
+*   `straight`: Direct straight line connection.
+*   `orthogonal`: Connection using horizontal and vertical line segments.
+
+#### GraphLayoutPositionOrigin (Enum)
+
+Defines the reference point for manual node positioning (`GraphManualLayoutStrategy`).
+
+*   `topLeft`, `topCenter`, `topRight`: Relative to top edge.
+*   `centerLeft`, `center`, `centerRight`: Relative to center.
+*   `bottomLeft`, `bottomCenter`, `bottomRight`: Relative to bottom edge.
+*   `alignCenter`: Positions are relative to the center of all specified nodes' bounding box.
+
+#### GraphTreeLayoutDirection (Enum)
+
+Specifies the direction in which the tree should expand (`GraphTreeLayoutStrategy`).
+
+*   `topToBottom`: Root at top, expanding downward.
+*   `bottomToTop`: Root at bottom, expanding upward.
+*   `leftToRight`: Root at left, expanding rightward.
+*   `rightToLeft`: Root at right, expanding leftward.
+
+#### GraphDefaultNodeRendererShape (Enum)
+
+Shape options available for nodes in `GraphDefaultNodeRenderer`.
+
+*   `circle`
+*   `rectangle`
+
+#### GraphTooltipTriggerMode (Enum)
+
+Defines when tooltips should be displayed in response to user interactions (`GraphTooltipBehavior`).
+
+*   `tap`: Shows on tap.
+*   `doubleTap`: Shows on double-tap.
+*   `longPress`: Shows on long-press.
+*   `hover`: Shows while hovering.
+*   `hoverStay`: Shows on hover and stays visible after pointer leaves.
+
+#### GraphTooltipPosition (Enum)
+
+Specifies where tooltips appear relative to their target entities (`GraphTooltipBehavior`).
+
+*   `top`, `bottom`, `left`, `right`.
+
+#### Typedefs
+
+*   `GraphNodeWidgetBuilder = Widget Function(BuildContext context, Graph graph, GraphNode node, Widget? child)`: Function type for building node widgets.
+*   `GraphLinkWidgetBuilder = Widget Function(BuildContext context, Graph graph, GraphLink link, Widget sourceView, Widget targetView, GraphLinkRouting routing, GraphConnectionGeometry geometry, Widget? child)`: Function type for building link widgets.
+*   `GraphLinkWidgetThicknessGetter = double Function(BuildContext context, Graph graph, GraphLink link, Widget sourceView, Widget targetView)`: Function type for dynamically calculating link thickness.
+
+#### GraphLine
+
+A line segment between two points (`start` and `end`) in the graph's coordinate system. Used internally for intersection calculations.
+
+##### Constructor
+
+*   `const GraphLine(Offset start, Offset end)`: Creates a line.
+
+##### Properties
+
+*   `Offset start`: Starting point.
+*   `Offset end`: Ending point.
+
+#### GraphViewBuildState (Enum)
+
+Build state of the graph view.
+
+*   `initialize`: Initial state, renders transparent for geometry calculation.
+*   `performLayout`: Executing layout algorithm.
+*   `ready`: Ready for rendering.
+
+### View Components
+
+#### GraphView
+
+The main widget for displaying a graph. Handles node/link rendering, automatic layout, animations, selection, and interaction.
+
+##### Constructor
+
+*   `const GraphView({required Graph graph, required GraphViewBehavior behavior, required GraphLayoutStrategy layoutStrategy, bool allowSelection = false, bool allowMultiSelection = false, bool animationEnabled = true, Offset? nodeAnimationStartPosition, Duration nodeAnimationDuration = const Duration(milliseconds: 500), Curve nodeAnimationCurve = Curves.easeOutQuint, Key? key})`: Creates a graph visualization widget.
+
+##### Properties
+
+*   `Graph graph`: The graph data model.
+*   `GraphViewBehavior behavior`: Defines appearance and interaction behavior.
+*   `GraphLayoutStrategy layoutStrategy`: Algorithm for positioning nodes.
+*   `bool allowSelection`: Whether node selection is enabled.
+*   `bool allowMultiSelection`: Whether multiple nodes can be selected.
+*   `bool animationEnabled`: Whether node movement animations are enabled.
+*   `Offset? nodeAnimationStartPosition`: Starting position for node animations (defaults to screen center if null).
+*   `Duration nodeAnimationDuration`: Duration of node movement animations.
+*   `Curve nodeAnimationCurve`: Easing curve for node movement animations.
+
+#### GraphViewBehavior
+
+Base class for customizing graph view behavior.
+
+Key methods to override:
+- `createNodeViewBehavior()`: Customize node display
+- `createLinkViewBehavior()`: Customize link display
+- `onNodeTap(GraphNode node)`: Handle node tap events
+- `onNodeDragStart/Update/End()`: Handle node drag operations
+
+### Layout Strategies
+
+#### GraphLayoutStrategy (Base Class)
+
+Base class for graph layout algorithms. Provides core functionality for positioning nodes.
+Subclasses implement `performLayout` and `shouldRelayout`.
+
+##### Constructor
+
+*   `GraphLayoutStrategy({int? seed, EdgeInsets padding = const EdgeInsets.all(100), List<GraphNodeLayoutPosition> nodePositions = const []})`: Creates a layout strategy.
+
+##### Properties
+
+*   `int? seed`: Optional seed for reproducible random number generation.
+*   `EdgeInsets padding`: Padding around the layout area.
+*   `List<GraphNodeLayoutPosition> nodePositions`: List of predefined node positions (initial or fixed).
+
+##### Methods to Implement/Override
+
+*   `void performLayout(Graph graph, Size size)`: Calculates and applies node positions based on the algorithm. Override in subclasses.
+*   `bool shouldRelayout(covariant GraphLayoutStrategy oldStrategy)`: Determines if the layout needs to be recalculated. Override in subclasses.
+
+##### Helper Methods
+
+*   `bool isSameStrategy(GraphLayoutStrategy other)`: Checks if the given strategy is of the same type.
+*   `Size? getNodeSize(GraphNode node)`: Retrieves the current size of a node.
+*   `GraphNodeLayoutPosition? getNodePosition(GraphNode node)`: Gets the predefined position for a node, if any.
+*   `bool isNodeFixed(GraphNode node)`: Checks if a node's position should remain fixed.
+*   `bool baseEquals(covariant GraphLayoutStrategy oldStrategy)`: Compares basic layout properties (padding, nodePositions).
+*   `void positionNode(GraphNode node, Offset position)`: Positions a node at the specified coordinates, respecting fixed state.
+
+#### GraphForceDirectedLayoutStrategy
+
+A physics-based layout strategy using a force-directed algorithm (spring forces between linked nodes and repulsion between all nodes). Produces naturally spaced layouts. Parameters control the physics simulation.
+
+##### Constructor
+
+*   `GraphForceDirectedLayoutStrategy({double? springLength = 200.0, double? springConstant = 0.1, double? damping = 0.8, double? coulombConstant = 2000.0, double? maxDisplacement = 50.0, int? maxIterations = 500, double? tolerance = 0.5, GraphId? centerNodeId, int? seed, EdgeInsets padding = const EdgeInsets.all(100)})`: Creates a force-directed layout strategy.
+
+##### Properties
+
+*   `double springLength`: Natural length of springs between linked nodes.
+*   `double springConstant`: Spring stiffness coefficient.
+*   `double damping`: Velocity reduction factor for node movement (controls convergence speed).
+*   `double coulombConstant`: Coulomb force coefficient for node repulsion.
+*   `double maxDisplacement`: Maximum allowed node movement per iteration.
+*   `int maxIterations`: Maximum number of simulation iterations.
+*   `double tolerance`: Convergence threshold for total node movement.
+*   `GraphId? centerNodeId`: ID of the node to fix at the center of the layout area.
+*   *(Inherits `seed`, `padding`, `nodePositions` from `GraphLayoutStrategy`)*
+
+##### Methods
+
+*   `void performLayout(Graph graph, Size size)`: Runs the force-directed simulation.
+*   `bool shouldRelayout(covariant GraphForceDirectedLayoutStrategy oldStrategy)`: Checks if physics parameters or base properties changed.
+
+#### GraphTreeLayoutStrategy
+
+A layout strategy that arranges nodes in a hierarchical tree structure.
+
+##### Constructor
+
+*   `GraphTreeLayoutStrategy({required GraphTreeLayoutDirection direction, int? seed, EdgeInsets padding = const EdgeInsets.all(100), List<GraphNodeLayoutPosition> nodePositions = const [], GraphId? rootNodeId, GraphTreeLayoutRootNodeSelector? rootNodeSelector, GraphTreeLayoutSiblingNodeComparator? siblingNodeComparator})`: Creates a tree layout strategy.
+
+##### Properties
+
+*   `GraphTreeLayoutDirection direction`: The direction the tree expands.
+*   `GraphId? rootNodeId`: ID of the root node (overrides `rootNodeSelector`).
+*   `GraphTreeLayoutRootNodeSelector? rootNodeSelector`: Callback to select the root node if `rootNodeId` is null. Defaults to node with fewest incoming links.
+*   `GraphTreeLayoutSiblingNodeComparator? siblingNodeComparator`: Callback to determine the order of sibling nodes. Defaults to graph order.
+*   `bool get isHorizontal`: Returns `true` if direction is left/right.
+*   *(Inherits `seed`, `padding`, `nodePositions` from `GraphLayoutStrategy`)*
+
+##### Methods
+
+*   `void performLayout(Graph graph, Size size)`: Builds the tree structure and positions nodes level by level.
+*   `bool shouldRelayout(covariant GraphTreeLayoutStrategy oldStrategy)`: Checks if direction, root selection, or base properties changed.
+
+#### GraphRandomLayoutStrategy
+
+A layout strategy that positions nodes randomly within the available space (respecting padding).
+Useful for initial layout generation or as a base for other algorithms.
+
+##### Constructor
+
+*   `GraphRandomLayoutStrategy({int? seed, EdgeInsets padding = const EdgeInsets.all(100)})`: Creates a random layout strategy.
+
+##### Properties
+
+*   *(Inherits `seed`, `padding` from `GraphLayoutStrategy`)*
+
+##### Methods
+
+*   `void performLayout(Graph graph, Size size)`: Assigns random positions to each node within the padded bounds.
+*   `bool shouldRelayout(GraphRandomLayoutStrategy oldStrategy)`: Checks if base properties changed.
+
+#### GraphManualLayoutStrategy
+
+A layout strategy for precise manual node positioning.
+
+##### Constructor
+
+*   `GraphManualLayoutStrategy({required List<GraphNodeLayoutPosition> nodePositions, GraphLayoutPositionOrigin origin = GraphLayoutPositionOrigin.alignCenter, Offset originOffset = Offset.zero})`: Creates a manual layout strategy.
+
+##### Properties
+
+*   `List<GraphNodeLayoutPosition> nodePositions`: Required list specifying each node's position (and optionally `fixed` state).
+*   `GraphLayoutPositionOrigin origin`: Reference point for positioning (how coordinates relate to the container).
+*   `Offset originOffset`: Additional offset applied after origin calculation.
+*   *(Inherits `seed`, `padding` from `GraphLayoutStrategy`)*
+
+##### Methods
+
+*   `void performLayout(Graph graph, Size size)`: Calculates absolute positions based on `nodePositions`, `origin`, and `originOffset`.
+*   `bool shouldRelayout(covariant GraphManualLayoutStrategy oldStrategy)`: Checks if `origin`, `originOffset`, or base properties changed.
+
+#### GraphCustomLayoutStrategy
+
+A layout strategy that enables custom node positioning through a delegate pattern ([`GraphCustomLayoutStrategyDelegate`]). Provides a flexible framework for custom algorithms while handling common features like padding.
+
+##### Constructor
+
+*   `GraphCustomLayoutStrategy({required GraphCustomLayoutStrategyDelegate delegate, int? seed, EdgeInsets padding = const EdgeInsets.all(100), List<GraphNodeLayoutPosition> nodePositions = const []})`: Creates a custom layout strategy with a required delegate.
+
+##### Properties
+
+*   `GraphCustomLayoutStrategyDelegate delegate`: The delegate implementing the custom layout logic.
+*   *(Inherits `seed`, `padding`, `nodePositions` from `GraphLayoutStrategy`)*
+
+##### Methods
+
+*   `void performLayout(Graph graph, Size size)`: Calls the delegate's `performLayout` after handling base setup.
+*   `bool shouldRelayout(GraphLayoutStrategy oldStrategy)`: Checks base properties and calls the delegate's `shouldRelayout`.
+
+### Layout Helper Classes
+
+#### GraphNodeLayoutPosition
+
+Holds position information for a node in the layout system.
+
+##### Constructor
+
+*   `const GraphNodeLayoutPosition({required GraphId id, required Offset position, bool fixed = false})`: Creates node position configuration.
+*   `static List<GraphNodeLayoutPosition> fromMap(Map<GraphId, Offset> map)`: Creates a list from a map of IDs to positions.
+
+##### Properties
+
+*   `GraphId id`: The unique identifier of the node.
+*   `Offset position`: The position of the node in logical coordinates.
+*   `bool fixed`: Whether this node's position should remain fixed during layout.
+
+#### GraphTreeLayoutRootNodeSelector (Typedef)
+
+`typedef GraphTreeLayoutRootNodeSelector = GraphId Function(Iterable<GraphNode> nodes)`
+Callback for selecting the root node for `GraphTreeLayoutStrategy`.
+
+#### GraphTreeLayoutSiblingNodeComparator (Typedef)
+
+`typedef GraphTreeLayoutSiblingNodeComparator = int Function(GraphNode a, GraphNode b)`
+Callback for determining the order of sibling nodes for `GraphTreeLayoutStrategy`.
+
+#### GraphCustomLayoutStrategyDelegate (Abstract Class)
+
+Interface for implementing custom graph layout algorithms, used with `GraphCustomLayoutStrategy`.
+Implementations define how nodes are arranged.
+
+##### Properties (Accessed from delegate)
+
+*   `EdgeInsets get padding`: Padding configuration from the parent strategy.
+*   `math.Random get random`: Random number generator from the parent strategy.
+*   `List<GraphNodeLayoutPosition> get nodePositions`: Predefined node positions from the parent strategy.
+
+##### Methods to Implement
+
+*   `void performLayout(Graph graph, Size size)`: Calculates and applies node positions within the content area (`size` excludes padding). Use `positionNode` helper.
+*   `bool shouldRelayout(GraphLayoutStrategy oldStrategy)`: Determines if the delegate's logic requires a relayout.
+
+##### Helper Methods (Provided)
+
+*   `GraphNodeLayoutPosition? getNodePosition(GraphNode node)`: Gets predefined position data for a node.
+*   `void positionNode(GraphNode node, Offset position)`: Positions a node relative to the content area (padding adjustment is automatic).
+
+#### GraphDefaultNodeRendererWidgetBuilder (Typedef)
+
+`typedef GraphDefaultNodeRendererWidgetBuilder = Widget Function(BuildContext context, Graph graph, GraphNode node, Widget? child)`
+A builder function type for customizing node rendering content within `GraphDefaultNodeRenderer`.
+
+#### GraphTooltipWidgetBuilder (Typedef)
+
+`typedef GraphTooltipWidgetBuilder = Widget Function(BuildContext context, GraphEntity entity)`
+A builder function type for creating tooltip widgets for graph entities, used with `GraphTooltipBehavior`.
+
+### Tooltip Components
+
+#### GraphTooltipBehavior
+
+Controls the display and behavior of tooltips for graph entities (nodes and links). Configured within `GraphNodeViewBehavior` or `GraphLinkViewBehavior`.
+
+##### Constructor
+
+*   `const GraphTooltipBehavior({required GraphTooltipTriggerMode triggerMode, required GraphTooltipPosition position, required GraphTooltipWidgetBuilder builder, Duration showDelay = Duration.zero, Duration hideDelay = Duration.zero, void Function()? onShow, void Function()? onHide, bool Function(GraphEntity entity)? shouldShow})`: Creates a tooltip behavior configuration.
+
+##### Properties
+
+*   `GraphTooltipTriggerMode triggerMode`: When the tooltip should be shown/hidden.
+*   `GraphTooltipPosition position`: Where the tooltip appears relative to the entity.
+*   `GraphTooltipWidgetBuilder builder`: Builds the widget content for the tooltip.
+*   `Duration showDelay`: Duration to wait before showing.
+*   `Duration hideDelay`: Duration to wait before hiding.
+*   `void Function()? onShow`: Called when the tooltip is about to be shown.
+*   `void Function()? onHide`: Called when the tooltip is about to be hidden.
+*   `bool Function(GraphEntity entity)? shouldShow`: Optional callback to decide if the tooltip should show.
+
+## Best Practices
+
+### Performance Optimization
+
+1. **Limit Node Count**: For optimal performance, limit the number of visible nodes to a few hundred.
+2. **Use Appropriate Layout**: Choose the layout strategy based on graph size and structure.
+3. **Lazy Loading**: For large graphs, implement lazy loading to display only visible portions.
+4. **Throttle Updates**: Batch updates to avoid frequent re-renders.
+
+### Customization
+
+1. **Node Content**: Use the `child` parameter of `GraphDefaultNodeRenderer` to customize node content.
+2. **Custom Behaviors**: Extend `GraphViewBehavior` to customize interaction handling.
+3. **Style Consistency**: Define a consistent style theme for nodes and links.
+4. **Layout Tuning**: Adjust layout parameters for optimal visualization.
+
+### Error Handling
+
+1. **ID Management**: Ensure node and link IDs are unique to avoid conflicts.
+2. **Cycle Detection**: Check for cycles when implementing tree layouts.
+3. **Position Validation**: Validate node positions to prevent off-screen placement.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Nodes Not Appearing**: Check that nodes have been added to the graph and the layout strategy is properly configured.
+2. **Layout Not Updating**: Ensure that the layout strategy is properly initialized and the graph view is being rebuilt.
+3. **Interaction Not Working**: Verify that the behavior is correctly implemented and attached to the graph view.
+4. **Performance Issues**: Reduce the number of nodes or simplify the rendering of nodes and links.
+
+### Debugging
+
+Plough includes a debug position plotter that can help visualize node positions and layout grids:
+
+```dart
+GraphPositionPlotter(
+  enabled: true,
+  showGrid: true,
+  showNodePositions: true,
+  showLinkPaths: true,
+)
+```
+
+## Conclusion
+
+Plough provides a powerful and flexible framework for implementing interactive graph visualizations in Flutter applications. With its comprehensive feature set and extensive customization options, it can be adapted to a wide range of use cases, from simple network diagrams to complex interactive data visualizations.
+
+For more information, refer to the API documentation and example applications included with the library.
+
+### Geometry Classes
+
+#### GraphConnectionPoints
+
+Defines the connection points between nodes for link calculation and rendering.
+
+##### Constructor
+
+*   `const factory GraphConnectionPoints({required Offset incoming, required Offset outgoing})`: Creates connection points.
+
+##### Properties
+
+*   `Offset incoming`: The point where the link enters the target node.
+*   `Offset outgoing`: The point where the link exits the source node.
+*   `double get distance`: The distance between connection points.
+*   `double get angle`: The angle of the link in radians.
+
+#### GraphNodeViewGeometry
+
+Defines a node's layout bounds for rendering and hit testing.
+
+##### Constructor
+
+*   `const factory GraphNodeViewGeometry({required Rect bounds})`: Creates node geometry.
+
+##### Properties
+
+*   `Rect bounds`: The bounding rectangle of the node in the view.
+
+#### GraphLinkViewGeometry
+
+Combines spatial information needed to render and interact with links.
+
+##### Constructor
+
+*   `const factory GraphLinkViewGeometry({required Rect bounds, required GraphConnectionGeometry connection, required double thickness, required double angle})`: Creates link geometry.
+
+##### Properties
+
+*   `Rect bounds`: The bounding rectangle of the link.
+*   `GraphConnectionGeometry connection`: Connection details between nodes.
+*   `double thickness`: The thickness of the link.
+*   `double angle`: The angle of the link in radians.
+
+##### Methods
+
+*   `bool containsPoint(Offset point)`: Determines if a point is within the link's area (considering rotation and thickness).
+
+#### GraphConnectionGeometry
+
+Manages geometric relationships between connected nodes.
+
+##### Constructor
+
+*   `const factory GraphConnectionGeometry({required GraphNodeViewGeometry source, required GraphNodeViewGeometry target, required GraphConnectionPoints connectionPoints})`: Creates connection geometry.
+
+##### Properties
+
+*   `GraphNodeViewGeometry source`: Geometry of the source node.
+*   `GraphNodeViewGeometry target`: Geometry of the target node.
+*   `GraphConnectionPoints connectionPoints`: Specific intersection points.
+
+#### GraphViewGeometry
+
+Tracks graph view layout information (position and size).
+
+##### Constructor
+
+*   `const factory GraphViewGeometry({required Offset position, required Size size})`: Creates view geometry.
+
+##### Properties
+
+*   `Offset position`: Position of the GraphView widget.
+*   `Size size`: Size of the GraphView widget.
+
+### Shape Classes
+
+#### GraphShape (Interface)
+
+Interface for defining node shapes in the graph. Provides intersection calculation between a shape and a line, used to determine link connection points.
+
+##### Methods
+
+*   `Set<Offset> getLineIntersections(Rect bounds, GraphLine line)`: Calculates intersection points between this shape (defined by `bounds`) and a `line`. Returns a set of intersection points.
+
+#### GraphCircle
+
+A circular node shape (`GraphShape` implementation).
+
+##### Constructor
+
+*   `const GraphCircle({required double radius})`: Creates a circular shape with a specified `radius`.
+
+##### Properties
+
+*   `double? radius`: The radius of the circle. If null, calculated from bounds.
+
+#### GraphRectangle
+
+A rectangular node shape (`GraphShape` implementation).
+Dimensions are determined by the node's bounds passed to `getLineIntersections`.
+
+##### Constructor
+
+*   `const GraphRectangle()`: Creates a rectangular shape.
+
+#### GraphLine
+
+A line segment between two points (`start` and `end`) in the graph's coordinate system. Used internally for intersection calculations.
+
+##### Constructor
+
+*   `const GraphLine(Offset start, Offset end)`: Creates a line.
+
+##### Properties
+
+*   `Offset start`: Starting point.
+*   `Offset end`: Ending point.
+
+### Layout Strategies
+
+#### GraphLayoutStrategy
+
+Base class for layout algorithms.
+
+Key implementations:
+- `GraphForceDirectedLayoutStrategy`: Physical model-based layout
+- `GraphTreeLayoutStrategy`: Hierarchical layout
+- `GraphRandomLayoutStrategy`: Random placement
+- `GraphManualLayoutStrategy`: Manual positioning
+
+### Global Settings
+
+#### Plough (Singleton)
+
+Singleton class managing global settings for the Plough library.
+Access the instance via `Plough()`.
+
+##### Properties
+
+*   `bool debugLogEnabled`: Controls the output of debug logs. Setting to `true` enables detailed logging.
+*   `bool debugViewEnabled`: Controls debug drawing in the graph view (bounding boxes, grid lines, node positions, connection points). Setting to `true` enables `GraphPositionPlotter` globally.
+*   `bool debugSignalsEnabled`: Controls the output of debug information related to state management (graph data changes, property updates, layout/selection state changes). Setting to `true` enables Signals DevTools.
+
+### Renderer Styles
+
+#### GraphDefaultNodeRendererStyle
+
+Controls node appearance for `GraphDefaultNodeRenderer` with color and dimension options that update based on interaction states.
+
+##### Constructor
+
+*   `const factory GraphDefaultNodeRendererStyle({...})`: Creates a style configuration with numerous optional parameters for colors (normal, hover, selected, highlight), border widths (normal, hover, selected), size (width, height, minWidth, minHeight, radius), and shape.
+
+##### Properties (Examples - see source for all defaults)
+
+*   `Color color`: Background color.
+*   `Color borderColor`: Border color.
+*   `Color hoverColor`: Background color when hovered.
+*   `Color selectedBorderColor`: Border color when selected.
+*   `double? radius`: Radius for circular nodes (auto-calculated if null).
+*   `double? width`/`height`: Fixed size (auto-calculated if null).
+*   `double borderWidth`: Border width in normal state.
+*   `double selectedBorderWidth`: Border width when selected.
+*   `GraphDefaultNodeRendererShape shape`: Node shape (`circle` or `rectangle`).
+
+#### GraphDefaultLinkRendererStyle
+
+Controls link appearance for `GraphDefaultLinkRenderer` with colors and dimensions that update with state changes.
+
+##### Constructor
+
+*   `const factory GraphDefaultLinkRendererStyle({...})`: Creates a style configuration with optional parameters for arrow color, border color, label color, state-specific colors (hover, selected), and arrow size.
+
+##### Properties (Examples - see source for all defaults)
+
+*   `Color arrowColor`: Arrow color.
+*   `Color borderColor`: Link line color.
+*   `Color hoverColor`: Color when hovered.
+*   `Color selectedHoverColor`: Color when selected and hovered.
+*   `Size arrowSize`: Size of the arrow.
