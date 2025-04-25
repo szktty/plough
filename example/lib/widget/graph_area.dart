@@ -59,4 +59,22 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
       },
     );
   }
+
+  @override
+  void onNodeSelect(List<GraphNode> nodes, {required bool isSelected}) {
+    super.onNodeSelect(nodes, isSelected: isSelected);
+    if (nodes.isNotEmpty) {
+      debugPrint(
+          '[GraphAreaBehavior] Node selection changed: ${nodes.map((n) => n.id.toString()).join(', ')} - isSelected: $isSelected');
+    }
+  }
+
+  @override
+  void onNodeTap(List<GraphNode> nodes) {
+    super.onNodeTap(nodes);
+    if (nodes.isNotEmpty) {
+      debugPrint(
+          '[GraphAreaBehavior] Node tapped: ${nodes.map((n) => n.id.toString()).join(', ')}');
+    }
+  }
 }
