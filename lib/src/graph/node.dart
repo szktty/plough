@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
@@ -63,6 +64,32 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   final Map<GraphId, Signal<GraphConnectionGeometry?>> _connectionGeometries =
       {};
   final Signal<GraphShape?> _shape = Signal(null);
+
+  @internal
+  void overrideWith({
+    double? weight,
+    int? stackOrder,
+    Offset? logicalPosition,
+    bool? isEnabled,
+    bool? visible,
+    bool? canSelect,
+    bool? isSelected,
+    bool? isArranged,
+    bool? isAnimating,
+    bool? isAnimationCompleted,
+  }) {
+    state.overrideWith(state.value.copyWith(
+      weight: weight ?? state.value.weight,
+      stackOrder: stackOrder ?? state.value.stackOrder,
+      logicalPosition: logicalPosition ?? state.value.logicalPosition,
+      isEnabled: isEnabled ?? state.value.isEnabled,
+      visible: visible ?? state.value.visible,
+      canSelect: canSelect ?? state.value.canSelect,
+      isSelected: isSelected ?? state.value.isSelected,
+      isArranged: isArranged ?? state.value.isArranged,
+      isAnimating: isAnimating ?? state.value.isAnimating,
+    ));
+  }
 
   @override
   set weight(double weight) {

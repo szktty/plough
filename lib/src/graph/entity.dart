@@ -37,7 +37,7 @@ import 'package:signals/signals_flutter.dart';
 /// * [GraphLink], which implements this interface for graph edges.
 /// * [Graph], the container and manager for entities.
 /// * [GraphView], which provides the visual representation of entities.
-abstract class GraphEntity implements Listenable {
+abstract class GraphEntity {
   /// The owning [Graph] instance for this entity.
   ///
   /// Set automatically when the entity is added to a graph. Initially null.
