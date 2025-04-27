@@ -18,6 +18,8 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$GraphConnectionPoints {
   /// The point where the link enters the target node.
   Offset get incoming => throw _privateConstructorUsedError;
+
+  /// The point where the link exits the source node.
   Offset get outgoing => throw _privateConstructorUsedError;
 
   /// Create a copy of GraphConnectionPoints
@@ -121,6 +123,8 @@ class _$GraphConnectionPointsImpl extends _GraphConnectionPoints
   /// The point where the link enters the target node.
   @override
   final Offset incoming;
+
+  /// The point where the link exits the source node.
   @override
   final Offset outgoing;
 
@@ -171,6 +175,8 @@ abstract class _GraphConnectionPoints extends GraphConnectionPoints {
   /// The point where the link enters the target node.
   @override
   Offset get incoming;
+
+  /// The point where the link exits the source node.
   @override
   Offset get outgoing;
 

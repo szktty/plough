@@ -435,7 +435,7 @@ class GraphImpl
       return;
     }
 
-    bool hasChanged = false;
+    var hasChanged = false;
 
     if (!state.value.allowMultiSelection) {
       final currentSelectedLinks = state.value.selectedLinkIds.toList();

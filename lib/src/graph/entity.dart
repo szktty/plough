@@ -101,6 +101,12 @@ abstract class GraphEntity {
   /// state changes should be made through the graph's selection methods.
   bool get isSelected;
 
+  /// Whether this entity can be dragged.
+  ///
+  /// When false, the entity cannot be dragged by the user.
+  bool get canDrag;
+  set canDrag(bool canDrag);
+
   /// Custom properties associated with this entity.
   ///
   /// A map that can store arbitrary application-specific data as [Object] values,
@@ -167,6 +173,9 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
 
   @override
   bool get isSelected => state.value.isSelected;
+
+  @override
+  bool get canDrag => state.value.canDrag;
 
   @override
   Map<String, Object> get properties => _map.value;

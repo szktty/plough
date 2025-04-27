@@ -73,22 +73,26 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     bool? isEnabled,
     bool? visible,
     bool? canSelect,
+    bool? canDrag,
     bool? isSelected,
     bool? isArranged,
     bool? isAnimating,
     bool? isAnimationCompleted,
   }) {
-    state.overrideWith(state.value.copyWith(
-      weight: weight ?? state.value.weight,
-      stackOrder: stackOrder ?? state.value.stackOrder,
-      logicalPosition: logicalPosition ?? state.value.logicalPosition,
-      isEnabled: isEnabled ?? state.value.isEnabled,
-      visible: visible ?? state.value.visible,
-      canSelect: canSelect ?? state.value.canSelect,
-      isSelected: isSelected ?? state.value.isSelected,
-      isArranged: isArranged ?? state.value.isArranged,
-      isAnimating: isAnimating ?? state.value.isAnimating,
-    ));
+    state.overrideWith(
+      state.value.copyWith(
+        weight: weight ?? state.value.weight,
+        stackOrder: stackOrder ?? state.value.stackOrder,
+        logicalPosition: logicalPosition ?? state.value.logicalPosition,
+        isEnabled: isEnabled ?? state.value.isEnabled,
+        visible: visible ?? state.value.visible,
+        canSelect: canSelect ?? state.value.canSelect,
+        canDrag: canDrag ?? state.value.canDrag,
+        isSelected: isSelected ?? state.value.isSelected,
+        isArranged: isArranged ?? state.value.isArranged,
+        isAnimating: isAnimating ?? state.value.isAnimating,
+      ),
+    );
   }
 
   @override
@@ -140,6 +144,12 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     );
   }
 
+  @override
+  set canDrag(bool canDrag) {
+    setState(state.value.copyWith(canDrag: canDrag));
+  }
+
+  @override
   set isSelected(bool isSelected) {
     setState(state.value.copyWith(isSelected: isSelected));
   }

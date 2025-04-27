@@ -85,7 +85,8 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     bool? isSelected,
   }) {
     state.overrideWith(
-        state.value.copyWith(isSelected: isSelected ?? state.value.isSelected));
+      state.value.copyWith(isSelected: isSelected ?? state.value.isSelected),
+    );
   }
 
   @override
@@ -144,6 +145,11 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   @override
   set canSelect(bool canSelect) {
     setState(state.value.copyWith(canSelect: canSelect));
+  }
+
+  @override
+  set canDrag(bool canDrag) {
+    setState(state.value.copyWith(canDrag: canDrag));
   }
 
   @override

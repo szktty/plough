@@ -31,6 +31,7 @@ mixin _$GraphNodeData {
   bool get isEnabled => throw _privateConstructorUsedError;
   bool get visible => throw _privateConstructorUsedError;
   bool get canSelect => throw _privateConstructorUsedError;
+  bool get canDrag => throw _privateConstructorUsedError;
   bool get isSelected => throw _privateConstructorUsedError;
   bool get isArranged => throw _privateConstructorUsedError;
   bool get isAnimating => throw _privateConstructorUsedError;
@@ -59,6 +60,7 @@ abstract class $GraphNodeDataCopyWith<$Res> {
       bool isEnabled,
       bool visible,
       bool canSelect,
+      bool canDrag,
       bool isSelected,
       bool isArranged,
       bool isAnimating,
@@ -91,6 +93,7 @@ class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
     Object? isEnabled = null,
     Object? visible = null,
     Object? canSelect = null,
+    Object? canDrag = null,
     Object? isSelected = null,
     Object? isArranged = null,
     Object? isAnimating = null,
@@ -132,6 +135,10 @@ class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
       canSelect: null == canSelect
           ? _value.canSelect
           : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
               as bool,
       isSelected: null == isSelected
           ? _value.isSelected
@@ -181,6 +188,7 @@ abstract class _$$GraphNodeDataImplCopyWith<$Res>
       bool isEnabled,
       bool visible,
       bool canSelect,
+      bool canDrag,
       bool isSelected,
       bool isArranged,
       bool isAnimating,
@@ -212,6 +220,7 @@ class __$$GraphNodeDataImplCopyWithImpl<$Res>
     Object? isEnabled = null,
     Object? visible = null,
     Object? canSelect = null,
+    Object? canDrag = null,
     Object? isSelected = null,
     Object? isArranged = null,
     Object? isAnimating = null,
@@ -254,6 +263,10 @@ class __$$GraphNodeDataImplCopyWithImpl<$Res>
           ? _value.canSelect
           : canSelect // ignore: cast_nullable_to_non_nullable
               as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
       isSelected: null == isSelected
           ? _value.isSelected
           : isSelected // ignore: cast_nullable_to_non_nullable
@@ -287,6 +300,7 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
       this.isEnabled = true,
       this.visible = true,
       this.canSelect = true,
+      this.canDrag = true,
       this.isSelected = false,
       this.isArranged = false,
       this.isAnimating = false,
@@ -326,6 +340,9 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
   final bool canSelect;
   @override
   @JsonKey()
+  final bool canDrag;
+  @override
+  @JsonKey()
   final bool isSelected;
   @override
   @JsonKey()
@@ -339,7 +356,7 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
 
   @override
   String toString() {
-    return 'GraphNodeData(id: $id, logicalPosition: $logicalPosition, animatedPosition: $animatedPosition, animationStartPosition: $animationStartPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, isSelected: $isSelected, isArranged: $isArranged, isAnimating: $isAnimating, isAnimationCompleted: $isAnimationCompleted)';
+    return 'GraphNodeData(id: $id, logicalPosition: $logicalPosition, animatedPosition: $animatedPosition, animationStartPosition: $animationStartPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isSelected: $isSelected, isArranged: $isArranged, isAnimating: $isAnimating, isAnimationCompleted: $isAnimationCompleted)';
   }
 
   @override
@@ -362,6 +379,7 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
             (identical(other.visible, visible) || other.visible == visible) &&
             (identical(other.canSelect, canSelect) ||
                 other.canSelect == canSelect) &&
+            (identical(other.canDrag, canDrag) || other.canDrag == canDrag) &&
             (identical(other.isSelected, isSelected) ||
                 other.isSelected == isSelected) &&
             (identical(other.isArranged, isArranged) ||
@@ -384,6 +402,7 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
       isEnabled,
       visible,
       canSelect,
+      canDrag,
       isSelected,
       isArranged,
       isAnimating,
@@ -409,6 +428,7 @@ abstract class _GraphNodeData implements GraphNodeData {
       final bool isEnabled,
       final bool visible,
       final bool canSelect,
+      final bool canDrag,
       final bool isSelected,
       final bool isArranged,
       final bool isAnimating,
@@ -439,6 +459,8 @@ abstract class _GraphNodeData implements GraphNodeData {
   @override
   bool get canSelect;
   @override
+  bool get canDrag;
+  @override
   bool get isSelected;
   @override
   bool get isArranged;
@@ -467,7 +489,11 @@ mixin _$GraphLinkData {
   bool get isEnabled => throw _privateConstructorUsedError;
   bool get visible => throw _privateConstructorUsedError;
   bool get canSelect => throw _privateConstructorUsedError;
+  bool get canDrag => throw _privateConstructorUsedError;
   bool get isSelected => throw _privateConstructorUsedError;
+  bool get isArranged => throw _privateConstructorUsedError;
+  bool get isAnimating => throw _privateConstructorUsedError;
+  bool get isAnimationCompleted => throw _privateConstructorUsedError;
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
@@ -493,7 +519,11 @@ abstract class $GraphLinkDataCopyWith<$Res> {
       bool isEnabled,
       bool visible,
       bool canSelect,
-      bool isSelected});
+      bool canDrag,
+      bool isSelected,
+      bool isArranged,
+      bool isAnimating,
+      bool isAnimationCompleted});
 
   $GraphIdCopyWith<$Res> get id;
 }
@@ -523,7 +553,11 @@ class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
     Object? isEnabled = null,
     Object? visible = null,
     Object? canSelect = null,
+    Object? canDrag = null,
     Object? isSelected = null,
+    Object? isArranged = null,
+    Object? isAnimating = null,
+    Object? isAnimationCompleted = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -566,9 +600,25 @@ class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
           ? _value.canSelect
           : canSelect // ignore: cast_nullable_to_non_nullable
               as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
       isSelected: null == isSelected
           ? _value.isSelected
           : isSelected // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _value.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnimating: null == isAnimating
+          ? _value.isAnimating
+          : isAnimating // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnimationCompleted: null == isAnimationCompleted
+          ? _value.isAnimationCompleted
+          : isAnimationCompleted // ignore: cast_nullable_to_non_nullable
               as bool,
     ) as $Val);
   }
@@ -603,7 +653,11 @@ abstract class _$$GraphLinkDataImplCopyWith<$Res>
       bool isEnabled,
       bool visible,
       bool canSelect,
-      bool isSelected});
+      bool canDrag,
+      bool isSelected,
+      bool isArranged,
+      bool isAnimating,
+      bool isAnimationCompleted});
 
   @override
   $GraphIdCopyWith<$Res> get id;
@@ -632,7 +686,11 @@ class __$$GraphLinkDataImplCopyWithImpl<$Res>
     Object? isEnabled = null,
     Object? visible = null,
     Object? canSelect = null,
+    Object? canDrag = null,
     Object? isSelected = null,
+    Object? isArranged = null,
+    Object? isAnimating = null,
+    Object? isAnimationCompleted = null,
   }) {
     return _then(_$GraphLinkDataImpl(
       id: null == id
@@ -675,9 +733,25 @@ class __$$GraphLinkDataImplCopyWithImpl<$Res>
           ? _value.canSelect
           : canSelect // ignore: cast_nullable_to_non_nullable
               as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
       isSelected: null == isSelected
           ? _value.isSelected
           : isSelected // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _value.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnimating: null == isAnimating
+          ? _value.isAnimating
+          : isAnimating // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnimationCompleted: null == isAnimationCompleted
+          ? _value.isAnimationCompleted
+          : isAnimationCompleted // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
@@ -697,7 +771,11 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
       this.isEnabled = true,
       this.visible = true,
       this.canSelect = true,
-      this.isSelected = false});
+      this.canDrag = true,
+      this.isSelected = false,
+      this.isArranged = false,
+      this.isAnimating = false,
+      this.isAnimationCompleted = false});
 
   @override
   final GraphId id;
@@ -728,11 +806,23 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
   final bool canSelect;
   @override
   @JsonKey()
+  final bool canDrag;
+  @override
+  @JsonKey()
   final bool isSelected;
+  @override
+  @JsonKey()
+  final bool isArranged;
+  @override
+  @JsonKey()
+  final bool isAnimating;
+  @override
+  @JsonKey()
+  final bool isAnimationCompleted;
 
   @override
   String toString() {
-    return 'GraphLinkData(id: $id, source: $source, target: $target, direction: $direction, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, isSelected: $isSelected)';
+    return 'GraphLinkData(id: $id, source: $source, target: $target, direction: $direction, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isSelected: $isSelected, isArranged: $isArranged, isAnimating: $isAnimating, isAnimationCompleted: $isAnimationCompleted)';
   }
 
   @override
@@ -755,8 +845,15 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
             (identical(other.visible, visible) || other.visible == visible) &&
             (identical(other.canSelect, canSelect) ||
                 other.canSelect == canSelect) &&
+            (identical(other.canDrag, canDrag) || other.canDrag == canDrag) &&
             (identical(other.isSelected, isSelected) ||
-                other.isSelected == isSelected));
+                other.isSelected == isSelected) &&
+            (identical(other.isArranged, isArranged) ||
+                other.isArranged == isArranged) &&
+            (identical(other.isAnimating, isAnimating) ||
+                other.isAnimating == isAnimating) &&
+            (identical(other.isAnimationCompleted, isAnimationCompleted) ||
+                other.isAnimationCompleted == isAnimationCompleted));
   }
 
   @override
@@ -772,7 +869,11 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
       isEnabled,
       visible,
       canSelect,
-      isSelected);
+      canDrag,
+      isSelected,
+      isArranged,
+      isAnimating,
+      isAnimationCompleted);
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
@@ -795,7 +896,11 @@ abstract class _GraphLinkData implements GraphLinkData {
       final bool isEnabled,
       final bool visible,
       final bool canSelect,
-      final bool isSelected}) = _$GraphLinkDataImpl;
+      final bool canDrag,
+      final bool isSelected,
+      final bool isArranged,
+      final bool isAnimating,
+      final bool isAnimationCompleted}) = _$GraphLinkDataImpl;
 
   @override
   GraphId get id;
@@ -818,7 +923,15 @@ abstract class _GraphLinkData implements GraphLinkData {
   @override
   bool get canSelect;
   @override
+  bool get canDrag;
+  @override
   bool get isSelected;
+  @override
+  bool get isArranged;
+  @override
+  bool get isAnimating;
+  @override
+  bool get isAnimationCompleted;
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
