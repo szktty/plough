@@ -33,7 +33,7 @@ class _TapState {
   final GraphId entityId;
   final Offset downPosition;
   final DateTime downTime; // Keep as final
-  int tapCount;
+  int tapCount = 1;
   bool cancelled = false;
   bool completed = false; // Flag set when a valid tap-up occurs
   Timer? doubleTapTimer; // Timer to detect if it's a single or double tap
