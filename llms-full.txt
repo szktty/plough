@@ -136,9 +136,9 @@ Key behavior customization methods include:
 - `createNodeViewBehavior()`: Customizes node display
 - `createLinkViewBehavior()`: Customizes link display
 - `getConnectionPoints()`: Calculates connection points between nodes
-- `onNodeSelect()`: Handles node selection
-- `onNodeTap()`: Handles node tap events
-- `onNodeDragStart/Update/End()`: Handles node drag operations
+- `hitTestNode()`: Tests if a node contains a given position.
+- `hitTestLink()`: Tests if a link contains a given position.
+- Event Handlers (e.g., `onTap`, `onSelectionChange`, `onDragStart`): Override these methods to handle user interactions using specific `GraphEvent` objects.
 
 #### Renderers
 
@@ -170,6 +170,160 @@ GraphDefaultLinkRenderer(
   ),
 )
 ```
+
+/// The interface provides two key customization points:
+/// - [createNodeViewBehavior] and [createLinkViewBehavior] for visual styling
+/// - Event handlers like [onTap], [onSelectionChange] for interaction logic
+///   (receiving specific [GraphEvent] objects).
+///
+/// For most use cases, extend [GraphViewDefaultBehavior] and override specific
+/// methods rather than implementing this interface directly.
+///
+/// See also:
+///
+/// * [GraphNodeViewBehavior], for node visualization control
+/// * [GraphLinkViewBehavior], for link visualization control
+/// * [GraphViewDefaultBehavior], for the standard implementation
+/// * [GraphEvent], for the base class of all interaction events
+abstract interface class GraphViewBehavior {
+  /// Retrieves the [GraphViewBehavior] from the widget tree.
+  @internal
+  static GraphViewBehavior of(BuildContext context) =>
+      Provider.of(context, listen: false);
+
+  /// Creates the behavior configuration for node rendering.
+  ///
+  /// Override this method to customize how nodes are displayed and interact
+  /// with user input.
+  GraphNodeViewBehavior createNodeViewBehavior();
+
+  /// Creates the behavior configuration for link rendering.
+  ///
+  /// Override this method to customize how links between nodes are displayed
+  /// and interact with user input.
+  GraphLinkViewBehavior createLinkViewBehavior();
+
+  /// Calculates connection points between two nodes.
+  ///
+  /// Returns intersection points where links should connect to the nodes'
+  /// shapes, based on their current geometry.
+  GraphConnectionPoints? getConnectionPoints(
+    GraphNode source,
+    GraphNode target,
+    Widget sourceWidget,
+    Widget targetWidget,
+  );
+
+  /// Tests if a node contains the given position.
+  ///
+  /// Used for hit testing in mouse interactions and event handling.
+  bool hitTestNode(covariant GraphNode node, Offset position);
+
+  /// Tests if a link contains the given position.
+  ///
+  /// Used for hit testing in mouse interactions and event handling.
+  bool hitTestLink(covariant GraphLink link, Offset position);
+
+  // --- Event Handlers ---
+  // Override these methods to handle user interactions.
+  // They receive specific GraphEvent objects containing details.
+
+  /// Called when entities are tapped (single or double).
+  void onTap(GraphTapEvent event);
+
+  /// Called when the selection changes.
+  void onSelectionChange(GraphSelectionChangeEvent event);
+
+  /// Called when a drag operation starts on entities.
+  void onDragStart(GraphDragStartEvent event);
+
+  /// Called during a drag operation on entities.
+  /// Use [event.delta] for positional changes.
+  void onDragUpdate(GraphDragUpdateEvent event);
+
+  /// Called when a drag operation on entities completes.
+  void onDragEnd(GraphDragEndEvent event);
+
+  /// Called when the mouse pointer enters an entity's area.
+  void onHoverEnter(GraphHoverEvent event);
+
+  /// Called when the mouse pointer moves within an entity's area.
+  void onHoverMove(GraphHoverEvent event);
+
+  /// Called when the mouse pointer leaves an entity's area.
+  void onHoverEnd(GraphHoverEndEvent event);
+
+  /// Called when an entity's tooltip is shown.
+  void onTooltipShow(GraphTooltipShowEvent event);
+
+  /// Called when an entity's tooltip is hidden.
+  void onTooltipHide(GraphTooltipHideEvent event);
+}
+
+/// A default implementation of graph view behavior with standard visualization features.
+///
+/// This implementation provides a complete set of basic graph visualization features
+/// including node rendering, link visualization, and user interaction handling.
+/// It serves both as a ready-to-use behavior and as a base class for custom behaviors.
+///
+/// The default behavior includes:
+/// - Standard node rendering with labels and tooltips
+/// - Link visualization with arrow indicators
+/// - Basic interaction handling dispatched via event callbacks (e.g., `onTap`, `onDragStart`).
+///   Default implementations for these handlers are empty.
+/// - Mouse hover effects
+///
+/// To customize specific aspects, extend this class and override only the
+/// methods that need different behavior (e.g., override `onTap` to handle taps).
+/// The default implementation provides a solid foundation for most graph
+/// visualization needs.
+///
+/// See also:
+///
+/// * [GraphViewBehavior], which defines the interface implemented by this class
+/// * [GraphNodeViewBehavior], for node-specific behavior
+/// * [GraphLinkViewBehavior], for link-specific behavior
+class GraphViewDefaultBehavior implements GraphViewBehavior {
+  @override
+  bool hitTestLink(GraphLinkImpl link, Offset position) {
+    final geometry = link.geometry;
+    if (geometry == null || !link.visible) return false;
+    return geometry.containsPoint(position);
+  }
+
+  // Default implementations for the event handlers are empty.
+  // Users extending this class will override the methods they need.
+
+  @override
+  void onTap(GraphTapEvent event) {}
+
+  @override
+  void onSelectionChange(GraphSelectionChangeEvent event) {}
+
+  @override
+  void onDragStart(GraphDragStartEvent event) {}
+
+  @override
+  void onDragUpdate(GraphDragUpdateEvent event) {}
+
+  @override
+  void onDragEnd(GraphDragEndEvent event) {}
+
+  @override
+  void onHoverEnter(GraphHoverEvent event) {}
+
+  @override
+  void onHoverMove(GraphHoverEvent event) {}
+
+  @override
+  void onHoverEnd(GraphHoverEndEvent event) {}
+
+  @override
+  void onTooltipShow(GraphTooltipShowEvent event) {}
+
+  @override
+  void onTooltipHide(GraphTooltipHideEvent event) {}
+}
 
 ### Tooltips
 
