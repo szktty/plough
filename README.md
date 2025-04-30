@@ -154,7 +154,7 @@ Methods that users can define. See API reference for details.
 - `getConnectionPoints()`: Calculates connection points for links between nodes
 - `hitTestNode()`: Tests if a node contains a given position.
 - `hitTestLink()`: Tests if a link contains a given position.
-- Event Handlers: Define handling for various user interactions by overriding methods that receive specific `GraphEvent` objects (defined in `lib/src/interactive/events.dart`).
+- 🖱️ Event Handlers: Handle various user interactions by overriding methods that receive specific `GraphEvent` objects (defined in `lib/src/interactive/events.dart`).
   - `onTap(GraphTapEvent event)`: Handles single or double taps on entities.
   - `onSelectionChange(GraphSelectionChangeEvent event)`: Handles changes in entity selection.
   - `onDragStart(GraphDragStartEvent event)`: Handles the start of a drag operation on entities.
