@@ -1,138 +1,269 @@
-import 'package:flutter/widgets.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'dart:async';
+
+import 'package:flutter/foundation.dart'; // Add this import
+import 'package:flutter/gestures.dart';
+// Remove unused import
+// import 'package:flutter/widgets.dart';
+// import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/interactive/state_manager.dart';
+import 'package:plough/src/utils/logger.dart'; // Add logger import
 
-part 'tap_state.freezed.dart';
+// Remove freezed part file
+// part 'tap_state.freezed.dart';
 
+// Remove freezed data class
+/*
 @freezed
 class GraphTapData with _$GraphTapData {
-  /// Creates tap state data with initial selection state.
   const factory GraphTapData({
     required bool isSelectedOnStart,
   }) = _GraphTapData;
 }
+*/
 
-abstract base class GraphTapStateManager
-    extends GraphStateManager<GraphTapData> {
-  GraphTapStateManager({
-    required super.gestureManager,
-    this.timeout = defaultTimeout,
-    this.tooltipTriggerMode,
+// Internal state for tap gesture recognition
+class _TapState {
+  _TapState({
+    required this.entityId,
+    required this.downPosition,
+    required this.downTime,
   });
 
-  static const defaultTimeout = Duration(milliseconds: 300);
+  final GraphId entityId;
+  final Offset downPosition;
+  final DateTime downTime; // Keep as final
+  int tapCount = 1;
+  bool cancelled = false;
+  bool completed = false; // Flag set when a valid tap-up occurs
+  Timer? doubleTapTimer; // Timer to detect if it's a single or double tap
+}
 
-  final Duration timeout;
+/// Manages tap (single and double) detection for graph entities.
+abstract base class GraphEntityTapStateManager<E extends GraphEntity>
+    extends GraphStateManager<_TapState> {
+  // Use _TapState
+  GraphEntityTapStateManager({
+    required super.gestureManager,
+    required this.tooltipTriggerMode,
+    // Use constants from GestureBinding
+    this.doubleTapTimeout = kDoubleTapTimeout,
+    this.touchSlop = kTouchSlop,
+    this.doubleTapSlop = kDoubleTapSlop,
+  });
+
   final GraphTooltipTriggerMode? tooltipTriggerMode;
+  final Duration doubleTapTimeout;
+  final double touchSlop;
+  final double doubleTapSlop;
 
-  @override
-  GraphEntityType get entityType => GraphEntityType.node;
+  // --- Public API ---
 
-  void handlePointerDown(GraphId entityId, PointerDownEvent event) {
-    final entity = gestureManager.getEntity(entityId);
-    if (entity == null) return;
+  /// ID of the entity currently being tracked for a potential tap.
+  GraphId? get trackedEntityId => states.firstOrNull?.entityId;
 
-    if (_tapCount == 0) {
-      setState(entityId, GraphTapData(isSelectedOnStart: entity.isSelected));
-    }
-    _multipleTapTimer?.ignore();
-    _multipleTapTimer = null;
-    _lastTapUpTime = DateTime.now();
+  /// Checks if the tap sequence for the given entity has successfully completed.
+  bool isTapCompleted(GraphId entityId) =>
+      getState(entityId)?.completed ?? false;
 
-    if (tooltipTriggerMode == GraphTooltipTriggerMode.tap) {
-      gestureManager.toggleTooltip(entityId);
-    } else {
-      gestureManager.hideTooltip(entityId);
+  /// Gets the number of taps detected (1 or 2) if completed, otherwise null.
+  int? getTapCount(GraphId entityId) => getState(entityId)?.tapCount;
+
+  /// Cleans up the tap state for an entity after the gesture is fully resolved.
+  void cleanupTapState(GraphId entityId) {
+    // Timer completion or cancellation already removes the state.
+    // This might be redundant if logic in handlePointerUp/cancel is correct.
+    if (hasState(entityId) && getState(entityId)?.doubleTapTimer == null) {
+      // Only remove if no timer is pending (i.e., it was a confirmed double tap or cancelled)
+      // log.d('Cleaning up residual tap state for $entityId');
+      // removeState(entityId);
     }
   }
 
-  Future<Null>? _multipleTapTimer;
-  int _tapCount = 0;
-  DateTime? _lastTapUpTime;
+  /// Cancels all ongoing tap recognitions.
+  void cancelAll() {
+    final statesToCancel = List.from(states);
+    for (final state in statesToCancel) {
+      final tapState = state as _TapState;
+      cancel(tapState.entityId);
+    }
+  }
+
+  // --- Gesture Handling Logic ---
+
+  void handlePointerDown(GraphId entityId, PointerDownEvent event) {
+    // Allow tap start even if !canSelect, selection check happens on up?
+    // if (!canSelect(entityId)) return;
+
+    final existingState = getState(entityId);
+    final now = DateTime.now();
+
+    // Check for double tap
+    if (existingState != null &&
+        !existingState.cancelled &&
+        now.difference(existingState.downTime) < doubleTapTimeout &&
+        _isWithinDoubleTapSlop(
+          existingState.downPosition,
+          event.localPosition,
+        )) {
+      existingState.doubleTapTimer?.cancel(); // Cancel the single tap timer
+      existingState.tapCount = 2;
+      existingState.completed =
+          false; // Reset completion for the second tap down
+      log.d('Potential double tap detected for $entityId');
+    } else {
+      // Start a new single tap recognition
+      cancelAll(); // Cancel any previous tap attempts on *other* entities
+      setState(
+        entityId,
+        _TapState(
+          entityId: entityId,
+          downPosition: event.localPosition,
+          downTime: now,
+        ),
+      );
+      log.d('Tap sequence started for $entityId');
+    }
+  }
 
   void handlePointerUp(GraphId entityId, PointerUpEvent event) {
-    final entity = gestureManager.getEntity(entityId);
     final state = getState(entityId);
-    if (entity == null || state == null) {
-      cancel(entityId);
-      return;
+    if (state == null || state.cancelled || state.completed) {
+      return; // Ignore if cancelled or already completed
     }
 
-    final currentTime = DateTime.now();
-    if (_lastTapUpTime != null) {
-      if (currentTime.difference(_lastTapUpTime!) < timeout) {
-        _tapCount++;
+    final isWithinSlop =
+        _isWithinTapSlop(state.downPosition, event.localPosition);
+    debugPrint(
+      '[TapManager] handlePointerUp ($entityId): isWithinSlop = $isWithinSlop',
+    ); // Log slop check
+
+    if (isWithinSlop) {
+      log.d('Tap up within slop for $entityId (Tap Count: ${state.tapCount})');
+      state.completed = true; // Mark as completed
+      debugPrint(
+        '[TapManager] handlePointerUp ($entityId): state.completed set to true',
+      ); // Log completion set
+
+      // Trigger tooltip if mode is tap
+      if (tooltipTriggerMode == GraphTooltipTriggerMode.tap) {
+        gestureManager.toggleTooltip(entityId);
+      }
+
+      // Start timer to confirm single tap or wait for double tap end
+      if (state.tapCount == 1) {
+        state.doubleTapTimer = Timer(doubleTapTimeout, () {
+          // Timer expired, it was just a single tap.
+          // Event dispatch happens in GraphGestureManager based on isTapCompleted and getTapCount.
+          log.d(
+            'Double tap timer expired for $entityId, confirming single tap.',
+          );
+          debugPrint(
+            '[TapManager] Double tap timer expired for $entityId, removing state.',
+          ); // Log timer expiry
+          removeState(entityId); // Clean up state after confirmation
+        });
       } else {
-        _tapCount = 1;
+        // Double tap up detected.
+        // Event dispatch happens in GraphGestureManager.
+        log.d('Double tap confirmed for $entityId on up.');
+        debugPrint(
+          '[TapManager] Double tap confirmed for $entityId, removing state.',
+        ); // Log double tap confirmation
+        removeState(entityId); // Clean up state immediately for double tap
       }
     } else {
+      // Moved too far, cancel tap
+      log.d('Tap cancelled for $entityId due to movement.');
+      debugPrint(
+        '[TapManager] handlePointerUp ($entityId): Cancelling due to movement beyond slop.',
+      ); // Log cancellation
       cancel(entityId);
-      return;
     }
-    _lastTapUpTime = currentTime;
+  }
 
-    if (_tapCount == 1) {
-      gestureManager.toggleSelection(entityId);
-    }
-
-    // 一定時間後にタップ数に変化がなければ確定
-    _multipleTapTimer?.ignore();
-    _multipleTapTimer = Future.delayed(timeout, () {
-      final state = getState(entityId);
-      if (state == null) return;
-
-      if (_tapCount == 1) {
-        onTap(targets);
-      } else {
-        onDoubleTap(targets);
-      }
+  /// Called when dragging starts or pointer moves too far during a tap sequence.
+  void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
+    final state = getState(entityId);
+    // Cancel tap if pointer moves beyond slop while tap is active (not completed/cancelled)
+    if (state != null &&
+        !state.cancelled &&
+        !state.completed &&
+        !_isWithinTapSlop(state.downPosition, details.localPosition)) {
+      log.d('Tap cancelled for $entityId due to pan update movement.');
+      debugPrint(
+        '[TapManager] handlePanUpdate ($entityId): Cancelling due to movement beyond slop during pan.',
+      ); // Log cancellation during pan
       cancel(entityId);
-    });
+    }
   }
 
   void handlePointerCancel(GraphId entityId, PointerCancelEvent event) {
+    debugPrint(
+      '[TapManager] handlePointerCancel ($entityId): Cancelling due to pointer cancel event.',
+    ); // Log cancellation event
     cancel(entityId);
   }
 
-  void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
-    cancel(entityId);
-  }
-
+  /// Cancels the tap recognition for a specific entity.
   @override
   void cancel(GraphId entityId) {
-    _tapCount = 0;
-    _lastTapUpTime = null;
-    _multipleTapTimer?.ignore();
-    _multipleTapTimer = null;
-    clearAllStates();
+    final state = getState(entityId);
+    if (state != null && !state.cancelled) {
+      log.d('Cancelling tap state for $entityId');
+      debugPrint(
+        '[TapManager] cancel ($entityId): Setting cancelled=true, removing state.',
+      ); // Log cancel method call
+      state.cancelled = true;
+      state.doubleTapTimer?.cancel();
+      removeState(entityId);
+      // Hide tooltip if it was shown by a tap that got cancelled
+      if (tooltipTriggerMode == GraphTooltipTriggerMode.tap &&
+          state.completed) {
+        // This condition seems unlikely if cancelled before completed? Check logic.
+        // Maybe check if tooltip *is* showing for this ID instead?
+        // Consider adding: gestureManager.isTooltipVisible(entityId) ?
+        gestureManager.hideTooltip(entityId);
+      }
+    }
+  }
+
+  bool _isWithinTapSlop(Offset p1, Offset p2) {
+    final distanceSquared = (p1 - p2).distanceSquared;
+    final result = distanceSquared < touchSlop * touchSlop;
+    debugPrint(
+      '[TapManager] _isWithinTapSlop: distanceSquared=$distanceSquared, touchSlopSquared=${touchSlop * touchSlop}, result=$result',
+    ); // Log distance check
+    return result;
+  }
+
+  bool _isWithinDoubleTapSlop(Offset p1, Offset p2) {
+    return (p1 - p2).distanceSquared < doubleTapSlop * doubleTapSlop;
   }
 }
 
-/// ノード要素のタップ状態を管理します。
-///
-/// ノード固有のタップ挙動を実装し、タップによる選択状態の切り替えを制御します。
-base class GraphNodeTapStateManager extends GraphTapStateManager {
-  /// Creates a tap state manager for node elements.
+final class GraphNodeTapStateManager
+    extends GraphEntityTapStateManager<GraphNode> {
   GraphNodeTapStateManager({
     required super.gestureManager,
-    super.timeout,
-    super.tooltipTriggerMode,
+    required super.tooltipTriggerMode,
+    super.doubleTapTimeout,
+    super.touchSlop,
+    super.doubleTapSlop,
   });
 
   @override
   GraphEntityType get entityType => GraphEntityType.node;
 }
 
-/// リンク要素のタップ状態を管理します。
-///
-/// リンク固有のタップ挙動を実装し、タップによる選択状態の切り替えを制御します。
-base class GraphLinkTapStateManager extends GraphTapStateManager {
-  /// Creates a tap state manager for link elements.
+final class GraphLinkTapStateManager
+    extends GraphEntityTapStateManager<GraphLink> {
   GraphLinkTapStateManager({
     required super.gestureManager,
-    super.timeout,
-    super.tooltipTriggerMode,
+    required super.tooltipTriggerMode,
+    super.doubleTapTimeout,
+    super.touchSlop,
+    super.doubleTapSlop,
   });
 
   @override

@@ -80,6 +80,15 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
 
   final Signal<GraphLinkViewGeometry?> _geometry = Signal(null);
 
+  @internal
+  void overrideWith({
+    bool? isSelected,
+  }) {
+    state.overrideWith(
+      state.value.copyWith(isSelected: isSelected ?? state.value.isSelected),
+    );
+  }
+
   @override
   GraphNodeImpl get source => state.value.source! as GraphNodeImpl;
 
@@ -136,6 +145,11 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   @override
   set canSelect(bool canSelect) {
     setState(state.value.copyWith(canSelect: canSelect));
+  }
+
+  @override
+  set canDrag(bool canDrag) {
+    setState(state.value.copyWith(canDrag: canDrag));
   }
 
   @override

@@ -28,9 +28,17 @@ abstract base class GraphStateManager<T> with Diagnosticable {
 
   final MapSignal<GraphId, T> _states = <GraphId, T>{}.toSignal();
 
+  GraphId? _lastActiveEntityId;
+
   List<T> get states => _states.values.toList();
 
   GraphEntityType get entityType;
+
+  /// IDs of the entities currently being managed by this state manager.
+  List<GraphId> get activeEntityIds => _states.keys.toList();
+
+  /// The ID of the last entity for which state was set.
+  GraphId? get lastActiveEntityId => _lastActiveEntityId;
 
   static const double defaultDragThreshold = 8;
 
@@ -67,14 +75,21 @@ abstract base class GraphStateManager<T> with Diagnosticable {
 
   void setState(GraphId entityId, T state) {
     _states[entityId] = state;
+    _lastActiveEntityId = entityId; // Update last active ID
   }
 
   void removeState(GraphId entityId) {
     _states.remove(entityId);
+    // Optionally, clear _lastActiveEntityId if it matches entityId
+    if (_lastActiveEntityId == entityId) {
+      // Set to null or find the new last? Setting to null is simpler.
+      _lastActiveEntityId = null;
+    }
   }
 
   void clearAllStates() {
     _states.clear();
+    _lastActiveEntityId = null; // Clear last active ID
   }
 
   void cancel(GraphId entityId);
@@ -135,6 +150,9 @@ abstract base class GraphStateManager<T> with Diagnosticable {
     }
   }
 
+  // Methods previously calling GraphViewBehavior callbacks are now obsolete.
+  // Event dispatching is handled by GraphGestureManager.
+  /*
   void onTap(List<GraphId> entityIds) {
     switch (entityType) {
       case GraphEntityType.node:
@@ -217,7 +235,7 @@ abstract base class GraphStateManager<T> with Diagnosticable {
   }
 
   void onHoverEnd(GraphId entityId) {
-    gestureManager.endHover(entityId);
+    // gestureManager.endHover(entityId); // This logic might be needed in GestureManager
     switch (entityType) {
       case GraphEntityType.node:
         behavior.onNodeHoverEnd(getNode(entityId)!);
@@ -251,4 +269,5 @@ abstract base class GraphStateManager<T> with Diagnosticable {
         gestureManager.onTooltipHide?.call(link);
     }
   }
+  */
 }

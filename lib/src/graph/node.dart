@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
@@ -64,6 +65,36 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
       {};
   final Signal<GraphShape?> _shape = Signal(null);
 
+  @internal
+  void overrideWith({
+    double? weight,
+    int? stackOrder,
+    Offset? logicalPosition,
+    bool? isEnabled,
+    bool? visible,
+    bool? canSelect,
+    bool? canDrag,
+    bool? isSelected,
+    bool? isArranged,
+    bool? isAnimating,
+    bool? isAnimationCompleted,
+  }) {
+    state.overrideWith(
+      state.value.copyWith(
+        weight: weight ?? state.value.weight,
+        stackOrder: stackOrder ?? state.value.stackOrder,
+        logicalPosition: logicalPosition ?? state.value.logicalPosition,
+        isEnabled: isEnabled ?? state.value.isEnabled,
+        visible: visible ?? state.value.visible,
+        canSelect: canSelect ?? state.value.canSelect,
+        canDrag: canDrag ?? state.value.canDrag,
+        isSelected: isSelected ?? state.value.isSelected,
+        isArranged: isArranged ?? state.value.isArranged,
+        isAnimating: isAnimating ?? state.value.isAnimating,
+      ),
+    );
+  }
+
   @override
   set weight(double weight) {
     setState(state.value.copyWith(weight: weight));
@@ -113,6 +144,12 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     );
   }
 
+  @override
+  set canDrag(bool canDrag) {
+    setState(state.value.copyWith(canDrag: canDrag));
+  }
+
+  @override
   set isSelected(bool isSelected) {
     setState(state.value.copyWith(isSelected: isSelected));
   }

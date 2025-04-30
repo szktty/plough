@@ -37,7 +37,7 @@ import 'package:signals/signals_flutter.dart';
 /// * [GraphLink], which implements this interface for graph edges.
 /// * [Graph], the container and manager for entities.
 /// * [GraphView], which provides the visual representation of entities.
-abstract class GraphEntity implements Listenable {
+abstract class GraphEntity {
   /// The owning [Graph] instance for this entity.
   ///
   /// Set automatically when the entity is added to a graph. Initially null.
@@ -100,6 +100,12 @@ abstract class GraphEntity implements Listenable {
   /// Read-only property managed by the [GraphView] interaction system. Selection
   /// state changes should be made through the graph's selection methods.
   bool get isSelected;
+
+  /// Whether this entity can be dragged.
+  ///
+  /// When false, the entity cannot be dragged by the user.
+  bool get canDrag;
+  set canDrag(bool canDrag);
 
   /// Custom properties associated with this entity.
   ///
@@ -167,6 +173,9 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
 
   @override
   bool get isSelected => state.value.isSelected;
+
+  @override
+  bool get canDrag => state.value.canDrag;
 
   @override
   Map<String, Object> get properties => _map.value;

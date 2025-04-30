@@ -33,6 +33,8 @@ abstract interface class GraphEntityData {
   bool get canSelect;
 
   bool get isSelected;
+
+  bool get canDrag;
 }
 
 /// The direction of a link between nodes.
@@ -76,6 +78,7 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
     @Default(true) bool isEnabled,
     @Default(true) bool visible,
     @Default(true) bool canSelect,
+    @Default(true) bool canDrag,
     @Default(false) bool isSelected,
     @Default(false) bool isArranged,
     @Default(false) bool isAnimating,
@@ -102,7 +105,11 @@ class GraphLinkData with _$GraphLinkData implements GraphEntityData {
     @Default(true) bool isEnabled,
     @Default(true) bool visible,
     @Default(true) bool canSelect,
+    @Default(true) bool canDrag,
     @Default(false) bool isSelected,
+    @Default(false) bool isArranged,
+    @Default(false) bool isAnimating,
+    @Default(false) bool isAnimationCompleted,
   }) = _GraphLinkData;
 }
 

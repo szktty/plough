@@ -366,26 +366,47 @@ class GraphImpl
       return;
     }
 
-    node.isSelected = true;
+    if (state.value.selectedNodeIds.length == 1 &&
+        state.value.selectedNodeIds.contains(id)) {
+      return;
+    }
+
+    var hasChanged = false;
+
     bringToFront(id);
 
     if (!state.value.allowMultiSelection) {
-      state.value = state.value.copyWith(selectedNodeIds: IList([node.id]));
-      for (final otherNode in nodes.cast<GraphNodeImpl>()) {
-        if (otherNode.id != node.id) {
-          otherNode.isSelected = false;
+      final currentSelectedNodes = state.value.selectedNodeIds.toList();
+      final updatedNodeIds = IList([node.id]);
+
+      for (final currentId in currentSelectedNodes) {
+        if (currentId != id) {
+          (getNodeOrThrow(currentId) as GraphNodeImpl)
+              .overrideWith(isSelected: false);
+          hasChanged = true;
         }
       }
+
+      node.overrideWith(isSelected: true);
+      hasChanged = true;
+
+      if (hasChanged) {
+        state.value = state.value.copyWith(selectedNodeIds: updatedNodeIds);
+      }
     } else {
-      state.value = state.value
-          .copyWith(selectedNodeIds: state.value.selectedNodeIds.add(node.id));
+      node.overrideWith(isSelected: true);
+      state.value = state.value.copyWith(
+        selectedNodeIds: state.value.selectedNodeIds.add(node.id),
+      );
     }
   }
 
   @override
   void deselectNode(GraphId id) {
     final node = getNodeOrThrow(id) as GraphNodeImpl;
-    node.isSelected = false;
+
+    node.overrideWith(isSelected: false);
+
     if (!state.value.allowMultiSelection) {
       state.value = state.value.copyWith(selectedNodeIds: const IListConst([]));
     } else {
@@ -408,17 +429,46 @@ class GraphImpl
   @override
   void selectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
+
+    if (state.value.selectedLinkIds.length == 1 &&
+        state.value.selectedLinkIds.contains(id)) {
+      return;
+    }
+
+    var hasChanged = false;
+
     if (!state.value.allowMultiSelection) {
-      state.value = state.value.copyWith(selectedLinkIds: IList([link.id]));
+      final currentSelectedLinks = state.value.selectedLinkIds.toList();
+      final updatedLinkIds = IList([link.id]);
+
+      for (final currentId in currentSelectedLinks) {
+        if (currentId != id) {
+          final otherLink = getLinkOrThrow(currentId) as GraphLinkImpl;
+          otherLink.overrideWith(isSelected: false);
+          hasChanged = true;
+        }
+      }
+
+      link.overrideWith(isSelected: true);
+      hasChanged = true;
+
+      if (hasChanged) {
+        state.value = state.value.copyWith(selectedLinkIds: updatedLinkIds);
+      }
     } else {
-      state.value = state.value
-          .copyWith(selectedLinkIds: state.value.selectedLinkIds.add(link.id));
+      link.overrideWith(isSelected: true);
+      state.value = state.value.copyWith(
+        selectedLinkIds: state.value.selectedLinkIds.add(link.id),
+      );
     }
   }
 
   @override
   void deselectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
+
+    link.overrideWith(isSelected: false);
+
     if (!state.value.allowMultiSelection) {
       state.value = state.value.copyWith(selectedLinkIds: const IListConst([]));
     } else {
@@ -533,7 +583,6 @@ extension GraphInternal on GraphImpl {
 
   void onLayoutFinished() {
     state.overrideWith(state.value.copyWith(needsLayout: false));
-    //state.value = state.value.copyWith(needsLayout: false);
 
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;
