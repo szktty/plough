@@ -95,6 +95,39 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     );
   }
 
+  /// 状態を更新し、変更を通知する
+  ///
+  /// [overrideWith]と異なり、このメソッドは変更を通知するため、
+  /// UIに反映されます。選択状態の変更など、UIに反映したい変更に使用します。
+  void updateWith({
+    double? weight,
+    int? stackOrder,
+    Offset? logicalPosition,
+    bool? isEnabled,
+    bool? visible,
+    bool? canSelect,
+    bool? canDrag,
+    bool? isSelected,
+    bool? isArranged,
+    bool? isAnimating,
+    bool? isAnimationCompleted,
+  }) {
+    setState(
+      state.value.copyWith(
+        weight: weight ?? state.value.weight,
+        stackOrder: stackOrder ?? state.value.stackOrder,
+        logicalPosition: logicalPosition ?? state.value.logicalPosition,
+        isEnabled: isEnabled ?? state.value.isEnabled,
+        visible: visible ?? state.value.visible,
+        canSelect: canSelect ?? state.value.canSelect,
+        canDrag: canDrag ?? state.value.canDrag,
+        isSelected: isSelected ?? state.value.isSelected,
+        isArranged: isArranged ?? state.value.isArranged,
+        isAnimating: isAnimating ?? state.value.isAnimating,
+      ),
+    );
+  }
+
   @override
   set weight(double weight) {
     setState(state.value.copyWith(weight: weight));

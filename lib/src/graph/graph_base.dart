@@ -164,6 +164,11 @@ abstract class Graph implements Listenable {
   /// Throws [ArgumentError] if no link with [id] exists.
   void toggleSelectLink(GraphId id);
 
+  /// Clears all selections in the graph.
+  ///
+  /// Deselects all currently selected nodes and links.
+  void clearSelection();
+
   /// Marks the graph as needing a layout recalculation.
   ///
   /// This triggers [GraphView] to recalculate node positions during its next update cycle.
@@ -486,6 +491,33 @@ class GraphImpl
     } else {
       selectLink(id);
     }
+  }
+
+  @override
+  void clearSelection() {
+    // 現在選択されているノードとリンクのIDを保存
+    final selectedNodeIds = state.value.selectedNodeIds.toList();
+    final selectedLinkIds = state.value.selectedLinkIds.toList();
+
+    // 選択されているノードをすべて選択解除（個別に状態更新、UIに反映）
+    for (final nodeId in selectedNodeIds) {
+      final node = getNodeOrThrow(nodeId) as GraphNodeImpl;
+      // 新しいupdateWithメソッドを使用
+      node.updateWith(isSelected: false);
+    }
+
+    // 選択されているリンクをすべて選択解除（個別に状態更新、UIに反映）
+    for (final linkId in selectedLinkIds) {
+      final link = getLinkOrThrow(linkId) as GraphLinkImpl;
+      // 新しいupdateWithメソッドを使用
+      link.updateWith(isSelected: false);
+    }
+
+    // グラフの選択状態をクリア（一括更新を避けるためにoverrideWithを使用）
+    state.overrideWith(state.value.copyWith(
+      selectedNodeIds: const IListConst([]),
+      selectedLinkIds: const IListConst([]),
+    ));
   }
 
   @override

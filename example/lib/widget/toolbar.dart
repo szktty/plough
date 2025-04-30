@@ -50,6 +50,11 @@ class MainPageToolbar extends StatelessWidget {
                     icon: const Icon(Icons.refresh),
                     tooltip: 'Reload',
                   ),
+                  IconButton(
+                    onPressed: state.clearAllSelections,
+                    icon: const Icon(Icons.deselect),
+                    tooltip: '選択解除',
+                  ),
                 ],
               ),
             ],

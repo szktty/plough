@@ -21,4 +21,10 @@ class AppState extends ChangeNotifier {
     final current = _selectedData.name;
     selectSampleData(current);
   }
+
+  /// 選択中のエンティティをすべて選択解除する
+  void clearAllSelections() {
+    _selectedData.graph.clearSelection();
+    notifyListeners();
+  }
 }

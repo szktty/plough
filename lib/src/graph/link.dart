@@ -89,6 +89,18 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     );
   }
 
+  /// 状態を更新し、変更を通知する
+  ///
+  /// [overrideWith]と異なり、このメソッドは変更を通知するため、
+  /// UIに反映されます。選択状態の変更など、UIに反映したい変更に使用します。
+  void updateWith({
+    bool? isSelected,
+  }) {
+    setState(
+      state.value.copyWith(isSelected: isSelected ?? state.value.isSelected),
+    );
+  }
+
   @override
   GraphNodeImpl get source => state.value.source! as GraphNodeImpl;
 
