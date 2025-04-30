@@ -3,11 +3,13 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
 import 'package:signals/signals.dart';
 
+@internal
 enum GraphEntityType {
   node,
   link;
@@ -17,6 +19,7 @@ enum GraphEntityType {
   bool get isLink => this == GraphEntityType.link;
 }
 
+@internal
 abstract base class GraphStateManager<T> with Diagnosticable {
   GraphStateManager({
     required this.gestureManager,

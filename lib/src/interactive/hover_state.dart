@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/interactive/state_manager.dart';
 import 'package:plough/src/utils/logger.dart';
@@ -10,6 +11,7 @@ class _HoverState {
 }
 
 /// Manages hover state for graph entities.
+@internal
 abstract base class GraphEntityHoverStateManager<E extends GraphEntity>
     extends GraphStateManager<_HoverState> {
   GraphEntityHoverStateManager({required super.gestureManager});
@@ -70,6 +72,7 @@ abstract base class GraphEntityHoverStateManager<E extends GraphEntity>
   }
 }
 
+@internal
 final class GraphNodeHoverStateManager
     extends GraphEntityHoverStateManager<GraphNode> {
   GraphNodeHoverStateManager({required super.gestureManager});
@@ -78,6 +81,7 @@ final class GraphNodeHoverStateManager
   GraphEntityType get entityType => GraphEntityType.node;
 }
 
+@internal
 final class GraphLinkHoverStateManager
     extends GraphEntityHoverStateManager<GraphLink> {
   GraphLinkHoverStateManager({required super.gestureManager});

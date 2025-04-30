@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart'; // Import GraphNode etc.
 // Import GraphEntity
 // Import GraphId
@@ -22,6 +23,7 @@ class _DragState {
 }
 
 /// Base class for managing drag interactions for graph entities.
+@internal
 abstract base class GraphEntityDragStateManager<E extends GraphEntity>
     extends GraphStateManager<_DragState> {
   GraphEntityDragStateManager({required super.gestureManager});
@@ -154,6 +156,7 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
   }
 }
 
+@internal
 final class GraphNodeDragStateManager
     extends GraphEntityDragStateManager<GraphNode> {
   GraphNodeDragStateManager({required super.gestureManager});
@@ -161,6 +164,7 @@ final class GraphNodeDragStateManager
   GraphEntityType get entityType => GraphEntityType.node;
 }
 
+@internal
 final class GraphLinkDragStateManager
     extends GraphEntityDragStateManager<GraphLink> {
   GraphLinkDragStateManager({required super.gestureManager});

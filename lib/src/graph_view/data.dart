@@ -15,6 +15,7 @@ part 'data.freezed.dart';
 /// * Animation - Controls node movement animations with [animationEnabled] and related properties
 ///
 /// The state is immutable and changes are managed through the provider pattern.
+@internal
 @freezed
 class GraphViewData with _$GraphViewData {
   /// Creates an immutable view configuration.

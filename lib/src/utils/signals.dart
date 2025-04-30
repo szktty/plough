@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
+@internal
 mixin ListenableSignalStateMixin<T> implements Listenable {
   Signal<T> get state;
 

@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/utils/widget.dart';
 
+@internal
 class GraphTooltipContainer extends StatefulWidget {
   const GraphTooltipContainer({
     required this.entity,

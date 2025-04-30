@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/id.dart';
@@ -17,6 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:signals/signals_flutter.dart';
 
 /// Build state of the graph view.
+@internal
 enum GraphViewBuildState {
   /// Initial state, renders transparent for geometry calculation
   initialize,

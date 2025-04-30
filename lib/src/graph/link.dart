@@ -67,6 +67,7 @@ abstract class GraphLink implements GraphEntity {
   GraphLinkViewGeometry? get geometry;
 }
 
+@internal
 class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     with Diagnosticable
     implements GraphLink {

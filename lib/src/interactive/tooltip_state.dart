@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/interactive/events.dart';
 import 'package:plough/src/interactive/state_manager.dart';
@@ -32,6 +33,7 @@ class _TooltipState {
 ///   triggerMode: GraphTooltipTriggerMode.hover,
 /// );
 /// ```
+@internal
 abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
     extends GraphStateManager<_TooltipState> {
   GraphEntityTooltipStateManager({
@@ -179,6 +181,7 @@ abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
 /// ノード要素のツールチップ状態を管理します。
 ///
 /// ノード固有のツールチップの表示動作を制御します。
+@internal
 final class GraphNodeTooltipStateManager
     extends GraphEntityTooltipStateManager<GraphNode> {
   /// Creates a tooltip state manager for node elements.
@@ -196,6 +199,7 @@ final class GraphNodeTooltipStateManager
 /// リンク要素のツールチップ状態を管理します。
 ///
 /// リンク固有のツールチップの表示動作を制御します。
+@internal
 final class GraphLinkTooltipStateManager
     extends GraphEntityTooltipStateManager<GraphLink> {
   /// Creates a tooltip state manager for link elements.

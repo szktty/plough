@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/id.dart';
@@ -16,6 +17,7 @@ import 'package:plough/src/interactive/tap_state.dart';
 import 'package:plough/src/interactive/tooltip_state.dart';
 import 'package:plough/src/tooltip/behavior.dart';
 
+@internal
 class GraphGestureManager {
   GraphGestureManager({
     required this.graph,
