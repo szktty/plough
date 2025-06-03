@@ -215,6 +215,17 @@ class GraphImpl
   late final ValueNotifier<GraphData> state;
 
   final Map<GraphId, List<GraphLinkData>> _nodeDependencies = {};
+  
+  /// Notifier for layout-related changes only (excludes selection changes)
+  final ValueNotifier<int> _layoutChangeNotifier = ValueNotifier(0);
+  
+  /// Getter for layout-specific listenable
+  Listenable get layoutChangeListenable => _layoutChangeNotifier;
+  
+  /// Notify layout-related changes
+  void _notifyLayoutChange() {
+    _layoutChangeNotifier.value++;
+  }
 
   void _checkEntityExists(GraphId id) {
     if (!state.value.nodes.containsKey(id) &&
@@ -236,6 +247,7 @@ class GraphImpl
   void addNode(GraphNodeImpl node) {
     node.onAdded(this);
     setState(state.value.copyWith(nodes: state.value.nodes.add(node.id, node)));
+    _notifyLayoutChange();
   }
 
   @override
@@ -271,12 +283,14 @@ class GraphImpl
     }
     _nodeDependencies.remove(id);
     state.value = state.value.copyWith(nodes: state.value.nodes.remove(id));
+    _notifyLayoutChange();
   }
 
   @override
   void addLink(GraphLinkImpl link) {
     state.value =
         state.value.copyWith(links: state.value.links.add(link.id, link));
+    _notifyLayoutChange();
   }
 
   @override
@@ -521,6 +535,7 @@ class GraphImpl
   @override
   void markNeedsLayout() {
     state.value = state.value.copyWith(needsLayout: true);
+    _notifyLayoutChange();
   }
 
   @override

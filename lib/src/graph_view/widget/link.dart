@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:plough/src/graph/link.dart';
+import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/data.dart';
 import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/graph_view/graph_view.dart';
@@ -75,9 +76,16 @@ class _GraphLinkViewState extends State<GraphLinkView> {
       'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
     );
 
-    // Listen to both source and target node changes to update link position
+    // Listen to both source and target node position changes to update link
+    final sourceNode = link.source as GraphNodeImpl;
+    final targetNode = link.target as GraphNodeImpl;
     return AnimatedBuilder(
-      animation: Listenable.merge([link.source, link.target]),
+      animation: Listenable.merge([
+        sourceNode.positionListenable,
+        targetNode.positionListenable,
+        sourceNode.geometryState,
+        targetNode.geometryState,
+      ]),
       builder: (context, _) {
         final sourceGeometry = link.source.geometry;
         final targetGeometry = link.target.geometry;

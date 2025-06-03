@@ -76,6 +76,8 @@ class GraphNodeViewState extends State<GraphNodeView>
   Animation<Offset>? _positionAnimation;
   bool _previousIsAnimating = false;
   bool _previousIsCompleted = false;
+  Offset? _lastAnimatedToPosition; // Track the last position we animated to
+  VoidCallback? _animationListener; // Store listener for disposal
 
   GraphNodeImpl get _node => widget.node;
 
@@ -94,6 +96,9 @@ class GraphNodeViewState extends State<GraphNodeView>
     if (widget.animationEnabled) {
       _initializeAnimation();
     }
+
+    // Reset animation state on initialization
+    _node.resetAnimationState();
   }
 
   void _initializeAnimation() {
@@ -106,11 +111,17 @@ class GraphNodeViewState extends State<GraphNodeView>
 
     void updateAnimationListener() {
       if (_node.isArranged && _node.isAnimationReady) {
-        _updateAnimationPosition(begin: _node.animationStartPosition);
+        // Only animate if the position has actually changed
+        if (_node.logicalPosition != _node.animationStartPosition) {
+          _updateAnimationPosition(begin: _node.animationStartPosition);
+        }
       }
     }
 
-    _graph?.addListener(updateAnimationListener);
+    // Store listener reference for disposal
+    _animationListener = updateAnimationListener;
+    // Only listen to layout changes, not all graph changes
+    _graph?.layoutChangeListenable.addListener(_animationListener!);
   }
 
   void _configureAnimationListener() {
@@ -122,6 +133,16 @@ class GraphNodeViewState extends State<GraphNodeView>
 
       _updateAnimationState(newIsAnimating, newIsCompleted);
     });
+  }
+
+  @override
+  void didUpdateWidget(GraphNodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Reset tracked position if animation is disabled
+    if (!widget.animationEnabled && oldWidget.animationEnabled) {
+      _lastAnimatedToPosition = null;
+    }
   }
 
   void _updateAnimationState(bool newIsAnimating, bool newIsCompleted) {
@@ -145,6 +166,13 @@ class GraphNodeViewState extends State<GraphNodeView>
   void _updateAnimationPosition({
     required Offset begin,
   }) {
+    // Only start a new animation if we're moving to a different position
+    if (_lastAnimatedToPosition == _node.logicalPosition) {
+      return;
+    }
+
+    _lastAnimatedToPosition = _node.logicalPosition;
+    
     _positionAnimation = Tween<Offset>(
       begin: begin,
       end: _node.logicalPosition,
@@ -162,6 +190,10 @@ class GraphNodeViewState extends State<GraphNodeView>
 
   @override
   void dispose() {
+    // Remove animation listener
+    if (_animationListener != null) {
+      _graph?.layoutChangeListenable.removeListener(_animationListener!);
+    }
     _positionController?.dispose();
     super.dispose();
   }
@@ -194,7 +226,7 @@ class GraphNodeViewState extends State<GraphNodeView>
       valueListenable: widget.buildState,
       builder: (context, buildState, _) {
         return AnimatedBuilder(
-          animation: _node,
+          animation: (_node as GraphNodeImpl).positionListenable,
           builder: (context, _) {
             if (buildState == GraphViewBuildState.initialize) {
               return _buildInitialPosition(context);
@@ -204,7 +236,12 @@ class GraphNodeViewState extends State<GraphNodeView>
               return _buildPreArrangedPosition(context);
             }
 
-            return _buildArrangedPosition(context, graphViewData);
+            return AnimatedBuilder(
+              animation: _node.renderStateListenable,
+              builder: (context, _) {
+                return _buildArrangedPosition(context, graphViewData);
+              },
+            );
           },
         );
       },
@@ -239,7 +276,11 @@ class GraphNodeViewState extends State<GraphNodeView>
     final top = _node.logicalPosition.dy;
     final child = _buildTooltipContainer(context, graphViewData.graph, _node);
 
-    if (widget.animationEnabled && _node.isAnimating) {
+    // Only show animated position if animation is actually running
+    if (widget.animationEnabled && 
+        _node.isAnimating && 
+        _positionController != null && 
+        _positionController!.isAnimating) {
       return _buildAnimatedPosition(child);
     }
 
@@ -258,8 +299,10 @@ class GraphNodeViewState extends State<GraphNodeView>
     return AnimatedBuilder(
       animation: _positionAnimation!,
       builder: (context, _) {
-        // Update animated position directly without causing full node rebuild
-        _node.animatedPosition = _positionAnimation!.value;
+        // Defer animated position update to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _node.animatedPosition = _positionAnimation!.value;
+        });
         _updateNodeGeometryDuringAnimation();
 
         return Positioned(

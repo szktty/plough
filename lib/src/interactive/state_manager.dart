@@ -149,11 +149,8 @@ abstract base class GraphStateManager<T> with Diagnosticable {
       case GraphEntityType.node:
         final node = gestureManager.graph.getNode(entityId) as GraphNodeImpl?;
         if (node != null) {
-          // Use force update during drag to ensure immediate UI updates
-          node.setState(
-            node.state.value.copyWith(logicalPosition: position),
-            force: true,
-          );
+          // Update position directly via ValueNotifier for immediate UI updates
+          node.logicalPosition = position;
 
           // Update node geometry during drag
           // (deferred to avoid setState during build)

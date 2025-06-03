@@ -240,6 +240,8 @@ class GraphViewState extends State<GraphView> {
         constraints.biggest.center(Offset.zero);
   }
 
+  bool _isFirstLayout = true;
+
   void _performLayout({
     required BuildContext context,
     required BoxConstraints constrains,
@@ -250,7 +252,8 @@ class GraphViewState extends State<GraphView> {
         _oldLayoutStrategy == null ||
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
-      if (widget.animationEnabled) {
+      // Only enable animation for the first layout
+      if (widget.animationEnabled && _isFirstLayout) {
         _layoutStrategy.nodeAnimationStartPosition =
             _getNodeAnimationStartPosition(constrains);
       }
@@ -260,6 +263,17 @@ class GraphViewState extends State<GraphView> {
       );
       _oldLayoutStrategy = _layoutStrategy;
       _graph.onLayoutFinished();
+      _isFirstLayout = false;
+    } else {
+      // Layout not performed, ensure nodes are not stuck in animating state
+      for (final node in _graph.nodes) {
+        final nodeImpl = node as GraphNodeImpl;
+        if (nodeImpl.isAnimating && !nodeImpl.isAnimationCompleted) {
+          // Force complete any lingering animations
+          nodeImpl.isAnimating = false;
+          nodeImpl.isAnimationCompleted = true;
+        }
+      }
     }
   }
 
@@ -268,7 +282,8 @@ class GraphViewState extends State<GraphView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return AnimatedBuilder(
-          animation: Listenable.merge([_graph, _buildState]),
+          animation:
+              Listenable.merge([_graph.layoutChangeListenable, _buildState]),
           builder: (context, child) {
             late List<GraphEntity> elements;
             if (_buildState.value == GraphViewBuildState.initialize) {

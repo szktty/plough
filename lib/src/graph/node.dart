@@ -47,6 +47,12 @@ abstract interface class GraphNode implements GraphEntity {
   ///
   /// Defines how the node is visually rendered.
   GraphShape? get shape;
+
+  /// Listenable for state changes that affect rendering but not layout.
+  ///
+  /// Used to trigger UI updates when visual properties like selection state
+  /// change.
+  Listenable get renderStateListenable;
 }
 
 @internal
@@ -66,34 +72,51 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   final ValueNotifier<GraphShape?> _shape = ValueNotifier(null);
   final ValueNotifier<Offset> _animatedPosition = ValueNotifier(Offset.zero);
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
+  final ValueNotifier<bool> _isAnimating = ValueNotifier(false);
+  final ValueNotifier<bool> _isAnimationCompleted = ValueNotifier(false);
+  final ValueNotifier<Offset> _animationStartPosition =
+      ValueNotifier(Offset.zero);
+  final ValueNotifier<Offset> _logicalPosition = ValueNotifier(Offset.zero);
+  final ValueNotifier<int> _stackOrder = ValueNotifier(-1);
 
+  /// Listenable that combines position and state ValueNotifiers
+  /// Note: _animatedPosition is excluded to avoid circular dependency during
+  /// animation
+  late final Listenable positionListenable = Listenable.merge([
+    _logicalPosition,
+    state, // for isArranged and other state changes
+  ]);
+
+  /// Listenable for state changes that affect rendering but not layout
+  late final Listenable _renderStateListenable = Listenable.merge([
+    _isSelected, // for selection state changes
+  ]);
+
+  /// Public accessor for render state listenable
+  @override
+  Listenable get renderStateListenable => _renderStateListenable;
 
   /// 状態を更新し、変更を通知する
   ///
   /// UIに反映したい変更に使用します。
   void updateWith({
     double? weight,
-    int? stackOrder,
     Offset? logicalPosition,
     bool? isEnabled,
     bool? visible,
     bool? canSelect,
     bool? canDrag,
     bool? isArranged,
-    bool? isAnimating,
-    bool? isAnimationCompleted,
   }) {
     setState(
       state.value.copyWith(
         weight: weight ?? state.value.weight,
-        stackOrder: stackOrder ?? state.value.stackOrder,
         logicalPosition: logicalPosition ?? state.value.logicalPosition,
         isEnabled: isEnabled ?? state.value.isEnabled,
         visible: visible ?? state.value.visible,
         canSelect: canSelect ?? state.value.canSelect,
         canDrag: canDrag ?? state.value.canDrag,
         isArranged: isArranged ?? state.value.isArranged,
-        isAnimating: isAnimating ?? state.value.isAnimating,
       ),
     );
   }
@@ -104,20 +127,26 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   }
 
   @override
+  int get stackOrder => _stackOrder.value;
+
+  @override
   set stackOrder(int stackOrder) {
-    setState(state.value.copyWith(stackOrder: stackOrder));
+    _stackOrder.value = stackOrder;
   }
+
+  @override
+  Offset get logicalPosition => _logicalPosition.value;
 
   @override
   set logicalPosition(Offset position) {
-    setState(state.value.copyWith(logicalPosition: position));
+    _logicalPosition.value = position;
   }
 
   @override
-  Offset get animationStartPosition => state.value.animationStartPosition;
+  Offset get animationStartPosition => _animationStartPosition.value;
 
   set animationStartPosition(Offset position) {
-    setState(state.value.copyWith(animationStartPosition: position));
+    _animationStartPosition.value = position;
   }
 
   ValueNotifier<Offset> get animatedPositionState => _animatedPosition;
@@ -169,19 +198,25 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     setState(state.value.copyWith(isArranged: isArranged));
   }
 
-  bool get isAnimating => state.value.isAnimating;
+  bool get isAnimating => _isAnimating.value;
 
   set isAnimating(bool isAnimating) {
-    setState(state.value.copyWith(isAnimating: isAnimating));
+    _isAnimating.value = isAnimating;
   }
 
-  bool get isAnimationCompleted => state.value.isAnimationCompleted;
+  bool get isAnimationCompleted => _isAnimationCompleted.value;
 
   set isAnimationCompleted(bool isAnimationCompleted) {
-    setState(state.value.copyWith(isAnimationCompleted: isAnimationCompleted));
+    _isAnimationCompleted.value = isAnimationCompleted;
   }
 
   bool get isAnimationReady => !isAnimating && !isAnimationCompleted;
+
+  /// Reset animation state for a new layout
+  void resetAnimationState() {
+    _isAnimating.value = false;
+    _isAnimationCompleted.value = false;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

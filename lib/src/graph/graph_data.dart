@@ -66,8 +66,6 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
     @Default(Offset.zero) Offset logicalPosition,
 
 
-    /// The position from which the current animation started.
-    @Default(Offset.zero) Offset animationStartPosition,
     @Default(1.0) double weight,
     @Default(-1) int stackOrder,
     @Default(true) bool isEnabled,
@@ -75,8 +73,6 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
     @Default(true) bool canSelect,
     @Default(true) bool canDrag,
     @Default(false) bool isArranged,
-    @Default(false) bool isAnimating,
-    @Default(false) bool isAnimationCompleted,
   }) = _GraphNodeData;
 }
 
@@ -101,8 +97,6 @@ class GraphLinkData with _$GraphLinkData implements GraphEntityData {
     @Default(true) bool canSelect,
     @Default(true) bool canDrag,
     @Default(false) bool isArranged,
-    @Default(false) bool isAnimating,
-    @Default(false) bool isAnimationCompleted,
   }) = _GraphLinkData;
 }
 
