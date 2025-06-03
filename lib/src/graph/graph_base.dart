@@ -632,5 +632,8 @@ extension GraphInternal on GraphImpl {
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;
     }
+    
+    // Notify layout change after setting isArranged to trigger animations
+    _notifyLayoutChange();
   }
 }

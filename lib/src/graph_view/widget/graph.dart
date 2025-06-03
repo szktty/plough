@@ -240,7 +240,6 @@ class GraphViewState extends State<GraphView> {
         constraints.biggest.center(Offset.zero);
   }
 
-  bool _isFirstLayout = true;
 
   void _performLayout({
     required BuildContext context,
@@ -252,10 +251,14 @@ class GraphViewState extends State<GraphView> {
         _oldLayoutStrategy == null ||
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
-      // Only enable animation for the first layout
-      if (widget.animationEnabled && _isFirstLayout) {
+      // Enable animation for layout changes
+      if (widget.animationEnabled) {
         _layoutStrategy.nodeAnimationStartPosition =
             _getNodeAnimationStartPosition(constrains);
+        // Reset animation states for all nodes
+        for (final node in _graph.nodes) {
+          (node as GraphNodeImpl).resetAnimationState();
+        }
       }
       _layoutStrategy.performLayout(
         _graph,
@@ -263,7 +266,6 @@ class GraphViewState extends State<GraphView> {
       );
       _oldLayoutStrategy = _layoutStrategy;
       _graph.onLayoutFinished();
-      _isFirstLayout = false;
     } else {
       // Layout not performed, ensure nodes are not stuck in animating state
       for (final node in _graph.nodes) {

@@ -96,9 +96,6 @@ class GraphNodeViewState extends State<GraphNodeView>
     if (widget.animationEnabled) {
       _initializeAnimation();
     }
-
-    // Reset animation state on initialization
-    _node.resetAnimationState();
   }
 
   void _initializeAnimation() {
