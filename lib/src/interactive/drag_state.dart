@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart'; // Import GraphNode etc.
 // Import GraphEntity
 // Import GraphId
+import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/interactive/state_manager.dart';
 
 // Internal state for tracking a single dragged entity
@@ -68,6 +69,8 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
     for (final entityId in entityIds) {
       final entity = gestureManager.getEntity(entityId);
       if (entity is GraphNode && canDrag(entityId)) {
+        // Stop any ongoing animation before starting drag
+        (entity as GraphNodeImpl).isAnimating = false;
         // Use canDrag check
         setState(
           entityId,
@@ -99,6 +102,8 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
       dragState.currentLogicalPosition = newLogicalPosition;
       final entity = gestureManager.getEntity(dragState.entityId);
       if (entity is GraphNode) {
+        // Stop any ongoing animation during drag
+        (entity as GraphNodeImpl).isAnimating = false;
         setPosition(entity.id, newLogicalPosition);
         updatedIds.add(dragState.entityId);
       } else {

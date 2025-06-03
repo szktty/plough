@@ -9,7 +9,6 @@ import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/utils/signals.dart';
 import 'package:provider/provider.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A core data structure that provides the foundation for graph visualization through [GraphView].
 ///
@@ -202,10 +201,10 @@ abstract class Graph implements Listenable {
 }
 
 class GraphImpl
-    with Diagnosticable, ListenableSignalStateMixin<GraphData>
+    with Diagnosticable, ListenableValueNotifierStateMixin<GraphData>
     implements Graph {
   GraphImpl() {
-    state = signal(GraphData(id: GraphId.unique(GraphIdType.graph)));
+    state = ValueNotifier(GraphData(id: GraphId.unique(GraphIdType.graph)));
   }
 
   @internal
@@ -213,7 +212,7 @@ class GraphImpl
       Provider.of(context, listen: false);
 
   @override
-  late final Signal<GraphData> state;
+  late final ValueNotifier<GraphData> state;
 
   final Map<GraphId, List<GraphLinkData>> _nodeDependencies = {};
 
@@ -513,11 +512,13 @@ class GraphImpl
       link.updateWith(isSelected: false);
     }
 
-    // グラフの選択状態をクリア（一括更新を避けるためにoverrideWithを使用）
-    state.overrideWith(state.value.copyWith(
-      selectedNodeIds: const IListConst([]),
-      selectedLinkIds: const IListConst([]),
-    ));
+    // グラフの選択状態をクリア
+    setState(
+        state.value.copyWith(
+          selectedNodeIds: const IListConst([]),
+          selectedLinkIds: const IListConst([]),
+        ),
+        force: true);
   }
 
   @override
@@ -614,7 +615,7 @@ extension GraphInternal on GraphImpl {
   bool get needsLayout => state.value.needsLayout;
 
   void onLayoutFinished() {
-    state.overrideWith(state.value.copyWith(needsLayout: false));
+    setState(state.value.copyWith(needsLayout: false), force: true);
 
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;

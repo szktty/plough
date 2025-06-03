@@ -82,10 +82,10 @@ class GraphOrderManager {
   ///
   /// Updates when entities are reordered or synchronized with the graph.
   List<GraphEntity> get entities =>
-      _entityIds.map((id) => _getEntity(id)!).toList();
+      _entityIds.map(_getEntity).whereType<GraphEntity>().toList();
 
   GraphEntity? _getEntity(GraphId entityId) =>
-      (_getNode(entityId) ?? _getLink(entityId))!;
+      _getNode(entityId) ?? _getLink(entityId);
 
   GraphNode? _getNode(GraphId entityId) => graph.getNode(entityId);
 
@@ -100,10 +100,12 @@ class GraphOrderManager {
       _entityIds.where((id) => _getLink(id) != null).toList();
 
   /// All nodes being managed, in their current order.
-  List<GraphNode> get nodes => nodeIds.map((id) => _getNode(id)!).toList();
+  List<GraphNode> get nodes =>
+      nodeIds.map(_getNode).whereType<GraphNode>().toList();
 
   /// All links being managed, in their current order.
-  List<GraphLink> get links => linkIds.map((id) => _getLink(id)!).toList();
+  List<GraphLink> get links =>
+      linkIds.map(_getLink).whereType<GraphLink>().toList();
 
   /// Removes all entities from management.
   void clear() {
@@ -132,7 +134,11 @@ class GraphOrderManager {
 
   /// Returns a new manager containing only entities that satisfy the [predicate].
   GraphOrderManager filteredBy(bool Function(GraphEntity) predicate) {
-    return copyWith()..filter((entityId) => predicate(_getEntity(entityId)!));
+    return copyWith()
+      ..filter((entityId) {
+        final entity = _getEntity(entityId);
+        return entity != null && predicate(entity);
+      });
   }
 
   void filterByNode() {
@@ -153,10 +159,12 @@ class GraphOrderManager {
 
   /// Sorts entities using the provided [comparator] function.
   void sortBy(int Function(GraphEntity entity) comparator) {
-    _entityIds.sort(
-      (a, b) =>
-          comparator(_getEntity(a)!).compareTo(comparator(_getEntity(b)!)),
-    );
+    _entityIds.sort((a, b) {
+      final entityA = _getEntity(a);
+      final entityB = _getEntity(b);
+      if (entityA == null || entityB == null) return 0;
+      return comparator(entityA).compareTo(comparator(entityB));
+    });
   }
 
   List<GraphId> sortedBy(int Function(GraphEntity entity) comparator) {
@@ -203,7 +211,10 @@ class GraphOrderManager {
   GraphEntity? frontmostWhereOrNull(
     bool Function(GraphEntity entity) predicate,
   ) {
-    final id = _entityIds.firstWhereOrNull((id) => predicate(_getEntity(id)!));
+    final id = _entityIds.firstWhereOrNull((id) {
+      final entity = _getEntity(id);
+      return entity != null && predicate(entity);
+    });
     return id != null ? _getEntity(id) : null;
   }
 

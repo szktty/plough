@@ -3,11 +3,12 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/link.dart';
+import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
-import 'package:signals/signals.dart';
 
 @internal
 enum GraphEntityType {
@@ -29,7 +30,7 @@ abstract base class GraphStateManager<T> with Diagnosticable {
 
   GraphViewBehavior get behavior => gestureManager.viewBehavior;
 
-  final MapSignal<GraphId, T> _states = <GraphId, T>{}.toSignal();
+  final Map<GraphId, T> _states = <GraphId, T>{};
 
   GraphId? _lastActiveEntityId;
 
@@ -146,7 +147,32 @@ abstract base class GraphStateManager<T> with Diagnosticable {
   void setPosition(GraphId entityId, Offset position) {
     switch (entityType) {
       case GraphEntityType.node:
-        gestureManager.graph.getNode(entityId)!.logicalPosition = position;
+        final node = gestureManager.graph.getNode(entityId) as GraphNodeImpl?;
+        if (node != null) {
+          // Use force update during drag to ensure immediate UI updates
+          node.setState(
+            node.state.value.copyWith(logicalPosition: position),
+            force: true,
+          );
+
+          // Update node geometry during drag
+          // (deferred to avoid setState during build)
+          if (node.geometry != null) {
+            final currentGeometry = node.geometry!;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (node.geometry != null) {
+                node.geometry = GraphNodeViewGeometry(
+                  bounds: Rect.fromLTWH(
+                    position.dx,
+                    position.dy,
+                    currentGeometry.bounds.width,
+                    currentGeometry.bounds.height,
+                  ),
+                );
+              }
+            });
+          }
+        }
       case GraphEntityType.link:
         // not supported
         break;

@@ -9,7 +9,6 @@ import 'package:plough/src/graph_view/widget/graph.dart';
 import 'package:plough/src/tooltip/widget/container.dart';
 import 'package:plough/src/utils/widget.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A widget that renders a node in the graph.
 ///
@@ -55,7 +54,7 @@ final class GraphNodeView extends StatefulWidget with Diagnosticable {
   final bool showTooltip;
 
   /// Current build state of the graph view.
-  final Signal<GraphViewBuildState> buildState;
+  final ValueNotifier<GraphViewBuildState> buildState;
 
   @override
   State<GraphNodeView> createState() => GraphNodeViewState();
@@ -105,12 +104,13 @@ class GraphNodeViewState extends State<GraphNodeView>
 
     _configureAnimationListener();
 
-    effect(() {
-      final _ = _graph?.id;
+    void updateAnimationListener() {
       if (_node.isArranged && _node.isAnimationReady) {
         _updateAnimationPosition(begin: _node.animationStartPosition);
       }
-    });
+    }
+
+    _graph?.addListener(updateAnimationListener);
   }
 
   void _configureAnimationListener() {
@@ -194,19 +194,25 @@ class GraphNodeViewState extends State<GraphNodeView>
   @override
   Widget build(BuildContext context) {
     final graphViewData = GraphViewData.of(context);
-    return Watch((context) {
-      final buildState = GraphViewBuildState.of(context);
+    return ValueListenableBuilder<GraphViewBuildState>(
+      valueListenable: widget.buildState,
+      builder: (context, buildState, _) {
+        return AnimatedBuilder(
+          animation: _node,
+          builder: (context, _) {
+            if (buildState == GraphViewBuildState.initialize) {
+              return _buildInitialPosition(context);
+            }
 
-      if (buildState == GraphViewBuildState.initialize) {
-        return _buildInitialPosition(context);
-      }
+            if (!_node.isArranged) {
+              return _buildPreArrangedPosition(context);
+            }
 
-      if (!_node.isArranged) {
-        return _buildPreArrangedPosition(context);
-      }
-
-      return _buildArrangedPosition(context, graphViewData);
-    });
+            return _buildArrangedPosition(context, graphViewData);
+          },
+        );
+      },
+    );
   }
 
   Widget _buildInitialPosition(BuildContext context) {
@@ -256,6 +262,7 @@ class GraphNodeViewState extends State<GraphNodeView>
     return AnimatedBuilder(
       animation: _positionAnimation!,
       builder: (context, _) {
+        // Update animated position directly without causing full node rebuild
         _node.animatedPosition = _positionAnimation!.value;
         _updateNodeGeometryDuringAnimation();
 
@@ -275,14 +282,19 @@ class GraphNodeViewState extends State<GraphNodeView>
         _updateGeometry();
       });
     } else {
-      _node.geometry = GraphNodeViewGeometry(
-        bounds: Rect.fromLTWH(
-          _node.animatedPosition.dx,
-          _node.animatedPosition.dy,
-          _node.geometry!.bounds.width,
-          _node.geometry!.bounds.height,
-        ),
-      );
+      // Defer geometry update to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_node.geometry != null) {
+          _node.geometry = GraphNodeViewGeometry(
+            bounds: Rect.fromLTWH(
+              _node.animatedPosition.dx,
+              _node.animatedPosition.dy,
+              _node.geometry!.bounds.width,
+              _node.geometry!.bounds.height,
+            ),
+          );
+        }
+      });
     }
   }
 

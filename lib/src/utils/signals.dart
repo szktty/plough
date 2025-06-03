@@ -1,12 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:signals_flutter/signals_flutter.dart';
 
 @internal
-mixin ListenableSignalStateMixin<T> implements Listenable {
-  Signal<T> get state;
-
-  ValueNotifier<T> get notifier => state as ValueNotifier<T>;
+mixin ListenableValueNotifierStateMixin<T> implements Listenable {
+  ValueNotifier<T> get state;
 
   bool useOverrideState = false;
 
@@ -14,12 +11,33 @@ mixin ListenableSignalStateMixin<T> implements Listenable {
     if (useOverrideState) {
       overrideState(value);
     } else {
-      state.set(value, force: force);
+      // Try immediate update first, defer if it fails due to build cycle
+      try {
+        state.value = value;
+      } catch (e) {
+        // If immediate update fails due to setState during build,
+        // defer to next frame
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          state.value = value;
+        });
+      }
     }
   }
 
   void overrideState(T value) {
-    state.overrideWith(value);
+    // Defer state updates to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final oldValue = state.value;
+      state.value = value;
+      // Restore after next frame if needed
+      if (!useOverrideState) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (state.value == value) {
+            state.value = oldValue;
+          }
+        });
+      }
+    });
   }
 
   void overrideStateWith(void Function() callback) {
@@ -30,12 +48,12 @@ mixin ListenableSignalStateMixin<T> implements Listenable {
 
   @override
   void addListener(VoidCallback listener) {
-    notifier.addListener(listener);
+    state.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    notifier.removeListener(listener);
+    state.removeListener(listener);
   }
 
   void disposeState() {

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/utils/signals.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// The fundamental interface defining a graph entity within the visualization system.
 ///
@@ -126,11 +125,11 @@ abstract class GraphEntity {
 }
 
 abstract class GraphEntityImpl<T extends GraphEntityData>
-    with ListenableSignalStateMixin<T>
+    with ListenableValueNotifierStateMixin<T>
     implements GraphEntity {
   @protected
   GraphEntityImpl(T value) {
-    state = signal(value);
+    state = ValueNotifier(value);
   }
 
   @override
@@ -138,7 +137,7 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
 
   Graph? _graph;
 
-  final MapSignal<String, Object> _map = mapSignal({});
+  final Map<String, Object> _map = <String, Object>{};
 
   void onAdded(Graph graph) {
     if (_graph != null) {
@@ -148,7 +147,7 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
   }
 
   @override
-  late final Signal<T> state;
+  late final ValueNotifier<T> state;
 
   @override
   GraphId get id => state.value.id;
@@ -178,11 +177,12 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
   bool get canDrag => state.value.canDrag;
 
   @override
-  Map<String, Object> get properties => _map.value;
+  Map<String, Object> get properties => _map;
 
   @override
   set properties(Map<String, Object> values) {
-    _map.value = values;
+    _map.clear();
+    _map.addAll(values);
   }
 
   @override

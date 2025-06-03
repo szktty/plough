@@ -156,9 +156,17 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
 
         // 新しい位置の計算と境界チェック
         var newPosition = node.logicalPosition + force;
+
+        // Ensure clamp bounds are valid (min <= max)
+        final minX = padding.left;
+        final maxX = (size.width - padding.right).clamp(minX, double.infinity);
+        final minY = padding.top;
+        final maxY =
+            (size.height - padding.bottom).clamp(minY, double.infinity);
+
         newPosition = Offset(
-          newPosition.dx.clamp(padding.left, size.width - padding.right),
-          newPosition.dy.clamp(padding.top, size.height - padding.bottom),
+          newPosition.dx.clamp(minX, maxX),
+          newPosition.dy.clamp(minY, maxY),
         );
 
         totalDisplacement += (newPosition - node.logicalPosition).distance;

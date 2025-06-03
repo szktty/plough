@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/widget/shape.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A builder function type for customizing node rendering.
 ///
@@ -75,84 +74,82 @@ class _GraphDefaultNodeRendererState extends State<GraphDefaultNodeRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    return Watch((context) {
-      final style = widget.style;
-      final node = widget.node;
-      final geometry = (node as GraphNodeImpl).geometry;
-      final radius =
-          style.radius ?? (geometry != null ? geometry.bounds.width / 2 : 0);
-      final child = widget.builder != null
-          ? widget.builder!(context, node.graph!, node, widget.child)
-          : widget.child;
-      switch (style.shape) {
-        case GraphDefaultNodeRendererShape.circle:
-          return IntrinsicWidth(
-            child: AspectRatio(
-              aspectRatio: 1,
+    final style = widget.style;
+    final node = widget.node;
+    final geometry = (node as GraphNodeImpl).geometry;
+    final radius =
+        style.radius ?? (geometry != null ? geometry.bounds.width / 2 : 0);
+    final child = widget.builder != null
+        ? widget.builder!(context, node.graph!, node, widget.child)
+        : widget.child;
+    switch (style.shape) {
+      case GraphDefaultNodeRendererShape.circle:
+        return IntrinsicWidth(
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: node.isSelected
+                      ? style.selectedBorderColor
+                      : Colors.transparent,
+                  width: style.selectedBorderWidth,
+                ),
+              ),
               child: Container(
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
+                  color: style.color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: node.isSelected
-                        ? style.selectedBorderColor
-                        : Colors.transparent,
-                    width: style.selectedBorderWidth,
+                    color: style.borderColor,
+                    width: style.borderWidth,
                   ),
                 ),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: style.color,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: style.borderColor,
-                      width: style.borderWidth,
-                    ),
-                  ),
-                  width: style.width,
-                  height: style.height,
-                  child: GraphCircleNodeView(
-                    node: node,
-                    radius: radius,
-                    child: child,
-                  ),
+                width: style.width,
+                height: style.height,
+                child: GraphCircleNodeView(
+                  node: node,
+                  radius: radius,
+                  child: child,
                 ),
               ),
             ),
-          );
-        case GraphDefaultNodeRendererShape.rectangle:
-          return Container(
-            constraints: BoxConstraints(
-              minWidth: style.minWidth,
-              minHeight: style.minHeight,
+          ),
+        );
+      case GraphDefaultNodeRendererShape.rectangle:
+        return Container(
+          constraints: BoxConstraints(
+            minWidth: style.minWidth,
+            minHeight: style.minHeight,
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: node.isSelected
+                  ? style.selectedBorderColor
+                  : Colors.transparent,
+              width: style.selectedBorderWidth,
             ),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
+              color: style.color,
               border: Border.all(
-                color: node.isSelected
-                    ? style.selectedBorderColor
-                    : Colors.transparent,
-                width: style.selectedBorderWidth,
+                color: style.borderColor,
+                width: style.borderWidth,
               ),
             ),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: style.color,
-                border: Border.all(
-                  color: style.borderColor,
-                  width: style.borderWidth,
-                ),
-              ),
-              width: style.width,
-              height: style.height,
-              child: GraphRectangleNodeView(
-                key: _rectangleKey,
-                node: node,
-                child: child,
-              ),
+            width: style.width,
+            height: style.height,
+            child: GraphRectangleNodeView(
+              key: _rectangleKey,
+              node: node,
+              child: child,
             ),
-          );
-      }
-    });
+          ),
+        );
+    }
   }
 }

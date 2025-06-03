@@ -15,7 +15,6 @@ import 'package:plough/src/layout_strategy/base.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget.dart';
 import 'package:provider/provider.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// Build state of the graph view.
 @internal
@@ -130,12 +129,13 @@ class GraphView extends StatefulWidget {
 /// See also:
 /// * [GraphView], the stateful widget using this state
 /// * [GraphViewData], which holds view-specific data
-class GraphViewState extends State<GraphView> with SignalsMixin {
+class GraphViewState extends State<GraphView> {
   late GraphViewData _data;
 
   GraphImpl get _graph => widget.graph as GraphImpl;
 
-  final _buildState = signal(GraphViewBuildState.initialize);
+  final ValueNotifier<GraphViewBuildState> _buildState =
+      ValueNotifier(GraphViewBuildState.initialize);
 
   GraphLayoutStrategy get _layoutStrategy => widget.layoutStrategy;
   GraphLayoutStrategy? _oldLayoutStrategy;
@@ -145,12 +145,12 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
   late GraphNodeViewBehavior _nodeViewBehavior;
   late GraphLinkViewBehavior _linkViewBehavior;
 
-  final _layoutKey = GlobalKey();
+  final GlobalKey _layoutKey = GlobalKey();
 
   final Map<GraphId, GlobalKey> _nodeKeys = {};
   final Map<GraphId, Widget> _nodeViews = {};
 
-  // TODO: Not used
+  // TODO(user): Not used
   final Map<GraphId, GlobalKey> _linkKeys = {};
 
   GraphId? _entityIdShowingTooltip;
@@ -159,6 +159,12 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
   void initState() {
     super.initState();
     _initBehavior();
+  }
+
+  @override
+  void dispose() {
+    _buildState.dispose();
+    super.dispose();
   }
 
   void _initBehavior() {
@@ -261,79 +267,82 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Watch((context) {
-          late List<GraphEntity> elements;
-          if (_buildState.value == GraphViewBuildState.initialize) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                _updateGraphGeometry();
-                _updateNodeGeometry();
-                _buildState.value = GraphViewBuildState.performLayout;
+        return AnimatedBuilder(
+          animation: Listenable.merge([_graph, _buildState]),
+          builder: (context, child) {
+            late List<GraphEntity> elements;
+            if (_buildState.value == GraphViewBuildState.initialize) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _updateGraphGeometry();
+                  _updateNodeGeometry();
+                  _buildState.value = GraphViewBuildState.performLayout;
+                });
               });
-            });
-            elements = [..._graph.nodes];
-          } else if (_buildState.value == GraphViewBuildState.performLayout) {
-            _performLayout(context: context, constrains: constraints);
-            elements = [..._graph.nodes];
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                _updateGraphGeometry();
-                _buildState.value = GraphViewBuildState.ready;
+              elements = [..._graph.nodes];
+            } else if (_buildState.value == GraphViewBuildState.performLayout) {
+              _performLayout(context: context, constrains: constraints);
+              elements = [..._graph.nodes];
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  _updateGraphGeometry();
+                  _buildState.value = GraphViewBuildState.ready;
+                });
               });
-            });
-          } else {
-            elements = [..._graph.nodes, ..._graph.links];
-          }
+            } else {
+              elements = [..._graph.nodes, ..._graph.links];
+            }
 
-          elements.sort((a, b) => a.stackOrder.compareTo(b.stackOrder));
+            elements.sort((a, b) => a.stackOrder.compareTo(b.stackOrder));
 
-          return KeyedSubtree(
-            key: ValueKey(_graph.hashCode),
-            child: _buildCommonProviders(
-              context,
-              constrains: constraints,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Stack(
-                      key: _layoutKey,
-                      children: elements.map((e) {
-                        if (e is GraphNodeImpl) {
-                          return _buildNodeView(context, constraints, e);
-                        } else if (e is GraphLinkImpl) {
-                          return _buildLinkView(context, e);
-                        } else {
-                          throw StateError('Unknown element: $e');
-                        }
-                      }).toList(),
+            return KeyedSubtree(
+              key: ValueKey(_graph.hashCode),
+              child: _buildCommonProviders(
+                context,
+                constrains: constraints,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Stack(
+                        key: _layoutKey,
+                        children: elements.map((e) {
+                          if (e is GraphNodeImpl) {
+                            return _buildNodeView(context, constraints, e);
+                          } else if (e is GraphLinkImpl) {
+                            return _buildLinkView(context, e);
+                          } else {
+                            throw StateError('Unknown element: $e');
+                          }
+                        }).toList(),
+                      ),
                     ),
-                  ),
-                  Positioned.fill(
-                    child: GraphInteractiveOverlay(
-                      graph: _graph,
-                      behavior: widget.behavior,
-                      viewportSize: constraints.biggest,
-                      nodeTooltipTriggerMode:
-                          _nodeViewBehavior.tooltipBehavior?.triggerMode,
-                      linkTooltipTriggerMode:
-                          _linkViewBehavior.tooltipBehavior?.triggerMode,
-                      onTooltipShow: (entity) {
-                        setState(() {
-                          _entityIdShowingTooltip = entity.id;
-                        });
-                      },
-                      onTooltipHide: (entity) {
-                        setState(() {
-                          _entityIdShowingTooltip = null;
-                        });
-                      },
+                    Positioned.fill(
+                      child: GraphInteractiveOverlay(
+                        graph: _graph,
+                        behavior: widget.behavior,
+                        viewportSize: constraints.biggest,
+                        nodeTooltipTriggerMode:
+                            _nodeViewBehavior.tooltipBehavior?.triggerMode,
+                        linkTooltipTriggerMode:
+                            _linkViewBehavior.tooltipBehavior?.triggerMode,
+                        onTooltipShow: (entity) {
+                          setState(() {
+                            _entityIdShowingTooltip = entity.id;
+                          });
+                        },
+                        onTooltipHide: (entity) {
+                          setState(() {
+                            _entityIdShowingTooltip = null;
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }

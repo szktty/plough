@@ -5,7 +5,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/graph_view/widget/graph.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget.dart';
-import 'package:signals/signals_flutter.dart';
 
 // ignore_for_file: library_private_types_in_public_api
 // ignore_for_file: cascade_invocations
@@ -55,8 +54,7 @@ class GraphPositionPlotter extends StatefulWidget {
   State createState() => _GraphPositionPlotterState();
 }
 
-class _GraphPositionPlotterState extends State<GraphPositionPlotter>
-    with SignalsMixin {
+class _GraphPositionPlotterState extends State<GraphPositionPlotter> {
   final GlobalKey _childKey = GlobalKey();
   Rect _geometry = Rect.zero;
   Timer? _timer;

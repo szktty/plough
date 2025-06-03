@@ -1,7 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:signals/signals.dart';
 
 /// Singleton class that manages the global settings of the Plough library.
 final class Plough {
@@ -55,6 +54,6 @@ final class Plough {
 
   set debugSignalsEnabled(bool enabled) {
     _debugSignalsEnabled = enabled;
-    signalsDevToolsEnabled = enabled;
+    // Note: signalsDevToolsEnabled is no longer available since we removed signals
   }
 }

@@ -7,7 +7,6 @@ import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/graph_view/graph_view.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A widget that renders connections between graph nodes.
 ///
@@ -72,12 +71,14 @@ class _GraphLinkViewState extends State<GraphLinkView> {
     log.d('GraphLinkView: ${link.id}: build');
     final graphViewData = GraphViewData.of(context);
     final graphViewBehavior = graphViewData.behavior;
-    return Watch(
-      (context) {
-        log.d(
-          'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
-        );
+    log.d(
+      'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
+    );
 
+    // Listen to both source and target node changes to update link position
+    return AnimatedBuilder(
+      animation: Listenable.merge([link.source, link.target]),
+      builder: (context, _) {
         final sourceGeometry = link.source.geometry;
         final targetGeometry = link.target.geometry;
 
@@ -155,7 +156,8 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           thickness: thickness,
           angle: angle,
         );
-        link.overrideStateWith(() {
+        // Defer geometry update to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           link.geometry = viewGeometry;
         });
 
@@ -193,7 +195,8 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           angle: 0,
         );
 
-        link.overrideStateWith(() {
+        // Defer geometry update to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           link.geometry = viewGeometry;
         });
 
