@@ -32,7 +32,6 @@ abstract interface class GraphEntityData {
 
   bool get canSelect;
 
-  bool get isSelected;
 
   bool get canDrag;
 }
@@ -66,10 +65,6 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
     required GraphId id,
     @Default(Offset.zero) Offset logicalPosition,
 
-    /// The current animated position during transitions.
-    ///
-    /// Used to smoothly animate the node between positions when layout changes.
-    @Default(Offset.zero) Offset animatedPosition,
 
     /// The position from which the current animation started.
     @Default(Offset.zero) Offset animationStartPosition,
@@ -79,7 +74,6 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
     @Default(true) bool visible,
     @Default(true) bool canSelect,
     @Default(true) bool canDrag,
-    @Default(false) bool isSelected,
     @Default(false) bool isArranged,
     @Default(false) bool isAnimating,
     @Default(false) bool isAnimationCompleted,
@@ -106,7 +100,6 @@ class GraphLinkData with _$GraphLinkData implements GraphEntityData {
     @Default(true) bool visible,
     @Default(true) bool canSelect,
     @Default(true) bool canDrag,
-    @Default(false) bool isSelected,
     @Default(false) bool isArranged,
     @Default(false) bool isAnimating,
     @Default(false) bool isAnimationCompleted,

@@ -79,27 +79,15 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
       Provider.of(context, listen: false);
 
   final ValueNotifier<GraphLinkViewGeometry?> _geometry = ValueNotifier(null);
+  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
 
-  @internal
-  void overrideWith({
-    bool? isSelected,
-  }) {
-    setState(
-      state.value.copyWith(isSelected: isSelected ?? state.value.isSelected),
-      force: true,
-    );
-  }
 
   /// 状態を更新し、変更を通知する
   ///
-  /// [overrideWith]と異なり、このメソッドは変更を通知するため、
-  /// UIに反映されます。選択状態の変更など、UIに反映したい変更に使用します。
-  void updateWith({
-    bool? isSelected,
-  }) {
-    setState(
-      state.value.copyWith(isSelected: isSelected ?? state.value.isSelected),
-    );
+  /// UIに反映したい変更に使用します。
+  void updateWith() {
+    // No properties need batch notification
+    // keeping method for consistency with base pattern
   }
 
   @override
@@ -163,6 +151,15 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   @override
   set canDrag(bool canDrag) {
     setState(state.value.copyWith(canDrag: canDrag));
+  }
+
+  ValueNotifier<bool> get isSelectedState => _isSelected;
+
+  @override
+  bool get isSelected => _isSelected.value;
+
+  set isSelected(bool isSelected) {
+    _isSelected.value = isSelected;
   }
 
   @override

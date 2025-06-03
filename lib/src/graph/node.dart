@@ -65,45 +65,12 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
       _connectionGeometries = {};
   final ValueNotifier<GraphShape?> _shape = ValueNotifier(null);
   final ValueNotifier<Offset> _animatedPosition = ValueNotifier(Offset.zero);
+  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
 
-  @internal
-  void overrideWith({
-    double? weight,
-    int? stackOrder,
-    Offset? logicalPosition,
-    Offset? animationStartPosition,
-    bool? isEnabled,
-    bool? visible,
-    bool? canSelect,
-    bool? canDrag,
-    bool? isSelected,
-    bool? isArranged,
-    bool? isAnimating,
-    bool? isAnimationCompleted,
-  }) {
-    setState(
-      state.value.copyWith(
-        weight: weight ?? state.value.weight,
-        stackOrder: stackOrder ?? state.value.stackOrder,
-        logicalPosition: logicalPosition ?? state.value.logicalPosition,
-        animationStartPosition:
-            animationStartPosition ?? state.value.animationStartPosition,
-        isEnabled: isEnabled ?? state.value.isEnabled,
-        visible: visible ?? state.value.visible,
-        canSelect: canSelect ?? state.value.canSelect,
-        canDrag: canDrag ?? state.value.canDrag,
-        isSelected: isSelected ?? state.value.isSelected,
-        isArranged: isArranged ?? state.value.isArranged,
-        isAnimating: isAnimating ?? state.value.isAnimating,
-      ),
-      force: true,
-    );
-  }
 
   /// 状態を更新し、変更を通知する
   ///
-  /// [overrideWith]と異なり、このメソッドは変更を通知するため、
-  /// UIに反映されます。選択状態の変更など、UIに反映したい変更に使用します。
+  /// UIに反映したい変更に使用します。
   void updateWith({
     double? weight,
     int? stackOrder,
@@ -112,7 +79,6 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     bool? visible,
     bool? canSelect,
     bool? canDrag,
-    bool? isSelected,
     bool? isArranged,
     bool? isAnimating,
     bool? isAnimationCompleted,
@@ -126,7 +92,6 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
         visible: visible ?? state.value.visible,
         canSelect: canSelect ?? state.value.canSelect,
         canDrag: canDrag ?? state.value.canDrag,
-        isSelected: isSelected ?? state.value.isSelected,
         isArranged: isArranged ?? state.value.isArranged,
         isAnimating: isAnimating ?? state.value.isAnimating,
       ),
@@ -189,8 +154,13 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     setState(state.value.copyWith(canDrag: canDrag));
   }
 
+  ValueNotifier<bool> get isSelectedState => _isSelected;
+
+  @override
+  bool get isSelected => _isSelected.value;
+
   set isSelected(bool isSelected) {
-    setState(state.value.copyWith(isSelected: isSelected));
+    _isSelected.value = isSelected;
   }
 
   bool get isArranged => state.value.isArranged;

@@ -115,16 +115,12 @@ class GraphNodeViewState extends State<GraphNodeView>
 
   void _configureAnimationListener() {
     _positionController!.addStatusListener((status) {
-      _node.useOverrideState = true;
-
       final newIsAnimating = status == AnimationStatus.forward ||
           status == AnimationStatus.reverse;
       final newIsCompleted = status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed;
 
       _updateAnimationState(newIsAnimating, newIsCompleted);
-
-      _node.useOverrideState = false;
     });
   }
 

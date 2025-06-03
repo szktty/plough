@@ -385,20 +385,19 @@ class GraphImpl
 
       for (final currentId in currentSelectedNodes) {
         if (currentId != id) {
-          (getNodeOrThrow(currentId) as GraphNodeImpl)
-              .overrideWith(isSelected: false);
+          (getNodeOrThrow(currentId) as GraphNodeImpl).isSelected = false;
           hasChanged = true;
         }
       }
 
-      node.overrideWith(isSelected: true);
+      node.isSelected = true;
       hasChanged = true;
 
       if (hasChanged) {
         state.value = state.value.copyWith(selectedNodeIds: updatedNodeIds);
       }
     } else {
-      node.overrideWith(isSelected: true);
+      node.isSelected = true;
       state.value = state.value.copyWith(
         selectedNodeIds: state.value.selectedNodeIds.add(node.id),
       );
@@ -409,7 +408,7 @@ class GraphImpl
   void deselectNode(GraphId id) {
     final node = getNodeOrThrow(id) as GraphNodeImpl;
 
-    node.overrideWith(isSelected: false);
+    node.isSelected = false;
 
     if (!state.value.allowMultiSelection) {
       state.value = state.value.copyWith(selectedNodeIds: const IListConst([]));
@@ -448,19 +447,19 @@ class GraphImpl
       for (final currentId in currentSelectedLinks) {
         if (currentId != id) {
           final otherLink = getLinkOrThrow(currentId) as GraphLinkImpl;
-          otherLink.overrideWith(isSelected: false);
+          otherLink.isSelected = false;
           hasChanged = true;
         }
       }
 
-      link.overrideWith(isSelected: true);
+      link.isSelected = true;
       hasChanged = true;
 
       if (hasChanged) {
         state.value = state.value.copyWith(selectedLinkIds: updatedLinkIds);
       }
     } else {
-      link.overrideWith(isSelected: true);
+      link.isSelected = true;
       state.value = state.value.copyWith(
         selectedLinkIds: state.value.selectedLinkIds.add(link.id),
       );
@@ -471,7 +470,7 @@ class GraphImpl
   void deselectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
 
-    link.overrideWith(isSelected: false);
+    link.isSelected = false;
 
     if (!state.value.allowMultiSelection) {
       state.value = state.value.copyWith(selectedLinkIds: const IListConst([]));
@@ -501,15 +500,13 @@ class GraphImpl
     // 選択されているノードをすべて選択解除（個別に状態更新、UIに反映）
     for (final nodeId in selectedNodeIds) {
       final node = getNodeOrThrow(nodeId) as GraphNodeImpl;
-      // 新しいupdateWithメソッドを使用
-      node.updateWith(isSelected: false);
+      node.isSelected = false;
     }
 
     // 選択されているリンクをすべて選択解除（個別に状態更新、UIに反映）
     for (final linkId in selectedLinkIds) {
       final link = getLinkOrThrow(linkId) as GraphLinkImpl;
-      // 新しいupdateWithメソッドを使用
-      link.updateWith(isSelected: false);
+      link.isSelected = false;
     }
 
     // グラフの選択状態をクリア

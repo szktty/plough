@@ -160,7 +160,7 @@ abstract base class GraphLayoutStrategy {
     }
 
     for (final node in graph.nodes.cast<GraphNodeImpl>()) {
-      node.overrideWith(animationStartPosition: _nodeAnimationStartPosition);
+      node.animationStartPosition = _nodeAnimationStartPosition;
     }
   }
 
@@ -173,7 +173,7 @@ abstract base class GraphLayoutStrategy {
     }
 
     final impl = node as GraphNodeImpl;
-    impl.overrideWith(logicalPosition: position);
+    impl.logicalPosition = position;
   }
 }
 
