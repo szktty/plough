@@ -20,7 +20,10 @@ GraphId _$GraphIdFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$GraphId {
+  /// The category of graph element this ID represents (graph, node, or link).
   GraphIdType get type => throw _privateConstructorUsedError;
+
+  /// The unique identifier string in UUIDv7 format.
   String get value => throw _privateConstructorUsedError;
 
   /// Serializes this GraphId to a JSON map.
@@ -118,8 +121,11 @@ class _$GraphIdImpl extends _GraphId {
   factory _$GraphIdImpl.fromJson(Map<String, dynamic> json) =>
       _$$GraphIdImplFromJson(json);
 
+  /// The category of graph element this ID represents (graph, node, or link).
   @override
   final GraphIdType type;
+
+  /// The unique identifier string in UUIDv7 format.
   @override
   final String value;
 
@@ -160,8 +166,11 @@ abstract class _GraphId extends GraphId {
 
   factory _GraphId.fromJson(Map<String, dynamic> json) = _$GraphIdImpl.fromJson;
 
+  /// The category of graph element this ID represents (graph, node, or link).
   @override
   GraphIdType get type;
+
+  /// The unique identifier string in UUIDv7 format.
   @override
   String get value;
 
