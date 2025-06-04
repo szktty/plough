@@ -8,6 +8,7 @@ import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/behavior.dart';
 import 'package:plough/src/graph_view/data.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/graph_view/hit_test.dart';
 import 'package:plough/src/graph_view/widget/link.dart';
 import 'package:plough/src/graph_view/widget/node.dart';
 import 'package:plough/src/interactive/widget/interactive_overlay.dart';
@@ -84,6 +85,12 @@ class GraphView extends StatefulWidget {
     this.nodeAnimationStartPosition,
     this.nodeAnimationDuration = const Duration(milliseconds: 500),
     this.nodeAnimationCurve = Curves.easeOutQuint,
+    this.gestureMode = GraphGestureMode.exclusive,
+    this.shouldConsumeGesture,
+    this.onBackgroundTapped,
+    this.onBackgroundPanStart,
+    this.onBackgroundPanUpdate,
+    this.onBackgroundPanEnd,
     super.key,
   });
 
@@ -113,6 +120,34 @@ class GraphView extends StatefulWidget {
 
   /// Easing curve for node movement animations.
   final Curve nodeAnimationCurve;
+
+  /// How gestures should be handled by the graph view.
+  ///
+  /// - [GraphGestureMode.exclusive]: Consume all gestures (default)
+  /// - [GraphGestureMode.nodeEdgeOnly]: Only consume gestures on nodes/edges
+  /// - [GraphGestureMode.transparent]: Pass all gestures to parent
+  /// - [GraphGestureMode.custom]: Use [shouldConsumeGesture] callback
+  final GraphGestureMode gestureMode;
+
+  /// Custom callback for determining gesture consumption.
+  ///
+  /// Only used when [gestureMode] is [GraphGestureMode.custom].
+  /// Return `true` to consume the gesture, `false` to pass it through.
+  final GraphGestureConsumptionCallback? shouldConsumeGesture;
+
+  /// Callback for background tap gestures.
+  ///
+  /// Only called when the gesture is not consumed by graph elements.
+  final GraphBackgroundGestureCallback? onBackgroundTapped;
+
+  /// Callback for background pan start gestures.
+  final GraphBackgroundGestureCallback? onBackgroundPanStart;
+
+  /// Callback for background pan update gestures.
+  final GraphBackgroundPanCallback? onBackgroundPanUpdate;
+
+  /// Callback for background pan end gestures.
+  final GraphBackgroundGestureCallback? onBackgroundPanEnd;
 
   @override
   State<GraphView> createState() => GraphViewState();
@@ -342,6 +377,12 @@ class GraphViewState extends State<GraphView> {
                             _nodeViewBehavior.tooltipBehavior?.triggerMode,
                         linkTooltipTriggerMode:
                             _linkViewBehavior.tooltipBehavior?.triggerMode,
+                        gestureMode: widget.gestureMode,
+                        shouldConsumeGesture: widget.shouldConsumeGesture,
+                        onBackgroundTapped: widget.onBackgroundTapped,
+                        onBackgroundPanStart: widget.onBackgroundPanStart,
+                        onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
+                        onBackgroundPanEnd: widget.onBackgroundPanEnd,
                         onTooltipShow: (entity) {
                           setState(() {
                             _entityIdShowingTooltip = entity.id;

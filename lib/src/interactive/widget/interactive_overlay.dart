@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
+import 'package:plough/src/graph_view/hit_test.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
 
 /// グラフのインタラクティブな操作を受け付けるオーバーレイウィジェットです。
@@ -29,6 +30,12 @@ class GraphInteractiveOverlay extends StatefulWidget {
     required this.viewportSize,
     this.nodeTooltipTriggerMode,
     this.linkTooltipTriggerMode,
+    this.gestureMode = GraphGestureMode.exclusive,
+    this.shouldConsumeGesture,
+    this.onBackgroundTapped,
+    this.onBackgroundPanStart,
+    this.onBackgroundPanUpdate,
+    this.onBackgroundPanEnd,
     this.onTooltipShow,
     this.onTooltipHide,
     super.key,
@@ -39,6 +46,12 @@ class GraphInteractiveOverlay extends StatefulWidget {
   final Size viewportSize;
   final GraphTooltipTriggerMode? nodeTooltipTriggerMode;
   final GraphTooltipTriggerMode? linkTooltipTriggerMode;
+  final GraphGestureMode gestureMode;
+  final GraphGestureConsumptionCallback? shouldConsumeGesture;
+  final GraphBackgroundGestureCallback? onBackgroundTapped;
+  final GraphBackgroundGestureCallback? onBackgroundPanStart;
+  final GraphBackgroundPanCallback? onBackgroundPanUpdate;
+  final GraphBackgroundGestureCallback? onBackgroundPanEnd;
   final void Function(GraphEntity)? onTooltipShow;
   final void Function(GraphEntity)? onTooltipHide;
 
@@ -59,6 +72,12 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       viewportSize: widget.viewportSize,
       nodeTooltipTriggerMode: widget.nodeTooltipTriggerMode,
       linkTooltipTriggerMode: widget.linkTooltipTriggerMode,
+      gestureMode: widget.gestureMode,
+      shouldConsumeGesture: widget.shouldConsumeGesture,
+      onBackgroundTapped: widget.onBackgroundTapped,
+      onBackgroundPanStart: widget.onBackgroundPanStart,
+      onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
+      onBackgroundPanEnd: widget.onBackgroundPanEnd,
       onTooltipShow: widget.onTooltipShow,
       onTooltipHide: widget.onTooltipHide,
     );
@@ -76,37 +95,104 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     _gestureManager.handlePointerMove(event);
   }
 
-  void _handlePanStart(DragStartDetails details) {
-    _gestureManager.handlePanStart(details);
-  }
-
-  void _handlePanUpdate(DragUpdateDetails details) {
-    _gestureManager.handlePanUpdate(details);
-  }
-
-  void _handlePanEnd(DragEndDetails details) {
-    _gestureManager.handlePanEnd(details);
-  }
-
   void _handleMouseHover(PointerHoverEvent event) {
     _gestureManager.handleMouseHover(event);
   }
 
   @override
   Widget build(BuildContext context) {
+    // In transparent mode, don't capture any gestures
+    if (widget.gestureMode == GraphGestureMode.transparent) {
+      return const IgnorePointer(
+        child: SizedBox(child: ColoredBox(color: Colors.transparent)),
+      );
+    }
+
+    // For other modes, use RawGestureDetector for more control
     return MouseRegion(
       onHover: _handleMouseHover,
       child: Listener(
         onPointerUp: _handlePointerUp,
         onPointerDown: _handlePointerDown,
         onPointerMove: _handlePointerMove,
-        child: GestureDetector(
-          onPanStart: _handlePanStart,
-          onPanUpdate: _handlePanUpdate,
-          onPanEnd: _handlePanEnd,
+        child: RawGestureDetector(
+          gestures: _buildGestureRecognizers(),
           child: const SizedBox(child: ColoredBox(color: Colors.transparent)),
         ),
       ),
     );
+  }
+
+  Map<Type, GestureRecognizerFactory> _buildGestureRecognizers() {
+    // Build gesture recognizers based on gesture mode
+    final recognizers = <Type, GestureRecognizerFactory>{};
+
+    // For custom mode, we need a special gesture recognizer
+    if (widget.gestureMode == GraphGestureMode.custom) {
+      recognizers[_CustomPanGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<_CustomPanGestureRecognizer>(
+        () => _CustomPanGestureRecognizer(
+          shouldAcceptGesture: _shouldConsumeGestureAt,
+        ),
+        (recognizer) {
+          recognizer
+            ..onStart = _handlePanStartConditional
+            ..onUpdate = _handlePanUpdateConditional
+            ..onEnd = _handlePanEndConditional;
+        },
+      );
+    } else {
+      // For other modes, use standard PanGestureRecognizer
+      recognizers[PanGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+        PanGestureRecognizer.new,
+        (recognizer) {
+          recognizer
+            ..onStart = _handlePanStartConditional
+            ..onUpdate = _handlePanUpdateConditional
+            ..onEnd = _handlePanEndConditional;
+        },
+      );
+    }
+
+    return recognizers;
+  }
+
+  void _handlePanStartConditional(DragStartDetails details) {
+    // Always delegate to gesture manager for proper handling
+    _gestureManager.handlePanStart(details);
+  }
+
+  void _handlePanUpdateConditional(DragUpdateDetails details) {
+    // Always delegate to gesture manager for proper handling
+    _gestureManager.handlePanUpdate(details);
+  }
+
+  void _handlePanEndConditional(DragEndDetails details) {
+    _gestureManager.handlePanEnd(details);
+  }
+
+  bool _shouldConsumeGestureAt(Offset position) {
+    return _gestureManager.shouldConsumeGestureAt(position);
+  }
+}
+
+/// Custom pan gesture recognizer that can selectively accept gestures.
+class _CustomPanGestureRecognizer extends PanGestureRecognizer {
+  _CustomPanGestureRecognizer({
+    required this.shouldAcceptGesture,
+  });
+
+  final bool Function(Offset) shouldAcceptGesture;
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    // Only accept the gesture if shouldAcceptGesture returns true
+    if (shouldAcceptGesture(event.localPosition)) {
+      super.addPointer(event);
+    } else {
+      // Reject this pointer to let it pass through
+      stopTrackingPointer(event.pointer);
+    }
   }
 }

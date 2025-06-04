@@ -173,9 +173,12 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     setState(
       state.value.copyWith(
         canSelect: canSelect,
-        isSelected: canSelect && isSelected,
       ),
     );
+    // If canSelect is disabled, also deselect the node
+    if (!canSelect && isSelected) {
+      _isSelected.value = false;
+    }
   }
 
   @override

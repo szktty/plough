@@ -10,6 +10,7 @@ import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph/order_manager.dart';
 import 'package:plough/src/graph_view/behavior.dart';
+import 'package:plough/src/graph_view/hit_test.dart';
 import 'package:plough/src/interactive/drag_state.dart';
 import 'package:plough/src/interactive/events.dart';
 import 'package:plough/src/interactive/hover_state.dart';
@@ -25,6 +26,12 @@ class GraphGestureManager {
     required this.viewportSize,
     this.nodeTooltipTriggerMode,
     this.linkTooltipTriggerMode,
+    this.gestureMode = GraphGestureMode.exclusive,
+    this.shouldConsumeGesture,
+    this.onBackgroundTapped,
+    this.onBackgroundPanStart,
+    this.onBackgroundPanUpdate,
+    this.onBackgroundPanEnd,
     this.onTooltipShow,
     this.onTooltipHide,
   }) {
@@ -36,6 +43,12 @@ class GraphGestureManager {
   final Size viewportSize;
   final GraphTooltipTriggerMode? nodeTooltipTriggerMode;
   final GraphTooltipTriggerMode? linkTooltipTriggerMode;
+  final GraphGestureMode gestureMode;
+  final GraphGestureConsumptionCallback? shouldConsumeGesture;
+  final GraphBackgroundGestureCallback? onBackgroundTapped;
+  final GraphBackgroundGestureCallback? onBackgroundPanStart;
+  final GraphBackgroundPanCallback? onBackgroundPanUpdate;
+  final GraphBackgroundGestureCallback? onBackgroundPanEnd;
   final void Function(GraphEntity)? onTooltipShow;
   final void Function(GraphEntity)? onTooltipHide;
 
@@ -81,6 +94,34 @@ class GraphGestureManager {
   GraphId? get lastDraggedEntityId =>
       _nodeDragManager.lastDraggedEntityId ??
       _linkDragManager.lastDraggedEntityId;
+
+  /// Creates a hit test result for the given position.
+  GraphHitTestResult createHitTestResult(Offset position) {
+    final node = findNodeAt(position);
+    final link = node == null ? findLinkAt(position) : null;
+    
+    return GraphHitTestResult(
+      localPosition: position,
+      node: node,
+      link: link,
+    );
+  }
+
+  /// Determines if a gesture should be consumed based on the current mode.
+  bool shouldConsumeGestureAt(Offset position) {
+    final hitTestResult = createHitTestResult(position);
+    
+    switch (gestureMode) {
+      case GraphGestureMode.exclusive:
+        return true;
+      case GraphGestureMode.nodeEdgeOnly:
+        return hitTestResult.hasEntity;
+      case GraphGestureMode.transparent:
+        return false;
+      case GraphGestureMode.custom:
+        return shouldConsumeGesture?.call(position, hitTestResult) ?? true;
+    }
+  }
 
   GraphNode? findNodeAt(Offset position) {
     return _orderManager.frontmostWhereOrNull((entity) {
@@ -234,6 +275,13 @@ class GraphGestureManager {
   }
 
   void handlePointerDown(PointerDownEvent event) {
+    // Check if we should consume this gesture
+    if (!shouldConsumeGestureAt(event.localPosition)) {
+      // Call background callback if available
+      onBackgroundTapped?.call(event.localPosition);
+      return;
+    }
+
     _nodeHoverManager.handlePointerDown(event);
     _linkHoverManager.handlePointerDown(event);
 
@@ -248,8 +296,11 @@ class GraphGestureManager {
     if (link != null) {
       _linkTapManager.handlePointerDown(link.id, event);
       _linkDragManager.handlePointerDown(link.id, event);
+      return;
     }
 
+    // Background was tapped
+    onBackgroundTapped?.call(event.localPosition);
     deselectAll(details: _lastPointerDetails);
   }
 
@@ -362,6 +413,12 @@ class GraphGestureManager {
   }
 
   void handlePanStart(DragStartDetails details) {
+    // Check if we should consume this gesture
+    if (!shouldConsumeGestureAt(details.localPosition)) {
+      onBackgroundPanStart?.call(details.localPosition);
+      return;
+    }
+
     // Store details, can be useful for events
     // Note: DragStartDetails doesn't directly map to PointerEventDetails easily
     // We might need to rely on _lastPointerDetails from PointerDownEvent if needed
@@ -407,8 +464,11 @@ class GraphGestureManager {
         // Cancel any pending tap on the link being dragged
         // _linkTapManager.cancel(link.id); // Removed: Let handlePanUpdate cancel based on slop
       }
+      return;
     }
-    // If no draggable entity found, potentially start panning the viewport later
+
+    // Background pan start
+    onBackgroundPanStart?.call(details.localPosition);
   }
 
   void handlePanUpdate(DragUpdateDetails details) {
@@ -460,6 +520,12 @@ class GraphGestureManager {
       return;
     }
 
+    // Check if this is a background pan update
+    if (!shouldConsumeGestureAt(details.localPosition)) {
+      onBackgroundPanUpdate?.call(details.localPosition, details.delta);
+      return;
+    }
+
     // If not currently dragging, check if movement cancels a pending tap
     final node = findNodeAt(details.localPosition);
     if (node != null) {
@@ -469,7 +535,11 @@ class GraphGestureManager {
     final link = findLinkAt(details.localPosition);
     if (link != null) {
       _linkTapManager.handlePanUpdate(link.id, details);
+      return;
     }
+
+    // Background pan update
+    onBackgroundPanUpdate?.call(details.localPosition, details.delta);
   }
 
   void handlePanEnd(DragEndDetails details) {
@@ -510,6 +580,11 @@ class GraphGestureManager {
         }
       }
       return;
+    }
+
+    // Background pan end - estimate position from last known position
+    if (endPointerDetails != null) {
+      onBackgroundPanEnd?.call(endPointerDetails.localPosition);
     }
   }
 
