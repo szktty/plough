@@ -130,6 +130,7 @@ class GraphData with _$GraphData {
     /// Whether multiple elements can be selected simultaneously.
     @Default(false) bool allowMultiSelection,
     @Default(true) bool needsLayout,
+    @Default(false) bool shouldAnimateLayout,
     GraphViewGeometry? geometry,
   }) = _GraphData;
 }

@@ -48,7 +48,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     required this.tooltipTriggerMode,
     // Use constants from GestureBinding
     this.doubleTapTimeout = kDoubleTapTimeout,
-    this.touchSlop = kTouchSlop,
+    this.touchSlop = kTouchSlop * 4, // Increase touch slop significantly for more forgiving taps
     this.doubleTapSlop = kDoubleTapSlop,
   });
 
@@ -163,6 +163,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
           ); // Log timer expiry
           removeState(entityId); // Clean up state after confirmation
         });
+        // Don't remove state immediately for single taps - let the timer handle it
       } else {
         // Double tap up detected.
         // Event dispatch happens in GraphGestureManager.
@@ -170,7 +171,11 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         debugPrint(
           '[TapManager] Double tap confirmed for $entityId, removing state.',
         ); // Log double tap confirmation
-        removeState(entityId); // Clean up state immediately for double tap
+        // Don't remove state immediately - let GraphGestureManager check completion first
+        // Schedule removal for next frame to allow gesture manager to process
+        Timer(Duration.zero, () {
+          removeState(entityId);
+        });
       }
     } else {
       // Moved too far, cancel tap

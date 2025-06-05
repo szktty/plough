@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
-import 'package:plough/src/graph_view/hit_test.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
 
 /// グラフのインタラクティブな操作を受け付けるオーバーレイウィジェットです。
@@ -101,10 +100,21 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    // In transparent mode, don't capture any gestures
+    // In transparent mode, allow all interactions but with translucent behavior
     if (widget.gestureMode == GraphGestureMode.transparent) {
-      return const IgnorePointer(
-        child: SizedBox(child: ColoredBox(color: Colors.transparent)),
+      return MouseRegion(
+        onHover: _handleMouseHover,
+        child: Listener(
+          onPointerUp: _handlePointerUp,
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          behavior: HitTestBehavior.translucent,
+          child: RawGestureDetector(
+            gestures: _buildGestureRecognizers(),
+            behavior: HitTestBehavior.translucent,
+            child: const SizedBox(child: ColoredBox(color: Colors.transparent)),
+          ),
+        ),
       );
     }
 
@@ -134,6 +144,19 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         () => _CustomPanGestureRecognizer(
           shouldAcceptGesture: _shouldConsumeGestureAt,
         ),
+        (recognizer) {
+          recognizer
+            ..onStart = _handlePanStartConditional
+            ..onUpdate = _handlePanUpdateConditional
+            ..onEnd = _handlePanEndConditional;
+        },
+      );
+    } else if (widget.gestureMode == GraphGestureMode.transparent) {
+      // For transparent mode, use custom recognizer that allows pass-through
+      recognizers[_TransparentPanGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<
+              _TransparentPanGestureRecognizer>(
+        _TransparentPanGestureRecognizer.new,
         (recognizer) {
           recognizer
             ..onStart = _handlePanStartConditional
@@ -194,5 +217,14 @@ class _CustomPanGestureRecognizer extends PanGestureRecognizer {
       // Reject this pointer to let it pass through
       stopTrackingPointer(event.pointer);
     }
+  }
+}
+
+/// Transparent pan gesture recognizer that allows pass-through.
+class _TransparentPanGestureRecognizer extends PanGestureRecognizer {
+  @override
+  void addPointer(PointerDownEvent event) {
+    // Always accept the gesture but allow it to pass through
+    super.addPointer(event);
   }
 }

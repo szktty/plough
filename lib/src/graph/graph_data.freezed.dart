@@ -753,6 +753,7 @@ mixin _$GraphData {
   /// Whether multiple elements can be selected simultaneously.
   bool get allowMultiSelection => throw _privateConstructorUsedError;
   bool get needsLayout => throw _privateConstructorUsedError;
+  bool get shouldAnimateLayout => throw _privateConstructorUsedError;
   GraphViewGeometry? get geometry => throw _privateConstructorUsedError;
 
   /// Create a copy of GraphData
@@ -776,6 +777,7 @@ abstract class $GraphDataCopyWith<$Res> {
       bool allowSelection,
       bool allowMultiSelection,
       bool needsLayout,
+      bool shouldAnimateLayout,
       GraphViewGeometry? geometry});
 
   $GraphIdCopyWith<$Res> get id;
@@ -805,6 +807,7 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
     Object? allowSelection = null,
     Object? allowMultiSelection = null,
     Object? needsLayout = null,
+    Object? shouldAnimateLayout = null,
     Object? geometry = freezed,
   }) {
     return _then(_value.copyWith(
@@ -839,6 +842,10 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
       needsLayout: null == needsLayout
           ? _value.needsLayout
           : needsLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shouldAnimateLayout: null == shouldAnimateLayout
+          ? _value.shouldAnimateLayout
+          : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
               as bool,
       geometry: freezed == geometry
           ? _value.geometry
@@ -889,6 +896,7 @@ abstract class _$$GraphDataImplCopyWith<$Res>
       bool allowSelection,
       bool allowMultiSelection,
       bool needsLayout,
+      bool shouldAnimateLayout,
       GraphViewGeometry? geometry});
 
   @override
@@ -918,6 +926,7 @@ class __$$GraphDataImplCopyWithImpl<$Res>
     Object? allowSelection = null,
     Object? allowMultiSelection = null,
     Object? needsLayout = null,
+    Object? shouldAnimateLayout = null,
     Object? geometry = freezed,
   }) {
     return _then(_$GraphDataImpl(
@@ -953,6 +962,10 @@ class __$$GraphDataImplCopyWithImpl<$Res>
           ? _value.needsLayout
           : needsLayout // ignore: cast_nullable_to_non_nullable
               as bool,
+      shouldAnimateLayout: null == shouldAnimateLayout
+          ? _value.shouldAnimateLayout
+          : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
       geometry: freezed == geometry
           ? _value.geometry
           : geometry // ignore: cast_nullable_to_non_nullable
@@ -973,6 +986,7 @@ class _$GraphDataImpl implements _GraphData {
       this.allowSelection = true,
       this.allowMultiSelection = false,
       this.needsLayout = true,
+      this.shouldAnimateLayout = false,
       this.geometry});
 
   /// Unique identifier for this graph instance.
@@ -1012,11 +1026,14 @@ class _$GraphDataImpl implements _GraphData {
   @JsonKey()
   final bool needsLayout;
   @override
+  @JsonKey()
+  final bool shouldAnimateLayout;
+  @override
   final GraphViewGeometry? geometry;
 
   @override
   String toString() {
-    return 'GraphData(id: $id, nodes: $nodes, links: $links, selectedNodeIds: $selectedNodeIds, selectedLinkIds: $selectedLinkIds, allowSelection: $allowSelection, allowMultiSelection: $allowMultiSelection, needsLayout: $needsLayout, geometry: $geometry)';
+    return 'GraphData(id: $id, nodes: $nodes, links: $links, selectedNodeIds: $selectedNodeIds, selectedLinkIds: $selectedLinkIds, allowSelection: $allowSelection, allowMultiSelection: $allowMultiSelection, needsLayout: $needsLayout, shouldAnimateLayout: $shouldAnimateLayout, geometry: $geometry)';
   }
 
   @override
@@ -1037,6 +1054,8 @@ class _$GraphDataImpl implements _GraphData {
                 other.allowMultiSelection == allowMultiSelection) &&
             (identical(other.needsLayout, needsLayout) ||
                 other.needsLayout == needsLayout) &&
+            (identical(other.shouldAnimateLayout, shouldAnimateLayout) ||
+                other.shouldAnimateLayout == shouldAnimateLayout) &&
             (identical(other.geometry, geometry) ||
                 other.geometry == geometry));
   }
@@ -1052,6 +1071,7 @@ class _$GraphDataImpl implements _GraphData {
       allowSelection,
       allowMultiSelection,
       needsLayout,
+      shouldAnimateLayout,
       geometry);
 
   /// Create a copy of GraphData
@@ -1073,6 +1093,7 @@ abstract class _GraphData implements GraphData {
       final bool allowSelection,
       final bool allowMultiSelection,
       final bool needsLayout,
+      final bool shouldAnimateLayout,
       final GraphViewGeometry? geometry}) = _$GraphDataImpl;
 
   /// Unique identifier for this graph instance.
@@ -1104,6 +1125,8 @@ abstract class _GraphData implements GraphData {
   bool get allowMultiSelection;
   @override
   bool get needsLayout;
+  @override
+  bool get shouldAnimateLayout;
   @override
   GraphViewGeometry? get geometry;
 

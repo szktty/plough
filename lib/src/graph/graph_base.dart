@@ -171,7 +171,10 @@ abstract class Graph implements Listenable {
   /// Marks the graph as needing a layout recalculation.
   ///
   /// This triggers [GraphView] to recalculate node positions during its next update cycle.
-  void markNeedsLayout();
+  /// 
+  /// [shouldAnimate] determines whether the layout change should be animated.
+  /// Defaults to false to avoid unnecessary animations on every rebuild.
+  void markNeedsLayout({bool shouldAnimate = false});
 
   /// Brings the node with the given [id] to the front of the display stack.
   ///
@@ -533,8 +536,11 @@ class GraphImpl
   }
 
   @override
-  void markNeedsLayout() {
-    state.value = state.value.copyWith(needsLayout: true);
+  void markNeedsLayout({bool shouldAnimate = false}) {
+    state.value = state.value.copyWith(
+      needsLayout: true,
+      shouldAnimateLayout: shouldAnimate,
+    );
     _notifyLayoutChange();
   }
 
@@ -625,9 +631,14 @@ class GraphImpl
 
 extension GraphInternal on GraphImpl {
   bool get needsLayout => state.value.needsLayout;
+  
+  bool get shouldAnimateLayout => state.value.shouldAnimateLayout;
 
   void onLayoutFinished() {
-    setState(state.value.copyWith(needsLayout: false), force: true);
+    setState(state.value.copyWith(
+      needsLayout: false,
+      shouldAnimateLayout: false,
+    ), force: true);
 
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;

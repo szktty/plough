@@ -282,14 +282,19 @@ class GraphViewState extends State<GraphView> {
         _oldLayoutStrategy == null ||
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
-      // Enable animation for layout changes
-      if (widget.animationEnabled) {
+      // Enable animation only when explicitly requested AND widget allows it
+      final shouldAnimateLayout = widget.animationEnabled && _graph.shouldAnimateLayout;
+      
+      if (shouldAnimateLayout) {
+        log.d('GraphView: Enabling animation - explicitly requested');
         _layoutStrategy.nodeAnimationStartPosition =
             _getNodeAnimationStartPosition(constrains);
         // Reset animation states for all nodes
         for (final node in _graph.nodes) {
           (node as GraphNodeImpl).resetAnimationState();
         }
+      } else {
+        log.d('GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})');
       }
       _layoutStrategy.performLayout(
         _graph,
@@ -318,18 +323,19 @@ class GraphViewState extends State<GraphView> {
           animation:
               Listenable.merge([_graph.layoutChangeListenable, _buildState]),
           builder: (context, child) {
+            final timestamp = DateTime.now().millisecondsSinceEpoch;
+            log.d('[GRAPHVIEW] AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
             late List<GraphEntity> elements;
             if (_buildState.value == GraphViewBuildState.initialize) {
               if (!_isGeometryUpdateScheduled) {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    setState(() {
-                      _updateGraphGeometry();
-                      _updateNodeGeometry();
-                      _buildState.value = GraphViewBuildState.performLayout;
-                      _isGeometryUpdateScheduled = false;
-                    });
+                    log.d('[GRAPHVIEW] PostFrameCallback in initialize phase');
+                    _updateGraphGeometry();
+                    _updateNodeGeometry();
+                    _buildState.value = GraphViewBuildState.performLayout;
+                    _isGeometryUpdateScheduled = false;
                   }
                 });
               }
@@ -341,11 +347,10 @@ class GraphViewState extends State<GraphView> {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    setState(() {
-                      _updateGraphGeometry();
-                      _buildState.value = GraphViewBuildState.ready;
-                      _isGeometryUpdateScheduled = false;
-                    });
+                    log.d('[GRAPHVIEW] PostFrameCallback in performLayout phase');
+                    _updateGraphGeometry();
+                    _buildState.value = GraphViewBuildState.ready;
+                    _isGeometryUpdateScheduled = false;
                   }
                 });
               }
@@ -417,6 +422,8 @@ class GraphViewState extends State<GraphView> {
     return AnimatedBuilder(
       animation: _graph,
       builder: (context, _) {
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        log.d('[GRAPHVIEW] _buildCommonProviders AnimatedBuilder.builder called at $timestamp');
         return GraphInheritedData(
           data: _data,
           buildState: _buildState.value,
