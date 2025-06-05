@@ -5,6 +5,7 @@ import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/data.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/graph_view/widget/graph.dart';
 import 'package:plough/src/tooltip/widget/container.dart';
 import 'package:plough/src/utils/widget.dart';

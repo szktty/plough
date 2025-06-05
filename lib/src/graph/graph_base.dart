@@ -8,7 +8,7 @@ import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/utils/signals.dart';
-import 'package:provider/provider.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 
 /// A core data structure that provides the foundation for graph visualization through [GraphView].
 ///
@@ -209,7 +209,7 @@ class GraphImpl
 
   @internal
   static GraphImpl of(BuildContext context) =>
-      Provider.of(context, listen: false);
+      GraphInheritedData.read(context).graph;
 
   @override
   late final ValueNotifier<GraphData> state;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/id.dart';
@@ -9,30 +8,14 @@ import 'package:plough/src/graph_view/behavior.dart';
 import 'package:plough/src/graph_view/data.dart';
 import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/graph_view/hit_test.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/graph_view/widget/link.dart';
 import 'package:plough/src/graph_view/widget/node.dart';
 import 'package:plough/src/interactive/widget/interactive_overlay.dart';
 import 'package:plough/src/layout_strategy/base.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget.dart';
-import 'package:provider/provider.dart';
 
-/// Build state of the graph view.
-@internal
-enum GraphViewBuildState {
-  /// Initial state, renders transparent for geometry calculation
-  initialize,
-
-  /// Executing layout algorithm
-  performLayout,
-
-  /// Ready for rendering
-  ready;
-
-  static GraphViewBuildState of(BuildContext context) {
-    return Provider.of<GraphViewBuildState>(context, listen: false);
-  }
-}
 
 /// The main widget for displaying a graph.
 ///
@@ -189,6 +172,8 @@ class GraphViewState extends State<GraphView> {
   final Map<GraphId, GlobalKey> _linkKeys = {};
 
   GraphId? _entityIdShowingTooltip;
+  
+  bool _isGeometryUpdateScheduled = false;
 
   @override
   void initState() {
@@ -234,14 +219,21 @@ class GraphViewState extends State<GraphView> {
     WidgetUtils.withSizedRenderBoxIfPresent(_layoutKey, (renderBox) {
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
-      _graph.geometry = GraphViewGeometry(
+      final newGeometry = GraphViewGeometry(
         position: position,
         size: size,
       );
-      log
-        ..d('GraphView: update geometry')
-        ..d('    position: $position')
-        ..d('    size: $size');
+      
+      // Only update if geometry actually changed
+      if (_graph.geometry == null || 
+          _graph.geometry!.position != position ||
+          _graph.geometry!.size != size) {
+        _graph.geometry = newGeometry;
+        log
+          ..d('GraphView: update geometry')
+          ..d('    position: $position')
+          ..d('    size: $size');
+      }
     });
   }
 
@@ -260,12 +252,16 @@ class GraphViewState extends State<GraphView> {
           renderBox.size.width,
           renderBox.size.height,
         );
-        node.geometry = GraphNodeViewGeometry(bounds: bounds);
-        log
-          ..d('GraphView: update node geometry')
-          ..d('    node: ${node.id}')
-          ..d('    position: $position')
-          ..d('    size: ${renderBox.size}');
+        final newGeometry = GraphNodeViewGeometry(bounds: bounds);
+        // Only update if geometry actually changed
+        if (node.geometry == null || node.geometry!.bounds != bounds) {
+          node.geometry = newGeometry;
+          log
+            ..d('GraphView: update node geometry')
+            ..d('    node: ${node.id}')
+            ..d('    position: $position')
+            ..d('    size: ${renderBox.size}');
+        }
       });
     }
   }
@@ -324,23 +320,35 @@ class GraphViewState extends State<GraphView> {
           builder: (context, child) {
             late List<GraphEntity> elements;
             if (_buildState.value == GraphViewBuildState.initialize) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                setState(() {
-                  _updateGraphGeometry();
-                  _updateNodeGeometry();
-                  _buildState.value = GraphViewBuildState.performLayout;
+              if (!_isGeometryUpdateScheduled) {
+                _isGeometryUpdateScheduled = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      _updateGraphGeometry();
+                      _updateNodeGeometry();
+                      _buildState.value = GraphViewBuildState.performLayout;
+                      _isGeometryUpdateScheduled = false;
+                    });
+                  }
                 });
-              });
+              }
               elements = [..._graph.nodes];
             } else if (_buildState.value == GraphViewBuildState.performLayout) {
               _performLayout(context: context, constrains: constraints);
               elements = [..._graph.nodes];
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                setState(() {
-                  _updateGraphGeometry();
-                  _buildState.value = GraphViewBuildState.ready;
+              if (!_isGeometryUpdateScheduled) {
+                _isGeometryUpdateScheduled = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      _updateGraphGeometry();
+                      _buildState.value = GraphViewBuildState.ready;
+                      _isGeometryUpdateScheduled = false;
+                    });
+                  }
                 });
-              });
+              }
             } else {
               elements = [..._graph.nodes, ..._graph.links];
             }
@@ -384,14 +392,10 @@ class GraphViewState extends State<GraphView> {
                         onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
                         onBackgroundPanEnd: widget.onBackgroundPanEnd,
                         onTooltipShow: (entity) {
-                          setState(() {
-                            _entityIdShowingTooltip = entity.id;
-                          });
+                          _entityIdShowingTooltip = entity.id;
                         },
                         onTooltipHide: (entity) {
-                          setState(() {
-                            _entityIdShowingTooltip = null;
-                          });
+                          _entityIdShowingTooltip = null;
                         },
                       ),
                     ),
@@ -410,17 +414,20 @@ class GraphViewState extends State<GraphView> {
     required BoxConstraints constrains,
     required Widget child,
   }) {
-    return MultiProvider(
-      providers: [
-        Provider.value(value: _data),
-        Provider.value(value: _buildState.value),
-        Provider.value(value: widget.behavior),
-        Provider.value(value: _nodeViewBehavior),
-        Provider.value(value: _linkViewBehavior),
-        Provider.value(value: constrains),
-        ListenableProvider.value(value: _graph),
-      ],
-      child: child,
+    return AnimatedBuilder(
+      animation: _graph,
+      builder: (context, _) {
+        return GraphInheritedData(
+          data: _data,
+          buildState: _buildState.value,
+          behavior: widget.behavior,
+          nodeViewBehavior: _nodeViewBehavior,
+          linkViewBehavior: _linkViewBehavior,
+          constraints: constrains,
+          graph: _graph,
+          child: child,
+        );
+      },
     );
   }
 

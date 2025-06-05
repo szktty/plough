@@ -4,7 +4,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
-import 'package:provider/provider.dart';
 
 /// Core component of graph visualization that manages visual properties, animation states,
 /// and interaction behaviors. Extends [GraphEntity] with node-specific functionality.
@@ -63,8 +62,6 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     this.properties = properties ?? const {};
   }
 
-  static GraphNodeImpl of(BuildContext context) =>
-      Provider.of(context, listen: false);
 
   final ValueNotifier<GraphNodeViewGeometry?> _geometry = ValueNotifier(null);
   final Map<GraphId, ValueNotifier<GraphConnectionGeometry?>>

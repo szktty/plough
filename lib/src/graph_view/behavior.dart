@@ -11,7 +11,7 @@ import 'package:plough/src/renderer/widget/link.dart';
 import 'package:plough/src/renderer/widget/node.dart';
 import 'package:plough/src/tooltip/behavior.dart';
 import 'package:plough/src/tooltip/widget/tooltip.dart';
-import 'package:provider/provider.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 
 /// A function type for building node widgets.
 ///
@@ -201,7 +201,7 @@ abstract interface class GraphViewBehavior {
   /// Retrieves the [GraphViewBehavior] from the widget tree.
   @internal
   static GraphViewBehavior of(BuildContext context) =>
-      Provider.of(context, listen: false);
+      GraphInheritedData.read(context).behavior;
 
   /// Creates the behavior configuration for node rendering.
   ///

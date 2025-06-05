@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Plough is a Flutter package for creating interactive network graph visualizations with multiple layout algorithms and customizable appearance. The package uses reactive state management (Signals) and follows clean architecture principles.
+Plough is a Flutter package for creating interactive network graph visualizations with multiple layout algorithms and customizable appearance. The package uses Flutter's standard state management (ValueNotifier, InheritedWidget) and follows clean architecture principles.
 
 ## Common Development Commands
 
@@ -50,7 +50,7 @@ flutter build web
 ### Core Components Structure
 
 1. **Data Model Layer** (`lib/src/graph/`)
-   - `Graph`: Central data structure using Signals for reactive state
+   - `Graph`: Central data structure using ValueNotifier for reactive state
    - `GraphNode` & `GraphLink`: Core entities with factory pattern
    - `GraphEntity`: Base interface for nodes and links
    - `GraphId`: Type-safe identifiers using Freezed
@@ -76,7 +76,7 @@ flutter build web
 
 ### Key Design Patterns
 
-- **Reactive State**: Uses Signals library for fine-grained reactivity
+- **Reactive State**: Uses Flutter standard ValueNotifier and InheritedWidget for efficient reactivity
 - **Factory Pattern**: For creating nodes and links
 - **Strategy Pattern**: For layout algorithms
 - **Composition**: Behavior system allows mixing features
@@ -84,11 +84,26 @@ flutter build web
 
 ### State Management Flow
 
-1. Graph data changes → Signal notifications
-2. GraphView listens to signals → Triggers rebuild
+1. Graph data changes → ValueNotifier notifications
+2. GraphView listens via InheritedWidget → Triggers rebuild
 3. Layout strategy calculates positions
 4. Widgets render with animations
 5. User interactions → Event emission → State updates → UI updates
+
+### State Management Implementation Details
+
+The package uses Flutter's standard state management without external dependencies:
+
+- **GraphInheritedData**: Core InheritedWidget that distributes graph data, build state, and behaviors throughout the widget tree
+- **ValueNotifier**: Used for reactive properties like node positions, selection state, and animation states
+- **AnimatedBuilder**: Efficiently rebuilds only when relevant data changes
+- **Batch Updates**: Layout changes are batched to maintain 60FPS performance during animations
+- **Separation of Concerns**: Layout changes and selection changes use separate listeners to minimize rebuilds
+
+Key files:
+- `lib/src/graph_view/inherited_data.dart`: InheritedWidget implementation
+- `lib/src/graph/graph_base.dart`: Core graph state with ValueNotifier
+- `lib/src/graph/node.dart` & `lib/src/graph/link.dart`: Entity-level state management
 
 ## Code Generation
 
@@ -124,9 +139,10 @@ Tests are located in `test/`. The package uses standard Flutter testing:
    - Extensive use of named parameters for clarity
 
 3. **Performance**:
-   - Signals provide efficient updates
-   - Layout calculations are optimized
+   - ValueNotifier and InheritedWidget provide efficient updates
+   - Layout calculations are optimized for 60FPS with batch updates
    - Animations use Flutter's animation system
+   - Designed to handle hundreds to thousands of entities efficiently
 
 4. **Extension Points**:
    - Custom layout strategies via `GraphCustomLayoutStrategy`

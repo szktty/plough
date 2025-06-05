@@ -6,7 +6,6 @@ import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
-import 'package:provider/provider.dart';
 
 /// Manages connections between graph nodes with support for directionality, routing,
 /// and visual styling. Extends [GraphEntity] with link-specific functionality.
@@ -74,9 +73,6 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     this.properties = properties ?? const {};
   }
 
-  @internal
-  static GraphLinkImpl of(BuildContext context) =>
-      Provider.of(context, listen: false);
 
   final ValueNotifier<GraphLinkViewGeometry?> _geometry = ValueNotifier(null);
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
