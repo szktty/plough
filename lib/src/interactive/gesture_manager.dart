@@ -357,33 +357,18 @@ class GraphGestureManager {
       }
     }
 
-    // Check if we should consume this gesture (after processing entities)
-    final shouldConsume = shouldConsumeGestureAt(event.localPosition);
-    logDebug(LogCategory.gesture, 'shouldConsumeGesture: $shouldConsume');
+    // Only call background callback if no entity was found
+    // Double-check to prevent race conditions
+    final reCheckNode = findNodeAt(event.localPosition);
+    final reCheckLink = findLinkAt(event.localPosition);
     
-    if (!shouldConsume) {
-      logDebug(LogCategory.gesture, 'Not consuming gesture, calling background callback');
-      // Call background callback if available
+    if (node == null && link == null && reCheckNode == null && reCheckLink == null) {
+      logDebug(LogCategory.gesture, 'True background area (double-checked), calling background callback');
       onBackgroundTapped?.call(event.localPosition);
-      // In transparent mode, don't deselect when background is tapped
-      if (gestureMode != GraphGestureMode.transparent) {
-        logDebug(LogCategory.gesture, 'Calling deselectAll (non-transparent mode)');
-        deselectAll(details: _lastPointerDetails);
-      } else {
-        logDebug(LogCategory.gesture, 'Skipping deselectAll (transparent mode)');
-      }
-      return;
-    }
-
-    // Background was tapped - but check if we should call callback based on mode
-    logDebug(LogCategory.gesture, 'Background area, checking if should call callback');
-    if (gestureMode == GraphGestureMode.nodeEdgeOnly && (node != null || link != null)) {
-      logDebug(LogCategory.gesture, 'handlePointerDown: NOT calling onBackgroundTapped - entity found in nodeEdgeOnly mode');
+      deselectAll(details: _lastPointerDetails);
     } else {
-      logDebug(LogCategory.gesture, 'handlePointerDown: Calling onBackgroundTapped');
-      onBackgroundTapped?.call(event.localPosition);
+      logDebug(LogCategory.gesture, 'Entity found (or re-found), not calling background callback');
     }
-    deselectAll(details: _lastPointerDetails);
   }
 
   void handlePointerUp(PointerUpEvent event) {
@@ -582,18 +567,16 @@ class GraphGestureManager {
       }
     }
 
-    // Check if we should consume this gesture (after processing entities)
-    if (!shouldConsumeGestureAt(details.localPosition)) {
-      onBackgroundPanStart?.call(details.localPosition);
-      return;
-    }
-
-    // Background pan start - only call if we haven't handled an entity in nodeEdgeOnly mode
-    if (gestureMode != GraphGestureMode.nodeEdgeOnly || (node == null && link == null)) {
-      logDebug(LogCategory.gesture, 'handlePanStart: Calling background callback');
+    // Only call background callback if no entity was found
+    // Double-check to prevent race conditions
+    final reCheckNode = findNodeAt(details.localPosition);
+    final reCheckLink = findLinkAt(details.localPosition);
+    
+    if (node == null && link == null && reCheckNode == null && reCheckLink == null) {
+      logDebug(LogCategory.gesture, 'handlePanStart: True background pan (double-checked), calling callback');
       onBackgroundPanStart?.call(details.localPosition);
     } else {
-      logDebug(LogCategory.gesture, 'handlePanStart: NOT calling background callback (nodeEdgeOnly with entity)');
+      logDebug(LogCategory.gesture, 'handlePanStart: Entity found (or re-found), not calling background callback');
     }
   }
 
@@ -672,12 +655,16 @@ class GraphGestureManager {
       return;
     }
 
-    // Background pan update - only call if we haven't handled an entity in nodeEdgeOnly mode
-    if (gestureMode != GraphGestureMode.nodeEdgeOnly || (node == null && link == null)) {
-      logDebug(LogCategory.gesture, 'handlePanUpdate: Calling background callback');
+    // Only call background callback if no entity was found
+    // Double-check to prevent race conditions
+    final reCheckNode = findNodeAt(details.localPosition);
+    final reCheckLink = findLinkAt(details.localPosition);
+    
+    if (node == null && link == null && reCheckNode == null && reCheckLink == null) {
+      logDebug(LogCategory.gesture, 'handlePanUpdate: True background pan (double-checked), calling callback');
       onBackgroundPanUpdate?.call(details.localPosition, details.delta);
     } else {
-      logDebug(LogCategory.gesture, 'handlePanUpdate: NOT calling background callback (nodeEdgeOnly with entity)');
+      logDebug(LogCategory.gesture, 'handlePanUpdate: Entity found (or re-found), not calling background callback');
     }
   }
 

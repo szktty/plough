@@ -224,7 +224,8 @@ class _CustomPanGestureRecognizer extends PanGestureRecognizer {
 class _TransparentPanGestureRecognizer extends PanGestureRecognizer {
   @override
   void addPointer(PointerDownEvent event) {
-    // Always accept the gesture but allow it to pass through
-    super.addPointer(event);
+    // In transparent mode, we want to reject all gestures so they pass through
+    // to the underlying InteractiveViewer
+    // Don't start tracking - just ignore the pointer completely
   }
 }
