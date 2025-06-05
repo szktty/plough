@@ -74,7 +74,7 @@ class _GraphPositionPlotterState extends State<GraphPositionPlotter> {
   }
 
   void _updateGeometry() {
-    log.d('GraphPositionPlotter: update geometry');
+    logDebug(LogCategory.rendering, 'GraphPositionPlotter: update geometry');
     WidgetUtils.withSizedRenderBoxIfPresent(_childKey, (childRenderBox) {
       final parentContext = _childKey.currentContext
           ?.findAncestorStateOfType<GraphViewState>()

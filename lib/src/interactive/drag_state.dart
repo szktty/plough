@@ -5,6 +5,7 @@ import 'package:plough/plough.dart'; // Import GraphNode etc.
 // Import GraphId
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/interactive/state_manager.dart';
+import 'package:plough/src/utils/logger.dart';
 
 // Internal state for tracking a single dragged entity
 class _DragState {
@@ -56,7 +57,7 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
       cancel(dragState.entityId);
     }
     if (isActive) {
-      print('Warning: Drag states remained after cancelAll');
+      logWarning(LogCategory.drag, 'Drag states remained after cancelAll');
       clearAllStates();
     }
   }
@@ -81,7 +82,7 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
           ),
         );
       } else {
-        print('Attempted to start drag on non-draggable entity: $entityId');
+        logWarning(LogCategory.drag, 'Attempted to start drag on non-draggable entity: $entityId');
       }
     }
   }
@@ -107,8 +108,9 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
         setPosition(entity.id, newLogicalPosition);
         updatedIds.add(dragState.entityId);
       } else {
-        print(
-          'Warning: Dragged entity ${dragState.entityId} not found or not a Node during update.',
+        logWarning(
+          LogCategory.drag,
+          'Dragged entity ${dragState.entityId} not found or not a Node during update.',
         );
         cancel(dragState.entityId);
       }
@@ -139,8 +141,9 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
     final state = getState(entityId);
     if (state != null) {
       // Check if state exists before warning/cancelling
-      print(
-        'Warning: Drag state still exists on PointerUp for $entityId. Cancelling.',
+      logWarning(
+        LogCategory.drag,
+        'Drag state still exists on PointerUp for $entityId. Cancelling.',
       );
       cancel(entityId); // cancel will call removeState
     }
@@ -156,7 +159,7 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
     if (state != null && !state.cancelled) {
       state.cancelled = true;
       removeState(entityId);
-      print('Cancelled drag for $entityId');
+      logDebug(LogCategory.drag, 'Cancelled drag for $entityId');
     }
   }
 }
@@ -179,7 +182,7 @@ final class GraphLinkDragStateManager
   bool canDrag(GraphId entityId) => false;
   @override
   void handlePanStart(List<GraphId> entityIds, DragStartDetails details) {
-    print('Attempted to drag links: $entityIds. Link dragging not supported.');
+    logWarning(LogCategory.drag, 'Attempted to drag links: $entityIds. Link dragging not supported.');
   }
 
   @override

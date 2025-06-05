@@ -146,10 +146,9 @@ abstract base class GraphLayoutStrategy {
   ///
   /// Override this method in subclasses to implement specific layout behavior.
   void performLayout(Graph graph, Size size) {
-    log
-      ..d('$runtimeType: perform layout')
-      ..d('    size: $size')
-      ..d('    seed: $seed');
+    logDebug(LogCategory.layout, '$runtimeType: perform layout');
+    logDebug(LogCategory.layout, '    size: $size');
+    logDebug(LogCategory.layout, '    seed: $seed');
 
     // node positions
     for (final nodePosition in nodePositions) {

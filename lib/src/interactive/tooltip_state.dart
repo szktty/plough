@@ -101,7 +101,7 @@ abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
           triggerMode: currentTriggerMode,
         ),
       );
-      log.d('Tooltip shown for $entityId');
+      logDebug(LogCategory.gesture, 'Tooltip shown for $entityId');
     }
   }
 
@@ -119,7 +119,7 @@ abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
         gestureManager.viewBehavior.onTooltipHide(
           GraphTooltipHideEvent(entityId: entityId, details: details),
         );
-        log.d('Tooltip hidden for $entityId');
+        logDebug(LogCategory.gesture, 'Tooltip hidden for $entityId');
       }
       removeState(entityId);
     }

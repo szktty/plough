@@ -34,11 +34,11 @@ abstract base class GraphEntityHoverStateManager<E extends GraphEntity>
     if (!hasState(entityId)) {
       clearAllStates(); // Ensure only one entity is hovered
       setState(entityId, _HoverState(entityId));
-      log.d('Hover started for $entityId');
+      logDebug(LogCategory.gesture, 'Hover started for $entityId');
       // Note: GraphGestureManager dispatches GraphHoverEnterEvent
     } else {
       // Already hovering this entity
-      log.d('Hover move over $entityId');
+      logDebug(LogCategory.gesture, 'Hover move over $entityId');
       // Note: GraphGestureManager dispatches GraphHoverMoveEvent
     }
   }
@@ -47,7 +47,7 @@ abstract base class GraphEntityHoverStateManager<E extends GraphEntity>
   void handleMouseExit(GraphId entityId, PointerHoverEvent event) {
     if (hasState(entityId)) {
       removeState(entityId);
-      log.d('Hover ended for $entityId');
+      logDebug(LogCategory.gesture, 'Hover ended for $entityId');
       // Note: GraphGestureManager dispatches GraphHoverEndEvent
     }
   }
@@ -66,7 +66,7 @@ abstract base class GraphEntityHoverStateManager<E extends GraphEntity>
   void cancel(GraphId entityId) {
     if (hasState(entityId)) {
       removeState(entityId);
-      log.d('Hover cancelled for $entityId');
+      logDebug(LogCategory.gesture, 'Hover cancelled for $entityId');
       // Note: GraphGestureManager should dispatch HoverEnd if cancelling due to external factors.
     }
   }

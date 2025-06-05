@@ -5,3 +5,4 @@ export 'src/layout_strategy/layout_strategy.dart';
 export 'src/manager.dart';
 export 'src/renderer/renderer.dart';
 export 'src/tooltip/tooltip.dart';
+export 'src/utils/logger.dart' show LogCategory;

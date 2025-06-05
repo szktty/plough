@@ -63,16 +63,16 @@ class _GraphLinkViewState extends State<GraphLinkView> {
 
   @override
   void dispose() {
-    log.d('GraphLinkView: dispose');
+    logDebug(LogCategory.rendering, 'GraphLinkView: dispose');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    log.d('GraphLinkView: ${link.id}: build');
+    logDebug(LogCategory.rendering, 'GraphLinkView: ${link.id}: build');
     final graphViewData = GraphViewData.of(context);
     final graphViewBehavior = graphViewData.behavior;
-    log.d(
+    logDebug(LogCategory.rendering,
       'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
     );
 
@@ -91,7 +91,7 @@ class _GraphLinkViewState extends State<GraphLinkView> {
         final targetGeometry = link.target.geometry;
 
         if (sourceGeometry == null || targetGeometry == null) {
-          log.d('GraphLinkView: waiting to get node geometries...');
+          logDebug(LogCategory.rendering, 'GraphLinkView: waiting to get node geometries...');
           return const SizedBox();
         }
 
@@ -102,12 +102,12 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           widget.targetView,
         );
         if (connPoints == null) {
-          log.d('GraphLinkView: waiting to calculate connection points...');
+          logDebug(LogCategory.rendering, 'GraphLinkView: waiting to calculate connection points...');
           return const SizedBox();
         }
 
         if (!connPoints.incoming.isFinite || !connPoints.outgoing.isFinite) {
-          log.e(
+          logError(LogCategory.rendering,
             'GraphLinkView: ${link.id}: connection points must be infinite',
           );
           return const SizedBox();
