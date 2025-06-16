@@ -405,28 +405,17 @@ class DebugGraphView extends StatefulWidget {
 }
 
 class _DebugGraphViewState extends State<DebugGraphView> {
-  int _buildCount = 0;
-
   @override
   Widget build(BuildContext context) {
-    _buildCount++;
     if (widget.monitorRebuilds) {
-      // Post rebuild event after the build completes
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.onRebuild();
-        widget.onEvent(DebugEvent(
-          type: EventType.rebuild,
-          source: 'DebugGraphView',
-          message: 'Widget rebuilt',
-          timestamp: DateTime.now(),
-          details: 'Build #$_buildCount',
-        ));
-      });
+      // Increment counter but don't log event to avoid rebuild loop
+      widget.onRebuild();
     }
 
     return GraphView(
       graph: widget.graph,
       layoutStrategy: GraphForceDirectedLayoutStrategy(),
+      animationEnabled: false, // Disable animation to prevent continuous rebuilds
       behavior: _createDebugBehavior(),
     );
   }
