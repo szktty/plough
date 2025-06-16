@@ -155,6 +155,39 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     return Scaffold(
       body: Row(
         children: [
+          // Left sidebar
+          Container(
+            width: 250,
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: Colors.grey[300]!)),
+              color: Colors.grey[50],
+            ),
+            child: Column(
+              children: [
+                // Sidebar header
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  color: Colors.grey[200],
+                  child: const Row(
+                    children: [
+                      Icon(Icons.list, size: 16),
+                      SizedBox(width: 8),
+                      Text('Graph Entities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ],
+                  ),
+                ),
+                // Nodes section
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildNodesSection(),
+                      _buildLinksSection(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           // Graph view area
           Expanded(
             flex: 2,
@@ -630,6 +663,147 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           fontSize: 10,
           color: timeRemaining != null ? Colors.orange : Colors.grey[600],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNodesSection() {
+    return Container(
+      color: Colors.blue[50],
+      child: ExpansionTile(
+        title: Text('Nodes (${graph.nodes.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        initiallyExpanded: true,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+        childrenPadding: EdgeInsets.zero,
+        backgroundColor: Colors.blue[50],
+        collapsedBackgroundColor: Colors.blue[50],
+        iconColor: Colors.blue[700],
+        collapsedIconColor: Colors.blue[700],
+        shape: const Border(),
+        collapsedShape: const Border(),
+        controlAffinity: ListTileControlAffinity.leading,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: graph.nodes.length,
+              itemBuilder: (context, index) {
+                final node = graph.nodes.elementAt(index);
+                final label = node.properties['label']?.toString() ?? 'Node ${index + 1}';
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.blue[200]!),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              label,
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              'ID: ${node.id.toString().substring(0, 8)}...',
+                              style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinksSection() {
+    return Container(
+      color: Colors.orange[50],
+      child: ExpansionTile(
+        title: Text('Links (${graph.links.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        initiallyExpanded: true,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+        childrenPadding: EdgeInsets.zero,
+        backgroundColor: Colors.orange[50],
+        collapsedBackgroundColor: Colors.orange[50],
+        iconColor: Colors.orange[700],
+        collapsedIconColor: Colors.orange[700],
+        shape: const Border(),
+        collapsedShape: const Border(),
+        controlAffinity: ListTileControlAffinity.leading,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: graph.links.length,
+              itemBuilder: (context, index) {
+                final link = graph.links.elementAt(index);
+                final sourceLabel = link.source.properties['label']?.toString() ?? 'Node';
+                final targetLabel = link.target.properties['label']?.toString() ?? 'Node';
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.orange[200]!),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$sourceLabel → $targetLabel',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              'ID: ${link.id.toString().substring(0, 8)}...',
+                              style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
