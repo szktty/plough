@@ -13,7 +13,7 @@ class PloughDebugManager {
   static PloughDebugManager? _instance;
   factory PloughDebugManager() => _instance ??= PloughDebugManager._();
 
-  final PloughDebugServer _debugServer = PloughDebugServer();
+  final PloughMonitorServer _debugServer = PloughMonitorServer();
   final StructuredLogger _structuredLogger = StructuredLogger();
   final PerformanceMonitor _performanceMonitor = PerformanceMonitor();
 
@@ -218,7 +218,7 @@ class PloughDebugManager {
     try {
       // サーバーを強制停止
       if (_debugServer.isRunning) {
-        PloughDebugServer.resetInstance();
+        PloughMonitorServer.resetInstance();
       }
       _initialized = false;
     } on Exception {
