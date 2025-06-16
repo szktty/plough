@@ -45,13 +45,24 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   final _eventStreamController = StreamController<DebugEvent>.broadcast();
   
   // Monitoring flags
-  bool _monitorCallbacks = true;
-  bool _monitorRebuilds = true;
-  bool _monitorNotifications = true;
+  final bool _monitorCallbacks = true;
+  final bool _monitorRebuilds = true;
+  final bool _monitorGestureStates = true;
   
   // Stats
   int _rebuildCount = 0;
-  int _notificationCount = 0;
+  
+  // Gesture state tracking
+  bool _isDragging = false;
+  bool _isHovering = false;
+  bool _isTapTracking = false;
+  String? _lastDraggedEntityId;
+  String? _hoveredEntityId;
+  String? _trackedTapEntityId;
+  int _currentTapCount = 0;
+  int? _doubleTapTimeRemaining;
+  int _totalGestureEvents = 0;
+  Timer? _gestureStateUpdateTimer;
   
   // Layout and data management
   String _currentLayoutStrategy = 'ForceDirected';
@@ -108,7 +119,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   }
 
   void _onGraphChanged() {
-    _notificationCount++;
     _logEvent(DebugEvent(
       type: EventType.notification,
       source: 'Graph',
@@ -136,6 +146,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   void dispose() {
     graph.removeListener(_onGraphChanged);
     _eventStreamController.close();
+    _gestureStateUpdateTimer?.cancel();
     super.dispose();
   }
 
@@ -269,6 +280,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                       monitorCallbacks: _monitorCallbacks,
                       monitorRebuilds: _monitorRebuilds,
                       animationEnabled: _animationEnabled,
+                      updateGestureState: _updateGestureState,
                     ),
                   ),
                   // Status bar
@@ -295,50 +307,23 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
             flex: 1,
             child: Column(
               children: [
-                // Control panel
+                // Gesture State Panel
                 Container(
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.grey[100],
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  color: Colors.purple[50],
+                  child: ExpansionTile(
+                    title: const Text('Gesture State', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    initiallyExpanded: true,
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+                    childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    backgroundColor: Colors.purple[50],
+                    collapsedBackgroundColor: Colors.purple[50],
+                    iconColor: Colors.purple[700],
+                    collapsedIconColor: Colors.purple[700],
+                    shape: const Border(),
+                    collapsedShape: const Border(),
+                    controlAffinity: ListTileControlAffinity.leading,
                     children: [
-                      const Text('Monitoring Options', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      SwitchListTile(
-                        title: const Text('Callbacks'),
-                        value: _monitorCallbacks,
-                        onChanged: (value) => setState(() => _monitorCallbacks = value),
-                        dense: true,
-                        splashRadius: 0,
-                      ),
-                      SwitchListTile(
-                        title: const Text('Rebuilds'),
-                        value: _monitorRebuilds,
-                        onChanged: (value) => setState(() => _monitorRebuilds = value),
-                        dense: true,
-                        splashRadius: 0,
-                      ),
-                      SwitchListTile(
-                        title: const Text('Notifications'),
-                        value: _monitorNotifications,
-                        onChanged: (value) => setState(() => _monitorNotifications = value),
-                        dense: true,
-                        splashRadius: 0,
-                      ),
-                    ],
-                  ),
-                ),
-                // Stats
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.blue[50],
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Statistics', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text('Total Rebuilds: $_rebuildCount'),
-                      Text('Total Notifications: $_notificationCount'),
+                      _buildGestureStateDisplay(),
                     ],
                   ),
                 ),
@@ -535,6 +520,119 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
            '${time.second.toString().padLeft(2, '0')}.'
            '${time.millisecond.toString().padLeft(3, '0')}';
   }
+
+  void _updateGestureState(String gestureType, Map<String, dynamic> data) {
+    if (!_monitorGestureStates) return;
+    
+    setState(() {
+      _totalGestureEvents++;
+      
+      switch (gestureType) {
+        case 'tap':
+          _isTapTracking = data['tracking'] ?? false;
+          _currentTapCount = data['tapCount'] ?? 0;
+          _trackedTapEntityId = data['entityId'];
+          break;
+        case 'dragStart':
+          _isDragging = true;
+          _lastDraggedEntityId = data['entityId'];
+          break;
+        case 'dragEnd':
+          _isDragging = false;
+          break;
+        case 'hoverEnter':
+          _isHovering = true;
+          _hoveredEntityId = data['entityId'];
+          break;
+        case 'hoverEnd':
+          _isHovering = false;
+          _hoveredEntityId = null;
+          break;
+      }
+    });
+  }
+
+  Widget _buildGestureStateDisplay() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildStateIndicator('Dragging', _isDragging, Colors.purple),
+        _buildStateIndicator('Hovering', _isHovering, Colors.blue),
+        _buildStateIndicator('Tap Tracking', _isTapTracking, Colors.green),
+        const SizedBox(height: 4),
+        _buildEntityInfo('Last Dragged', _lastDraggedEntityId),
+        _buildEntityInfo('Hovered Entity', _hoveredEntityId),
+        _buildEntityInfo('Tap Target', _trackedTapEntityId),
+        const SizedBox(height: 4),
+        _buildCounterInfo('Tap Count', _currentTapCount),
+        _buildTimerInfo('Double-tap Timer', _doubleTapTimeRemaining),
+        _buildCounterInfo('Total Gestures', _totalGestureEvents),
+      ],
+    );
+  }
+
+  Widget _buildStateIndicator(String label, bool isActive, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isActive ? color : Colors.grey[300],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: isActive ? color : Colors.grey[600],
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEntityInfo(String label, String? entityId) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Text(
+        '$label: ${entityId ?? 'None'}',
+        style: TextStyle(
+          fontSize: 10,
+          color: entityId != null ? Colors.black87 : Colors.grey[600],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCounterInfo(String label, int value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(fontSize: 10, color: Colors.black87),
+      ),
+    );
+  }
+
+  Widget _buildTimerInfo(String label, int? timeRemaining) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Text(
+        '$label: ${timeRemaining != null ? '${timeRemaining}ms' : 'Inactive'}',
+        style: TextStyle(
+          fontSize: 10,
+          color: timeRemaining != null ? Colors.orange : Colors.grey[600],
+        ),
+      ),
+    );
+  }
 }
 
 // Debug event types
@@ -571,6 +669,7 @@ class DebugGraphView extends StatefulWidget {
   final bool monitorCallbacks;
   final bool monitorRebuilds;
   final bool animationEnabled;
+  final Function(String, Map<String, dynamic>)? updateGestureState;
 
   const DebugGraphView({
     super.key,
@@ -580,6 +679,7 @@ class DebugGraphView extends StatefulWidget {
     required this.monitorCallbacks,
     required this.monitorRebuilds,
     required this.animationEnabled,
+    this.updateGestureState,
   });
 
   @override
@@ -606,6 +706,7 @@ class _DebugGraphViewState extends State<DebugGraphView> {
     return DebugGraphViewBehavior(
       onEvent: widget.onEvent,
       monitorCallbacks: widget.monitorCallbacks,
+      updateGestureState: widget.updateGestureState,
     );
   }
 }
@@ -614,10 +715,12 @@ class _DebugGraphViewState extends State<DebugGraphView> {
 class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
   final Function(DebugEvent) onEvent;
   final bool monitorCallbacks;
+  final Function(String, Map<String, dynamic>)? updateGestureState;
 
   DebugGraphViewBehavior({
     required this.onEvent,
     required this.monitorCallbacks,
+    this.updateGestureState,
   });
 
   @override
@@ -635,6 +738,12 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         timestamp: DateTime.now(),
         details: details,
       ));
+      // Update gesture state tracking
+      updateGestureState?.call('tap', {
+        'tracking': hasEntities,
+        'tapCount': event.tapCount,
+        'entityId': hasEntities ? event.entityIds.first.toString() : null,
+      });
     }
   }
 
@@ -670,6 +779,10 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         timestamp: DateTime.now(),
         details: details,
       ));
+      // Update gesture state tracking
+      updateGestureState?.call('dragStart', {
+        'entityId': hasEntities ? event.entityIds.first.toString() : null,
+      });
     }
   }
 
@@ -706,6 +819,8 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         timestamp: DateTime.now(),
         details: details,
       ));
+      // Update gesture state tracking
+      updateGestureState?.call('dragEnd', {});
     }
   }
 
@@ -720,6 +835,10 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         timestamp: DateTime.now(),
         details: 'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
       ));
+      // Update gesture state tracking
+      updateGestureState?.call('hoverEnter', {
+        'entityId': event.entityId.toString(),
+      });
     }
   }
 
@@ -748,6 +867,8 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         timestamp: DateTime.now(),
         details: 'Position: ${event.details.localPosition}',
       ));
+      // Update gesture state tracking
+      updateGestureState?.call('hoverEnd', {});
     }
   }
 
