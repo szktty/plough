@@ -16,7 +16,6 @@ import 'package:plough/src/layout_strategy/base.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget.dart';
 
-
 /// The main widget for displaying a graph.
 ///
 /// Features:
@@ -155,6 +154,14 @@ class GraphViewState extends State<GraphView> {
   final ValueNotifier<GraphViewBuildState> _buildState =
       ValueNotifier(GraphViewBuildState.initialize);
 
+  void _setBuildState(GraphViewBuildState newState) {
+    if (_buildState.value != newState) {
+      print(
+          '🏗️ GraphView _buildState changed: ${_buildState.value} -> $newState');
+      _buildState.value = newState;
+    }
+  }
+
   GraphLayoutStrategy get _layoutStrategy => widget.layoutStrategy;
   GraphLayoutStrategy? _oldLayoutStrategy;
 
@@ -172,7 +179,7 @@ class GraphViewState extends State<GraphView> {
   final Map<GraphId, GlobalKey> _linkKeys = {};
 
   GraphId? _entityIdShowingTooltip;
-  
+
   bool _isGeometryUpdateScheduled = false;
 
   @override
@@ -201,17 +208,26 @@ class GraphViewState extends State<GraphView> {
       nodeAnimationDuration: widget.nodeAnimationDuration,
       nodeAnimationCurve: widget.nodeAnimationCurve,
     );
-    _buildState.value = GraphViewBuildState.initialize;
+    _setBuildState(GraphViewBuildState.initialize);
     _nodeViews.clear();
   }
 
   @override
   void didUpdateWidget(covariant GraphView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.graph != oldWidget.graph ||
-        widget.layoutStrategy != oldWidget.layoutStrategy ||
-        widget.behavior != oldWidget.behavior) {
+    // より厳密な条件でのみ再初期化を行う
+    final needsReinit = widget.graph != oldWidget.graph ||
+        widget.layoutStrategy.runtimeType !=
+            oldWidget.layoutStrategy.runtimeType ||
+        widget.behavior.runtimeType != oldWidget.behavior.runtimeType;
+
+    if (needsReinit) {
+      print(
+          '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behavior=${widget.behavior.runtimeType != oldWidget.behavior.runtimeType})');
       _initBehavior();
+    } else {
+      print(
+          '🔄 GraphView didUpdateWidget: skipping reinit (no significant changes)');
     }
   }
 
@@ -223,9 +239,9 @@ class GraphViewState extends State<GraphView> {
         position: position,
         size: size,
       );
-      
+
       // Only update if geometry actually changed
-      if (_graph.geometry == null || 
+      if (_graph.geometry == null ||
           _graph.geometry!.position != position ||
           _graph.geometry!.size != size) {
         _graph.geometry = newGeometry;
@@ -269,7 +285,6 @@ class GraphViewState extends State<GraphView> {
         constraints.biggest.center(Offset.zero);
   }
 
-
   void _performLayout({
     required BuildContext context,
     required BoxConstraints constrains,
@@ -281,10 +296,12 @@ class GraphViewState extends State<GraphView> {
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
       // Enable animation only when explicitly requested AND widget allows it
-      final shouldAnimateLayout = widget.animationEnabled && _graph.shouldAnimateLayout;
-      
+      final shouldAnimateLayout =
+          widget.animationEnabled && _graph.shouldAnimateLayout;
+
       if (shouldAnimateLayout) {
-        logDebug(LogCategory.layout, 'GraphView: Enabling animation - explicitly requested');
+        logDebug(LogCategory.layout,
+            'GraphView: Enabling animation - explicitly requested');
         _layoutStrategy.nodeAnimationStartPosition =
             _getNodeAnimationStartPosition(constrains);
         // Reset animation states for all nodes
@@ -292,7 +309,8 @@ class GraphViewState extends State<GraphView> {
           (node as GraphNodeImpl).resetAnimationState();
         }
       } else {
-        logDebug(LogCategory.layout, 'GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})');
+        logDebug(LogCategory.layout,
+            'GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})');
       }
       _layoutStrategy.performLayout(
         _graph,
@@ -322,17 +340,21 @@ class GraphViewState extends State<GraphView> {
               Listenable.merge([_graph.layoutChangeListenable, _buildState]),
           builder: (context, child) {
             final timestamp = DateTime.now().millisecondsSinceEpoch;
-            logDebug(LogCategory.rendering, 'AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
+            print(
+                '🔄 GraphView AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
+            logDebug(LogCategory.rendering,
+                'AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
             late List<GraphEntity> elements;
             if (_buildState.value == GraphViewBuildState.initialize) {
               if (!_isGeometryUpdateScheduled) {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    logDebug(LogCategory.rendering, 'PostFrameCallback in initialize phase');
+                    logDebug(LogCategory.rendering,
+                        'PostFrameCallback in initialize phase');
                     _updateGraphGeometry();
                     _updateNodeGeometry();
-                    _buildState.value = GraphViewBuildState.performLayout;
+                    _setBuildState(GraphViewBuildState.performLayout);
                     _isGeometryUpdateScheduled = false;
                   }
                 });
@@ -345,9 +367,10 @@ class GraphViewState extends State<GraphView> {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    logDebug(LogCategory.rendering, 'PostFrameCallback in performLayout phase');
+                    logDebug(LogCategory.rendering,
+                        'PostFrameCallback in performLayout phase');
                     _updateGraphGeometry();
-                    _buildState.value = GraphViewBuildState.ready;
+                    _setBuildState(GraphViewBuildState.ready);
                     _isGeometryUpdateScheduled = false;
                   }
                 });
@@ -421,7 +444,8 @@ class GraphViewState extends State<GraphView> {
       animation: _graph,
       builder: (context, _) {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
-        logDebug(LogCategory.rendering, '_buildCommonProviders AnimatedBuilder.builder called at $timestamp');
+        logDebug(LogCategory.rendering,
+            '_buildCommonProviders AnimatedBuilder.builder called at $timestamp');
         return GraphInheritedData(
           data: _data,
           buildState: _buildState.value,

@@ -1,6 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
+import 'package:plough/src/debug/debug_manager.dart';
 
 /// Singleton class that manages the global settings of the Plough library.
 final class Plough {
@@ -68,7 +69,7 @@ final class Plough {
   }
 
   /// Enable logging for specific categories.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// Plough()
@@ -91,9 +92,7 @@ final class Plough {
 
   /// Enable all log categories with debug level.
   Plough enableAllLogCategories([Level level = Level.debug]) {
-    _enabledLogCategories = {
-      for (final cat in LogCategory.values) cat: level
-    };
+    _enabledLogCategories = {for (final cat in LogCategory.values) cat: level};
     if (_debugLogEnabled) {
       configureLogging(
         defaultLevel: level,
@@ -110,5 +109,97 @@ final class Plough {
       configureLogging(defaultLevel: Level.off);
     }
     return this;
+  }
+
+  /// Controls advanced debug features including debug server and performance monitoring.
+  ///
+  /// When set to true, the following features are enabled:
+  ///
+  /// * Debug HTTP server for real-time log monitoring
+  /// * Structured logging with context and metadata
+  /// * Performance monitoring and profiling
+  /// * Web-based debug console
+  bool get debugAdvancedEnabled => _debugAdvancedEnabled;
+
+  bool _debugAdvancedEnabled = false;
+
+  set debugAdvancedEnabled(bool enabled) {
+    _debugAdvancedEnabled = enabled;
+    if (enabled) {
+      initializeDebug();
+    } else {
+      shutdownDebug();
+    }
+  }
+
+  /// Initialize debug features with custom settings.
+  ///
+  /// Example:
+  /// ```dart
+  /// Plough().initializeDebugFeatures(
+  ///   enableServer: true,
+  ///   enablePerformanceMonitoring: true,
+  ///   serverPort: 8080,
+  /// );
+  /// ```
+  Future<void> initializeDebugFeatures({
+    bool enableServer = true,
+    bool enableStructuredLogging = true,
+    bool enablePerformanceMonitoring = true,
+    int serverPort = 8080,
+    bool tryAlternativePorts = true,
+  }) async {
+    logInfo(LogCategory.debug, 'Initializing Plough debug features...');
+
+    await initializeDebug(
+      enableServer: enableServer,
+      enableStructuredLogging: enableStructuredLogging,
+      enablePerformanceMonitoring: enablePerformanceMonitoring,
+      serverPort: serverPort,
+      tryAlternativePorts: tryAlternativePorts,
+    );
+    _debugAdvancedEnabled = true;
+
+    // デバッグサーバーが起動した場合、URLを表示
+    if (enableServer) {
+      if (debugManager.isServerRunning) {
+        logInfo(LogCategory.debug,
+            '🌐 Debug server is running at: ${debugManager.serverUrl}');
+        logInfo(LogCategory.debug,
+            '💡 Open the URL in your browser to access the debug console');
+        logInfo(LogCategory.debug,
+            '🔧 Use CLI tools: python3 debug/simple_cli.py recent --category gesture');
+        if (debugManager.serverPort != serverPort) {
+          logInfo(LogCategory.debug,
+              'ℹ️ Server started on alternative port ${debugManager.serverPort}');
+        }
+      } else {
+        logWarning(LogCategory.debug,
+            '⚠️ Debug server failed to start. Check if port $serverPort is available.');
+        logInfo(
+            LogCategory.debug, '💡 You can still use basic logging features');
+      }
+    }
+
+    logInfo(
+        LogCategory.debug, 'Plough debug features initialized successfully');
+  }
+
+  /// Shutdown all debug features.
+  Future<void> shutdownDebugFeatures() async {
+    logInfo(LogCategory.debug, 'Shutting down Plough debug features...');
+    await shutdownDebug();
+    _debugAdvancedEnabled = false;
+    logInfo(LogCategory.debug, 'Plough debug features shut down successfully');
+  }
+
+  /// Get debug server URL if running.
+  String? get debugServerUrl {
+    return debugManager.isServerRunning ? debugManager.serverUrl : null;
+  }
+
+  /// Generate comprehensive debug report.
+  Map<String, dynamic> generateDebugReport() {
+    return debugManager.generateDebugReport();
   }
 }

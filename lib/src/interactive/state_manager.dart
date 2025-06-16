@@ -91,6 +91,14 @@ abstract base class GraphStateManager<T> with Diagnosticable {
     }
   }
 
+  /// 再描画をトリガーしない「静かな」状態削除
+  void removeStateSilently(GraphId entityId) {
+    _states.remove(entityId);
+    if (_lastActiveEntityId == entityId) {
+      _lastActiveEntityId = null;
+    }
+  }
+
   void clearAllStates() {
     _states.clear();
     _lastActiveEntityId = null; // Clear last active ID

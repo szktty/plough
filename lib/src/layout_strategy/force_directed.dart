@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
+import 'package:plough/src/graph/node.dart';
 
 /// A physics-based layout strategy using a force-directed algorithm.
 ///
@@ -88,10 +89,15 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       positionNode(centerNode, size.center(Offset.zero));
     }
 
-    // ノードの初期配置
+    // ノードの初期配置（既に配置されているノードはスキップ）
     final width = size.width - padding.left - padding.right;
     final height = size.height - padding.top - padding.bottom;
     for (final node in graph.nodes) {
+      // 既に配置されているノードは初期配置をスキップ
+      final nodeImpl = node as GraphNodeImpl;
+      if (nodeImpl.isArranged && node.logicalPosition != Offset.zero) {
+        continue;
+      }
       final dx = random.nextDouble() * width + padding.left;
       final dy = random.nextDouble() * height + padding.top;
       positionNode(node, Offset(dx, dy));

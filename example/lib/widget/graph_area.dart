@@ -4,7 +4,6 @@ import 'package:example/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:platform/platform.dart';
 import 'package:plough/plough.dart';
-import 'package:plough/src/interactive/events.dart';
 import 'package:provider/provider.dart';
 
 // lib/widget/graph_area.dart
@@ -71,13 +70,12 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
   @override
   void onSelectionChange(GraphSelectionChangeEvent event) {
     super.onSelectionChange(event);
-    final graph = appState.selectedData.graph;
 
     if (event.selectedIds.isNotEmpty || event.deselectedIds.isNotEmpty) {
       // Shorten IDs for cleaner debug output
       String idStr(GraphId id) =>
           id.value.substring(0, math.min(4, id.value.length));
-      debugPrint('[GraphAreaBehavior] Selection changed: '
+      debugPrint('Selection changed: '
           'Selected: ${event.selectedIds.map(idStr).join(', ')}, '
           'Deselected: ${event.deselectedIds.map(idStr).join(', ')}, '
           'Current: ${event.currentSelectionIds.map(idStr).join(', ')}');
@@ -94,7 +92,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
       String idStr(GraphId id) =>
           id.value.substring(0, math.min(4, id.value.length));
       debugPrint(
-        '[GraphAreaBehavior] $type tapped (${event.tapCount}x): ${event.entityIds.map(idStr).join(', ')} at ${event.details.localPosition}',
+        '$type tapped (${event.tapCount}x): ${event.entityIds.map(idStr).join(', ')} at ${event.details.localPosition}',
       );
     }
   }
@@ -106,7 +104,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
       String idStr(GraphId id) =>
           id.value.substring(0, math.min(4, id.value.length));
       debugPrint(
-        '[GraphAreaBehavior] Drag started for: ${event.entityIds.map(idStr).join(', ')} from ${event.details.localPosition}',
+        'Drag started for: ${event.entityIds.map(idStr).join(', ')} from ${event.details.localPosition}',
       );
     }
   }
@@ -118,7 +116,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
       String idStr(GraphId id) =>
           id.value.substring(0, math.min(4, id.value.length));
       debugPrint(
-        '[GraphAreaBehavior] Drag ended for: ${event.entityIds.map(idStr).join(', ')} at ${event.details.localPosition}',
+        'Drag ended for: ${event.entityIds.map(idStr).join(', ')} at ${event.details.localPosition}',
       );
     }
   }
@@ -131,7 +129,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
     String idStr(GraphId id) =>
         id.value.substring(0, math.min(4, id.value.length));
     debugPrint(
-      '[GraphAreaBehavior] Hover Enter $entityType: ${idStr(event.entityId)} at ${event.details.localPosition}',
+      'Hover Enter $entityType: ${idStr(event.entityId)} at ${event.details.localPosition}',
     );
   }
 
@@ -143,7 +141,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
     String idStr(GraphId id) =>
         id.value.substring(0, math.min(4, id.value.length));
     debugPrint(
-      '[GraphAreaBehavior] Hover End $entityType: ${idStr(event.entityId)} at ${event.details.localPosition}',
+      'Hover End $entityType: ${idStr(event.entityId)} at ${event.details.localPosition}',
     );
   }
 
@@ -155,7 +153,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
     String idStr(GraphId id) =>
         id.value.substring(0, math.min(4, id.value.length));
     debugPrint(
-      '[GraphAreaBehavior] Tooltip Show $entityType: ${idStr(event.entityId)} (Trigger: ${event.triggerMode})',
+      'Tooltip Show $entityType: ${idStr(event.entityId)} (Trigger: ${event.triggerMode})',
     );
   }
 
@@ -167,7 +165,7 @@ class GraphAreaBehavior extends GraphViewDefaultBehavior {
     String idStr(GraphId id) =>
         id.value.substring(0, math.min(4, id.value.length));
     debugPrint(
-      '[GraphAreaBehavior] Tooltip Hide $entityType: ${idStr(event.entityId)}',
+      'Tooltip Hide $entityType: ${idStr(event.entityId)}',
     );
   }
 }

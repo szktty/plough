@@ -18,6 +18,7 @@ import 'package:plough/src/interactive/tap_state.dart';
 import 'package:plough/src/interactive/tooltip_state.dart';
 import 'package:plough/src/tooltip/behavior.dart';
 import 'package:plough/src/utils/logger.dart';
+import 'package:plough/src/debug/external_debug_client.dart';
 
 @internal
 class GraphGestureManager {
@@ -100,7 +101,7 @@ class GraphGestureManager {
   GraphHitTestResult createHitTestResult(Offset position) {
     final node = findNodeAt(position);
     final link = node == null ? findLinkAt(position) : null;
-    
+
     return GraphHitTestResult(
       localPosition: position,
       node: node,
@@ -111,8 +112,9 @@ class GraphGestureManager {
   /// Determines if a gesture should be consumed based on the current mode.
   bool shouldConsumeGestureAt(Offset position) {
     final hitTestResult = createHitTestResult(position);
-    logDebug(LogCategory.gesture, 'shouldConsumeGestureAt: mode=$gestureMode, hasEntity=${hitTestResult.hasEntity}');
-    
+    logDebug(LogCategory.gesture,
+        'shouldConsumeGestureAt: mode=$gestureMode, hasEntity=${hitTestResult.hasEntity}');
+
     bool result;
     switch (gestureMode) {
       case GraphGestureMode.exclusive:
@@ -120,15 +122,18 @@ class GraphGestureManager {
         logDebug(LogCategory.gesture, 'Exclusive mode: consuming gesture');
       case GraphGestureMode.nodeEdgeOnly:
         result = hitTestResult.hasEntity;
-        logDebug(LogCategory.gesture, 'NodeEdgeOnly mode: ${result ? 'consuming' : 'not consuming'} (hasEntity=${hitTestResult.hasEntity})');
+        logDebug(LogCategory.gesture,
+            'NodeEdgeOnly mode: ${result ? 'consuming' : 'not consuming'} (hasEntity=${hitTestResult.hasEntity})');
       case GraphGestureMode.transparent:
         result = false;
-        logDebug(LogCategory.gesture, 'Transparent mode: not consuming gesture');
+        logDebug(
+            LogCategory.gesture, 'Transparent mode: not consuming gesture');
       case GraphGestureMode.custom:
         result = shouldConsumeGesture?.call(position, hitTestResult) ?? true;
-        logDebug(LogCategory.gesture, 'Custom mode: ${result ? 'consuming' : 'not consuming'}');
+        logDebug(LogCategory.gesture,
+            'Custom mode: ${result ? 'consuming' : 'not consuming'}');
     }
-    
+
     return result;
   }
 
@@ -170,7 +175,8 @@ class GraphGestureManager {
       );
       viewBehavior.onSelectionChange(event);
     } else {
-      logDebug(LogCategory.selection, '_dispatchSelectionChange: No actual changes, skipping event dispatch');
+      logDebug(LogCategory.selection,
+          '_dispatchSelectionChange: No actual changes, skipping event dispatch');
     }
   }
 
@@ -186,7 +192,8 @@ class GraphGestureManager {
     );
 
     if (currentSelection.contains(entityId)) {
-      logDebug(LogCategory.selection, 'Entity is already selected, deselecting');
+      logDebug(
+          LogCategory.selection, 'Entity is already selected, deselecting');
       deselectEntities([entityId], details: details);
     } else {
       logDebug(LogCategory.selection, 'Entity not selected, selecting');
@@ -209,13 +216,15 @@ class GraphGestureManager {
 
     final idsToSelect =
         entityIds.where((id) => !currentSelection.contains(id)).toList();
-    logDebug(LogCategory.selection, 'IDs to select: [${idsToSelect.map((id) => id.value.substring(0, 4)).join(', ')}]');
-    
+    logDebug(LogCategory.selection,
+        'IDs to select: [${idsToSelect.map((id) => id.value.substring(0, 4)).join(', ')}]');
+
     if (idsToSelect.isNotEmpty) {
       final othersToDeselect =
           currentSelection.where((id) => !entityIds.contains(id)).toList();
       if (othersToDeselect.isNotEmpty) {
-        logDebug(LogCategory.selection, 'Deselecting others first: [${othersToDeselect.map((id) => id.value.substring(0, 4)).join(', ')}]');
+        logDebug(LogCategory.selection,
+            'Deselecting others first: [${othersToDeselect.map((id) => id.value.substring(0, 4)).join(', ')}]');
         _deselectEntitiesInternal(othersToDeselect);
         newlyDeselected.addAll(othersToDeselect);
       }
@@ -245,11 +254,13 @@ class GraphGestureManager {
           );
         }
       } else {
-        logDebug(LogCategory.selection, 'Entity ${entityId.value.substring(0, 4)} already selected, skipping');
+        logDebug(LogCategory.selection,
+            'Entity ${entityId.value.substring(0, 4)} already selected, skipping');
       }
     }
 
-    logDebug(LogCategory.selection, 'About to dispatch: newlySelected=[${newlySelected.map((id) => id.value.substring(0, 4)).join(', ')}], newlyDeselected=[${newlyDeselected.map((id) => id.value.substring(0, 4)).join(', ')}]');
+    logDebug(LogCategory.selection,
+        'About to dispatch: newlySelected=[${newlySelected.map((id) => id.value.substring(0, 4)).join(', ')}], newlyDeselected=[${newlyDeselected.map((id) => id.value.substring(0, 4)).join(', ')}]');
     _dispatchSelectionChange(newlySelected, newlyDeselected, details: details);
   }
 
@@ -302,57 +313,122 @@ class GraphGestureManager {
           newlyDeselected.add(entity.id);
         }
       } else {
-        logDebug(LogCategory.selection, 'Entity ${entityId.value.substring(0, 4)} not selected, skipping deselect');
+        logDebug(LogCategory.selection,
+            'Entity ${entityId.value.substring(0, 4)} not selected, skipping deselect');
       }
     }
-    logDebug(LogCategory.selection, 'About to dispatch deselection: newlyDeselected=[${newlyDeselected.map((id) => id.value.substring(0, 4)).join(', ')}]');
+    logDebug(LogCategory.selection,
+        'About to dispatch deselection: newlyDeselected=[${newlyDeselected.map((id) => id.value.substring(0, 4)).join(', ')}]');
     _dispatchSelectionChange([], newlyDeselected, details: details);
   }
 
   void deselectAll({PointerEventDetails? details}) {
     logDebug(LogCategory.selection, 'deselectAll called');
     final currentSelection = graph.selectedEntityIds.toList();
-    logDebug(LogCategory.selection, 'Current selection: [${currentSelection.map((id) => id.value.substring(0, 4)).join(', ')}]');
+    logDebug(LogCategory.selection,
+        'Current selection: [${currentSelection.map((id) => id.value.substring(0, 4)).join(', ')}]');
     if (currentSelection.isNotEmpty) {
-      logDebug(LogCategory.selection, 'Deselecting all ${currentSelection.length} entities');
+      logDebug(LogCategory.selection,
+          'Deselecting all ${currentSelection.length} entities');
       deselectEntities(currentSelection, details: details);
     } else {
-      logDebug(LogCategory.selection, 'No entities selected, skipping deselect to avoid unnecessary rebuilds');
+      logDebug(LogCategory.selection,
+          'No entities selected, skipping deselect to avoid unnecessary rebuilds');
       // Don't call deselectEntities when there's nothing to deselect
       // This prevents unnecessary event dispatching and rebuilds
     }
   }
 
   void handlePointerDown(PointerDownEvent event) {
-    logDebug(LogCategory.gesture, 'Starting handlePointerDown at ${event.localPosition}, mode: $gestureMode');
+    logDebug(LogCategory.gesture,
+        'Starting handlePointerDown at ${event.localPosition}, mode: $gestureMode');
     
+    // Send structured gesture event to debug server
+    externalDebugClient.sendLog(
+      category: LogCategory.gesture,
+      level: 'DEBUG',
+      message: 'Pointer down event',
+      metadata: {
+        'event_type': 'pointerDown',
+        'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+        'gesture_mode': gestureMode.name,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     _nodeHoverManager.handlePointerDown(event);
     _linkHoverManager.handlePointerDown(event);
 
     final node = findNodeAt(event.localPosition);
     if (node != null) {
-      logDebug(LogCategory.gesture, 'Node found: ${node.id.value.substring(0, 4)}');
+      logDebug(
+          LogCategory.gesture, 'Node found: ${node.id.value.substring(0, 4)}');
+      
+      // Send structured node event to debug server
+      externalDebugClient.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'Node found at pointer down',
+        metadata: {
+          'event_type': 'nodeFound',
+          'nodeId': node.id.value,
+          'node_id': node.id.value, // backward compatibility
+          'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+          'node_position': {'x': node.logicalPosition.dx, 'y': node.logicalPosition.dy},
+          'can_select': node.canSelect,
+          'can_drag': node.canDrag,
+          'is_selected': graph.selectedEntityIds.contains(node.id),
+          'gesture_mode': gestureMode.name,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+      
       _nodeTapManager.handlePointerDown(node.id, event);
       _nodeDragManager.handlePointerDown(node.id, event);
       // Return early for all modes except transparent
       if (gestureMode == GraphGestureMode.transparent) {
-        logDebug(LogCategory.gesture, 'Continuing after node processing (transparent mode)');
+        logDebug(LogCategory.gesture,
+            'Continuing after node processing (transparent mode)');
       } else {
-        logDebug(LogCategory.gesture, 'Early return for node (mode: $gestureMode)');
+        logDebug(
+            LogCategory.gesture, 'Early return for node (mode: $gestureMode)');
         return;
       }
     }
 
     final link = findLinkAt(event.localPosition);
     if (link != null) {
-      logDebug(LogCategory.gesture, 'Link found: ${link.id.value.substring(0, 4)}');
+      logDebug(
+          LogCategory.gesture, 'Link found: ${link.id.value.substring(0, 4)}');
+      
+      // Send structured link event to debug server
+      externalDebugClient.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'Link found at pointer down',
+        metadata: {
+          'event_type': 'linkFound',
+          'linkId': link.id.value,
+          'link_id': link.id.value, // backward compatibility
+          'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+          'source_node_id': link.source.id.value,
+          'target_node_id': link.target.id.value,
+          'can_select': link.canSelect,
+          'is_selected': graph.selectedEntityIds.contains(link.id),
+          'gesture_mode': gestureMode.name,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+      
       _linkTapManager.handlePointerDown(link.id, event);
       _linkDragManager.handlePointerDown(link.id, event);
       // Return early for all modes except transparent
       if (gestureMode == GraphGestureMode.transparent) {
-        logDebug(LogCategory.gesture, 'Continuing after link processing (transparent mode)');
+        logDebug(LogCategory.gesture,
+            'Continuing after link processing (transparent mode)');
       } else {
-        logDebug(LogCategory.gesture, 'Early return for link (mode: $gestureMode)');
+        logDebug(
+            LogCategory.gesture, 'Early return for link (mode: $gestureMode)');
         return;
       }
     }
@@ -361,38 +437,110 @@ class GraphGestureManager {
     // Double-check to prevent race conditions
     final reCheckNode = findNodeAt(event.localPosition);
     final reCheckLink = findLinkAt(event.localPosition);
-    
-    if (node == null && link == null && reCheckNode == null && reCheckLink == null) {
-      logDebug(LogCategory.gesture, 'True background area (double-checked), calling background callback');
+
+    if (node == null &&
+        link == null &&
+        reCheckNode == null &&
+        reCheckLink == null) {
+      logDebug(LogCategory.gesture,
+          'True background area (double-checked), calling background callback');
       onBackgroundTapped?.call(event.localPosition);
       deselectAll(details: _lastPointerDetails);
     } else {
-      logDebug(LogCategory.gesture, 'Entity found (or re-found), not calling background callback');
+      logDebug(LogCategory.gesture,
+          'Entity found (or re-found), not calling background callback');
     }
   }
 
   void handlePointerUp(PointerUpEvent event) {
-    logDebug(LogCategory.gesture, 'Starting handlePointerUp at ${event.localPosition}, mode: $gestureMode');
+    logDebug(LogCategory.gesture,
+        'Starting handlePointerUp at ${event.localPosition}, mode: $gestureMode');
     _lastPointerDetails = PointerEventDetails.fromPointerEvent(event);
     final details = _lastPointerDetails!;
-    
+
+    // Send structured gesture event to debug server
+    externalDebugClient.sendLog(
+      category: LogCategory.gesture,
+      level: 'DEBUG',
+      message: 'Pointer up event',
+      metadata: {
+        'event_type': 'pointerUp',
+        'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+        'gesture_mode': gestureMode.name,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     // Track if we're processing an entity
     bool entityProcessed = false;
 
     final nodeTargetId =
         _nodeTapManager.trackedEntityId ?? _nodeDragManager.lastDraggedEntityId;
-    logDebug(LogCategory.gesture, 'Node target ID: ${nodeTargetId?.value.substring(0, 4) ?? 'null'}');
+    logDebug(LogCategory.gesture,
+        'Node target ID: ${nodeTargetId?.value.substring(0, 4) ?? 'null'}');
     
+    // Send structured node target info to debug server
+    externalDebugClient.sendLog(
+      category: LogCategory.gesture,
+      level: 'DEBUG',
+      message: 'Node target tracking',
+      metadata: {
+        'event_type': 'nodeTargetTracking',
+        'nodeId': nodeTargetId?.value,
+        'node_id': nodeTargetId?.value, // backward compatibility
+        'tracked_by_tap_manager': _nodeTapManager.trackedEntityId?.value,
+        'tracked_by_drag_manager': _nodeDragManager.lastDraggedEntityId?.value,
+        'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     if (nodeTargetId != null) {
       final node = graph.getNode(nodeTargetId);
       if (node == null) {
         logDebug(LogCategory.gesture, 'Node not found, cleaning up');
+        
+        // Send structured cleanup event to debug server
+        externalDebugClient.sendLog(
+          category: LogCategory.gesture,
+          level: 'WARNING',
+          message: 'Node not found during cleanup',
+          metadata: {
+            'event_type': 'nodeNotFoundCleanup',
+            'nodeId': nodeTargetId.value,
+            'node_id': nodeTargetId.value, // backward compatibility
+            'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+        
         _nodeTapManager.cleanupTapState(nodeTargetId);
         _nodeDragManager.cancel(nodeTargetId);
         return;
       }
 
-      logDebug(LogCategory.gesture, 'Processing node: ${node.id.value.substring(0, 4)}');
+      logDebug(LogCategory.gesture,
+          'Processing node: ${node.id.value.substring(0, 4)}');
+      
+      // Send structured node processing event to debug server
+      externalDebugClient.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'Processing node at pointer up',
+        metadata: {
+          'event_type': 'nodeProcessing',
+          'nodeId': node.id.value,
+          'node_id': node.id.value, // backward compatibility
+          'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+          'node_position': {'x': node.logicalPosition.dx, 'y': node.logicalPosition.dy},
+          'can_select': node.canSelect,
+          'can_drag': node.canDrag,
+          'is_selected': graph.selectedEntityIds.contains(node.id),
+          'was_being_dragged': _nodeDragManager.isDragging(nodeTargetId),
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+      
       _nodeTapManager.handlePointerUp(nodeTargetId, event);
       _nodeDragManager.handlePointerUp(nodeTargetId, event);
 
@@ -472,11 +620,12 @@ class GraphGestureManager {
       }
       entityProcessed = true;
     }
-    
+
     // Check if we should call background callback
     if (!entityProcessed && gestureMode == GraphGestureMode.nodeEdgeOnly) {
       // No entity was processed, this is a true background tap
-      logDebug(LogCategory.gesture, 'handlePointerUp: No entity processed, might be background tap');
+      logDebug(LogCategory.gesture,
+          'handlePointerUp: No entity processed, might be background tap');
     }
   }
 
@@ -515,7 +664,8 @@ class GraphGestureManager {
         // Use the details captured during PointerDown
         if (_lastPointerDetails == null) {
           // Should not happen if PointerDown was processed correctly
-          logError(LogCategory.gesture, '_lastPointerDetails is null in handlePanStart');
+          logError(LogCategory.gesture,
+              '_lastPointerDetails is null in handlePanStart');
           return;
         }
         final event = GraphDragStartEvent(
@@ -523,12 +673,15 @@ class GraphGestureManager {
           details: _lastPointerDetails!, // Assumes not null after PointerDown
         );
         viewBehavior.onDragStart(event);
-        // Cancel any pending tap on the node being dragged
-        // _nodeTapManager.cancel(node.id); // Removed: Let handlePanUpdate cancel based on slop
+        // ドラッグ開始時にタップタイマーを即座にキャンセルして再描画を防ぐ
+        _nodeTapManager.cancel(node.id);
+        logDebug(LogCategory.gesture,
+            'Cancelled tap timer for dragged node: ${node.id.value.substring(0, 4)}');
       }
       // In nodeEdgeOnly mode, we handled the node, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        logDebug(LogCategory.gesture, 'handlePanStart: Skipping background callback - node handled in nodeEdgeOnly mode');
+        logDebug(LogCategory.gesture,
+            'handlePanStart: Skipping background callback - node handled in nodeEdgeOnly mode');
         return;
       }
       // In transparent mode, don't return early so gestures can pass through
@@ -553,12 +706,15 @@ class GraphGestureManager {
           details: _lastPointerDetails!, // Assumes not null after PointerDown
         );
         viewBehavior.onDragStart(event);
-        // Cancel any pending tap on the link being dragged
-        // _linkTapManager.cancel(link.id); // Removed: Let handlePanUpdate cancel based on slop
+        // ドラッグ開始時にタップタイマーを即座にキャンセルして再描画を防ぐ
+        _linkTapManager.cancel(link.id);
+        logDebug(LogCategory.gesture,
+            'Cancelled tap timer for dragged link: ${link.id.value.substring(0, 4)}');
       }
       // In nodeEdgeOnly mode, we handled the link, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        logDebug(LogCategory.gesture, 'handlePanStart: Skipping background callback - link handled in nodeEdgeOnly mode');
+        logDebug(LogCategory.gesture,
+            'handlePanStart: Skipping background callback - link handled in nodeEdgeOnly mode');
         return;
       }
       // In transparent mode, don't return early so gestures can pass through
@@ -571,12 +727,17 @@ class GraphGestureManager {
     // Double-check to prevent race conditions
     final reCheckNode = findNodeAt(details.localPosition);
     final reCheckLink = findLinkAt(details.localPosition);
-    
-    if (node == null && link == null && reCheckNode == null && reCheckLink == null) {
-      logDebug(LogCategory.gesture, 'handlePanStart: True background pan (double-checked), calling callback');
+
+    if (node == null &&
+        link == null &&
+        reCheckNode == null &&
+        reCheckLink == null) {
+      logDebug(LogCategory.gesture,
+          'handlePanStart: True background pan (double-checked), calling callback');
       onBackgroundPanStart?.call(details.localPosition);
     } else {
-      logDebug(LogCategory.gesture, 'handlePanStart: Entity found (or re-found), not calling background callback');
+      logDebug(LogCategory.gesture,
+          'handlePanStart: Entity found (or re-found), not calling background callback');
     }
   }
 
@@ -584,7 +745,8 @@ class GraphGestureManager {
     // DO NOT create a new PointerEventDetails from DragUpdateDetails
     // Use the last known details
     if (_lastPointerDetails == null) {
-      logError(LogCategory.gesture, '_lastPointerDetails is null in handlePanUpdate');
+      logError(LogCategory.gesture,
+          '_lastPointerDetails is null in handlePanUpdate');
       // Cannot proceed without details, maybe cancel drag?
       // For now, just return to avoid crash
       return;
@@ -635,7 +797,8 @@ class GraphGestureManager {
       _nodeTapManager.handlePanUpdate(node.id, details);
       // In nodeEdgeOnly mode, we're handling a node, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        logDebug(LogCategory.gesture, 'handlePanUpdate: Skipping background callback - node handled in nodeEdgeOnly mode');
+        logDebug(LogCategory.gesture,
+            'handlePanUpdate: Skipping background callback - node handled in nodeEdgeOnly mode');
         return;
       }
     }
@@ -644,7 +807,8 @@ class GraphGestureManager {
       _linkTapManager.handlePanUpdate(link.id, details);
       // In nodeEdgeOnly mode, we're handling a link, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        logDebug(LogCategory.gesture, 'handlePanUpdate: Skipping background callback - link handled in nodeEdgeOnly mode');
+        logDebug(LogCategory.gesture,
+            'handlePanUpdate: Skipping background callback - link handled in nodeEdgeOnly mode');
         return;
       }
     }
@@ -659,12 +823,17 @@ class GraphGestureManager {
     // Double-check to prevent race conditions
     final reCheckNode = findNodeAt(details.localPosition);
     final reCheckLink = findLinkAt(details.localPosition);
-    
-    if (node == null && link == null && reCheckNode == null && reCheckLink == null) {
-      logDebug(LogCategory.gesture, 'handlePanUpdate: True background pan (double-checked), calling callback');
+
+    if (node == null &&
+        link == null &&
+        reCheckNode == null &&
+        reCheckLink == null) {
+      logDebug(LogCategory.gesture,
+          'handlePanUpdate: True background pan (double-checked), calling callback');
       onBackgroundPanUpdate?.call(details.localPosition, details.delta);
     } else {
-      logDebug(LogCategory.gesture, 'handlePanUpdate: Entity found (or re-found), not calling background callback');
+      logDebug(LogCategory.gesture,
+          'handlePanUpdate: Entity found (or re-found), not calling background callback');
     }
   }
 
@@ -677,18 +846,29 @@ class GraphGestureManager {
       final endedDragIds = _nodeDragManager.handlePanEnd(details);
       if (endedDragIds.isNotEmpty) {
         if (endPointerDetails == null) {
-          logError(LogCategory.gesture, '_lastPointerDetails is null in handlePanEnd');
+          logError(LogCategory.gesture,
+              '_lastPointerDetails is null in handlePanEnd');
         } else {
           final event = GraphDragEndEvent(
             entityIds: endedDragIds,
             details: endPointerDetails, // Use last known details
           );
           viewBehavior.onDragEnd(event);
+
+          // ドラッグ終了時に残っているタップ状態を静かにクリーンアップ
+          for (final nodeId in endedDragIds) {
+            if (_nodeTapManager.hasState(nodeId)) {
+              logDebug(LogCategory.gesture,
+                  'Cleaning up tap state after drag end: ${nodeId.value.substring(0, 4)}');
+              _nodeTapManager.removeStateSilently(nodeId);
+            }
+          }
         }
       }
       // In nodeEdgeOnly mode, we handled a node drag, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        logDebug(LogCategory.gesture, 'handlePanEnd: Skipping background callback - node drag handled in nodeEdgeOnly mode');
+        logDebug(LogCategory.gesture,
+            'handlePanEnd: Skipping background callback - node drag handled in nodeEdgeOnly mode');
         return;
       }
       return;
@@ -713,7 +893,8 @@ class GraphGestureManager {
       }
       // In nodeEdgeOnly mode, we handled a link drag, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        logDebug(LogCategory.gesture, 'handlePanEnd: Skipping background callback - link drag handled in nodeEdgeOnly mode');
+        logDebug(LogCategory.gesture,
+            'handlePanEnd: Skipping background callback - link drag handled in nodeEdgeOnly mode');
         return;
       }
       return;
@@ -726,13 +907,16 @@ class GraphGestureManager {
         final node = findNodeAt(endPointerDetails.localPosition);
         final link = findLinkAt(endPointerDetails.localPosition);
         if (node == null && link == null) {
-          logDebug(LogCategory.gesture, 'handlePanEnd: Calling background callback (no entity at position)');
+          logDebug(LogCategory.gesture,
+              'handlePanEnd: Calling background callback (no entity at position)');
           onBackgroundPanEnd?.call(endPointerDetails.localPosition);
         } else {
-          logDebug(LogCategory.gesture, 'handlePanEnd: NOT calling background callback (entity found at position)');
+          logDebug(LogCategory.gesture,
+              'handlePanEnd: NOT calling background callback (entity found at position)');
         }
       } else {
-        logDebug(LogCategory.gesture, 'handlePanEnd: Calling background callback (not nodeEdgeOnly mode)');
+        logDebug(LogCategory.gesture,
+            'handlePanEnd: Calling background callback (not nodeEdgeOnly mode)');
         onBackgroundPanEnd?.call(endPointerDetails.localPosition);
       }
     }

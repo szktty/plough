@@ -3,34 +3,34 @@ import 'package:plough/plough.dart';
 import 'dart:async';
 
 void main() {
-  runApp(const DebugApp());
+  runApp(const WorkbenchApp());
 }
 
-class DebugApp extends StatelessWidget {
-  const DebugApp({super.key});
+class WorkbenchApp extends StatelessWidget {
+  const WorkbenchApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Plough Debug App',
+      title: 'Plough Workbench',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const DebugHomePage(),
+      home: const WorkbenchHomePage(),
     );
   }
 }
 
-class DebugHomePage extends StatefulWidget {
-  const DebugHomePage({super.key});
+class WorkbenchHomePage extends StatefulWidget {
+  const WorkbenchHomePage({super.key});
 
   @override
-  State<DebugHomePage> createState() => _DebugHomePageState();
+  State<WorkbenchHomePage> createState() => _WorkbenchHomePageState();
 }
 
-class _DebugHomePageState extends State<DebugHomePage> {
+class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   late Graph graph;
   final List<DebugEvent> _events = [];
   final _eventStreamController = StreamController<DebugEvent>.broadcast();
@@ -440,7 +440,7 @@ class _DebugHomePageState extends State<DebugHomePage> {
     });
     _logEvent(DebugEvent(
       type: EventType.layout,
-      source: 'DebugHomePage',
+      source: 'WorkbenchHomePage',
       message: 'Layout strategy changed',
       timestamp: DateTime.now(),
       details: 'Strategy: $_currentLayoutStrategy',
@@ -452,7 +452,7 @@ class _DebugHomePageState extends State<DebugHomePage> {
     setState(() {});
     _logEvent(DebugEvent(
       type: EventType.layout,
-      source: 'DebugHomePage',
+      source: 'WorkbenchHomePage',
       message: 'Layout reset',
       timestamp: DateTime.now(),
     ));
@@ -465,7 +465,7 @@ class _DebugHomePageState extends State<DebugHomePage> {
     });
     _logEvent(DebugEvent(
       type: EventType.callback,
-      source: 'DebugHomePage',
+      source: 'WorkbenchHomePage',
       message: 'Data preset selected',
       timestamp: DateTime.now(),
       details: 'Preset: $_currentDataPreset',
@@ -477,7 +477,7 @@ class _DebugHomePageState extends State<DebugHomePage> {
     setState(() {});
     _logEvent(DebugEvent(
       type: EventType.callback,
-      source: 'DebugHomePage',
+      source: 'WorkbenchHomePage',
       message: 'Graph data reloaded',
       timestamp: DateTime.now(),
     ));
@@ -488,7 +488,7 @@ class _DebugHomePageState extends State<DebugHomePage> {
     setState(() {});
     _logEvent(DebugEvent(
       type: EventType.rebuild,
-      source: 'DebugHomePage',
+      source: 'WorkbenchHomePage',
       message: 'Force rebuild triggered',
       timestamp: DateTime.now(),
     ));

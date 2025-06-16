@@ -1,5 +1,5 @@
-name: plough_debug_app
-description: A debug application for Plough package development
+name: plough_workbench
+description: A workbench application for testing and developing Plough features
 version: 1.0.0+1
 publish_to: 'none'
 

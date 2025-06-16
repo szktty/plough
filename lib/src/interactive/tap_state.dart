@@ -46,9 +46,10 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   GraphEntityTapStateManager({
     required super.gestureManager,
     required this.tooltipTriggerMode,
-    // Use constants from GestureBinding
-    this.doubleTapTimeout = kDoubleTapTimeout,
-    this.touchSlop = kTouchSlop * 4, // Increase touch slop significantly for more forgiving taps
+    // ダブルタップタイムアウトを大幅に短縮してドラッグ時の点滅を防ぐ
+    this.doubleTapTimeout = const Duration(milliseconds: 100), // 300ms -> 100ms
+    this.touchSlop = kTouchSlop *
+        4, // Increase touch slop significantly for more forgiving taps
     this.doubleTapSlop = kDoubleTapSlop,
   });
 
@@ -140,7 +141,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     );
 
     if (isWithinSlop) {
-      logDebug(LogCategory.tap, 'Tap up within slop for $entityId (Tap Count: ${state.tapCount})');
+      logDebug(LogCategory.tap,
+          'Tap up within slop for $entityId (Tap Count: ${state.tapCount})');
       state.completed = true; // Mark as completed
       logDebug(
         LogCategory.tap,
@@ -165,7 +167,9 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
             LogCategory.tap,
             'Double tap timer expired for $entityId, removing state.',
           );
-          removeState(entityId); // Clean up state after confirmation
+
+          // 静かに状態を削除して再描画を防ぐ
+          removeStateSilently(entityId);
         });
         // Don't remove state immediately for single taps - let the timer handle it
       } else {
@@ -179,7 +183,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         // Don't remove state immediately - let GraphGestureManager check completion first
         // Schedule removal for next frame to allow gesture manager to process
         Timer(Duration.zero, () {
-          removeState(entityId);
+          removeStateSilently(entityId);
         });
       }
     } else {
@@ -201,7 +205,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         !state.cancelled &&
         !state.completed &&
         !_isWithinTapSlop(state.downPosition, details.localPosition)) {
-      logDebug(LogCategory.tap, 'Tap cancelled for $entityId due to pan update movement.');
+      logDebug(LogCategory.tap,
+          'Tap cancelled for $entityId due to pan update movement.');
       logDebug(
         LogCategory.tap,
         'handlePanUpdate ($entityId): Cancelling due to movement beyond slop during pan.',
@@ -229,8 +234,15 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         'cancel ($entityId): Setting cancelled=true, removing state.',
       );
       state.cancelled = true;
-      state.doubleTapTimer?.cancel();
-      removeState(entityId);
+
+      // タイマーをキャンセルして、不要な状態変更通知を防ぐ
+      if (state.doubleTapTimer != null) {
+        state.doubleTapTimer!.cancel();
+        state.doubleTapTimer = null;
+      }
+
+      // 状態を静かに削除して、再描画を防ぐ
+      removeStateSilently(entityId);
       // Hide tooltip if it was shown by a tap that got cancelled
       if (tooltipTriggerMode == GraphTooltipTriggerMode.tap &&
           state.completed) {

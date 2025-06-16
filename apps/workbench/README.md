@@ -1,6 +1,6 @@
-# Plough Debug App
+# Plough Workbench
 
-A Flutter application specifically designed for debugging and monitoring the Plough package during development.
+A workbench application for testing and developing Plough features interactively.
 
 ## Features
 
@@ -15,7 +15,7 @@ A Flutter application specifically designed for debugging and monitoring the Plo
 From the project root directory:
 
 ```bash
-cd apps/debug_app
+cd apps/workbench
 flutter pub get
 flutter run -d macos  # or your preferred device
 ```

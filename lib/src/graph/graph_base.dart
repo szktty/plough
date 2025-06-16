@@ -171,7 +171,7 @@ abstract class Graph implements Listenable {
   /// Marks the graph as needing a layout recalculation.
   ///
   /// This triggers [GraphView] to recalculate node positions during its next update cycle.
-  /// 
+  ///
   /// [shouldAnimate] determines whether the layout change should be animated.
   /// Defaults to false to avoid unnecessary animations on every rebuild.
   void markNeedsLayout({bool shouldAnimate = false});
@@ -218,15 +218,17 @@ class GraphImpl
   late final ValueNotifier<GraphData> state;
 
   final Map<GraphId, List<GraphLinkData>> _nodeDependencies = {};
-  
+
   /// Notifier for layout-related changes only (excludes selection changes)
   final ValueNotifier<int> _layoutChangeNotifier = ValueNotifier(0);
-  
+
   /// Getter for layout-specific listenable
   Listenable get layoutChangeListenable => _layoutChangeNotifier;
-  
+
   /// Notify layout-related changes
   void _notifyLayoutChange() {
+    print(
+        '📐 Graph._notifyLayoutChange() called - value: ${_layoutChangeNotifier.value} -> ${_layoutChangeNotifier.value + 1}');
     _layoutChangeNotifier.value++;
   }
 
@@ -631,19 +633,21 @@ class GraphImpl
 
 extension GraphInternal on GraphImpl {
   bool get needsLayout => state.value.needsLayout;
-  
+
   bool get shouldAnimateLayout => state.value.shouldAnimateLayout;
 
   void onLayoutFinished() {
-    setState(state.value.copyWith(
-      needsLayout: false,
-      shouldAnimateLayout: false,
-    ), force: true);
+    setState(
+        state.value.copyWith(
+          needsLayout: false,
+          shouldAnimateLayout: false,
+        ),
+        force: true);
 
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;
     }
-    
+
     // Notify layout change after setting isArranged to trigger animations
     _notifyLayoutChange();
   }

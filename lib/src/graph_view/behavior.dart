@@ -370,7 +370,21 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
   @override
   bool hitTestNode(GraphNodeImpl node, Offset position) {
     final geometry = node.geometry;
-    if (geometry == null || !node.visible || node.isAnimating) return false;
+    if (geometry == null || !node.visible) return false;
+
+    // アニメーション中でもヒットテストを有効にする
+    // アニメーション中の場合は、現在のアニメーション位置を使用
+    if (node.isAnimating) {
+      final animatedPosition = node.animatedPosition;
+      final bounds = Rect.fromLTWH(
+        animatedPosition.dx,
+        animatedPosition.dy,
+        geometry.bounds.width,
+        geometry.bounds.height,
+      );
+      return bounds.contains(position);
+    }
+
     return geometry.bounds.contains(position);
   }
 

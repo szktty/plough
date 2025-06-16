@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logger/logger.dart';
+import 'package:plough/src/debug/external_debug_client.dart';
 
 /// Logger categories for selective logging control
 enum LogCategory {
@@ -11,15 +12,20 @@ enum LogCategory {
   rendering,
   graph,
   performance,
+  debug,
+  state,
+  animation,
+  hitTest,
 }
 
 /// Centralized logging configuration
 @internal
 class PloughLogger {
   PloughLogger._();
-  
-  static PloughLogger? _instance;
+
   factory PloughLogger() => _instance ??= PloughLogger._();
+
+  static PloughLogger? _instance;
 
   final Map<LogCategory, Logger> _loggers = {};
   final Map<LogCategory, Level> _levels = {};
@@ -31,7 +37,7 @@ class PloughLogger {
   }) {
     _levels.clear();
     _loggers.clear();
-    
+
     for (final category in LogCategory.values) {
       final level = categoryLevels?[category] ?? defaultLevel;
       _levels[category] = level;
@@ -52,14 +58,38 @@ class PloughLogger {
   }
 
   /// Quick logging methods
-  void d(LogCategory category, String message) => 
-      getLogger(category).d(message);
-  void i(LogCategory category, String message) => 
-      getLogger(category).i(message);
-  void w(LogCategory category, String message) => 
-      getLogger(category).w(message);
-  void e(LogCategory category, String message) => 
-      getLogger(category).e(message);
+  void d(LogCategory category, String message) {
+    getLogger(category).d(message);
+    _sendToExternalDebug(category, 'DEBUG', message);
+  }
+  
+  void i(LogCategory category, String message) {
+    getLogger(category).i(message);
+    _sendToExternalDebug(category, 'INFO', message);
+  }
+  
+  void w(LogCategory category, String message) {
+    getLogger(category).w(message);
+    _sendToExternalDebug(category, 'WARNING', message);
+  }
+  
+  void e(LogCategory category, String message) {
+    getLogger(category).e(message);
+    _sendToExternalDebug(category, 'ERROR', message);
+  }
+  
+  /// 外部デバッグサーバーにログを送信
+  void _sendToExternalDebug(LogCategory category, String level, String message) {
+    try {
+      externalDebugClient.sendLog(
+        category: category,
+        level: level,
+        message: message,
+      );
+    } catch (_) {
+      // エラーは無視（ログシステムでエラーが起きてもアプリは継続）
+    }
+  }
 }
 
 /// Global logger instance
@@ -67,16 +97,16 @@ final PloughLogger _logger = PloughLogger();
 
 /// Internal logging functions - not part of public API
 @internal
-void logDebug(LogCategory category, String message) => 
+void logDebug(LogCategory category, String message) =>
     _logger.d(category, message);
 @internal
-void logInfo(LogCategory category, String message) => 
+void logInfo(LogCategory category, String message) =>
     _logger.i(category, message);
 @internal
-void logWarning(LogCategory category, String message) => 
+void logWarning(LogCategory category, String message) =>
     _logger.w(category, message);
 @internal
-void logError(LogCategory category, String message) => 
+void logError(LogCategory category, String message) =>
     _logger.e(category, message);
 
 /// Configure logging for the entire package
@@ -91,7 +121,6 @@ void configureLogging({
   );
 }
 
-
 /// Legacy support - gradually replace these
 @Deprecated('Use logDebug with LogCategory instead')
 Logger log = Logger(level: Level.off);
@@ -99,9 +128,9 @@ Logger log = Logger(level: Level.off);
 /// Simple printer that outputs clean, timestamped logs
 class _SimplePrinter extends LogPrinter {
   _SimplePrinter(this.category);
-  
+
   final LogCategory category;
-  
+
   @override
   List<String> log(LogEvent event) {
     final timestamp = DateTime.now().toIso8601String().substring(11, 23);

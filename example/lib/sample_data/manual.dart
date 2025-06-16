@@ -195,10 +195,10 @@ class _GlowingDotEffectState extends State<GlowingDotEffect>
         return Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: widget.color.withOpacity(0.3 * _animation.value),
+            color: widget.color.withValues(alpha: 0.3 * _animation.value),
             boxShadow: [
               BoxShadow(
-                color: widget.color.withOpacity(0.5 * _animation.value),
+                color: widget.color.withValues(alpha: 0.5 * _animation.value),
                 blurRadius: widget.blurRadius,
                 spreadRadius: widget.spreadRadius * _animation.value,
               ),

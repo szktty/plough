@@ -4,8 +4,8 @@ This directory contains development and debugging tools for the Plough package.
 
 ## Applications
 
-### debug_app/
-A Flutter application for real-time debugging and monitoring of Plough package internals.
+### workbench/
+A workbench application for testing and developing Plough features interactively.
 
 **Features:**
 - Event monitoring (callbacks, gestures, selections)
@@ -16,7 +16,7 @@ A Flutter application for real-time debugging and monitoring of Plough package i
 
 **Usage:**
 ```bash
-cd debug_app
+cd workbench
 flutter pub get
 flutter run -d macos
 ```
@@ -38,7 +38,7 @@ dart run bin/debug_server.dart
 
 ## Development Workflow
 
-1. Use `debug_app` for interactive UI debugging and event monitoring
+1. Use `workbench` for interactive testing and feature development
 2. Use `debug_server` for programmatic debugging and logging
 3. Both tools can be used together for comprehensive debugging
 
