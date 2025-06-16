@@ -43,6 +43,26 @@ class _DebugHomePageState extends State<DebugHomePage> {
   // Stats
   int _rebuildCount = 0;
   int _notificationCount = 0;
+  
+  // Layout and data management
+  String _currentLayoutStrategy = 'ForceDirected';
+  String _currentDataPreset = 'Default';
+  bool _animationEnabled = false;
+  
+  final List<String> _layoutStrategies = [
+    'ForceDirected',
+    'Tree',
+    'Manual',
+    'Random',
+  ];
+  
+  final List<String> _dataPresets = [
+    'Default',
+    'Small Network',
+    'Large Network',
+    'Tree Structure',
+    'Complex Graph',
+  ];
 
   @override
   void initState() {
@@ -128,10 +148,101 @@ class _DebugHomePageState extends State<DebugHomePage> {
                     padding: const EdgeInsets.all(8),
                     color: Colors.grey[200],
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('Graph View', style: TextStyle(fontWeight: FontWeight.bold)),
-                        const Spacer(),
-                        Text('Rebuilds: $_rebuildCount'),
+                        // Layout strategy dropdown
+                        DropdownButton<String>(
+                          value: _currentLayoutStrategy,
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _currentLayoutStrategy = newValue;
+                              });
+                              _applyLayoutStrategy();
+                            }
+                          },
+                          items: _layoutStrategies.map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value, style: const TextStyle(fontSize: 12)),
+                            );
+                          }).toList(),
+                          underline: Container(),
+                          isDense: true,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: _resetLayout,
+                          tooltip: 'Reset Layout',
+                          icon: const Icon(Icons.restart_alt),
+                          iconSize: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        // Data preset dropdown
+                        DropdownButton<String>(
+                          value: _currentDataPreset,
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _currentDataPreset = newValue;
+                              });
+                              _loadDataPreset();
+                            }
+                          },
+                          items: _dataPresets.map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value, style: const TextStyle(fontSize: 12)),
+                            );
+                          }).toList(),
+                          underline: Container(),
+                          isDense: true,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: _reloadGraphData,
+                          tooltip: 'Reload Graph Data',
+                          icon: const Icon(Icons.download),
+                          iconSize: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        // Node management buttons
+                        IconButton(
+                          onPressed: _addNode,
+                          tooltip: 'Add Node',
+                          icon: const Icon(Icons.add_circle_outline),
+                          iconSize: 20,
+                        ),
+                        IconButton(
+                          onPressed: _removeNode,
+                          tooltip: 'Remove Node',
+                          icon: const Icon(Icons.remove_circle_outline),
+                          iconSize: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: _forceRebuild,
+                          tooltip: 'Force Rebuild',
+                          icon: const Icon(Icons.refresh),
+                          iconSize: 20,
+                        ),
+                        const SizedBox(width: 16),
+                        // Animation toggle
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Checkbox(
+                              value: _animationEnabled,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _animationEnabled = value ?? false;
+                                });
+                              },
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            const Text('Animation', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -144,6 +255,22 @@ class _DebugHomePageState extends State<DebugHomePage> {
                       },
                       monitorCallbacks: _monitorCallbacks,
                       monitorRebuilds: _monitorRebuilds,
+                      animationEnabled: _animationEnabled,
+                    ),
+                  ),
+                  // Status bar
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.grey[300],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Nodes: ${graph.nodes.length}', style: const TextStyle(fontSize: 12)),
+                        const SizedBox(width: 16),
+                        Text('Links: ${graph.links.length}', style: const TextStyle(fontSize: 12)),
+                        const SizedBox(width: 16),
+                        Text('Rebuilds: $_rebuildCount', style: const TextStyle(fontSize: 12)),
+                      ],
                     ),
                   ),
                 ],
@@ -281,29 +408,6 @@ class _DebugHomePageState extends State<DebugHomePage> {
           ),
         ],
       ),
-      // Action buttons
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _addNode,
-            tooltip: 'Add Node',
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton(
-            onPressed: _removeNode,
-            tooltip: 'Remove Node',
-            child: const Icon(Icons.remove),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton(
-            onPressed: _triggerAnimation,
-            tooltip: 'Trigger Animation',
-            child: const Icon(Icons.play_arrow),
-          ),
-        ],
-      ),
     );
   }
 
@@ -329,9 +433,65 @@ class _DebugHomePageState extends State<DebugHomePage> {
     }
   }
 
-  void _triggerAnimation() {
-    // Trigger layout recalculation
+  void _applyLayoutStrategy() {
+    // Apply the selected layout strategy
+    setState(() {
+      _rebuildCount = 0; // Reset rebuild count on layout change
+    });
+    _logEvent(DebugEvent(
+      type: EventType.layout,
+      source: 'DebugHomePage',
+      message: 'Layout strategy changed',
+      timestamp: DateTime.now(),
+      details: 'Strategy: $_currentLayoutStrategy',
+    ));
+  }
+
+  void _resetLayout() {
+    // Reset layout positions
     setState(() {});
+    _logEvent(DebugEvent(
+      type: EventType.layout,
+      source: 'DebugHomePage',
+      message: 'Layout reset',
+      timestamp: DateTime.now(),
+    ));
+  }
+
+  void _loadDataPreset() {
+    // Load the selected data preset (UI only for now)
+    setState(() {
+      _rebuildCount = 0; // Reset rebuild count on preset load
+    });
+    _logEvent(DebugEvent(
+      type: EventType.callback,
+      source: 'DebugHomePage',
+      message: 'Data preset selected',
+      timestamp: DateTime.now(),
+      details: 'Preset: $_currentDataPreset',
+    ));
+  }
+
+  void _reloadGraphData() {
+    // Reload current graph data
+    setState(() {});
+    _logEvent(DebugEvent(
+      type: EventType.callback,
+      source: 'DebugHomePage',
+      message: 'Graph data reloaded',
+      timestamp: DateTime.now(),
+    ));
+  }
+
+  void _forceRebuild() {
+    // Force a complete rebuild
+    setState(() {});
+    _logEvent(DebugEvent(
+      type: EventType.rebuild,
+      source: 'DebugHomePage',
+      message: 'Force rebuild triggered',
+      timestamp: DateTime.now(),
+    ));
   }
 
   Color _getEventColor(EventType type) {
@@ -390,6 +550,7 @@ class DebugGraphView extends StatefulWidget {
   final VoidCallback onRebuild;
   final bool monitorCallbacks;
   final bool monitorRebuilds;
+  final bool animationEnabled;
 
   const DebugGraphView({
     super.key,
@@ -398,6 +559,7 @@ class DebugGraphView extends StatefulWidget {
     required this.onRebuild,
     required this.monitorCallbacks,
     required this.monitorRebuilds,
+    required this.animationEnabled,
   });
 
   @override
@@ -415,7 +577,7 @@ class _DebugGraphViewState extends State<DebugGraphView> {
     return GraphView(
       graph: widget.graph,
       layoutStrategy: GraphForceDirectedLayoutStrategy(),
-      animationEnabled: false, // Disable animation to prevent continuous rebuilds
+      animationEnabled: widget.animationEnabled,
       behavior: _createDebugBehavior(),
     );
   }
