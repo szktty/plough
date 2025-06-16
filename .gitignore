@@ -19,7 +19,7 @@ migrate_working_dir/
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
-#.vscode/
+.vscode/
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
@@ -37,3 +37,29 @@ example/ios/Podfile.lock
 
 # Documentation progress tracking
 doc/documentation_progress_status.xml
+
+# IDE and editor configurations
+.claude/
+.cursor/
+
+# Development temporary files
+PLOUGH_REQUIREMENTS.md
+filtered_no_position.txt
+
+# Test output files
+test/background_flickering_test.dart
+test/debug_background_test.dart
+test/debug_gesture_test.dart
+test/demo_page_flickering_test.dart
+test/detailed_debug_test.dart
+test/final_flickering_test.dart
+test/flickering_test_documentation.md
+test/flickering_test_progress.md
+test/geometry_timing_debug.dart
+test/gesture_passthrough_flickering_test.dart
+test/hit_test_debug.dart
+test/intermittent_flicker_test.dart
+test/node_position_debug.dart
+test/pure_background_flickering_test.dart
+test/race_condition_test.dart
+test/simple_background_test.dart

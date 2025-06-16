@@ -21,8 +21,8 @@ flutter pub get
 flutter run -d macos
 ```
 
-### debug_server/
-A Dart-based debug server for real-time debugging support.
+### monitor/
+A Dart-based monitoring server for real-time debugging support.
 
 **Features:**
 - Real-time debugging capabilities
@@ -31,15 +31,15 @@ A Dart-based debug server for real-time debugging support.
 
 **Usage:**
 ```bash
-cd debug_server
+cd monitor
 dart pub get
-dart run bin/debug_server.dart
+dart run bin/monitor_server.dart
 ```
 
 ## Development Workflow
 
 1. Use `workbench` for interactive testing and feature development
-2. Use `debug_server` for programmatic debugging and logging
+2. Use `monitor` for programmatic debugging and logging
 3. Both tools can be used together for comprehensive debugging
 
 ## Integration

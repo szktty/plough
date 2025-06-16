@@ -105,10 +105,10 @@ class StructuredLogger {
         logDebug(category, entry.toString());
     }
 
-    // デバッグサーバーにブロードキャスト
-    final debugServer = PloughDebugServer();
-    if (debugServer.isRunning) {
-      debugServer.broadcastLog(category, level, message);
+    // モニタリングサーバーにブロードキャスト
+    final monitorServer = PloughMonitorServer();
+    if (monitorServer.isRunning) {
+      monitorServer.broadcastLog(category, level, message);
     }
   }
 

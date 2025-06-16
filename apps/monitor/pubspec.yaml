@@ -1,5 +1,5 @@
-name: plough_debug_server
-description: Debug server for Plough graph visualization library
+name: plough_monitor
+description: Monitoring server for Plough graph visualization library
 version: 1.0.0
 
 environment:

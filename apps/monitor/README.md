@@ -1,6 +1,6 @@
-# Plough Debug Server (Dart)
+# Plough Monitor Server (Dart)
 
-A debug server built in Dart for the Plough library.
+A monitoring server built in Dart for the Plough library.
 
 ## Features
 
@@ -14,7 +14,7 @@ A debug server built in Dart for the Plough library.
 ## Installation
 
 ```bash
-cd debug_server
+cd monitor
 dart pub get
 ```
 
@@ -24,13 +24,13 @@ dart pub get
 
 ```bash
 # Start with default port (8081)
-dart run bin/debug_server.dart
+dart run bin/monitor_server.dart
 
 # Start with custom port
-dart run bin/debug_server.dart --port 8090
+dart run bin/monitor_server.dart --port 8090
 
 # Show help
-dart run bin/debug_server.dart --help
+dart run bin/monitor_server.dart --help
 ```
 
 ### Accessing the Web Console
@@ -141,7 +141,7 @@ The server receives and processes the following diagnostic data:
 lsof -i :8081
 
 # Try a different port
-dart run bin/debug_server.dart --port 8082
+dart run bin/monitor_server.dart --port 8082
 ```
 
 ### Dependency Errors
@@ -164,7 +164,7 @@ dart --version
 Adding new API endpoints:
 
 ```dart
-// Add to router in bin/debug_server.dart
+// Add to router in bin/monitor_server.dart
 router.get('/api/custom', _handleCustomEndpoint);
 
 Response _handleCustomEndpoint(Request request) {
@@ -176,7 +176,7 @@ Response _handleCustomEndpoint(Request request) {
 ```
 
 ### Custom Data Processing
-Add support for new data types to the `DebugSession` class:
+Add support for new data types to the `MonitorSession` class:
 
 ```dart
 void addCustomEvent(Map<String, dynamic> event) {

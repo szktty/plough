@@ -17,8 +17,8 @@ void main(List<String> args) async {
   final result = parser.parse(args);
 
   if (result['help'] as bool) {
-    print('Plough Debug Server');
-    print('Usage: dart bin/debug_server.dart [options]');
+    print('Plough Monitor Server');
+    print('Usage: dart bin/monitor_server.dart [options]');
     print(parser.usage);
     return;
   }
@@ -60,7 +60,7 @@ class DebugServer {
 
     await serve(handler, 'localhost', port);
     
-    print('🚀 Plough Debug Server running at http://localhost:$port');
+    print('🚀 Plough Monitor Server running at http://localhost:$port');
     print('📊 Web Console: http://localhost:$port');
     print('🔍 API Status: http://localhost:$port/api/status');
     print('');
@@ -407,7 +407,7 @@ class DebugServer {
     return Response.ok(
       jsonEncode({
         'status': 'running',
-        'server': 'Plough Debug Server (Dart)',
+        'server': 'Plough Monitor Server (Dart)',
         'version': '1.0.0',
         'sessions': _sessions.length,
         'websocket_clients': _webSocketClients.length,
@@ -440,7 +440,7 @@ class DebugServer {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Plough Debug Console (Dart)</title>
+    <title>Plough Monitor Console (Dart)</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -647,7 +647,7 @@ class DebugServer {
 </head>
 <body>
     <div class="header">
-        <h1>🔍 Plough Debug Console</h1>
+        <h1>🔍 Plough Monitor Console</h1>
         <div class="status">
             <div class="status-dot" id="statusDot"></div>
             <span id="statusText">Connecting...</span>

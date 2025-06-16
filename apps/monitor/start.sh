@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "🚀 Starting Plough Debug Server (Dart)"
+echo "🚀 Starting Plough Monitor Server (Dart)"
 echo ""
 
 # Check if we're in the right directory
 if [ ! -f "pubspec.yaml" ]; then
-    echo "❌ Error: Not in debug_server directory"
-    echo "Run this script from the debug_server directory"
-    echo "  cd debug_server"
+    echo "❌ Error: Not in monitor directory"
+    echo "Run this script from the monitor directory"
+    echo "  cd monitor"
     echo "  ./start.sh"
     exit 1
 fi
@@ -29,4 +29,4 @@ echo ""
 
 # Start the server
 echo "▶️  Starting server..."
-dart run bin/debug_server.dart --port $PORT
+dart run bin/monitor_server.dart --port $PORT

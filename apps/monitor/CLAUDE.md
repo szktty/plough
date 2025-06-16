@@ -1,10 +1,10 @@
-# CLAUDE.md - Debug Server
+# CLAUDE.md - Monitor Server
 
-This file provides guidance for AI assistants working with the Plough Debug Server project. Please follow these instructions when helping with development, troubleshooting, or maintenance.
+This file provides guidance for AI assistants working with the Plough Monitor Server project. Please follow these instructions when helping with development, troubleshooting, or maintenance.
 
 ## Project Overview
 
-The Plough Debug Server is a standalone Dart application that provides real-time debugging capabilities for the Plough graph visualization library. It serves as a bridge between Flutter applications and web-based debugging tools, offering comprehensive monitoring and analysis features.
+The Plough Monitor Server is a standalone Dart application that provides real-time monitoring capabilities for the Plough graph visualization library. It serves as a bridge between Flutter applications and web-based debugging tools, offering comprehensive monitoring and analysis features.
 
 ### Architecture
 
@@ -19,10 +19,10 @@ The Plough Debug Server is a standalone Dart application that provides real-time
 ### Server Management
 ```bash
 # Start server with default settings
-dart run bin/debug_server.dart
+dart run bin/monitor_server.dart
 
 # Start with custom port
-dart run bin/debug_server.dart --port 8090
+dart run bin/monitor_server.dart --port 8090
 
 # Quick start script
 ./start.sh
@@ -52,17 +52,17 @@ curl -X POST http://localhost:8081/api/sessions/test/diagnostics \
 
 ### Core Components
 
-1. **`bin/debug_server.dart`** - Main server entry point
+1. **`bin/monitor_server.dart`** - Main server entry point
    - Command-line argument parsing
    - Server initialization and routing
    - CORS middleware configuration
 
-2. **`DebugServer` class** - Core server logic
+2. **`MonitorServer` class** - Core server logic
    - HTTP request handlers
    - WebSocket management
    - Session orchestration
 
-3. **`DebugSession` class** - Session data management
+3. **`MonitorSession` class** - Session data management
    - Event buffering (max 1000 events per type)
    - Recording functionality
    - Performance metrics calculation
@@ -88,7 +88,7 @@ All endpoints follow RESTful conventions:
 
 ### Server Configuration
 
-Default settings in `DebugServer.start()`:
+Default settings in `MonitorServer.start()`:
 - Port: 8081 (configurable via `--port`)
 - Host: localhost only (security consideration)
 - Buffer size: 1000 events per type
@@ -109,7 +109,7 @@ case 'custom_event':
   });
 ```
 
-2. **Extend `DebugSession` class**:
+2. **Extend `MonitorSession` class**:
 ```dart
 final List<Map<String, dynamic>> customEvents = [];
 
@@ -200,7 +200,7 @@ externalDebugClient.sendLog(
    lsof -i :8081
    
    # Kill process or use different port
-   dart run bin/debug_server.dart --port 8082
+   dart run bin/monitor_server.dart --port 8082
    ```
 
 2. **Permission errors**:
@@ -256,7 +256,7 @@ externalDebugClient.sendLog(
 - No sensitive data should be logged
 
 ### Production Usage
-**IMPORTANT**: This debug server is intended for development only:
+**IMPORTANT**: This monitor server is intended for development only:
 - Never deploy to production environments
 - Contains no security hardening
 - Exposes detailed application internals
@@ -310,4 +310,4 @@ When adding new functionality:
 - Check memory leak scenarios
 - Test error recovery paths
 
-This debug server is a powerful tool for understanding and optimizing Plough-based applications. Use it to identify performance bottlenecks, debug gesture handling issues, and monitor real-time application behavior during development.
+This monitor server is a powerful tool for understanding and optimizing Plough-based applications. Use it to identify performance bottlenecks, debug gesture handling issues, and monitor real-time application behavior during development.

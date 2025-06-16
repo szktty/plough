@@ -29,6 +29,13 @@
             "cwd": "apps/workbench",
             "request": "launch",
             "type": "dart"
+        },
+        {
+            "name": "monitor",
+            "cwd": "apps/monitor",
+            "request": "launch",
+            "type": "dart",
+            "program": "bin/monitor_server.dart"
         }
     ]
 }

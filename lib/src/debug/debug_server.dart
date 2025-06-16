@@ -4,16 +4,16 @@ import 'dart:io';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/utils/logger.dart';
 
-/// デバッグ用HTTPサーバー
+/// モニタリング用HTTPサーバー
 ///
 /// リアルタイムでログやグラフの状態を監視できるWebインターフェースを提供
 @internal
-class PloughDebugServer {
-  PloughDebugServer._();
+class PloughMonitorServer {
+  PloughMonitorServer._();
 
-  factory PloughDebugServer() => _instance ??= PloughDebugServer._();
+  factory PloughMonitorServer() => _instance ??= PloughMonitorServer._();
 
-  static PloughDebugServer? _instance;
+  static PloughMonitorServer? _instance;
 
   /// Hot reload時のクリーンアップをサポート
   static void resetInstance() {
@@ -31,7 +31,7 @@ class PloughDebugServer {
   int get port => _port;
   String get url => 'http://localhost:$_port';
 
-  /// デバッグサーバーを開始
+  /// モニタリングサーバーを開始
   Future<void> start({int port = 8080, bool tryAlternativePorts = true}) async {
     if (_server != null) {
       logWarning(
@@ -55,7 +55,7 @@ class PloughDebugServer {
 
         // ローカルホストのみでバインド（macOS サンドボックスの制限を回避）
         _server = await HttpServer.bind(InternetAddress.loopbackIPv4, _port, shared: true);
-        logInfo(LogCategory.debug, 'Debug server started on $url');
+        logInfo(LogCategory.debug, 'Monitor server started on $url');
         logInfo(LogCategory.debug, 'Server port: ${_server!.port}');
         logInfo(LogCategory.debug, 'Server address: ${_server!.address.address}');
 
@@ -90,9 +90,9 @@ class PloughDebugServer {
         if (tryPort == portsToTry.last) {
           // 最後のポートでも失敗
           logError(LogCategory.debug,
-              'Failed to start debug server on any port: $portsToTry');
+              'Failed to start monitor server on any port: $portsToTry');
           throw SocketException(
-              'Failed to start debug server on any port: $portsToTry');
+              'Failed to start monitor server on any port: $portsToTry');
         }
       }
     }
@@ -104,7 +104,7 @@ class PloughDebugServer {
       final client = HttpClient();
       
       // User-Agentを設定
-      client.userAgent = 'PloughDebugServer/1.0';
+      client.userAgent = 'PloughMonitorServer/1.0';
       
       final request = await client.getUrl(Uri.parse('http://localhost:$_port/test'));
       final response = await request.close();
@@ -124,7 +124,7 @@ class PloughDebugServer {
       
       // macOS サンドボックスの問題の場合の代替案を提示
       logInfo(LogCategory.debug, 
-          'Alternative: Use the CLI debug server (dart debug/simple_server.dart)');
+          'Alternative: Use the CLI monitor server (dart monitor/monitor_server.dart)');
     }
   }
 
@@ -147,7 +147,7 @@ class PloughDebugServer {
     }
   }
 
-  /// デバッグサーバーを停止
+  /// モニタリングサーバーを停止
   Future<void> stop() async {
     if (_server == null) return;
 
@@ -159,7 +159,7 @@ class PloughDebugServer {
 
     await _server!.close();
     _server = null;
-    logInfo(LogCategory.debug, 'Debug server stopped');
+    logInfo(LogCategory.debug, 'Monitor server stopped');
   }
 
   /// 強制的にシャットダウン（同期的）
@@ -366,7 +366,7 @@ class PloughDebugServer {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Plough Debug Console</title>
+    <title>Plough Monitor Console</title>
     <meta charset="utf-8">
     <style>
         body { font-family: monospace; margin: 0; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
@@ -387,7 +387,7 @@ class PloughDebugServer {
 </head>
 <body>
     <div class="header">
-        <h1>🔍 Plough Debug Console</h1>
+        <h1>🔍 Plough Monitor Console</h1>
         <p>リアルタイムログ監視とデバッグ情報</p>
     </div>
     
