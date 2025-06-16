@@ -17,6 +17,15 @@ class WorkbenchApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+          },
+        ),
       ),
       home: const WorkbenchHomePage(),
     );
@@ -151,24 +160,25 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Layout strategy dropdown
-                        DropdownButton<String>(
-                          value: _currentLayoutStrategy,
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _currentLayoutStrategy = newValue;
-                              });
-                              _applyLayoutStrategy();
-                            }
-                          },
-                          items: _layoutStrategies.map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value, style: const TextStyle(fontSize: 12)),
-                            );
-                          }).toList(),
-                          underline: Container(),
-                          isDense: true,
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _currentLayoutStrategy,
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _currentLayoutStrategy = newValue;
+                                });
+                                _applyLayoutStrategy();
+                              }
+                            },
+                            items: _layoutStrategies.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value, style: const TextStyle(fontSize: 12)),
+                              );
+                            }).toList(),
+                            isDense: true,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         IconButton(
@@ -179,24 +189,25 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                         ),
                         const SizedBox(width: 8),
                         // Data preset dropdown
-                        DropdownButton<String>(
-                          value: _currentDataPreset,
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _currentDataPreset = newValue;
-                              });
-                              _loadDataPreset();
-                            }
-                          },
-                          items: _dataPresets.map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value, style: const TextStyle(fontSize: 12)),
-                            );
-                          }).toList(),
-                          underline: Container(),
-                          isDense: true,
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _currentDataPreset,
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _currentDataPreset = newValue;
+                                });
+                                _loadDataPreset();
+                              }
+                            },
+                            items: _dataPresets.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value, style: const TextStyle(fontSize: 12)),
+                              );
+                            }).toList(),
+                            isDense: true,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         IconButton(
@@ -239,6 +250,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                                 });
                               },
                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              splashRadius: 0,
+                              visualDensity: VisualDensity.compact,
                             ),
                             const Text('Animation', style: TextStyle(fontSize: 12)),
                           ],
@@ -296,18 +309,21 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                         value: _monitorCallbacks,
                         onChanged: (value) => setState(() => _monitorCallbacks = value),
                         dense: true,
+                        splashRadius: 0,
                       ),
                       SwitchListTile(
                         title: const Text('Rebuilds'),
                         value: _monitorRebuilds,
                         onChanged: (value) => setState(() => _monitorRebuilds = value),
                         dense: true,
+                        splashRadius: 0,
                       ),
                       SwitchListTile(
                         title: const Text('Notifications'),
                         value: _monitorNotifications,
                         onChanged: (value) => setState(() => _monitorNotifications = value),
                         dense: true,
+                        splashRadius: 0,
                       ),
                     ],
                   ),
@@ -343,6 +359,10 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                               const Spacer(),
                               TextButton(
                                 onPressed: () => setState(() => _events.clear()),
+                                style: TextButton.styleFrom(
+                                  splashFactory: NoSplash.splashFactory,
+                                  overlayColor: Colors.transparent,
+                                ),
                                 child: const Text('Clear'),
                               ),
                             ],
