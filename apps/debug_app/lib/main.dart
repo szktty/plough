@@ -13,6 +13,7 @@ class DebugApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Plough Debug App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -41,7 +42,6 @@ class _DebugHomePageState extends State<DebugHomePage> {
   
   // Stats
   int _rebuildCount = 0;
-  int _callbackCount = 0;
   int _notificationCount = 0;
 
   @override
@@ -113,10 +113,6 @@ class _DebugHomePageState extends State<DebugHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Plough Debug App'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: Row(
         children: [
           // Graph view area
@@ -198,7 +194,6 @@ class _DebugHomePageState extends State<DebugHomePage> {
                     children: [
                       const Text('Statistics', style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
-                      Text('Total Callbacks: $_callbackCount'),
                       Text('Total Rebuilds: $_rebuildCount'),
                       Text('Total Notifications: $_notificationCount'),
                     ],
