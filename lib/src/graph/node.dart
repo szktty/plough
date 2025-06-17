@@ -136,7 +136,7 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   @override
   set logicalPosition(Offset position) {
     if (_logicalPosition.value != position) {
-      print(
+      debugPrint(
           '📍 Node ${id.value.substring(0, 4)} position changed: ${_logicalPosition.value} -> $position');
     }
     _logicalPosition.value = position;

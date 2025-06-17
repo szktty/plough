@@ -227,7 +227,7 @@ class GraphImpl
 
   /// Notify layout-related changes
   void _notifyLayoutChange() {
-    print(
+    debugPrint(
         '📐 Graph._notifyLayoutChange() called - value: ${_layoutChangeNotifier.value} -> ${_layoutChangeNotifier.value + 1}');
     _layoutChangeNotifier.value++;
   }

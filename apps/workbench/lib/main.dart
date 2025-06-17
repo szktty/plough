@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:plough/plough.dart';
 import 'dart:async';
 
@@ -68,6 +69,35 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
 
   // Gesture state tracking
   bool _isDragging = false;
+  
+  // Internal debug state from TAP_DEBUG_STATE events
+  Map<String, dynamic> _internalDebugState = {
+    'nodeTargetId': 'null',
+    'state_exists': false,
+    'state_completed': false,
+    'state_cancelled': false,
+    'tap_count': 0,
+    'tracked_entity_id': 'null',
+    'is_still_dragging_after_up': false,
+    'is_tap_completed_after_up': false,
+    'touch_slop': 144.0,
+    'k_touch_slop': 18.0,
+    'phase': 'none',
+    'node_can_select': false,
+    'node_can_drag': false,
+    'node_is_selected': false,
+    'gesture_mode': 'unknown',
+    'pointer_position': {'x': 0.0, 'y': 0.0},
+    'node_position': {'x': 0.0, 'y': 0.0},
+    'node_at_position': 'null',
+    'tap_manager_states_count': 0,
+    'drag_state_exists': false,
+    'drag_manager_is_dragging': false,
+    'will_toggle_selection': false,
+    'tap_debug_info': null,
+    'distance': 0.0,
+    'isWithinSlop': false,
+  };
   bool _isHovering = false;
   bool _isTapTracking = false;
   String? _lastDraggedEntityId;
@@ -91,6 +121,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   String _lastBackgroundAction = '';
   Timer? _updateTimer;
   bool _gestureDebugMode = false;
+  bool _collapseFloatingDebug = false;
 
   final List<String> _layoutStrategies = [
     'ForceDirected',
@@ -173,8 +204,10 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
+      body: Stack(
         children: [
+          Row(
+            children: [
           // Left sidebar
           Container(
             width: 250,
@@ -512,6 +545,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
             flex: 1,
             child: _buildTabbedDebugPanel(),
           ),
+            ],
+          ),
         ],
       ),
     );
@@ -634,6 +669,12 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           _currentTapCount = data['tapCount'] ?? 0;
           _trackedTapEntityId = data['entityId'];
           break;
+        case 'tap_debug_state':
+          // Update internal debug state from TAP_DEBUG_STATE events
+          debugPrint('WORKBENCH: Updating internal debug state with: $data');
+          _internalDebugState = Map<String, dynamic>.from(data);
+          debugPrint('WORKBENCH: New internal debug state: $_internalDebugState');
+          break;
         case 'dragStart':
           _isDragging = true;
           _lastDraggedEntityId = data['entityId'];
@@ -657,6 +698,10 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   void initState() {
     super.initState();
     _initializeGraph();
+
+    // Enable gesture debug mode by default
+    _gestureDebugMode = true;
+    setGestureDebugMode(true);
 
     // Listen to debug events for timer tracking
     _listenToDebugEvents();
@@ -717,30 +762,136 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         _buildCounterInfo('Tap Count', _currentTapCount),
         _buildTimerInfo('Double-tap Timer', _doubleTapTimeRemaining),
         _buildCounterInfo('Total Gestures', _totalGestureEvents),
+        const SizedBox(height: 8),
+        _buildInternalDetailsSection(),
       ],
     );
   }
 
   Widget _buildStateIndicator(String label, bool isActive, Color color) {
+    String value = isActive ? 'Active' : 'Inactive';
+    return _buildInternalValue(label, value);
+  }
+
+  Widget _buildEntityInfo(String label, String? entityId) {
+    String displayId = entityId != null ? entityId.substring(0, 6.clamp(0, entityId.length)) : 'None';
+    return _buildInternalValue(label, displayId);
+  }
+
+  Widget _buildCounterInfo(String label, int value) {
+    return _buildInternalValue(label, value.toString());
+  }
+
+  Widget _buildTimerInfo(String label, int? timeRemaining) {
+    String value = timeRemaining != null ? '${timeRemaining}ms' : 'Inactive';
+    return _buildInternalValue(label, value);
+  }
+
+  Widget _buildInternalDetailsSection() {
+    // Get values from the internal debug state received from TAP_DEBUG_STATE events
+    
+    String isTapCompletedStatus = _internalDebugState['is_tap_completed_after_up']?.toString() ?? 'N/A';
+    String isStillDraggingStatus = _internalDebugState['is_still_dragging_after_up']?.toString() ?? 'N/A';
+    String trackedEntityIdStr = _internalDebugState['tracked_entity_id']?.toString() ?? 'null';
+    if (trackedEntityIdStr != 'null' && trackedEntityIdStr.length > 6) {
+      trackedEntityIdStr = trackedEntityIdStr.substring(0, 6);
+    }
+    String tapStateExists = _internalDebugState['state_exists']?.toString() ?? 'N/A';
+    String tapStateCompleted = _internalDebugState['state_completed']?.toString() ?? 'N/A';
+    String tapStateCancelled = _internalDebugState['state_cancelled']?.toString() ?? 'N/A';
+    String tapCount = _internalDebugState['tap_count']?.toString() ?? '0';
+    String nodeTargetId = _internalDebugState['nodeTargetId']?.toString() ?? 'null';
+    if (nodeTargetId != 'null' && nodeTargetId.length > 6) {
+      nodeTargetId = nodeTargetId.substring(0, 6);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Divider
+        Container(
+          height: 1,
+          color: Colors.grey[400],
+          margin: const EdgeInsets.symmetric(vertical: 4),
+        ),
+        Text(
+          'Internal Implementation Details',
+          style: TextStyle(
+            fontSize: 16 * _uiScale,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 4),
+        _buildInternalValue('isTapCompletedAfterUp', isTapCompletedStatus),
+        _buildInternalValue('isStillDraggingAfterUp', isStillDraggingStatus),
+        _buildInternalValue('kTouchSlop', kTouchSlop.toString()),
+        _buildInternalValue('touchSlop (effective)', (kTouchSlop * 8).toString()),
+        _buildInternalValue('Node Target ID', nodeTargetId),
+        _buildInternalValue('Tracked Entity ID', trackedEntityIdStr),
+        _buildInternalValue('Tap State Exists', tapStateExists),
+        _buildInternalValue('Tap State Completed', tapStateCompleted),
+        _buildInternalValue('Tap State Cancelled', tapStateCancelled),
+        _buildInternalValue('Tap Count', tapCount),
+        const SizedBox(height: 4),
+        // Additional debug info from enhanced logging
+        _buildInternalValue('Phase', _internalDebugState['phase']?.toString() ?? 'none'),
+        _buildInternalValue('Node Can Select', _internalDebugState['node_can_select']?.toString() ?? 'N/A'),
+        _buildInternalValue('Node Can Drag', _internalDebugState['node_can_drag']?.toString() ?? 'N/A'),
+        _buildInternalValue('Node Is Selected', _internalDebugState['node_is_selected']?.toString() ?? 'N/A'),
+        _buildInternalValue('Gesture Mode', _internalDebugState['gesture_mode']?.toString() ?? 'unknown'),
+        _buildInternalValue('Tap States Count', _internalDebugState['tap_manager_states_count']?.toString() ?? '0'),
+        _buildInternalValue('Drag State Exists', _internalDebugState['drag_state_exists']?.toString() ?? 'N/A'),
+        _buildInternalValue('Drag Manager Dragging', _internalDebugState['drag_manager_is_dragging']?.toString() ?? 'N/A'),
+        _buildInternalValue('Will Toggle Selection', _internalDebugState['will_toggle_selection']?.toString() ?? 'N/A'),
+        _buildPositionInfo('Pointer Position', _internalDebugState['pointer_position']),
+        _buildPositionInfo('Node Position', _internalDebugState['node_position']),
+        _buildInternalValue('Distance', _internalDebugState['distance']?.toString() ?? '0.0'),
+        _buildInternalValue('Is Within Slop', _internalDebugState['isWithinSlop']?.toString() ?? 'N/A'),
+        // Failure reason if available
+        if (_internalDebugState.containsKey('failure_reason'))
+          _buildInternalValue('Failure Reason', _internalDebugState['failure_reason']?.toString() ?? 'N/A'),
+        if (_internalDebugState.containsKey('reason'))
+          _buildInternalValue('Reason', _internalDebugState['reason']?.toString() ?? 'N/A'),
+        if (_internalDebugState.containsKey('exceeded_by'))
+          _buildInternalValue('Exceeded By', _internalDebugState['exceeded_by']?.toString() ?? 'N/A'),
+        // Node at position (shortened)
+        if (_internalDebugState.containsKey('node_at_position')) ...[
+          _buildInternalValue('Node At Position', _shortenId(_internalDebugState['node_at_position']?.toString() ?? 'null')),
+        ],
+        // Tap debug info breakdown
+        if (_internalDebugState['tap_debug_info'] != null)
+          ..._buildTapDebugInfoSection(_internalDebugState['tap_debug_info']),
+      ],
+    );
+  }
+
+  Widget _buildInternalValue(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? color : Colors.grey[300],
+          Expanded(
+            flex: 3,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 16 * _uiScale,
+                color: Colors.grey[600],
+                fontFamily: 'monospace',
+              ),
             ),
           ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16 * _uiScale,
-              color: isActive ? color : Colors.grey[600],
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          Expanded(
+            flex: 2,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16 * _uiScale,
+                color: Colors.black87,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -748,40 +899,270 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     );
   }
 
-  Widget _buildEntityInfo(String label, String? entityId) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Text(
-        '$label: ${entityId ?? 'None'}',
-        style: TextStyle(
-          fontSize: 16 * _uiScale,
-          color: entityId != null ? Colors.black87 : Colors.grey[600],
+  Widget _buildPositionInfo(String label, dynamic position) {
+    String positionText = 'N/A';
+    if (position is Map<String, dynamic>) {
+      final x = position['x']?.toStringAsFixed(1) ?? '0.0';
+      final y = position['y']?.toStringAsFixed(1) ?? '0.0';
+      positionText = '($x, $y)';
+    }
+    return _buildInternalValue(label, positionText);
+  }
+
+  String _shortenId(String id) {
+    if (id == 'null' || id == 'N/A') return id;
+    return id.length > 6 ? id.substring(0, 6) : id;
+  }
+
+  Widget _buildFloatingDebugDialog() {
+    return Positioned(
+      top: 10,
+      right: 10,
+      child: Container(
+        width: _collapseFloatingDebug ? 250 : 320,
+        constraints: _collapseFloatingDebug 
+          ? const BoxConstraints(maxHeight: 40)
+          : const BoxConstraints(maxHeight: 500),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.red, width: 2),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
+        child: _collapseFloatingDebug 
+          ? _buildCollapsedHeader()
+          : _buildExpandedContent(),
       ),
     );
   }
 
-  Widget _buildCounterInfo(String label, int value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Text(
-        '$label: $value',
-        style: TextStyle(fontSize: 16 * _uiScale, color: Colors.black87),
+  Widget _buildCollapsedHeader() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.red[50],
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.bug_report, color: Colors.red[700], size: 16),
+          const SizedBox(width: 4),
+          Text(
+            'Live Gesture Debug',
+            style: TextStyle(
+              fontSize: 16 * _uiScale,
+              fontWeight: FontWeight.bold,
+              color: Colors.red[700],
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _collapseFloatingDebug = !_collapseFloatingDebug;
+              });
+            },
+            icon: Icon(
+              Icons.keyboard_arrow_down, 
+              size: 16, 
+              color: Colors.red[700]
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+            tooltip: 'Expand',
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTimerInfo(String label, int? timeRemaining) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Text(
-        '$label: ${timeRemaining != null ? '${timeRemaining}ms' : 'Inactive'}',
-        style: TextStyle(
-          fontSize: 16 * _uiScale,
-          color: timeRemaining != null ? Colors.orange : Colors.grey[600],
+  Widget _buildExpandedContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.red[50],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.bug_report, color: Colors.red[700], size: 16),
+              const SizedBox(width: 4),
+              Text(
+                'Live Gesture Debug',
+                style: TextStyle(
+                  fontSize: 16 * _uiScale,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red[700],
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _collapseFloatingDebug = !_collapseFloatingDebug;
+                  });
+                },
+                icon: Icon(
+                  Icons.keyboard_arrow_up, 
+                  size: 16, 
+                  color: Colors.red[700]
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                tooltip: 'Collapse',
+              ),
+            ],
+          ),
         ),
+        // Tabbed content
+        Expanded(
+          child: DefaultTabController(
+            length: 3,
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.grey[100],
+                  child: TabBar(
+                    labelColor: Colors.red[700],
+                    unselectedLabelColor: Colors.grey[600],
+                    indicatorColor: Colors.red[700],
+                    labelStyle: TextStyle(fontSize: 12 * _uiScale, fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: TextStyle(fontSize: 12 * _uiScale),
+                    tabs: const [
+                      Tab(text: 'Critical'),
+                      Tab(text: 'State'),
+                      Tab(text: 'Full'),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _buildCriticalDebugTab(),
+                      _buildStateDebugTab(),
+                      _buildFullDebugTab(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCriticalDebugTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Most critical info for immediate debugging
+          _buildInternalValue('Phase', _internalDebugState['phase']?.toString() ?? 'none'),
+          _buildInternalValue('Tap Completed', _internalDebugState['is_tap_completed_after_up']?.toString() ?? 'N/A'),
+          _buildInternalValue('Still Dragging', _internalDebugState['is_still_dragging_after_up']?.toString() ?? 'N/A'),
+          _buildInternalValue('Will Toggle', _internalDebugState['will_toggle_selection']?.toString() ?? 'N/A'),
+          const SizedBox(height: 8),
+          _buildInternalValue('Node Target', _shortenId(_internalDebugState['nodeTargetId']?.toString() ?? 'null')),
+          _buildInternalValue('Distance', _internalDebugState['distance']?.toString() ?? '0.0'),
+          _buildInternalValue('Within Slop', _internalDebugState['isWithinSlop']?.toString() ?? 'N/A'),
+          _buildInternalValue('Touch Slop', _internalDebugState['touch_slop']?.toString() ?? '144.0'),
+          const SizedBox(height: 8),
+          // Failure reasons
+          if (_internalDebugState.containsKey('failure_reason'))
+            _buildInternalValue('Failure', _internalDebugState['failure_reason']?.toString() ?? 'N/A'),
+          if (_internalDebugState.containsKey('reason'))
+            _buildInternalValue('Reason', _internalDebugState['reason']?.toString() ?? 'N/A'),
+        ],
       ),
     );
+  }
+
+  Widget _buildStateDebugTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Current State', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
+          const SizedBox(height: 4),
+          _buildInternalValue('Dragging', _isDragging ? 'Active' : 'Inactive'),
+          _buildInternalValue('Hovering', _isHovering ? 'Active' : 'Inactive'),
+          _buildInternalValue('Tap Tracking', _isTapTracking ? 'Active' : 'Inactive'),
+          const SizedBox(height: 8),
+          
+          Text('Entities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
+          const SizedBox(height: 4),
+          _buildInternalValue('Last Dragged', _shortenId(_lastDraggedEntityId ?? 'None')),
+          _buildInternalValue('Hovered Entity', _shortenId(_hoveredEntityId ?? 'None')),
+          _buildInternalValue('Tap Target', _shortenId(_trackedTapEntityId ?? 'None')),
+          const SizedBox(height: 8),
+          
+          Text('Counters', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
+          const SizedBox(height: 4),
+          _buildInternalValue('Tap Count', _currentTapCount.toString()),
+          _buildInternalValue('Total Gestures', _totalGestureEvents.toString()),
+          _buildInternalValue('Double-tap Timer', _doubleTapTimeRemaining != null ? '${_doubleTapTimeRemaining}ms' : 'Inactive'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullDebugTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8),
+      child: _buildGestureStateDisplay(),
+    );
+  }
+
+  List<Widget> _buildTapDebugInfoSection(dynamic tapDebugInfo) {
+    if (tapDebugInfo is! Map<String, dynamic>) {
+      return [_buildInternalValue('Tap Debug Info', 'Invalid data')];
+    }
+    
+    final List<Widget> widgets = [];
+    widgets.add(Padding(
+      padding: const EdgeInsets.only(top: 4, bottom: 2),
+      child: Text(
+        'Tap State Manager Details:',
+        style: TextStyle(
+          fontSize: 16 * _uiScale,
+          fontWeight: FontWeight.bold,
+          color: Colors.indigo[700],
+        ),
+      ),
+    ));
+    
+    tapDebugInfo.forEach((key, value) {
+      final displayKey = key.replaceAll('_', ' ').split(' ').map((word) => 
+        word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : word
+      ).join(' ');
+      
+      if (key == 'down_position' || key == 'up_position') {
+        widgets.add(_buildPositionInfo(displayKey, value));
+      } else if (key.contains('entityId') || key.contains('entity_id')) {
+        widgets.add(_buildInternalValue(displayKey, _shortenId(value.toString())));
+      } else {
+        widgets.add(_buildInternalValue(displayKey, value.toString()));
+      }
+    });
+    
+    return widgets;
   }
 
   Widget _buildNodesSection() {
@@ -1026,11 +1407,19 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                 ),
               ),
             ),
+          // Floating debug dialog in graph view (Interactive Viewer mode - always visible)
+          _buildFloatingDebugDialog(),
         ],
       );
     }
 
-    return graphView;
+    return Stack(
+      children: [
+        graphView,
+        // Floating debug dialog in graph view (always visible, collapsible)
+        _buildFloatingDebugDialog(),
+      ],
+    );
   }
 
   void _scheduleUpdate() {
@@ -1044,8 +1433,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
 
   Widget _buildTabbedDebugPanel() {
     return DefaultTabController(
-      length: 3,
-      initialIndex: _selectedTabIndex,
+      length: 2,
+      initialIndex: _selectedTabIndex.clamp(0, 1),
       child: Column(
         children: [
           Container(
@@ -1059,7 +1448,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
               unselectedLabelStyle: const TextStyle(fontSize: 12),
               onTap: (index) => setState(() => _selectedTabIndex = index),
               tabs: const [
-                Tab(text: 'Gesture State'),
                 Tab(text: 'State Timeline'),
                 Tab(text: 'Event Log'),
               ],
@@ -1068,35 +1456,11 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           Expanded(
             child: TabBarView(
               children: [
-                _buildGestureStateTab(),
                 _buildStateTimelineTab(),
                 _buildEventLogTab(),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGestureStateTab() {
-    return Container(
-      color: Colors.purple[50],
-      child: ExpansionTile(
-        title: Text('Current Gesture State',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
-        initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-        childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-        backgroundColor: Colors.purple[50],
-        collapsedBackgroundColor: Colors.purple[50],
-        iconColor: Colors.purple[700],
-        collapsedIconColor: Colors.purple[700],
-        shape: const Border(),
-        collapsedShape: const Border(),
-        controlAffinity: ListTileControlAffinity.leading,
-        children: [
-          _buildGestureStateDisplay(),
         ],
       ),
     );
@@ -1116,6 +1480,11 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                 Text(
                   'Gesture State Transitions',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Live gesture state available in floating dialog (always visible in top-right corner)',
+                  style: TextStyle(fontSize: 12 * _uiScale, color: Colors.grey[600], fontStyle: FontStyle.italic),
                 ),
                 const SizedBox(height: 8),
                 _buildTimelineFilters(),
@@ -1484,6 +1853,17 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         case GestureDebugEventType.backgroundCallback:
           eventType = EventType.callback;
           break;
+        case GestureDebugEventType.tapDebugState:
+          // Handle TAP_DEBUG_STATE events specially
+          eventType = EventType.gesture;
+          debugPrint('WORKBENCH: Received TAP_DEBUG_STATE event with data: ${event.data}');
+          // Update internal debug state directly from the event data
+          if (mounted) {
+            setState(() {
+              _updateGestureState('tap_debug_state', event.data);
+            });
+          }
+          break;
       }
 
       // Create display event
@@ -1652,7 +2032,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
   @override
   void onTap(GraphTapEvent event) {
     super.onTap(event);
-    print('onTap');
+    debugPrint('onTap');
     if (monitorCallbacks) {
       final hasEntities = event.entityIds.isNotEmpty;
       final details = hasEntities

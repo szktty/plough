@@ -13,6 +13,7 @@ import 'package:plough/src/graph_view/behavior.dart';
 import 'package:plough/src/graph_view/hit_test.dart';
 import 'package:plough/src/interactive/drag_state.dart';
 import 'package:plough/src/interactive/events.dart';
+import 'package:plough/src/interactive/gesture_debug.dart';
 import 'package:plough/src/interactive/hover_state.dart';
 import 'package:plough/src/interactive/tap_state.dart';
 import 'package:plough/src/interactive/tooltip_state.dart';
@@ -87,6 +88,12 @@ class GraphGestureManager {
 
   PointerEventDetails? _lastPointerDetails;
   PointerEventDetails? get lastPointerDetails => _lastPointerDetails;
+
+  // Debug accessors for internal state
+  GraphNodeTapStateManager get nodeTapManager => _nodeTapManager;
+  GraphNodeDragStateManager get nodeDragManager => _nodeDragManager;
+  GraphLinkTapStateManager get linkTapManager => _linkTapManager;
+  GraphLinkDragStateManager get linkDragManager => _linkDragManager;
 
   GraphEntity? getEntity(GraphId entityId) =>
       graph.getNode(entityId) ?? graph.getLink(entityId);
@@ -342,7 +349,7 @@ class GraphGestureManager {
   void handlePointerDown(PointerDownEvent event) {
     logDebug(LogCategory.gesture,
         'Starting handlePointerDown at ${event.localPosition}, mode: $gestureMode');
-    
+
     // Send structured gesture event to debug server
     externalDebugClient.sendLog(
       category: LogCategory.gesture,
@@ -363,7 +370,7 @@ class GraphGestureManager {
     if (node != null) {
       logDebug(
           LogCategory.gesture, 'Node found: ${node.id.value.substring(0, 4)}');
-      
+
       // Send structured node event to debug server
       externalDebugClient.sendLog(
         category: LogCategory.gesture,
@@ -373,8 +380,14 @@ class GraphGestureManager {
           'event_type': 'nodeFound',
           'nodeId': node.id.value,
           'node_id': node.id.value, // backward compatibility
-          'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-          'node_position': {'x': node.logicalPosition.dx, 'y': node.logicalPosition.dy},
+          'position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
+          'node_position': {
+            'x': node.logicalPosition.dx,
+            'y': node.logicalPosition.dy
+          },
           'can_select': node.canSelect,
           'can_drag': node.canDrag,
           'is_selected': graph.selectedEntityIds.contains(node.id),
@@ -382,9 +395,52 @@ class GraphGestureManager {
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
-      
+
+      debugPrint('TAP DEBUG DOWN: node.id=${node.id.value.substring(0, 8)}');
       _nodeTapManager.handlePointerDown(node.id, event);
       _nodeDragManager.handlePointerDown(node.id, event);
+      debugPrint(
+          'TAP DEBUG DOWN: trackedEntityId after handlePointerDown=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
+
+      // Send TAP_DEBUG_STATE after pointer down
+      final tapState = _nodeTapManager.getState(node.id);
+      final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(node.id);
+      logGestureDebug(
+        GestureDebugEventType.tapDebugState,
+        'GraphGestureManager',
+        'TAP_DEBUG_STATE_DOWN',
+        {
+          'event_type': 'tap_debug_state',
+          'phase': 'down',
+          'nodeTargetId': node.id.value,
+          'state_exists': tapState != null,
+          'state_completed': tapState?.completed ?? false,
+          'state_cancelled': tapState?.cancelled ?? false,
+          'tap_count': tapState?.tapCount ?? 0,
+          'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
+          'is_still_dragging_after_up': false,
+          'is_tap_completed_after_up': false,
+          'touch_slop': kTouchSlop * 8,
+          'k_touch_slop': kTouchSlop,
+          'timestamp': DateTime.now().toIso8601String(),
+          // Additional debug info
+          'tap_debug_info': tapDebugInfo,
+          'node_can_select': node.canSelect,
+          'node_can_drag': node.canDrag,
+          'node_is_selected': graph.selectedEntityIds.contains(node.id),
+          'gesture_mode': gestureMode.name,
+          'pointer_position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
+          'node_position': {
+            'x': node.logicalPosition.dx,
+            'y': node.logicalPosition.dy
+          },
+          'tap_manager_states_count': _nodeTapManager.states.length,
+          'drag_manager_is_dragging': _nodeDragManager.isDragging(node.id),
+        },
+      );
       // Return early for all modes except transparent
       if (gestureMode == GraphGestureMode.transparent) {
         logDebug(LogCategory.gesture,
@@ -400,7 +456,7 @@ class GraphGestureManager {
     if (link != null) {
       logDebug(
           LogCategory.gesture, 'Link found: ${link.id.value.substring(0, 4)}');
-      
+
       // Send structured link event to debug server
       externalDebugClient.sendLog(
         category: LogCategory.gesture,
@@ -410,7 +466,10 @@ class GraphGestureManager {
           'event_type': 'linkFound',
           'linkId': link.id.value,
           'link_id': link.id.value, // backward compatibility
-          'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+          'position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
           'source_node_id': link.source.id.value,
           'target_node_id': link.target.id.value,
           'can_select': link.canSelect,
@@ -419,7 +478,7 @@ class GraphGestureManager {
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
-      
+
       _linkTapManager.handlePointerDown(link.id, event);
       _linkDragManager.handlePointerDown(link.id, event);
       // Return early for all modes except transparent
@@ -474,11 +533,26 @@ class GraphGestureManager {
     // Track if we're processing an entity
     bool entityProcessed = false;
 
-    final nodeTargetId =
-        _nodeTapManager.trackedEntityId ?? _nodeDragManager.lastDraggedEntityId;
-    logDebug(LogCategory.gesture,
-        'Node target ID: ${nodeTargetId?.value.substring(0, 4) ?? 'null'}');
-    
+    // First try to get the node at the pointer up location
+    final nodeAtPosition = findNodeAt(event.localPosition);
+    final nodeTargetId = nodeAtPosition?.id ??
+        _nodeTapManager.trackedEntityId ??
+        _nodeDragManager.lastDraggedEntityId;
+    debugPrint(
+        'TAP DEBUG: nodeAtPosition=${nodeAtPosition?.id.value.substring(0, 8) ?? 'null'}');
+    debugPrint(
+        'TAP DEBUG: trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
+    debugPrint(
+        'TAP DEBUG: lastDraggedEntityId=${_nodeDragManager.lastDraggedEntityId?.value.substring(0, 8) ?? 'null'}');
+    debugPrint(
+        'TAP DEBUG: final nodeTargetId=${nodeTargetId?.value.substring(0, 8) ?? 'null'}');
+
+    logDebug(
+        LogCategory.gesture,
+        'Node target ID: ${nodeTargetId?.value.substring(0, 4) ?? 'null'} '
+        '(trackedEntityId: ${_nodeTapManager.trackedEntityId?.value.substring(0, 4) ?? 'null'}, '
+        'lastDraggedEntityId: ${_nodeDragManager.lastDraggedEntityId?.value.substring(0, 4) ?? 'null'})');
+
     // Send structured node target info to debug server
     externalDebugClient.sendLog(
       category: LogCategory.gesture,
@@ -499,7 +573,7 @@ class GraphGestureManager {
       final node = graph.getNode(nodeTargetId);
       if (node == null) {
         logDebug(LogCategory.gesture, 'Node not found, cleaning up');
-        
+
         // Send structured cleanup event to debug server
         externalDebugClient.sendLog(
           category: LogCategory.gesture,
@@ -509,11 +583,14 @@ class GraphGestureManager {
             'event_type': 'nodeNotFoundCleanup',
             'nodeId': nodeTargetId.value,
             'node_id': nodeTargetId.value, // backward compatibility
-            'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+            'position': {
+              'x': event.localPosition.dx,
+              'y': event.localPosition.dy
+            },
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
-        
+
         _nodeTapManager.cleanupTapState(nodeTargetId);
         _nodeDragManager.cancel(nodeTargetId);
         return;
@@ -521,7 +598,7 @@ class GraphGestureManager {
 
       logDebug(LogCategory.gesture,
           'Processing node: ${node.id.value.substring(0, 4)}');
-      
+
       // Send structured node processing event to debug server
       externalDebugClient.sendLog(
         category: LogCategory.gesture,
@@ -531,8 +608,14 @@ class GraphGestureManager {
           'event_type': 'nodeProcessing',
           'nodeId': node.id.value,
           'node_id': node.id.value, // backward compatibility
-          'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-          'node_position': {'x': node.logicalPosition.dx, 'y': node.logicalPosition.dy},
+          'position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
+          'node_position': {
+            'x': node.logicalPosition.dx,
+            'y': node.logicalPosition.dy
+          },
           'can_select': node.canSelect,
           'can_drag': node.canDrag,
           'is_selected': graph.selectedEntityIds.contains(node.id),
@@ -540,7 +623,7 @@ class GraphGestureManager {
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
-      
+
       _nodeTapManager.handlePointerUp(nodeTargetId, event);
       _nodeDragManager.handlePointerUp(nodeTargetId, event);
 
@@ -548,12 +631,90 @@ class GraphGestureManager {
       final isTapCompletedAfterUp =
           _nodeTapManager.isTapCompleted(nodeTargetId);
 
-      logDebug(
-        LogCategory.gesture,
-        'Final check (Node: ${nodeTargetId.value.substring(0, 4)}): isStillDraggingAfterUp=$isStillDraggingAfterUp, isTapCompletedAfterUp=$isTapCompletedAfterUp',
+      // Additional debugging
+      final tapState = _nodeTapManager.getState(nodeTargetId);
+
+      // Send detailed debug info to workbench via gesture debug stream
+      final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(nodeTargetId);
+      final dragState = _nodeDragManager.getState(nodeTargetId);
+      logGestureDebug(
+        GestureDebugEventType.tapDebugState,
+        'GraphGestureManager',
+        'TAP_DEBUG_STATE_UP',
+        {
+          'event_type': 'tap_debug_state',
+          'phase': 'up',
+          'nodeTargetId': nodeTargetId?.value ?? 'null',
+          'state_exists': tapState != null,
+          'state_completed': tapState?.completed ?? false,
+          'state_cancelled': tapState?.cancelled ?? false,
+          'tap_count': tapState?.tapCount ?? 0,
+          'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
+          'is_still_dragging_after_up': isStillDraggingAfterUp,
+          'is_tap_completed_after_up': isTapCompletedAfterUp,
+          'touch_slop': kTouchSlop * 8,
+          'k_touch_slop': kTouchSlop,
+          'timestamp': DateTime.now().toIso8601String(),
+          // Additional debug info
+          'tap_debug_info': tapDebugInfo,
+          'node_can_select': node.canSelect,
+          'node_can_drag': node.canDrag,
+          'node_is_selected': graph.selectedEntityIds.contains(node.id),
+          'gesture_mode': gestureMode.name,
+          'pointer_position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
+          'node_position': {
+            'x': node.logicalPosition.dx,
+            'y': node.logicalPosition.dy
+          },
+          'node_at_position': nodeAtPosition?.id.value,
+          'tap_manager_states_count': _nodeTapManager.states.length,
+          'drag_state_exists': dragState != null,
+          'drag_manager_is_dragging': _nodeDragManager.isDragging(nodeTargetId),
+          'will_toggle_selection':
+              !isStillDraggingAfterUp && isTapCompletedAfterUp,
+        },
       );
 
+      // Also send to external debug client if available
+      externalDebugClient.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'TAP_DEBUG_STATE',
+        metadata: {
+          'event_type': 'tap_debug_state',
+          'nodeTargetId': nodeTargetId?.value ?? 'null',
+          'state_exists': tapState != null,
+          'state_completed': tapState?.completed ?? false,
+          'state_cancelled': tapState?.cancelled ?? false,
+          'tap_count': tapState?.tapCount ?? 0,
+          'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
+          'is_still_dragging_after_up': isStillDraggingAfterUp,
+          'is_tap_completed_after_up': isTapCompletedAfterUp,
+          'touch_slop': kTouchSlop * 8,
+          'k_touch_slop': kTouchSlop,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+
+      debugPrint(
+          'TAP DEBUG: nodeTargetId=${nodeTargetId?.value.substring(0, 8) ?? 'null'}');
+      debugPrint('TAP DEBUG: state exists=${tapState != null}');
+      debugPrint('TAP DEBUG: completed=${tapState?.completed}');
+      debugPrint('TAP DEBUG: cancelled=${tapState?.cancelled}');
+      debugPrint('TAP DEBUG: tapCount=${tapState?.tapCount}');
+      debugPrint(
+          'TAP DEBUG: trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
+
+      debugPrint(
+          'TAP DEBUG: Final check - isStillDraggingAfterUp=$isStillDraggingAfterUp, isTapCompletedAfterUp=$isTapCompletedAfterUp');
+
+      debugPrint(
+          'isStillDraggingAfterUp: $isStillDraggingAfterUp, isTapCompletedAfterUp: $isTapCompletedAfterUp');
       if (!isStillDraggingAfterUp && isTapCompletedAfterUp) {
+        debugPrint('tap!');
         logDebug(
           LogCategory.gesture,
           'Toggling selection for Node: ${nodeTargetId.value.substring(0, 4)}',
@@ -567,10 +728,44 @@ class GraphGestureManager {
         );
         viewBehavior.onTap(tapEvent);
         entityProcessed = true;
+
+        // Clean up tap state after successful tap processing
+        _nodeTapManager.cleanupTapState(nodeTargetId);
       } else {
         logDebug(
           LogCategory.gesture,
           'NOT Toggling selection for Node: ${nodeTargetId.value.substring(0, 4)} (isStillDraggingAfterUp=$isStillDraggingAfterUp, isTapCompletedAfterUp=$isTapCompletedAfterUp)',
+        );
+
+        // Log detailed failure reason for tap recognition
+        String failureReason = '';
+        if (isStillDraggingAfterUp && !isTapCompletedAfterUp) {
+          failureReason = 'still_dragging_and_tap_not_completed';
+        } else if (isStillDraggingAfterUp) {
+          failureReason = 'still_dragging';
+        } else if (!isTapCompletedAfterUp) {
+          failureReason = 'tap_not_completed';
+        } else {
+          failureReason = 'unknown';
+        }
+
+        logGestureDebug(
+          GestureDebugEventType.tapDebugState,
+          'GraphGestureManager',
+          'TAP_RECOGNITION_FAILED',
+          {
+            'event_type': 'tap_recognition_failed',
+            'nodeTargetId': nodeTargetId.value,
+            'failure_reason': failureReason,
+            'is_still_dragging_after_up': isStillDraggingAfterUp,
+            'is_tap_completed_after_up': isTapCompletedAfterUp,
+            'tap_state_exists': tapState != null,
+            'tap_state_completed': tapState?.completed ?? false,
+            'tap_state_cancelled': tapState?.cancelled ?? false,
+            'tap_count': tapState?.tapCount ?? 0,
+            'tracked_entity_id':
+                _nodeTapManager.trackedEntityId?.value ?? 'null',
+          },
         );
       }
       entityProcessed = true;
@@ -612,6 +807,9 @@ class GraphGestureManager {
         );
         viewBehavior.onTap(tapEvent);
         entityProcessed = true;
+
+        // Clean up tap state after successful tap processing
+        _linkTapManager.cleanupTapState(linkTargetId);
       } else {
         logDebug(
           LogCategory.gesture,

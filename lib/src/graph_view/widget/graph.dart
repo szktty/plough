@@ -156,7 +156,7 @@ class GraphViewState extends State<GraphView> {
 
   void _setBuildState(GraphViewBuildState newState) {
     if (_buildState.value != newState) {
-      print(
+      debugPrint(
           '🏗️ GraphView _buildState changed: ${_buildState.value} -> $newState');
       _buildState.value = newState;
     }
@@ -222,11 +222,11 @@ class GraphViewState extends State<GraphView> {
         widget.behavior.runtimeType != oldWidget.behavior.runtimeType;
 
     if (needsReinit) {
-      print(
+      debugPrint(
           '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behavior=${widget.behavior.runtimeType != oldWidget.behavior.runtimeType})');
       _initBehavior();
     } else {
-      print(
+      debugPrint(
           '🔄 GraphView didUpdateWidget: skipping reinit (no significant changes)');
     }
   }
@@ -340,7 +340,7 @@ class GraphViewState extends State<GraphView> {
               Listenable.merge([_graph.layoutChangeListenable, _buildState]),
           builder: (context, child) {
             final timestamp = DateTime.now().millisecondsSinceEpoch;
-            print(
+            debugPrint(
                 '🔄 GraphView AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
             logDebug(LogCategory.rendering,
                 'AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
