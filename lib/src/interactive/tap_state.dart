@@ -114,6 +114,9 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     // Allow tap start even if !canSelect, selection check happens on up?
     // if (!canSelect(entityId)) return;
 
+    debugPrint('TAP_STATE handlePointerDown called for entityId=${entityId.value.substring(0, 8)}');
+    debugPrint('TAP_STATE Before: states count=${states.length}');
+
     final existingState = getState(entityId);
     final now = DateTime.now();
 
@@ -142,6 +145,14 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         ),
       );
       logDebug(LogCategory.tap, 'Tap sequence started for $entityId');
+      debugPrint('TAP_STATE New state created for entityId=${entityId.value.substring(0, 8)}');
+    }
+    
+    debugPrint('TAP_STATE After: states count=${states.length}');
+    // 登録されている state を出力
+    for (final s in states) {
+      final tapState = s as _TapState;
+      debugPrint('TAP_STATE Registered state: entityId=${tapState.entityId.value.substring(0, 8)}');
     }
     
     // Log tap state after handling pointer down
@@ -163,6 +174,22 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
 
   void handlePointerUp(GraphId entityId, PointerUpEvent event) {
     final state = getState(entityId);
+    
+    // 詳細なデバッグログを追加
+    debugPrint('TAP_STATE handlePointerUp called for entityId=${entityId.value.substring(0, 8)}');
+    debugPrint('TAP_STATE state exists=${state != null}');
+    if (state != null) {
+      debugPrint('TAP_STATE state.cancelled=${state.cancelled}');
+      debugPrint('TAP_STATE state.completed=${state.completed}');
+    }
+    
+    // すべての登録されている state をデバッグ出力
+    debugPrint('TAP_STATE All states count=${states.length}');
+    for (final s in states) {
+      final tapState = s as _TapState;
+      debugPrint('TAP_STATE Registered state: entityId=${tapState.entityId.value.substring(0, 8)}, cancelled=${tapState.cancelled}, completed=${tapState.completed}');
+    }
+    
     if (state == null || state.cancelled || state.completed) {
       // Log why the pointer up was ignored
       String reason = '';

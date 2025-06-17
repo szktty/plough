@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:plough/plough.dart';
 import 'dart:async';
+import 'dart:convert';
 
 void main() {
   runApp(const WorkbenchApp());
@@ -54,7 +55,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   int _rebuildCount = 0;
 
   // Tab state
-  int _selectedTabIndex = 0;
   
   // UI scale
   double _uiScale = 1.0;
@@ -69,6 +69,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
 
   // Gesture state tracking
   bool _isDragging = false;
+  
+  // Gesture validation results
   
   // Internal debug state from TAP_DEBUG_STATE events
   Map<String, dynamic> _internalDebugState = {
@@ -98,6 +100,10 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     'distance': 0.0,
     'isWithinSlop': false,
   };
+
+  // ジェスチャー検証関連
+  final List<GestureValidationResult> _gestureValidationResults = [];
+  GestureTestType _selectedGestureTest = GestureTestType.tap;
   bool _isHovering = false;
   bool _isTapTracking = false;
   String? _lastDraggedEntityId;
@@ -223,8 +229,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                   color: Colors.grey[200],
                   child: Row(
                     children: [
-                      Icon(Icons.list, size: 16),
-                      SizedBox(width: 8),
+                      const Icon(Icons.list, size: 16),
+                      const SizedBox(width: 8),
                       Text('Graph Entities',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
@@ -650,12 +656,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     }
   }
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:'
-        '${time.minute.toString().padLeft(2, '0')}:'
-        '${time.second.toString().padLeft(2, '0')}.'
-        '${time.millisecond.toString().padLeft(3, '0')}';
-  }
 
   void _updateGestureState(String gestureType, Map<String, dynamic> data) {
     if (!_monitorGestureStates) return;
@@ -674,6 +674,9 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           debugPrint('WORKBENCH: Updating internal debug state with: $data');
           _internalDebugState = Map<String, dynamic>.from(data);
           debugPrint('WORKBENCH: New internal debug state: $_internalDebugState');
+          
+          // タップ検証を実行
+          _validateTapBehavior(data);
           break;
         case 'dragStart':
           _isDragging = true;
@@ -692,6 +695,622 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           break;
       }
     });
+  }
+
+  // ジェスチャー動作の期待値検証
+  void _validateTapBehavior(Map<String, dynamic> debugState) {
+    final phase = debugState['phase']?.toString() ?? 'unknown';
+    final nodeTargetId = debugState['nodeTargetId']?.toString() ?? 'null';
+    
+    if (nodeTargetId == 'null' || phase == 'none') return;
+
+    final checks = <GestureValidationCheck>[];
+    
+    // 選択されたテストタイプに応じて検証を実行
+    switch (_selectedGestureTest) {
+      case GestureTestType.tap:
+        if (phase == 'down') {
+          checks.addAll(_validateTapDown(debugState));
+        } else if (phase == 'up') {
+          checks.addAll(_validateTapUp(debugState));
+        }
+        break;
+      case GestureTestType.doubleTap:
+        checks.addAll(_validateDoubleTap(debugState, phase));
+        break;
+      case GestureTestType.drag:
+        checks.addAll(_validateDrag(debugState, phase));
+        break;
+      case GestureTestType.hover:
+        checks.addAll(_validateHover(debugState, phase));
+        break;
+      case GestureTestType.longPress:
+        checks.addAll(_validateLongPress(debugState, phase));
+        break;
+      case GestureTestType.tapAndHold:
+        checks.addAll(_validateTapAndHold(debugState, phase));
+        break;
+    }
+
+    if (checks.isNotEmpty) {
+      final result = GestureValidationResult(
+        timestamp: DateTime.now(),
+        testType: _selectedGestureTest,
+        phase: phase,
+        nodeId: nodeTargetId,
+        checks: checks,
+      );
+      
+      _gestureValidationResults.insert(0, result);
+      
+      // 最大100件まで保持
+      if (_gestureValidationResults.length > 100) {
+        _gestureValidationResults.removeRange(100, _gestureValidationResults.length);
+      }
+    }
+  }
+
+  List<GestureValidationCheck> _validateTapDown(Map<String, dynamic> state) {
+    final checks = <GestureValidationCheck>[];
+    
+    final nodeCanSelect = state['node_can_select'] ?? false;
+    checks.add(GestureValidationCheck(
+      name: 'node_selectable',
+      description: 'ノードが選択可能である',
+      passed: nodeCanSelect,
+      expectedValue: 'true',
+      actualValue: nodeCanSelect.toString(),
+      failureReason: nodeCanSelect ? null : 'ノードのcanSelectがfalse',
+    ));
+
+    final stateExists = state['state_exists'] ?? false;
+    checks.add(GestureValidationCheck(
+      name: 'tap_state_created',
+      description: 'タップ状態が作成される',
+      passed: stateExists,
+      expectedValue: 'true',
+      actualValue: stateExists.toString(),
+      failureReason: stateExists ? null : 'タップ状態が作成されていない',
+    ));
+
+    final stateCancelled = state['state_cancelled'] ?? false;
+    checks.add(GestureValidationCheck(
+      name: 'tap_state_not_cancelled',
+      description: 'タップ状態がキャンセルされていない',
+      passed: !stateCancelled,
+      expectedValue: 'false',
+      actualValue: stateCancelled.toString(),
+      failureReason: stateCancelled ? 'タップ状態がキャンセルされた' : null,
+    ));
+
+    return checks;
+  }
+
+  List<GestureValidationCheck> _validateTapUp(Map<String, dynamic> state) {
+    final checks = <GestureValidationCheck>[];
+    
+    final stateExists = state['state_exists'] ?? false;
+    checks.add(GestureValidationCheck(
+      name: 'tap_state_exists_on_up',
+      description: 'ポインターアップ時にタップ状態が存在する',
+      passed: stateExists,
+      expectedValue: 'true',
+      actualValue: stateExists.toString(),
+      failureReason: stateExists ? null : 'ポインターアップ時にタップ状態が存在しない',
+    ));
+
+    if (stateExists) {
+      final isStillDragging = state['is_still_dragging_after_up'] ?? true;
+      checks.add(GestureValidationCheck(
+        name: 'not_dragging',
+        description: 'ドラッグ中でない',
+        passed: !isStillDragging,
+        expectedValue: 'false',
+        actualValue: isStillDragging.toString(),
+        failureReason: isStillDragging ? 'まだドラッグ中' : null,
+      ));
+
+      final isTapCompleted = state['is_tap_completed_after_up'] ?? false;
+      checks.add(GestureValidationCheck(
+        name: 'tap_completed',
+        description: 'タップが完了している',
+        passed: isTapCompleted,
+        expectedValue: 'true',
+        actualValue: isTapCompleted.toString(),
+        failureReason: isTapCompleted ? null : 'タップが完了していない',
+      ));
+
+      final isWithinSlop = state['isWithinSlop'];
+      if (isWithinSlop != null) {
+        checks.add(GestureValidationCheck(
+          name: 'within_slop',
+          description: 'Touch slop範囲内',
+          passed: isWithinSlop,
+          expectedValue: 'true',
+          actualValue: isWithinSlop.toString(),
+          failureReason: isWithinSlop ? null : 'Touch slop範囲外に移動した',
+        ));
+      }
+
+      final willToggleSelection = state['will_toggle_selection'] ?? false;
+      final shouldToggle = !isStillDragging && isTapCompleted;
+      checks.add(GestureValidationCheck(
+        name: 'will_toggle_selection',
+        description: '選択状態が切り替わる',
+        passed: willToggleSelection == shouldToggle,
+        expectedValue: shouldToggle.toString(),
+        actualValue: willToggleSelection.toString(),
+        failureReason: willToggleSelection != shouldToggle 
+          ? '選択切り替えの判定が不正' : null,
+      ));
+    }
+
+    return checks;
+  }
+
+  List<GestureValidationCheck> _validateDoubleTap(Map<String, dynamic> state, String phase) {
+    final checks = <GestureValidationCheck>[];
+    
+    if (phase == 'up') {
+      final tapCount = state['tap_count'] ?? 0;
+      checks.add(GestureValidationCheck(
+        name: 'double_tap_count',
+        description: 'タップ回数が2回である',
+        passed: tapCount == 2,
+        expectedValue: '2',
+        actualValue: tapCount.toString(),
+        failureReason: tapCount != 2 ? 'タップ回数が2回でない' : null,
+      ));
+    }
+    
+    return checks;
+  }
+
+  List<GestureValidationCheck> _validateDrag(Map<String, dynamic> state, String phase) {
+    final checks = <GestureValidationCheck>[];
+    
+    final nodeCanDrag = state['node_can_drag'] ?? false;
+    checks.add(GestureValidationCheck(
+      name: 'node_draggable',
+      description: 'ノードがドラッグ可能である',
+      passed: nodeCanDrag,
+      expectedValue: 'true',
+      actualValue: nodeCanDrag.toString(),
+      failureReason: nodeCanDrag ? null : 'ノードのcanDragがfalse',
+    ));
+
+    if (phase == 'up') {
+      final isDragging = state['drag_manager_is_dragging'] ?? false;
+      checks.add(GestureValidationCheck(
+        name: 'drag_active',
+        description: 'ドラッグが実行されている',
+        passed: isDragging,
+        expectedValue: 'true',
+        actualValue: isDragging.toString(),
+        failureReason: isDragging ? null : 'ドラッグが開始されていない',
+      ));
+    }
+    
+    return checks;
+  }
+
+  List<GestureValidationCheck> _validateHover(Map<String, dynamic> state, String phase) {
+    // ホバー検証（今回は簡易実装）
+    return [
+      GestureValidationCheck(
+        name: 'hover_support',
+        description: 'ホバー状態をサポート',
+        passed: true,
+        expectedValue: 'true',
+        actualValue: 'true',
+      ),
+    ];
+  }
+
+  List<GestureValidationCheck> _validateLongPress(Map<String, dynamic> state, String phase) {
+    // 長押し検証（今回は簡易実装）
+    return [
+      GestureValidationCheck(
+        name: 'long_press_support',
+        description: '長押しをサポート',
+        passed: true,
+        expectedValue: 'true',
+        actualValue: 'true',
+      ),
+    ];
+  }
+
+  List<GestureValidationCheck> _validateTapAndHold(Map<String, dynamic> state, String phase) {
+    // タップ&ホールド検証（今回は簡易実装）
+    return [
+      GestureValidationCheck(
+        name: 'tap_hold_support',
+        description: 'タップ&ホールドをサポート',
+        passed: true,
+        expectedValue: 'true',
+        actualValue: 'true',
+      ),
+    ];
+  }
+
+  Widget _buildGestureTestTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ジェスチャーテスト選択セクション
+          _buildGestureTestSelector(),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          
+          // テスト結果表示セクション
+          _buildGestureTestResults(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGestureTestSelector() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        border: Border.all(color: Colors.blue[200]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.science, color: Colors.blue[700], size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Gesture Test Configuration',
+                style: TextStyle(
+                  fontSize: 18 * _uiScale,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[700],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          
+          Text(
+            'Select gesture type to test:',
+            style: TextStyle(
+              fontSize: 14 * _uiScale,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          
+          // ドロップダウン
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.grey[400]!),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<GestureTestType>(
+                value: _selectedGestureTest,
+                isDense: true,
+                onChanged: (GestureTestType? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedGestureTest = newValue;
+                      // テスト変更時に結果をクリア
+                      _gestureValidationResults.clear();
+                    });
+                  }
+                },
+                items: GestureTestType.values.map<DropdownMenuItem<GestureTestType>>((GestureTestType type) {
+                  return DropdownMenuItem<GestureTestType>(
+                    value: type,
+                    child: Text(
+                      type.displayName,
+                      style: TextStyle(fontSize: 14 * _uiScale),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          
+          // 選択されたテストの説明
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: Text(
+              _selectedGestureTest.description,
+              style: TextStyle(
+                fontSize: 13 * _uiScale,
+                color: Colors.grey[700],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          // クリアボタン
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _gestureValidationResults.clear();
+                  });
+                },
+                icon: const Icon(Icons.clear_all, size: 16),
+                label: Text('Clear Results', style: TextStyle(fontSize: 12 * _uiScale)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[100],
+                  foregroundColor: Colors.grey[700],
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${_gestureValidationResults.length} results',
+                style: TextStyle(
+                  fontSize: 12 * _uiScale,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGestureTestResults() {
+    if (_gestureValidationResults.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.gesture, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 12),
+            Text(
+              'No test results yet',
+              style: TextStyle(
+                fontSize: 16 * _uiScale,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Perform a ${_selectedGestureTest.displayName.toLowerCase()} gesture on a node to see validation results',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14 * _uiScale,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Test Results',
+          style: TextStyle(
+            fontSize: 16 * _uiScale,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ..._gestureValidationResults.map((result) => _buildDetailedValidationCard(result)),
+      ],
+    );
+  }
+
+  Widget _buildDetailedValidationCard(GestureValidationResult result) {
+    final isSuccess = result.isSuccess;
+    final passedChecks = result.checks.where((check) => check.passed).toList();
+    final failedChecks = result.checks.where((check) => !check.passed).toList();
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSuccess ? Colors.green[300]! : Colors.red[300]!,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ヘッダー
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isSuccess ? Colors.green[50] : Colors.red[50],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isSuccess ? Icons.check_circle : Icons.error_outline,
+                  color: isSuccess ? Colors.green[700] : Colors.red[700],
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${result.testType.displayName} ${result.phase.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: 16 * _uiScale,
+                          fontWeight: FontWeight.bold,
+                          color: isSuccess ? Colors.green[700] : Colors.red[700],
+                        ),
+                      ),
+                      Text(
+                        'Node: ${_shortenId(result.nodeId)} • ${_formatGestureTime(result.timestamp)}',
+                        style: TextStyle(
+                          fontSize: 12 * _uiScale,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isSuccess ? Colors.green[100] : Colors.red[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${passedChecks.length}/${result.checks.length}',
+                    style: TextStyle(
+                      fontSize: 14 * _uiScale,
+                      fontWeight: FontWeight.bold,
+                      color: isSuccess ? Colors.green[700] : Colors.red[700],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // 検証項目の詳細
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (passedChecks.isNotEmpty) ...[
+                  Text(
+                    '✅ Passed Tests',
+                    style: TextStyle(
+                      fontSize: 14 * _uiScale,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green[700],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  ...passedChecks.map((check) => Padding(
+                    padding: const EdgeInsets.only(left: 16, bottom: 2),
+                    child: Text(
+                      '• ${check.description}',
+                      style: TextStyle(
+                        fontSize: 12 * _uiScale,
+                        color: Colors.green[600],
+                      ),
+                    ),
+                  )),
+                  if (failedChecks.isNotEmpty) const SizedBox(height: 8),
+                ],
+                
+                if (failedChecks.isNotEmpty) ...[
+                  Text(
+                    '❌ Failed Tests',
+                    style: TextStyle(
+                      fontSize: 14 * _uiScale,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red[700],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  ...failedChecks.map((check) => Padding(
+                    padding: const EdgeInsets.only(left: 16, bottom: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• ${check.description}',
+                          style: TextStyle(
+                            fontSize: 12 * _uiScale,
+                            color: Colors.red[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (check.failureReason != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8, top: 2),
+                            child: Text(
+                              'Reason: ${check.failureReason}',
+                              style: TextStyle(
+                                fontSize: 11 * _uiScale,
+                                color: Colors.red[500],
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        if (check.expectedValue != null && check.actualValue != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8, top: 2),
+                            child: Text(
+                              'Expected: ${check.expectedValue}, Got: ${check.actualValue}',
+                              style: TextStyle(
+                                fontSize: 11 * _uiScale,
+                                color: Colors.red[500],
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  )),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatGestureTime(DateTime time) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+    if (diff.inSeconds < 60) {
+      return '${diff.inSeconds}s ago';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    } else {
+      return '${diff.inHours}h ago';
+    }
   }
 
   @override
@@ -911,7 +1530,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
 
   String _shortenId(String id) {
     if (id == 'null' || id == 'N/A') return id;
-    return id.length > 6 ? id.substring(0, 6) : id;
+    return id.length > 6 ? id.substring(id.length - 6) : id;
   }
 
   Widget _buildFloatingDebugDialog() {
@@ -1031,7 +1650,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         // Tabbed content
         Expanded(
           child: DefaultTabController(
-            length: 3,
+            length: 2,
             child: Column(
               children: [
                 Container(
@@ -1043,18 +1662,16 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                     labelStyle: TextStyle(fontSize: 12 * _uiScale, fontWeight: FontWeight.bold),
                     unselectedLabelStyle: TextStyle(fontSize: 12 * _uiScale),
                     tabs: const [
-                      Tab(text: 'Critical'),
                       Tab(text: 'State'),
-                      Tab(text: 'Full'),
+                      Tab(text: 'Check'),
                     ],
                   ),
                 ),
                 Expanded(
                   child: TabBarView(
                     children: [
-                      _buildCriticalDebugTab(),
                       _buildStateDebugTab(),
-                      _buildFullDebugTab(),
+                      _buildGestureTestTab(),
                     ],
                   ),
                 ),
@@ -1066,13 +1683,153 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     );
   }
 
-  Widget _buildCriticalDebugTab() {
+  Widget _buildTapValidationSection() {
+    final recentResults = _gestureValidationResults.take(3).toList();
+    
+    if (recentResults.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tap Validation (Live Tests)',
+            style: TextStyle(
+              fontSize: 16 * _uiScale,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue[700],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'No tap attempts yet',
+            style: TextStyle(
+              fontSize: 14 * _uiScale,
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.fact_check, size: 18, color: Colors.blue[700]),
+            const SizedBox(width: 4),
+            Text(
+              'Tap Validation (Live Tests)',
+              style: TextStyle(
+                fontSize: 16 * _uiScale,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue[700],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...recentResults.map((result) => _buildValidationResultCard(result)),
+      ],
+    );
+  }
+
+  Widget _buildValidationResultCard(GestureValidationResult result) {
+    final isSuccess = result.isSuccess;
+    final failedChecks = result.checks.where((check) => !check.passed).toList();
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: isSuccess ? Colors.green[50] : Colors.red[50],
+        border: Border.all(
+          color: isSuccess ? Colors.green[300]! : Colors.red[300]!,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle : Icons.error,
+                size: 16,
+                color: isSuccess ? Colors.green[700] : Colors.red[700],
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${result.phase.toUpperCase()} - ${_shortenId(result.nodeId)}',
+                style: TextStyle(
+                  fontSize: 14 * _uiScale,
+                  fontWeight: FontWeight.bold,
+                  color: isSuccess ? Colors.green[700] : Colors.red[700],
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${result.checks.where((c) => c.passed).length}/${result.checks.length}',
+                style: TextStyle(
+                  fontSize: 12 * _uiScale,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          if (!isSuccess && failedChecks.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            ...failedChecks.take(2).map((check) => Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Text(
+                '✗ ${check.description}${check.failureReason != null ? ': ${check.failureReason}' : ''}',
+                style: TextStyle(
+                  fontSize: 12 * _uiScale,
+                  color: Colors.red[600],
+                ),
+              ),
+            )),
+            if (failedChecks.length > 2)
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Text(
+                  '... and ${failedChecks.length - 2} more failures',
+                  style: TextStyle(
+                    fontSize: 12 * _uiScale,
+                    color: Colors.red[500],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStateDebugTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // タップ検証結果セクション
+          _buildTapValidationSection(),
+          const SizedBox(height: 12),
+          Divider(color: Colors.grey[400]),
+          const SizedBox(height: 8),
+          
           // Most critical info for immediate debugging
+          Text(
+            'Current State',
+            style: TextStyle(
+              fontSize: 16 * _uiScale,
+              fontWeight: FontWeight.bold,
+              color: Colors.red[700],
+            ),
+          ),
+          const SizedBox(height: 4),
           _buildInternalValue('Phase', _internalDebugState['phase']?.toString() ?? 'none'),
           _buildInternalValue('Tap Completed', _internalDebugState['is_tap_completed_after_up']?.toString() ?? 'N/A'),
           _buildInternalValue('Still Dragging', _internalDebugState['is_still_dragging_after_up']?.toString() ?? 'N/A'),
@@ -1088,18 +1845,12 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
             _buildInternalValue('Failure', _internalDebugState['failure_reason']?.toString() ?? 'N/A'),
           if (_internalDebugState.containsKey('reason'))
             _buildInternalValue('Reason', _internalDebugState['reason']?.toString() ?? 'N/A'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStateDebugTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Current State', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
+          
+          const SizedBox(height: 12),
+          Divider(color: Colors.grey[400]),
+          const SizedBox(height: 8),
+          
+          Text('Gesture State', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
           const SizedBox(height: 4),
           _buildInternalValue('Dragging', _isDragging ? 'Active' : 'Inactive'),
           _buildInternalValue('Hovering', _isHovering ? 'Active' : 'Inactive'),
@@ -1118,17 +1869,17 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           _buildInternalValue('Tap Count', _currentTapCount.toString()),
           _buildInternalValue('Total Gestures', _totalGestureEvents.toString()),
           _buildInternalValue('Double-tap Timer', _doubleTapTimeRemaining != null ? '${_doubleTapTimeRemaining}ms' : 'Inactive'),
+          
+          const SizedBox(height: 12),
+          Divider(color: Colors.grey[400]),
+          const SizedBox(height: 8),
+          
+          _buildGestureStateDisplay(),
         ],
       ),
     );
   }
 
-  Widget _buildFullDebugTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: _buildGestureStateDisplay(),
-    );
-  }
 
   List<Widget> _buildTapDebugInfoSection(dynamic tapDebugInfo) {
     if (tapDebugInfo is! Map<String, dynamic>) {
@@ -1432,74 +2183,19 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   }
 
   Widget _buildTabbedDebugPanel() {
-    return DefaultTabController(
-      length: 2,
-      initialIndex: _selectedTabIndex.clamp(0, 1),
-      child: Column(
-        children: [
-          Container(
-            color: Colors.grey[200],
-            child: TabBar(
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey[600],
-              indicatorColor: Colors.blue,
-              labelStyle:
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              unselectedLabelStyle: const TextStyle(fontSize: 12),
-              onTap: (index) => setState(() => _selectedTabIndex = index),
-              tabs: const [
-                Tab(text: 'State Timeline'),
-                Tab(text: 'Event Log'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildStateTimelineTab(),
-                _buildEventLogTab(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return _buildEventLogTab();
   }
 
-  Widget _buildStateTimelineTab() {
-    return Container(
-      color: Colors.orange[50],
-      child: Column(
-        children: [
-          // Filter controls
-          Container(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Gesture State Transitions',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Live gesture state available in floating dialog (always visible in top-right corner)',
-                  style: TextStyle(fontSize: 12 * _uiScale, color: Colors.grey[600], fontStyle: FontStyle.italic),
-                ),
-                const SizedBox(height: 8),
-                _buildTimelineFilters(),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _buildStateTransitionTimeline(),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEventLogTab() {
+    // Filter events based on selected filters
+    final filteredEvents = _events
+        .where((event) {
+          if (_timelineFilters.isEmpty) return true;
+          return _timelineFilters.contains(event.type);
+        })
+        .toList();
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
@@ -1514,6 +2210,11 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                 const Text('Event Log',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const Spacer(),
+                Text(
+                  '${filteredEvents.length} events',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: () => setState(() => _events.clear()),
                   style: TextButton.styleFrom(
@@ -1525,133 +2226,68 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
               ],
             ),
           ),
+          // Event type filters
+          Container(
+            padding: const EdgeInsets.all(8),
+            color: Colors.grey[50],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Filter by Event Type:',
+                  style: TextStyle(
+                    fontSize: 14 * _uiScale,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: EventType.values.map((eventType) {
+                    final isSelected = _timelineFilters.contains(eventType);
+                    return FilterChip(
+                      label: Text(
+                        _getEventTypeLabel(eventType),
+                        style: TextStyle(
+                          fontSize: 14 * _uiScale,
+                          color: isSelected ? Colors.white : Colors.grey[700],
+                        ),
+                      ),
+                      selected: isSelected,
+                      selectedColor: _getEventColor(eventType),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _timelineFilters.add(eventType);
+                          } else {
+                            _timelineFilters.remove(eventType);
+                          }
+                        });
+                      },
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: ListView.builder(
-              itemCount: _events.length,
+              itemCount: filteredEvents.length,
               itemBuilder: (context, index) {
-                final event = _events[index];
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: index % 2 == 0 ? Colors.white : Colors.grey[50],
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey[300]!),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        margin: const EdgeInsets.only(top: 4, right: 8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getEventColor(event.type),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.message,
-                              style: TextStyle(fontSize: 16 * _uiScale),
-                            ),
-                            Text(
-                              '${event.source} - ${_formatTime(event.timestamp)}',
-                              style: TextStyle(
-                                  fontSize: 16 * _uiScale, color: Colors.grey[600]),
-                            ),
-                            if (event.details != null)
-                              Text(
-                                event.details!,
-                                style: TextStyle(
-                                    fontSize: 16 * _uiScale, color: Colors.grey[700]),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                final event = filteredEvents[index];
+                return _ExpandableDebugEvent(
+                  event: event,
+                  index: index,
+                  uiScale: _uiScale,
                 );
               },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildTimelineFilters() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Filter control buttons
-        Row(
-          children: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _timelineFilters.addAll(EventType.values);
-                });
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text('All', style: TextStyle(fontSize: 16 * _uiScale)),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _timelineFilters.clear();
-                });
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text('Clear', style: TextStyle(fontSize: 16 * _uiScale)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        // Filter chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: EventType.values.map((eventType) {
-            final isSelected = _timelineFilters.contains(eventType);
-            return FilterChip(
-              label: Text(
-                _getEventTypeLabel(eventType),
-                style: TextStyle(
-                  fontSize: 16 * _uiScale,
-                  color: isSelected ? Colors.white : Colors.grey[700],
-                ),
-              ),
-              selected: isSelected,
-              selectedColor: _getEventColor(eventType),
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _timelineFilters.add(eventType);
-                  } else {
-                    _timelineFilters.remove(eventType);
-                  }
-                });
-              },
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-            );
-          }).toList(),
-        ),
-      ],
     );
   }
 
@@ -1670,150 +2306,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     }
   }
 
-  Widget _buildStateTransitionTimeline() {
-    // Filter events based on selected filters
-    final filteredEvents = _events
-        .where((event) {
-          return _timelineFilters.contains(event.type);
-        })
-        .take(200)
-        .toList();
-
-    // Group consecutive events of the same type and message
-    final groupedEvents = <GroupedEvent>[];
-    for (final event in filteredEvents) {
-      if (groupedEvents.isNotEmpty &&
-          groupedEvents.last.type == event.type &&
-          groupedEvents.last.message == event.message) {
-        // Same event type and message - increment count
-        groupedEvents.last.count++;
-        groupedEvents.last.lastTimestamp = event.timestamp;
-      } else {
-        // New event or different type/message - create new group
-        groupedEvents.add(GroupedEvent(
-          type: event.type,
-          source: event.source,
-          message: event.message,
-          details: event.details,
-          timestamp: event.timestamp,
-          lastTimestamp: event.timestamp,
-          count: 1,
-        ));
-      }
-    }
-
-    final stateEvents = groupedEvents.take(50).toList();
-
-    if (stateEvents.isEmpty) {
-      return const Center(
-        child: Text(
-          'No gesture state transitions yet.\nPerform some gestures to see the timeline.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: stateEvents.length,
-      itemBuilder: (context, index) {
-        final event = stateEvents[index];
-        final isLastItem = index == stateEvents.length - 1;
-
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 2),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Timeline visual
-              Column(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _getEventColor(event.type),
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                  if (!isLastItem)
-                    Container(
-                      width: 2,
-                      height: 30,
-                      color: Colors.grey[300],
-                    ),
-                ],
-              ),
-              const SizedBox(width: 8),
-              // Event details
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              event.message,
-                              style: TextStyle(
-                                  fontSize: 16 * _uiScale, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          if (event.count > 1)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: _getEventColor(event.type)
-                                    .withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: _getEventColor(event.type),
-                                    width: 1),
-                              ),
-                              child: Text(
-                                '×${event.count}',
-                                style: TextStyle(
-                                  fontSize: 16 * _uiScale,
-                                  color: _getEventColor(event.type),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${event.source} • ${_formatTime(event.timestamp)}${event.count > 1 ? ' - ${_formatTime(event.lastTimestamp)}' : ''}',
-                        style: TextStyle(fontSize: 16 * _uiScale, color: Colors.grey[600]),
-                      ),
-                      if (event.details != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            event.details!,
-                            style:
-                                TextStyle(fontSize: 16 * _uiScale, color: Colors.grey[700]),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void _subscribeToGestureDebugEvents() {
     _debugEventSubscription = gestureDebugEventStream.listen((event) {
@@ -1873,6 +2365,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         message: event.message,
         timestamp: event.timestamp,
         details: event.data.isEmpty ? null : event.data.toString(),
+        jsonData: event.data.isEmpty ? null : event.data,
       );
 
       _logEvent(debugEvent);
@@ -1905,26 +2398,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
 }
 
 // Grouped event for timeline display
-class GroupedEvent {
-  final EventType type;
-  final String source;
-  final String message;
-  final String? details;
-  final DateTime timestamp;
-  DateTime lastTimestamp;
-  int count;
-
-  GroupedEvent({
-    required this.type,
-    required this.source,
-    required this.message,
-    this.details,
-    required this.timestamp,
-    required this.lastTimestamp,
-    required this.count,
-  });
-}
-
 // Debug event types
 enum EventType {
   callback,
@@ -1934,6 +2407,57 @@ enum EventType {
   layout,
 }
 
+// ジェスチャーテストの種類
+enum GestureTestType {
+  tap('タップ', 'ノードを1回タップして選択状態を切り替える'),
+  doubleTap('ダブルタップ', '短時間に2回タップする'),
+  drag('ドラッグ', 'ノードを押してドラッグで移動させる'),
+  hover('ホバー', 'マウスをノード上に置いてホバー状態にする'),
+  longPress('長押し', '長時間押し続ける'),
+  tapAndHold('タップ&ホールド', 'タップ後に少し保持する');
+
+  const GestureTestType(this.displayName, this.description);
+  final String displayName;
+  final String description;
+}
+
+// ジェスチャー検証結果
+class GestureValidationResult {
+  final DateTime timestamp;
+  final GestureTestType testType;
+  final String phase; // 'down', 'move', 'up', 'completed'
+  final String nodeId;
+  final List<GestureValidationCheck> checks;
+  final bool isSuccess;
+
+  GestureValidationResult({
+    required this.timestamp,
+    required this.testType,
+    required this.phase,
+    required this.nodeId,
+    required this.checks,
+  }) : isSuccess = checks.every((check) => check.passed);
+}
+
+// 個別の検証項目
+class GestureValidationCheck {
+  final String name;
+  final String description;
+  final bool passed;
+  final String? expectedValue;
+  final String? actualValue;
+  final String? failureReason;
+
+  GestureValidationCheck({
+    required this.name,
+    required this.description,
+    required this.passed,
+    this.expectedValue,
+    this.actualValue,
+    this.failureReason,
+  });
+}
+
 // Debug event model
 class DebugEvent {
   final EventType type;
@@ -1941,6 +2465,7 @@ class DebugEvent {
   final String message;
   final DateTime timestamp;
   final String? details;
+  final Map<String, dynamic>? jsonData;
 
   DebugEvent({
     required this.type,
@@ -1948,6 +2473,7 @@ class DebugEvent {
     required this.message,
     required this.timestamp,
     this.details,
+    this.jsonData,
   });
 }
 
@@ -2207,6 +2733,190 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         timestamp: DateTime.now(),
         details: 'Entity ID: ${event.entityId}',
       ));
+    }
+  }
+}
+
+// 折りたたみ可能なデバッグイベントウィジェット
+class _ExpandableDebugEvent extends StatefulWidget {
+  final DebugEvent event;
+  final int index;
+  final double uiScale;
+
+  const _ExpandableDebugEvent({
+    required this.event,
+    required this.index,
+    required this.uiScale,
+  });
+
+  @override
+  _ExpandableDebugEventState createState() => _ExpandableDebugEventState();
+}
+
+class _ExpandableDebugEventState extends State<_ExpandableDebugEvent> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final event = widget.event;
+    final hasJsonData = event.jsonData != null && event.jsonData!.isNotEmpty;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: widget.index % 2 == 0 ? Colors.white : Colors.grey[50],
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[300]!),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(top: 4, right: 8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _getEventColor(event.type),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            event.message,
+                            style: TextStyle(fontSize: 16 * widget.uiScale),
+                          ),
+                        ),
+                        if (hasJsonData)
+                          IconButton(
+                            icon: Icon(
+                              _isExpanded ? Icons.expand_less : Icons.expand_more,
+                              size: 20 * widget.uiScale,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isExpanded = !_isExpanded;
+                              });
+                            },
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                      ],
+                    ),
+                    Text(
+                      '${event.source} - ${_formatTime(event.timestamp)}',
+                      style: TextStyle(
+                        fontSize: 16 * widget.uiScale,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    if (!hasJsonData && event.details != null)
+                      Text(
+                        event.details!,
+                        style: TextStyle(
+                          fontSize: 16 * widget.uiScale,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (_isExpanded && hasJsonData)
+            Container(
+              margin: const EdgeInsets.only(left: 16, top: 8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: _buildJsonTable(event.jsonData!),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJsonTable(Map<String, dynamic> data) {
+    final entries = data.entries.toList();
+    
+    return Table(
+      columnWidths: const {
+        0: IntrinsicColumnWidth(),
+        1: FlexColumnWidth(),
+      },
+      children: entries.map((entry) {
+        String valueStr;
+        if (entry.value is Map || entry.value is List) {
+          valueStr = const JsonEncoder.withIndent('  ').convert(entry.value);
+        } else {
+          valueStr = entry.value?.toString() ?? 'null';
+        }
+        
+        return TableRow(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12, bottom: 4),
+              child: Text(
+                '${entry.key}:',
+                style: TextStyle(
+                  fontSize: 14 * widget.uiScale,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue[800],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: SelectableText(
+                valueStr,
+                style: TextStyle(
+                  fontSize: 14 * widget.uiScale,
+                  fontFamily: 'monospace',
+                  color: Colors.grey[800],
+                ),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Color _getEventColor(EventType type) {
+    switch (type) {
+      case EventType.gesture:
+        return Colors.red;
+      case EventType.callback:
+        return Colors.brown;
+      case EventType.layout:
+        return Colors.pink;
+      case EventType.rebuild:
+        return Colors.orange;
+      case EventType.notification:
+        return Colors.teal;
+    }
+  }
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+    if (diff.inSeconds < 60) {
+      return '${diff.inSeconds}s ago';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    } else {
+      return '${diff.inHours}h ago';
     }
   }
 }

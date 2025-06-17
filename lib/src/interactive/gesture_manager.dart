@@ -397,6 +397,7 @@ class GraphGestureManager {
       );
 
       debugPrint('TAP DEBUG DOWN: node.id=${node.id.value.substring(0, 8)}');
+      debugPrint('TAP DEBUG DOWN: Before handlePointerDown - trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
       _nodeTapManager.handlePointerDown(node.id, event);
       _nodeDragManager.handlePointerDown(node.id, event);
       debugPrint(
@@ -535,6 +536,14 @@ class GraphGestureManager {
 
     // First try to get the node at the pointer up location
     final nodeAtPosition = findNodeAt(event.localPosition);
+    
+    // CRITICAL DEBUG: Check all tap states before determining nodeTargetId
+    debugPrint('TAP DEBUG UP: All tap states before nodeTargetId determination:');
+    for (final state in _nodeTapManager.states) {
+      final tapState = state as dynamic;
+      debugPrint('  - entityId=${tapState.entityId.value.substring(0, 8)}, cancelled=${tapState.cancelled}, completed=${tapState.completed}');
+    }
+    
     final nodeTargetId = nodeAtPosition?.id ??
         _nodeTapManager.trackedEntityId ??
         _nodeDragManager.lastDraggedEntityId;
