@@ -43,15 +43,29 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   late Graph graph;
   final List<DebugEvent> _events = [];
   final _eventStreamController = StreamController<DebugEvent>.broadcast();
-  
+
   // Monitoring flags
   final bool _monitorCallbacks = true;
   final bool _monitorRebuilds = true;
   final bool _monitorGestureStates = true;
-  
+
   // Stats
   int _rebuildCount = 0;
+
+  // Tab state
+  int _selectedTabIndex = 0;
   
+  // UI scale
+  double _uiScale = 1.0;
+
+  // Timeline filters
+  final Set<EventType> _timelineFilters = {
+    EventType.gesture,
+    EventType.rebuild,
+    EventType.notification,
+    EventType.layout,
+  };
+
   // Gesture state tracking
   bool _isDragging = false;
   bool _isHovering = false;
@@ -63,19 +77,28 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   int? _doubleTapTimeRemaining;
   int _totalGestureEvents = 0;
   Timer? _gestureStateUpdateTimer;
-  
+  StreamSubscription<GestureDebugEvent>? _debugEventSubscription;
+  Timer? _timerCountdown;
+
   // Layout and data management
   String _currentLayoutStrategy = 'ForceDirected';
   String _currentDataPreset = 'Default';
   bool _animationEnabled = false;
-  
+
+  // Gesture mode and interaction settings
+  GraphGestureMode _gestureMode = GraphGestureMode.exclusive;
+  bool _useInteractiveViewer = false;
+  String _lastBackgroundAction = '';
+  Timer? _updateTimer;
+  bool _gestureDebugMode = false;
+
   final List<String> _layoutStrategies = [
     'ForceDirected',
     'Tree',
     'Manual',
     'Random',
   ];
-  
+
   final List<String> _dataPresets = [
     'Default',
     'Small Network',
@@ -84,24 +107,18 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     'Complex Graph',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeGraph();
-  }
-
   void _initializeGraph() {
     graph = Graph();
-    
+
     // Create simple test nodes
     final node1 = GraphNode(properties: {'label': 'Node 1'});
     final node2 = GraphNode(properties: {'label': 'Node 2'});
     final node3 = GraphNode(properties: {'label': 'Node 3'});
-    
+
     graph.addNode(node1);
     graph.addNode(node2);
     graph.addNode(node3);
-    
+
     // Add links
     graph.addLink(GraphLink(
       source: node1,
@@ -113,7 +130,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
       target: node3,
       direction: GraphLinkDirection.outgoing,
     ));
-    
+
     // Monitor graph changes
     graph.addListener(_onGraphChanged);
   }
@@ -147,6 +164,9 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     graph.removeListener(_onGraphChanged);
     _eventStreamController.close();
     _gestureStateUpdateTimer?.cancel();
+    _updateTimer?.cancel();
+    _debugEventSubscription?.cancel();
+    _timerCountdown?.cancel();
     super.dispose();
   }
 
@@ -168,11 +188,13 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   color: Colors.grey[200],
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(Icons.list, size: 16),
                       SizedBox(width: 8),
-                      Text('Graph Entities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text('Graph Entities',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
                     ],
                   ),
                 ),
@@ -200,121 +222,268 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     color: Colors.grey[200],
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        // Layout strategy dropdown
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _currentLayoutStrategy,
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  _currentLayoutStrategy = newValue;
-                                });
-                                _applyLayoutStrategy();
-                              }
-                            },
-                            items: _layoutStrategies.map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value, style: const TextStyle(fontSize: 12)),
-                              );
-                            }).toList(),
-                            isDense: true,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: _resetLayout,
-                          tooltip: 'Reset Layout',
-                          icon: const Icon(Icons.restart_alt),
-                          iconSize: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        // Data preset dropdown
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _currentDataPreset,
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  _currentDataPreset = newValue;
-                                });
-                                _loadDataPreset();
-                              }
-                            },
-                            items: _dataPresets.map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value, style: const TextStyle(fontSize: 12)),
-                              );
-                            }).toList(),
-                            isDense: true,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: _reloadGraphData,
-                          tooltip: 'Reload Graph Data',
-                          icon: const Icon(Icons.download),
-                          iconSize: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        // Node management buttons
-                        IconButton(
-                          onPressed: _addNode,
-                          tooltip: 'Add Node',
-                          icon: const Icon(Icons.add_circle_outline),
-                          iconSize: 20,
-                        ),
-                        IconButton(
-                          onPressed: _removeNode,
-                          tooltip: 'Remove Node',
-                          icon: const Icon(Icons.remove_circle_outline),
-                          iconSize: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: _forceRebuild,
-                          tooltip: 'Force Rebuild',
-                          icon: const Icon(Icons.refresh),
-                          iconSize: 20,
-                        ),
-                        const SizedBox(width: 16),
-                        // Animation toggle
+                        // First row - Basic controls
                         Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Checkbox(
-                              value: _animationEnabled,
-                              onChanged: (bool? value) {
+                            // Layout strategy dropdown
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _currentLayoutStrategy,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _currentLayoutStrategy = newValue;
+                                    });
+                                    _applyLayoutStrategy();
+                                  }
+                                },
+                                items: _layoutStrategies
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value,
+                                        style: TextStyle(fontSize: 16 * _uiScale)),
+                                  );
+                                }).toList(),
+                                isDense: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: _resetLayout,
+                              tooltip: 'Reset Layout',
+                              icon: const Icon(Icons.restart_alt),
+                              iconSize: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            // Data preset dropdown
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _currentDataPreset,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _currentDataPreset = newValue;
+                                    });
+                                    _loadDataPreset();
+                                  }
+                                },
+                                items: _dataPresets
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value,
+                                        style: TextStyle(fontSize: 16 * _uiScale)),
+                                  );
+                                }).toList(),
+                                isDense: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: _reloadGraphData,
+                              tooltip: 'Reload Graph Data',
+                              icon: const Icon(Icons.download),
+                              iconSize: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            // Node management buttons
+                            IconButton(
+                              onPressed: _addNode,
+                              tooltip: 'Add Node',
+                              icon: const Icon(Icons.add_circle_outline),
+                              iconSize: 20,
+                            ),
+                            IconButton(
+                              onPressed: _removeNode,
+                              tooltip: 'Remove Node',
+                              icon: const Icon(Icons.remove_circle_outline),
+                              iconSize: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: _forceRebuild,
+                              tooltip: 'Force Rebuild',
+                              icon: const Icon(Icons.refresh),
+                              iconSize: 20,
+                            ),
+                            const SizedBox(width: 16),
+                            // Animation toggle
+                            InkWell(
+                              onTap: () {
                                 setState(() {
-                                  _animationEnabled = value ?? false;
+                                  _animationEnabled = !_animationEnabled;
                                 });
                               },
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              splashRadius: 0,
-                              visualDensity: VisualDensity.compact,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Checkbox(
+                                    value: _animationEnabled,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        _animationEnabled = value ?? false;
+                                      });
+                                    },
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    splashRadius: 0,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                  const Text('Animation',
+                                      style: TextStyle(fontSize: 12)),
+                                ],
+                              ),
                             ),
-                            const Text('Animation', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Second row - Gesture controls
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Gesture mode selector
+                            const Text('Gesture Mode:',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 8),
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton<GraphGestureMode>(
+                                value: _gestureMode,
+                                onChanged: (GraphGestureMode? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _gestureMode = newValue;
+                                    });
+                                  }
+                                },
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: GraphGestureMode.exclusive,
+                                    child: Text('Exclusive',
+                                        style: TextStyle(fontSize: 12)),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: GraphGestureMode.nodeEdgeOnly,
+                                    child: Text('NodeEdgeOnly',
+                                        style: TextStyle(fontSize: 12)),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: GraphGestureMode.transparent,
+                                    child: Text('Transparent',
+                                        style: TextStyle(fontSize: 12)),
+                                  ),
+                                ],
+                                isDense: true,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // InteractiveViewer toggle
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _useInteractiveViewer =
+                                      !_useInteractiveViewer;
+                                });
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Checkbox(
+                                    value: _useInteractiveViewer,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        _useInteractiveViewer = value ?? false;
+                                      });
+                                    },
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    splashRadius: 0,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                  const Text('InteractiveViewer',
+                                      style: TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Gesture debug mode toggle
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _gestureDebugMode = !_gestureDebugMode;
+                                });
+                                // Enable/disable gesture debug mode in the library
+                                setGestureDebugMode(_gestureDebugMode);
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Checkbox(
+                                    value: _gestureDebugMode,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        _gestureDebugMode = value ?? false;
+                                      });
+                                      // Enable/disable gesture debug mode in the library
+                                      setGestureDebugMode(_gestureDebugMode);
+                                    },
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    splashRadius: 0,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                  Text('Debug Mode',
+                                      style: TextStyle(fontSize: 16 * _uiScale)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            // UI Scale controls
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('Text Size:', style: TextStyle(fontSize: 16 * _uiScale, fontWeight: FontWeight.bold)),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _uiScale = (_uiScale - 0.1).clamp(0.5, 2.0);
+                                    });
+                                  },
+                                  tooltip: 'Decrease text size',
+                                  icon: const Icon(Icons.text_decrease),
+                                  iconSize: 16,
+                                  padding: const EdgeInsets.all(4),
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                ),
+                                Text('${(_uiScale * 100).round()}%', style: TextStyle(fontSize: 16 * _uiScale)),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _uiScale = (_uiScale + 0.1).clamp(0.5, 2.0);
+                                    });
+                                  },
+                                  tooltip: 'Increase text size',
+                                  icon: const Icon(Icons.text_increase),
+                                  iconSize: 16,
+                                  padding: const EdgeInsets.all(4),
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
                   Expanded(
-                    child: DebugGraphView(
-                      graph: graph,
-                      onEvent: _logEvent,
-                      onRebuild: () {
-                        _rebuildCount++;
-                      },
-                      monitorCallbacks: _monitorCallbacks,
-                      monitorRebuilds: _monitorRebuilds,
-                      animationEnabled: _animationEnabled,
-                      updateGestureState: _updateGestureState,
-                    ),
+                    child: _buildGraphViewContainer(),
                   ),
                   // Status bar
                   Container(
@@ -323,11 +492,14 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Nodes: ${graph.nodes.length}', style: const TextStyle(fontSize: 12)),
+                        Text('Nodes: ${graph.nodes.length}',
+                            style: TextStyle(fontSize: 16 * _uiScale)),
                         const SizedBox(width: 16),
-                        Text('Links: ${graph.links.length}', style: const TextStyle(fontSize: 12)),
+                        Text('Links: ${graph.links.length}',
+                            style: TextStyle(fontSize: 16 * _uiScale)),
                         const SizedBox(width: 16),
-                        Text('Rebuilds: $_rebuildCount', style: const TextStyle(fontSize: 12)),
+                        Text('Rebuilds: $_rebuildCount',
+                            style: TextStyle(fontSize: 16 * _uiScale)),
                       ],
                     ),
                   ),
@@ -335,114 +507,10 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
               ),
             ),
           ),
-          // Debug panel
+          // Debug panel with tabs
           Expanded(
             flex: 1,
-            child: Column(
-              children: [
-                // Gesture State Panel
-                Container(
-                  color: Colors.purple[50],
-                  child: ExpansionTile(
-                    title: const Text('Gesture State', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    initiallyExpanded: true,
-                    tilePadding: const EdgeInsets.symmetric(horizontal: 8),
-                    childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                    backgroundColor: Colors.purple[50],
-                    collapsedBackgroundColor: Colors.purple[50],
-                    iconColor: Colors.purple[700],
-                    collapsedIconColor: Colors.purple[700],
-                    shape: const Border(),
-                    collapsedShape: const Border(),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    children: [
-                      _buildGestureStateDisplay(),
-                    ],
-                  ),
-                ),
-                // Event log
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          color: Colors.grey[200],
-                          child: Row(
-                            children: [
-                              const Text('Event Log', style: TextStyle(fontWeight: FontWeight.bold)),
-                              const Spacer(),
-                              TextButton(
-                                onPressed: () => setState(() => _events.clear()),
-                                style: TextButton.styleFrom(
-                                  splashFactory: NoSplash.splashFactory,
-                                  overlayColor: Colors.transparent,
-                                ),
-                                child: const Text('Clear'),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: _events.length,
-                            itemBuilder: (context, index) {
-                              final event = _events[index];
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: index % 2 == 0 ? Colors.white : Colors.grey[50],
-                                  border: Border(
-                                    bottom: BorderSide(color: Colors.grey[300]!),
-                                  ),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      margin: const EdgeInsets.only(top: 4, right: 8),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: _getEventColor(event.type),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            event.message,
-                                            style: const TextStyle(fontSize: 12),
-                                          ),
-                                          Text(
-                                            '${event.source} - ${_formatTime(event.timestamp)}',
-                                            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                                          ),
-                                          if (event.details != null)
-                                            Text(
-                                              event.details!,
-                                              style: TextStyle(fontSize: 10, color: Colors.grey[700]),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: _buildTabbedDebugPanel(),
           ),
         ],
       ),
@@ -453,7 +521,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     final nodeLabel = 'Node ${graph.nodes.length + 1}';
     final node = GraphNode(properties: {'label': nodeLabel});
     graph.addNode(node);
-    
+
     if (graph.nodes.length > 1) {
       final nodesList = graph.nodes.toList();
       final randomNode = nodesList[nodesList.length - 2];
@@ -549,17 +617,17 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
 
   String _formatTime(DateTime time) {
     return '${time.hour.toString().padLeft(2, '0')}:'
-           '${time.minute.toString().padLeft(2, '0')}:'
-           '${time.second.toString().padLeft(2, '0')}.'
-           '${time.millisecond.toString().padLeft(3, '0')}';
+        '${time.minute.toString().padLeft(2, '0')}:'
+        '${time.second.toString().padLeft(2, '0')}.'
+        '${time.millisecond.toString().padLeft(3, '0')}';
   }
 
   void _updateGestureState(String gestureType, Map<String, dynamic> data) {
     if (!_monitorGestureStates) return;
-    
+
     setState(() {
       _totalGestureEvents++;
-      
+
       switch (gestureType) {
         case 'tap':
           _isTapTracking = data['tracking'] ?? false;
@@ -581,6 +649,55 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           _isHovering = false;
           _hoveredEntityId = null;
           break;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeGraph();
+
+    // Listen to debug events for timer tracking
+    _listenToDebugEvents();
+
+    // Subscribe to gesture debug events
+    _subscribeToGestureDebugEvents();
+  }
+
+  void _listenToDebugEvents() {
+    // This would ideally listen to a stream of debug events
+    // For now, we'll simulate timer updates based on events
+    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (mounted && _gestureDebugMode) {
+        // Look for recent timer events to update the display
+        final recentTimerEvents = _events
+            .where((event) =>
+                event.timestamp.isAfter(
+                    DateTime.now().subtract(const Duration(seconds: 1))) &&
+                event.message.contains('timer'))
+            .toList();
+
+        if (recentTimerEvents.isNotEmpty) {
+          setState(() {
+            // Update timer display based on recent events
+            final timerStartEvents = recentTimerEvents
+                .where((e) => e.message.contains('timer started'))
+                .toList();
+            if (timerStartEvents.isNotEmpty) {
+              _doubleTapTimeRemaining = 100; // Default timeout
+            }
+
+            final timerEndEvents = recentTimerEvents
+                .where((e) =>
+                    e.message.contains('timer expired') ||
+                    e.message.contains('timer cancelled'))
+                .toList();
+            if (timerEndEvents.isNotEmpty) {
+              _doubleTapTimeRemaining = null;
+            }
+          });
+        }
       }
     });
   }
@@ -621,7 +738,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 16 * _uiScale,
               color: isActive ? color : Colors.grey[600],
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
@@ -637,7 +754,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
       child: Text(
         '$label: ${entityId ?? 'None'}',
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 16 * _uiScale,
           color: entityId != null ? Colors.black87 : Colors.grey[600],
         ),
       ),
@@ -649,7 +766,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: Text(
         '$label: $value',
-        style: const TextStyle(fontSize: 10, color: Colors.black87),
+        style: TextStyle(fontSize: 16 * _uiScale, color: Colors.black87),
       ),
     );
   }
@@ -660,7 +777,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
       child: Text(
         '$label: ${timeRemaining != null ? '${timeRemaining}ms' : 'Inactive'}',
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 16 * _uiScale,
           color: timeRemaining != null ? Colors.orange : Colors.grey[600],
         ),
       ),
@@ -671,7 +788,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     return Container(
       color: Colors.blue[50],
       child: ExpansionTile(
-        title: Text('Nodes (${graph.nodes.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        title: Text('Nodes (${graph.nodes.length})',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
         initiallyExpanded: true,
         tilePadding: const EdgeInsets.symmetric(horizontal: 8),
         childrenPadding: EdgeInsets.zero,
@@ -690,10 +808,13 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
               itemCount: graph.nodes.length,
               itemBuilder: (context, index) {
                 final node = graph.nodes.elementAt(index);
-                final label = node.properties['label']?.toString() ?? 'Node ${index + 1}';
+                final label =
+                    node.properties['label']?.toString() ?? 'Node ${index + 1}';
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.blue[200]!),
@@ -716,12 +837,14 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                           children: [
                             Text(
                               label,
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  fontSize: 16 * _uiScale, fontWeight: FontWeight.w500),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               'ID: ${node.id.toString().substring(0, 8)}...',
-                              style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                              style: TextStyle(
+                                  fontSize: 16 * _uiScale, color: Colors.grey[600]),
                             ),
                           ],
                         ),
@@ -741,7 +864,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     return Container(
       color: Colors.orange[50],
       child: ExpansionTile(
-        title: Text('Links (${graph.links.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        title: Text('Links (${graph.links.length})',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
         initiallyExpanded: true,
         tilePadding: const EdgeInsets.symmetric(horizontal: 8),
         childrenPadding: EdgeInsets.zero,
@@ -760,11 +884,15 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
               itemCount: graph.links.length,
               itemBuilder: (context, index) {
                 final link = graph.links.elementAt(index);
-                final sourceLabel = link.source.properties['label']?.toString() ?? 'Node';
-                final targetLabel = link.target.properties['label']?.toString() ?? 'Node';
+                final sourceLabel =
+                    link.source.properties['label']?.toString() ?? 'Node';
+                final targetLabel =
+                    link.target.properties['label']?.toString() ?? 'Node';
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.orange[200]!),
@@ -787,12 +915,14 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
                           children: [
                             Text(
                               '$sourceLabel → $targetLabel',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  fontSize: 16 * _uiScale, fontWeight: FontWeight.w500),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               'ID: ${link.id.toString().substring(0, 8)}...',
-                              style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                              style: TextStyle(
+                                  fontSize: 16 * _uiScale, color: Colors.grey[600]),
                             ),
                           ],
                         ),
@@ -807,6 +937,612 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
       ),
     );
   }
+
+  Widget _buildGraphViewContainer() {
+    final graphView = DebugGraphView(
+      graph: graph,
+      onEvent: _logEvent,
+      onRebuild: () {
+        _rebuildCount++;
+      },
+      monitorCallbacks: _monitorCallbacks,
+      monitorRebuilds: _monitorRebuilds,
+      animationEnabled: _animationEnabled,
+      updateGestureState: _updateGestureState,
+      gestureMode: _gestureMode,
+      onBackgroundTapped: _gestureMode != GraphGestureMode.exclusive
+          ? (localPosition) {
+              setState(() {
+                _lastBackgroundAction = 'Background tapped at $localPosition';
+              });
+              _scheduleUpdate();
+            }
+          : null,
+      onBackgroundPanStart: _gestureMode != GraphGestureMode.exclusive
+          ? (localPosition) {
+              setState(() {
+                _lastBackgroundAction =
+                    'Background pan started at $localPosition';
+              });
+              _scheduleUpdate();
+            }
+          : null,
+      onBackgroundPanUpdate: _gestureMode != GraphGestureMode.exclusive
+          ? (localPosition, delta) {
+              setState(() {
+                _lastBackgroundAction = 'Background panning: delta=$delta';
+              });
+              _scheduleUpdate();
+            }
+          : null,
+      onBackgroundPanEnd: _gestureMode != GraphGestureMode.exclusive
+          ? (localPosition) {
+              setState(() {
+                _lastBackgroundAction = 'Background pan ended';
+              });
+              _scheduleUpdate();
+            }
+          : null,
+    );
+
+    if (_useInteractiveViewer && _gestureMode != GraphGestureMode.exclusive) {
+      return Stack(
+        children: [
+          InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(100),
+            minScale: 0.5,
+            maxScale: 3.0,
+            child: Container(
+              width: 3000,
+              height: 3000,
+              color: Colors.grey[100],
+              child: Center(
+                child: Container(
+                  width: 800,
+                  height: 600,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue, width: 2),
+                    color: Colors.white,
+                  ),
+                  child: graphView,
+                ),
+              ),
+            ),
+          ),
+          if (_lastBackgroundAction.isNotEmpty)
+            Positioned(
+              top: 10,
+              left: 10,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.yellow[100],
+                  border: Border.all(color: Colors.orange),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  _lastBackgroundAction,
+                  style: TextStyle(fontSize: 16 * _uiScale),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return graphView;
+  }
+
+  void _scheduleUpdate() {
+    _updateTimer?.cancel();
+    _updateTimer = Timer(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  Widget _buildTabbedDebugPanel() {
+    return DefaultTabController(
+      length: 3,
+      initialIndex: _selectedTabIndex,
+      child: Column(
+        children: [
+          Container(
+            color: Colors.grey[200],
+            child: TabBar(
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.grey[600],
+              indicatorColor: Colors.blue,
+              labelStyle:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              unselectedLabelStyle: const TextStyle(fontSize: 12),
+              onTap: (index) => setState(() => _selectedTabIndex = index),
+              tabs: const [
+                Tab(text: 'Gesture State'),
+                Tab(text: 'State Timeline'),
+                Tab(text: 'Event Log'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildGestureStateTab(),
+                _buildStateTimelineTab(),
+                _buildEventLogTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGestureStateTab() {
+    return Container(
+      color: Colors.purple[50],
+      child: ExpansionTile(
+        title: Text('Current Gesture State',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale)),
+        initiallyExpanded: true,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+        childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+        backgroundColor: Colors.purple[50],
+        collapsedBackgroundColor: Colors.purple[50],
+        iconColor: Colors.purple[700],
+        collapsedIconColor: Colors.purple[700],
+        shape: const Border(),
+        collapsedShape: const Border(),
+        controlAffinity: ListTileControlAffinity.leading,
+        children: [
+          _buildGestureStateDisplay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStateTimelineTab() {
+    return Container(
+      color: Colors.orange[50],
+      child: Column(
+        children: [
+          // Filter controls
+          Container(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Gesture State Transitions',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * _uiScale),
+                ),
+                const SizedBox(height: 8),
+                _buildTimelineFilters(),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _buildStateTransitionTimeline(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventLogTab() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            color: Colors.grey[200],
+            child: Row(
+              children: [
+                const Text('Event Log',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => setState(() => _events.clear()),
+                  style: TextButton.styleFrom(
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: Colors.transparent,
+                  ),
+                  child: const Text('Clear'),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _events.length,
+              itemBuilder: (context, index) {
+                final event = _events[index];
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: index % 2 == 0 ? Colors.white : Colors.grey[50],
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey[300]!),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.only(top: 4, right: 8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _getEventColor(event.type),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event.message,
+                              style: TextStyle(fontSize: 16 * _uiScale),
+                            ),
+                            Text(
+                              '${event.source} - ${_formatTime(event.timestamp)}',
+                              style: TextStyle(
+                                  fontSize: 16 * _uiScale, color: Colors.grey[600]),
+                            ),
+                            if (event.details != null)
+                              Text(
+                                event.details!,
+                                style: TextStyle(
+                                    fontSize: 16 * _uiScale, color: Colors.grey[700]),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineFilters() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Filter control buttons
+        Row(
+          children: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _timelineFilters.addAll(EventType.values);
+                });
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text('All', style: TextStyle(fontSize: 16 * _uiScale)),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _timelineFilters.clear();
+                });
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text('Clear', style: TextStyle(fontSize: 16 * _uiScale)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Filter chips
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: EventType.values.map((eventType) {
+            final isSelected = _timelineFilters.contains(eventType);
+            return FilterChip(
+              label: Text(
+                _getEventTypeLabel(eventType),
+                style: TextStyle(
+                  fontSize: 16 * _uiScale,
+                  color: isSelected ? Colors.white : Colors.grey[700],
+                ),
+              ),
+              selected: isSelected,
+              selectedColor: _getEventColor(eventType),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _timelineFilters.add(eventType);
+                  } else {
+                    _timelineFilters.remove(eventType);
+                  }
+                });
+              },
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  String _getEventTypeLabel(EventType type) {
+    switch (type) {
+      case EventType.callback:
+        return 'Callbacks';
+      case EventType.rebuild:
+        return 'Rebuilds';
+      case EventType.notification:
+        return 'Notifications';
+      case EventType.gesture:
+        return 'Gestures';
+      case EventType.layout:
+        return 'Layout';
+    }
+  }
+
+  Widget _buildStateTransitionTimeline() {
+    // Filter events based on selected filters
+    final filteredEvents = _events
+        .where((event) {
+          return _timelineFilters.contains(event.type);
+        })
+        .take(200)
+        .toList();
+
+    // Group consecutive events of the same type and message
+    final groupedEvents = <GroupedEvent>[];
+    for (final event in filteredEvents) {
+      if (groupedEvents.isNotEmpty &&
+          groupedEvents.last.type == event.type &&
+          groupedEvents.last.message == event.message) {
+        // Same event type and message - increment count
+        groupedEvents.last.count++;
+        groupedEvents.last.lastTimestamp = event.timestamp;
+      } else {
+        // New event or different type/message - create new group
+        groupedEvents.add(GroupedEvent(
+          type: event.type,
+          source: event.source,
+          message: event.message,
+          details: event.details,
+          timestamp: event.timestamp,
+          lastTimestamp: event.timestamp,
+          count: 1,
+        ));
+      }
+    }
+
+    final stateEvents = groupedEvents.take(50).toList();
+
+    if (stateEvents.isEmpty) {
+      return const Center(
+        child: Text(
+          'No gesture state transitions yet.\nPerform some gestures to see the timeline.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: stateEvents.length,
+      itemBuilder: (context, index) {
+        final event = stateEvents[index];
+        final isLastItem = index == stateEvents.length - 1;
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Timeline visual
+              Column(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _getEventColor(event.type),
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
+                  if (!isLastItem)
+                    Container(
+                      width: 2,
+                      height: 30,
+                      color: Colors.grey[300],
+                    ),
+                ],
+              ),
+              const SizedBox(width: 8),
+              // Event details
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              event.message,
+                              style: TextStyle(
+                                  fontSize: 16 * _uiScale, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          if (event.count > 1)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: _getEventColor(event.type)
+                                    .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: _getEventColor(event.type),
+                                    width: 1),
+                              ),
+                              child: Text(
+                                '×${event.count}',
+                                style: TextStyle(
+                                  fontSize: 16 * _uiScale,
+                                  color: _getEventColor(event.type),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${event.source} • ${_formatTime(event.timestamp)}${event.count > 1 ? ' - ${_formatTime(event.lastTimestamp)}' : ''}',
+                        style: TextStyle(fontSize: 16 * _uiScale, color: Colors.grey[600]),
+                      ),
+                      if (event.details != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            event.details!,
+                            style:
+                                TextStyle(fontSize: 16 * _uiScale, color: Colors.grey[700]),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _subscribeToGestureDebugEvents() {
+    _debugEventSubscription = gestureDebugEventStream.listen((event) {
+      if (!mounted) return;
+
+      // Map GestureDebugEvent to DebugEvent for display
+      EventType eventType;
+      switch (event.type) {
+        case GestureDebugEventType.timerStart:
+        case GestureDebugEventType.timerCancel:
+        case GestureDebugEventType.timerExpire:
+          eventType = EventType.gesture;
+          // Update timer display
+          if (event.type == GestureDebugEventType.timerStart) {
+            final timeoutMs = event.data['timeout_ms'] as int?;
+            if (timeoutMs != null) {
+              setState(() {
+                _doubleTapTimeRemaining = timeoutMs;
+              });
+              _startTimerCountdown(timeoutMs);
+            }
+          } else {
+            setState(() {
+              _doubleTapTimeRemaining = null;
+            });
+            _timerCountdown?.cancel();
+          }
+          break;
+        case GestureDebugEventType.stateTransition:
+        case GestureDebugEventType.gestureDecision:
+          eventType = EventType.gesture;
+          break;
+        case GestureDebugEventType.conditionCheck:
+        case GestureDebugEventType.hitTest:
+          eventType = EventType.gesture;
+          break;
+        case GestureDebugEventType.backgroundCallback:
+          eventType = EventType.callback;
+          break;
+      }
+
+      // Create display event
+      final debugEvent = DebugEvent(
+        type: eventType,
+        source: event.component,
+        message: event.message,
+        timestamp: event.timestamp,
+        details: event.data.isEmpty ? null : event.data.toString(),
+      );
+
+      _logEvent(debugEvent);
+    });
+  }
+
+  void _startTimerCountdown(int durationMs) {
+    _timerCountdown?.cancel();
+    final endTime = DateTime.now().add(Duration(milliseconds: durationMs));
+
+    _timerCountdown = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final remaining = endTime.difference(DateTime.now()).inMilliseconds;
+      if (remaining <= 0) {
+        setState(() {
+          _doubleTapTimeRemaining = null;
+        });
+        timer.cancel();
+      } else {
+        setState(() {
+          _doubleTapTimeRemaining = remaining;
+        });
+      }
+    });
+  }
+}
+
+// Grouped event for timeline display
+class GroupedEvent {
+  final EventType type;
+  final String source;
+  final String message;
+  final String? details;
+  final DateTime timestamp;
+  DateTime lastTimestamp;
+  int count;
+
+  GroupedEvent({
+    required this.type,
+    required this.source,
+    required this.message,
+    this.details,
+    required this.timestamp,
+    required this.lastTimestamp,
+    required this.count,
+  });
 }
 
 // Debug event types
@@ -844,6 +1580,11 @@ class DebugGraphView extends StatefulWidget {
   final bool monitorRebuilds;
   final bool animationEnabled;
   final Function(String, Map<String, dynamic>)? updateGestureState;
+  final GraphGestureMode gestureMode;
+  final GraphBackgroundGestureCallback? onBackgroundTapped;
+  final GraphBackgroundGestureCallback? onBackgroundPanStart;
+  final GraphBackgroundPanCallback? onBackgroundPanUpdate;
+  final GraphBackgroundGestureCallback? onBackgroundPanEnd;
 
   const DebugGraphView({
     super.key,
@@ -854,6 +1595,11 @@ class DebugGraphView extends StatefulWidget {
     required this.monitorRebuilds,
     required this.animationEnabled,
     this.updateGestureState,
+    this.gestureMode = GraphGestureMode.exclusive,
+    this.onBackgroundTapped,
+    this.onBackgroundPanStart,
+    this.onBackgroundPanUpdate,
+    this.onBackgroundPanEnd,
   });
 
   @override
@@ -873,6 +1619,12 @@ class _DebugGraphViewState extends State<DebugGraphView> {
       layoutStrategy: GraphForceDirectedLayoutStrategy(),
       animationEnabled: widget.animationEnabled,
       behavior: _createDebugBehavior(),
+      gestureMode: widget.gestureMode,
+      allowSelection: true, // Enable selection for tap/double-tap
+      onBackgroundTapped: widget.onBackgroundTapped,
+      onBackgroundPanStart: widget.onBackgroundPanStart,
+      onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
+      onBackgroundPanEnd: widget.onBackgroundPanEnd,
     );
   }
 
@@ -900,6 +1652,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
   @override
   void onTap(GraphTapEvent event) {
     super.onTap(event);
+    print('onTap');
     if (monitorCallbacks) {
       final hasEntities = event.entityIds.isNotEmpty;
       final details = hasEntities
@@ -933,7 +1686,8 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         source: 'DebugGraphViewBehavior',
         message: 'onSelectionChange fired',
         timestamp: DateTime.now(),
-        details: 'Selected: $selectedCount, Deselected: $deselectedCount, Current: $currentCount',
+        details:
+            'Selected: $selectedCount, Deselected: $deselectedCount, Current: $currentCount',
       ));
     }
   }
@@ -1007,7 +1761,8 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         source: 'DebugGraphViewBehavior',
         message: 'onHoverEnter fired',
         timestamp: DateTime.now(),
-        details: 'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
+        details:
+            'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
       ));
       // Update gesture state tracking
       updateGestureState?.call('hoverEnter', {
@@ -1025,7 +1780,8 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         source: 'DebugGraphViewBehavior',
         message: 'onHoverMove fired',
         timestamp: DateTime.now(),
-        details: 'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
+        details:
+            'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
       ));
     }
   }
