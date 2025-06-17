@@ -1,6 +1,4 @@
-// lib/widget/toolbar.dart
 import 'package:example/app_state.dart';
-import 'package:example/widget/gesture_passthrough_demo_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -54,19 +52,7 @@ class MainPageToolbar extends StatelessWidget {
                   IconButton(
                     onPressed: state.clearAllSelections,
                     icon: const Icon(Icons.deselect),
-                    tooltip: '選択解除',
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const GesturePassthroughDemoPage(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.bug_report),
-                    tooltip: 'Flicker Test',
+                    tooltip: 'Clear Selection',
                   ),
                 ],
               ),

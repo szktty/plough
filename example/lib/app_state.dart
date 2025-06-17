@@ -22,12 +22,12 @@ class AppState extends ChangeNotifier {
     selectSampleData(current);
   }
 
-  /// 選択中のエンティティをすべて選択解除する
+  /// Clear all selected entities
   void clearAllSelections() {
-    // グラフの選択をクリア（個別のエンティティ更新を使用）
+    // Clear graph selection using individual entity updates
     _selectedData.graph.clearSelection();
 
-    // AppStateの変更通知は送らない（グラフ全体の再描画を避けるため）
-    // 個々のエンティティの状態変更は、Signalを通じて自動的に伝播される
+    // Don't send AppState change notifications to avoid redrawing the entire graph
+    // Individual entity state changes are automatically propagated through Signals
   }
 }

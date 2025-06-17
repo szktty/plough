@@ -12,7 +12,7 @@ class GraphArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Providerを使用してデータを監視
+    // Monitor data using Provider
     return Consumer<AppState>(
       builder: (context, state, child) {
         return GraphView(
