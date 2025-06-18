@@ -92,7 +92,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
   @override
   void onTap(GraphTapEvent event) {
     super.onTap(event);
-    debugPrint('onTap');
+    debugPrint('🔥 DEBUG: onTap called! Event: ${event.entityIds.length} entities');
     if (monitorCallbacks) {
       final hasEntities = event.entityIds.isNotEmpty;
       final details = hasEntities
@@ -323,8 +323,16 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
 
   @override
   bool isEquivalentTo(GraphViewBehavior other) {
-    if (other is! DebugGraphViewBehavior) return false;
-    return isDarkMode == other.isDarkMode &&
+    if (other is! DebugGraphViewBehavior) {
+      debugPrint('isEquivalentTo: other is not DebugGraphViewBehavior (${other.runtimeType})');
+      return false;
+    }
+    
+    final result = isDarkMode == other.isDarkMode &&
         monitorCallbacks == other.monitorCallbacks;
+    
+    debugPrint('isEquivalentTo: isDarkMode($isDarkMode == ${other.isDarkMode}) && monitorCallbacks($monitorCallbacks == ${other.monitorCallbacks}) = $result');
+    
+    return result;
   }
 }

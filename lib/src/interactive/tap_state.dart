@@ -47,9 +47,9 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     required super.gestureManager,
     required this.tooltipTriggerMode,
     // ダブルタップタイムアウトを大幅に短縮してドラッグ時の点滅を防ぐ
-    this.doubleTapTimeout = const Duration(milliseconds: 100), // 300ms -> 100ms
+    this.doubleTapTimeout = const Duration(milliseconds: 200), // Increased from 100ms
     this.touchSlop = kTouchSlop *
-        8, // Increase touch slop significantly for more forgiving taps (was 4)
+        4, // Increase touch slop for more forgiving taps (reduced from 8)
     this.doubleTapSlop = kDoubleTapSlop,
   });
 

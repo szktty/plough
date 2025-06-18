@@ -880,8 +880,10 @@ class GraphGestureManager {
           details: _lastPointerDetails!, // Assumes not null after PointerDown
         );
         viewBehavior.onDragStart(event);
-        // ドラッグ開始時にタップタイマーを即座にキャンセルして再描画を防ぐ
-        _nodeTapManager.cancel(node.id);
+        // ドラッグ開始時にタップタイマーをキャンセル（少し遅延を加える）
+        Future.delayed(const Duration(milliseconds: 50), () {
+          _nodeTapManager.cancel(node.id);
+        });
         logDebug(LogCategory.gesture,
             'Cancelled tap timer for dragged node: ${node.id.value.substring(0, 4)}');
       }
