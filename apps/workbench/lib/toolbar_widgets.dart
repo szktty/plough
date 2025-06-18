@@ -32,33 +32,39 @@ class CentralArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!),
       ),
       child: Column(
         children: [
           buildToolbar(),
           Expanded(
-            child: _buildGraphViewContainer(),
+            child: _buildGraphViewContainer(context),
           ),
-          _buildStatusBar(),
+          _buildStatusBar(context),
         ],
       ),
     );
   }
 
-  Widget _buildGraphViewContainer() {
+  Widget _buildGraphViewContainer(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!),
       ),
       child: ClipRect(
         child: Stack(
           children: [
             // Dot grid background
             CustomPaint(
-              painter: DotGridPainter(),
+              painter: DotGridPainter(
+                dotColor: isDarkMode ? Colors.grey[700]! : const Color(0xFFE0E0E0),
+              ),
               size: Size.infinite,
             ),
             // Graph view on top
@@ -78,10 +84,12 @@ class CentralArea extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBar() {
+  Widget _buildStatusBar(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(8),
-      color: Colors.grey[300],
+      color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -106,6 +114,8 @@ class Toolbar extends StatelessWidget {
   final Function(bool) onUseInteractiveViewerChanged;
   final bool gestureDebugMode;
   final Function(bool) onGestureDebugModeChanged;
+  final bool isDarkMode;
+  final Function(bool) onDarkModeChanged;
   final double uiScale;
   final VoidCallback onDecreaseUIScale;
   final VoidCallback onIncreaseUIScale;
@@ -121,6 +131,8 @@ class Toolbar extends StatelessWidget {
     required this.onUseInteractiveViewerChanged,
     required this.gestureDebugMode,
     required this.onGestureDebugModeChanged,
+    required this.isDarkMode,
+    required this.onDarkModeChanged,
     required this.uiScale,
     required this.onDecreaseUIScale,
     required this.onIncreaseUIScale,
@@ -128,9 +140,11 @@ class Toolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(8),
-      color: Colors.grey[200],
+      color: isDarkMode ? Colors.grey[850] : Colors.grey[200],
       child: Column(
         children: [
           // First row - Layout and data controls
@@ -220,6 +234,25 @@ class Toolbar extends StatelessWidget {
                       visualDensity: VisualDensity.compact,
                     ),
                     Text('Debug Mode', style: TextStyle(fontSize: 16 * uiScale)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Dark mode toggle
+              InkWell(
+                onTap: () => onDarkModeChanged(!isDarkMode),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isDarkMode ? 'Dark' : 'Light',
+                      style: TextStyle(fontSize: 16 * uiScale),
+                    ),
                   ],
                 ),
               ),

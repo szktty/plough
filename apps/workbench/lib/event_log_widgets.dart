@@ -50,16 +50,18 @@ class EventLogPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!),
       ),
       child: DefaultTabController(
         length: 3,
         child: Column(
           children: [
             Container(
-              color: Colors.grey[100],
+              color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
               child: TabBar(
                 labelColor: Colors.red[700],
                 unselectedLabelColor: Colors.grey[600],
@@ -76,8 +78,8 @@ class EventLogPanel extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  _buildEventLogTab(),
-                  _buildStateDebugTab(),
+                  _buildEventLogTab(context),
+                  _buildStateDebugTab(context),
                   GestureTestTab(
                     selectedGestureTest: selectedGestureTest,
                     gestureValidationResults: gestureValidationResults,
@@ -94,7 +96,9 @@ class EventLogPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildEventLogTab() {
+  Widget _buildEventLogTab(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     // Filter events based on selected filters
     final filteredEvents = events
         .where((event) {
@@ -107,7 +111,7 @@ class EventLogPanel extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          color: Colors.grey[200],
+          color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
           child: Row(
             children: [
               const Text('Event Log', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -131,7 +135,7 @@ class EventLogPanel extends StatelessWidget {
         // Event type filters
         Container(
           padding: const EdgeInsets.all(8),
-          color: Colors.grey[50],
+          color: isDarkMode ? Colors.grey[850] : Colors.grey[50],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -192,7 +196,7 @@ class EventLogPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildStateDebugTab() {
+  Widget _buildStateDebugTab(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8),
       child: Column(

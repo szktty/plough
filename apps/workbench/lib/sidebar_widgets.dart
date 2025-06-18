@@ -27,11 +27,13 @@ class _LeftSidebarState extends State<LeftSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       width: 300,
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(right: BorderSide(color: Colors.grey[300]!)),
+        color: isDarkMode ? Colors.grey[900] : Colors.grey[50],
+        border: Border(right: BorderSide(color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!)),
       ),
       child: Column(
         children: [
@@ -43,8 +45,8 @@ class _LeftSidebarState extends State<LeftSidebar> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+              color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+              border: Border(bottom: BorderSide(color: isDarkMode ? Colors.grey[600]! : Colors.grey[300]!)),
             ),
             child: Row(
               children: [
@@ -63,7 +65,7 @@ class _LeftSidebarState extends State<LeftSidebar> {
                 SizedBox(
                   height: _nodesSectionHeight,
                   child: Container(
-                    color: Colors.blue[50],
+                    color: isDarkMode ? Colors.blue[900] : Colors.blue[50],
                     child: Column(
                       children: [
                         // Header
@@ -95,8 +97,8 @@ class _LeftSidebarState extends State<LeftSidebar> {
                                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.blue[200]!),
+                                  color: isDarkMode ? Colors.grey[800] : Colors.white,
+                                  border: Border.all(color: isDarkMode ? Colors.blue[700]! : Colors.blue[200]!),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Row(
@@ -155,13 +157,13 @@ class _LeftSidebarState extends State<LeftSidebar> {
                     child: Container(
                       width: double.infinity,
                       height: 8,
-                      color: Colors.grey[300],
+                      color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
                       child: Center(
                         child: Container(
                           width: 40,
                           height: 2,
                           decoration: BoxDecoration(
-                            color: Colors.grey[400],
+                            color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
                             borderRadius: BorderRadius.circular(1),
                           ),
                         ),
@@ -172,7 +174,7 @@ class _LeftSidebarState extends State<LeftSidebar> {
                 // Links section takes remaining space
                 Expanded(
                   child: Container(
-                    color: Colors.orange[50],
+                    color: isDarkMode ? Colors.orange[900] : Colors.orange[50],
                     child: Column(
                       children: [
                         // Header
@@ -205,8 +207,8 @@ class _LeftSidebarState extends State<LeftSidebar> {
                                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.orange[200]!),
+                                  color: isDarkMode ? Colors.grey[800] : Colors.white,
+                                  border: Border.all(color: isDarkMode ? Colors.orange[700]! : Colors.orange[200]!),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Row(

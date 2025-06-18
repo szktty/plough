@@ -10,7 +10,14 @@ import 'event_log_widgets.dart';
 import 'workbench_state.dart';
 
 class WorkbenchHomePage extends StatefulWidget {
-  const WorkbenchHomePage({super.key});
+  final bool isDarkMode;
+  final Function(bool) onDarkModeChanged;
+
+  const WorkbenchHomePage({
+    super.key,
+    required this.isDarkMode,
+    required this.onDarkModeChanged,
+  });
 
   @override
   State<WorkbenchHomePage> createState() => _WorkbenchHomePageState();
@@ -36,6 +43,7 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   double _rightSidebarWidth = 300.0;
   final double _minSidebarWidth = 200.0;
   final double _maxSidebarWidth = 600.0;
+  
 
   // Timeline filters
   Set<EventType> _timelineFilters = createDefaultTimelineFilters();
@@ -202,6 +210,8 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         // Enable/disable gesture debug mode in the library
         setGestureDebugMode(_gestureDebugMode);
       },
+      isDarkMode: widget.isDarkMode,
+      onDarkModeChanged: widget.onDarkModeChanged,
       uiScale: _uiScale,
       onDecreaseUIScale: () {
         setState(() {

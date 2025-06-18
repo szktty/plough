@@ -45,12 +45,15 @@ class _DebugGraphViewState extends State<DebugGraphView> {
       widget.onRebuild();
     }
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    debugPrint('DebugGraphView rebuild - isDarkMode: $isDarkMode');
+
     return GraphView(
-      key: ValueKey(widget.graph.hashCode),
+      key: ValueKey('${widget.graph.hashCode}_$isDarkMode'), // Include dark mode in key to force rebuild
       graph: widget.graph,
       layoutStrategy: GraphForceDirectedLayoutStrategy(),
       animationEnabled: widget.animationEnabled,
-      behavior: _createDebugBehavior(),
+      behavior: _createDebugBehavior(context),
       gestureMode: widget.gestureMode,
       allowSelection: true, // Enable selection for tap/double-tap
       onBackgroundTapped: widget.onBackgroundTapped,
@@ -60,11 +63,14 @@ class _DebugGraphViewState extends State<DebugGraphView> {
     );
   }
 
-  GraphViewBehavior _createDebugBehavior() {
+  GraphViewBehavior _createDebugBehavior(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return DebugGraphViewBehavior(
       onEvent: widget.onEvent,
       monitorCallbacks: widget.monitorCallbacks,
       updateGestureState: widget.updateGestureState,
+      isDarkMode: isDarkMode,
     );
   }
 }
@@ -74,11 +80,13 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
   final Function(DebugEvent) onEvent;
   final bool monitorCallbacks;
   final Function(String, Map<String, dynamic>)? updateGestureState;
+  final bool isDarkMode;
 
   DebugGraphViewBehavior({
     required this.onEvent,
     required this.monitorCallbacks,
     this.updateGestureState,
+    required this.isDarkMode,
   });
 
   @override
@@ -260,5 +268,56 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         details: 'Entity ID: ${event.entityId}',
       ));
     }
+  }
+
+  @override
+  GraphNodeViewBehavior createNodeViewBehavior() {
+    debugPrint('createNodeViewBehavior called - isDarkMode: $isDarkMode');
+    final nodeColor = isDarkMode ? const Color(0xFF1F2937) : const Color(0xFFE2E8F0);
+    debugPrint('  Node color: $nodeColor');
+    
+    return GraphNodeViewBehavior.defaultBehavior(
+      nodeRendererStyle: GraphDefaultNodeRendererStyle(
+        color: nodeColor,
+        borderColor: isDarkMode ? const Color(0xFF6B7280) : const Color(0xFF64748B),
+        labelColor: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+        idColor: isDarkMode ? const Color(0xFFE5E7EB) : const Color(0xFF6B7280),
+        hoverColor: isDarkMode ? const Color(0xFF374151) : const Color(0xFFDDD6FE),
+        selectedHoverColor: isDarkMode ? const Color(0xFF059669) : const Color(0xFF10B981),
+        selectedBorderColor: isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF4F46E5),
+        highlightColor: isDarkMode ? const Color(0xFFFBBF24) : const Color(0xFFFEF3C7),
+      ),
+    );
+  }
+
+  @override
+  GraphLinkViewBehavior createLinkViewBehavior() {
+    debugPrint('createLinkViewBehavior called - isDarkMode: $isDarkMode');
+    final linkColor = isDarkMode ? Colors.white : const Color(0xFF374151);
+    debugPrint('  Link color: $linkColor');
+    
+    return GraphLinkViewBehavior(
+      builder: (context, graph, link, sourceView, targetView, routing, geometry, _) {
+        return GraphDefaultLinkRenderer(
+          link: link,
+          sourceView: sourceView,
+          targetView: targetView,
+          routing: routing,
+          geometry: geometry,
+          style: GraphDefaultLinkRendererStyle(
+            arrowColor: linkColor,
+            borderColor: linkColor,
+            labelColor: isDarkMode ? Colors.white : const Color(0xFF1F2937),
+            hoverColor: isDarkMode ? const Color(0xFF6366F1) : const Color(0xFF8B5CF6),
+            selectedHoverColor: isDarkMode ? const Color(0xFF10B981) : const Color(0xFF059669),
+            selectedUnhoverColor: isDarkMode ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
+            highlightColor: isDarkMode ? const Color(0xFFFBBF24) : const Color(0xFFFEF3C7),
+          ),
+          color: linkColor,
+          thickness: 30,
+        );
+      },
+      routing: GraphLinkRouting.straight,
+    );
   }
 }
