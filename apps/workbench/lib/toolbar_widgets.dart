@@ -54,15 +54,25 @@ class CentralArea extends StatelessWidget {
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: ClipRect(
-        child: DebugGraphView(
-          graph: graph,
-          onEvent: onEvent,
-          onRebuild: onRebuildCountChanged,
-          monitorCallbacks: monitorCallbacks,
-          monitorRebuilds: monitorRebuilds,
-          animationEnabled: animationEnabled,
-          updateGestureState: updateGestureState,
-          gestureMode: gestureMode,
+        child: Stack(
+          children: [
+            // Dot grid background
+            CustomPaint(
+              painter: DotGridPainter(),
+              size: Size.infinite,
+            ),
+            // Graph view on top
+            DebugGraphView(
+              graph: graph,
+              onEvent: onEvent,
+              onRebuild: onRebuildCountChanged,
+              monitorCallbacks: monitorCallbacks,
+              monitorRebuilds: monitorRebuilds,
+              animationEnabled: animationEnabled,
+              updateGestureState: updateGestureState,
+              gestureMode: gestureMode,
+            ),
+          ],
         ),
       ),
     );
@@ -240,5 +250,54 @@ class Toolbar extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class DotGridPainter extends CustomPainter {
+  final double dotSpacing;
+  final double dotSize;
+  final Color dotColor;
+
+  DotGridPainter({
+    this.dotSpacing = 24.0,
+    this.dotSize = 1.5,
+    this.dotColor = const Color(0xFFE0E0E0),
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = dotColor
+      ..style = PaintingStyle.fill;
+
+    // Calculate the number of dots in each direction
+    final horizontalDots = (size.width / dotSpacing).ceil();
+    final verticalDots = (size.height / dotSpacing).ceil();
+
+    // Draw dots
+    for (int x = 0; x <= horizontalDots; x++) {
+      for (int y = 0; y <= verticalDots; y++) {
+        final dx = x * dotSpacing;
+        final dy = y * dotSpacing;
+        
+        if (dx <= size.width && dy <= size.height) {
+          canvas.drawCircle(
+            Offset(dx, dy),
+            dotSize,
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    if (oldDelegate is DotGridPainter) {
+      return oldDelegate.dotSpacing != dotSpacing ||
+             oldDelegate.dotSize != dotSize ||
+             oldDelegate.dotColor != dotColor;
+    }
+    return true;
   }
 }
