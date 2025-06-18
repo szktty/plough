@@ -90,8 +90,6 @@ class Toolbar extends StatelessWidget {
   final String currentLayoutStrategy;
   final Function(String?) onLayoutStrategyChanged;
   final VoidCallback onResetLayout;
-  final String currentDataPreset;
-  final Function(String?) onDataPresetChanged;
   final GraphGestureMode gestureMode;
   final Function(GraphGestureMode?) onGestureModeChanged;
   final bool useInteractiveViewer;
@@ -107,8 +105,6 @@ class Toolbar extends StatelessWidget {
     required this.currentLayoutStrategy,
     required this.onLayoutStrategyChanged,
     required this.onResetLayout,
-    required this.currentDataPreset,
-    required this.onDataPresetChanged,
     required this.gestureMode,
     required this.onGestureModeChanged,
     required this.useInteractiveViewer,
@@ -151,21 +147,6 @@ class Toolbar extends StatelessWidget {
                 tooltip: 'Reset Layout',
                 icon: const Icon(Icons.restart_alt),
                 iconSize: 20,
-              ),
-              const SizedBox(width: 16),
-              // Data preset dropdown
-              DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: currentDataPreset,
-                  onChanged: onDataPresetChanged,
-                  items: dataPresets.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value, style: TextStyle(fontSize: 16 * uiScale)),
-                    );
-                  }).toList(),
-                  isDense: true,
-                ),
               ),
               const SizedBox(width: 16),
               // Gesture Mode dropdown

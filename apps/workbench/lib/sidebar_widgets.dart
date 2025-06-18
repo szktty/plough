@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
+import 'template_section.dart';
 
 class LeftSidebar extends StatelessWidget {
   final Graph graph;
   final double uiScale;
+  final String currentDataPreset;
+  final Function(String?) onDataPresetChanged;
 
   const LeftSidebar({
     super.key,
     required this.graph,
     required this.uiScale,
+    required this.currentDataPreset,
+    required this.onDataPresetChanged,
   });
 
   @override
@@ -21,6 +26,11 @@ class LeftSidebar extends StatelessWidget {
       ),
       child: Column(
         children: [
+          TemplateSection(
+            currentDataPreset: currentDataPreset,
+            onDataPresetChanged: onDataPresetChanged,
+            uiScale: uiScale,
+          ),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

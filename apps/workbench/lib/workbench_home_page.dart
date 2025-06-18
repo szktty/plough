@@ -75,7 +75,19 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         builder: (context, constraints) {
           return Row(
             children: [
-              LeftSidebar(graph: graph, uiScale: _uiScale),
+              LeftSidebar(
+                graph: graph, 
+                uiScale: _uiScale,
+                currentDataPreset: _currentDataPreset,
+                onDataPresetChanged: (newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _currentDataPreset = newValue;
+                    });
+                    _loadDataPreset();
+                  }
+                },
+              ),
               Expanded(
                 child: CentralArea(
                   graph: graph,
@@ -168,15 +180,6 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         }
       },
       onResetLayout: _resetLayout,
-      currentDataPreset: _currentDataPreset,
-      onDataPresetChanged: (newValue) {
-        if (newValue != null) {
-          setState(() {
-            _currentDataPreset = newValue;
-          });
-          _loadDataPreset();
-        }
-      },
       gestureMode: _gestureMode,
       onGestureModeChanged: (newValue) {
         if (newValue != null) {
