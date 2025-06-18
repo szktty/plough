@@ -101,6 +101,28 @@ String shortenId(String id) {
 
 // Initialize graph with sample data
 Graph initializeGraph() {
+  return loadGraphTemplate('Default');
+}
+
+// Load graph template by name
+Graph loadGraphTemplate(String templateName) {
+  switch (templateName) {
+    case 'Default':
+      return _createDefaultGraph();
+    case 'Small Network':
+      return _createSmallNetworkGraph();
+    case 'Large Network':
+      return _createLargeNetworkGraph();
+    case 'Tree Structure':
+      return _createTreeStructureGraph();
+    case 'Complex Graph':
+      return _createComplexGraph();
+    default:
+      return _createDefaultGraph();
+  }
+}
+
+Graph _createDefaultGraph() {
   final graph = Graph();
 
   // Add sample nodes using the correct API from the original
@@ -135,6 +157,141 @@ Graph initializeGraph() {
     target: node1,
     direction: GraphLinkDirection.outgoing,
   ));
+
+  return graph;
+}
+
+Graph _createSmallNetworkGraph() {
+  final graph = Graph();
+
+  // Create 6 nodes
+  final nodes = <GraphNode>[];
+  for (int i = 1; i <= 6; i++) {
+    nodes.add(GraphNode(properties: {'label': 'Node $i'}));
+    graph.addNode(nodes.last);
+  }
+
+  // Create interconnections
+  graph.addLink(GraphLink(source: nodes[0], target: nodes[1], direction: GraphLinkDirection.outgoing));
+  graph.addLink(GraphLink(source: nodes[0], target: nodes[2], direction: GraphLinkDirection.outgoing));
+  graph.addLink(GraphLink(source: nodes[1], target: nodes[3], direction: GraphLinkDirection.outgoing));
+  graph.addLink(GraphLink(source: nodes[2], target: nodes[4], direction: GraphLinkDirection.outgoing));
+  graph.addLink(GraphLink(source: nodes[3], target: nodes[5], direction: GraphLinkDirection.outgoing));
+  graph.addLink(GraphLink(source: nodes[4], target: nodes[5], direction: GraphLinkDirection.outgoing));
+  graph.addLink(GraphLink(source: nodes[1], target: nodes[4], direction: GraphLinkDirection.outgoing));
+
+  return graph;
+}
+
+Graph _createLargeNetworkGraph() {
+  final graph = Graph();
+
+  // Create 25 nodes
+  final nodes = <GraphNode>[];
+  for (int i = 1; i <= 25; i++) {
+    nodes.add(GraphNode(properties: {'label': 'Node $i'}));
+    graph.addNode(nodes.last);
+  }
+
+  // Create more complex interconnections
+  for (int i = 0; i < nodes.length; i++) {
+    // Connect each node to 2-4 other nodes
+    final connectionCount = 2 + (i % 3);
+    for (int j = 1; j <= connectionCount; j++) {
+      final targetIndex = (i + j * 3) % nodes.length;
+      if (targetIndex != i) {
+        graph.addLink(GraphLink(
+          source: nodes[i],
+          target: nodes[targetIndex],
+          direction: GraphLinkDirection.outgoing,
+        ));
+      }
+    }
+  }
+
+  return graph;
+}
+
+Graph _createTreeStructureGraph() {
+  final graph = Graph();
+
+  // Create root node
+  final root = GraphNode(properties: {'label': 'Root'});
+  graph.addNode(root);
+
+  // Create level 1 nodes
+  final level1Nodes = <GraphNode>[];
+  for (int i = 1; i <= 3; i++) {
+    final node = GraphNode(properties: {'label': 'L1-$i'});
+    level1Nodes.add(node);
+    graph.addNode(node);
+    graph.addLink(GraphLink(
+      source: root,
+      target: node,
+      direction: GraphLinkDirection.outgoing,
+    ));
+  }
+
+  // Create level 2 nodes
+  for (int i = 0; i < level1Nodes.length; i++) {
+    final childCount = i == 0 ? 3 : 2; // First branch has 3 children, others have 2
+    for (int j = 1; j <= childCount; j++) {
+      final node = GraphNode(properties: {'label': 'L2-${i + 1}-$j'});
+      graph.addNode(node);
+      graph.addLink(GraphLink(
+        source: level1Nodes[i],
+        target: node,
+        direction: GraphLinkDirection.outgoing,
+      ));
+    }
+  }
+
+  return graph;
+}
+
+Graph _createComplexGraph() {
+  final graph = Graph();
+
+  // Create central hub nodes
+  final hubs = <GraphNode>[];
+  for (int i = 1; i <= 4; i++) {
+    final hub = GraphNode(properties: {'label': 'Hub $i'});
+    hubs.add(hub);
+    graph.addNode(hub);
+  }
+
+  // Connect hubs in a circle
+  for (int i = 0; i < hubs.length; i++) {
+    final nextIndex = (i + 1) % hubs.length;
+    graph.addLink(GraphLink(
+      source: hubs[i],
+      target: hubs[nextIndex],
+      direction: GraphLinkDirection.outgoing,
+    ));
+  }
+
+  // Add satellite nodes around each hub
+  for (int i = 0; i < hubs.length; i++) {
+    final satelliteCount = 3 + (i % 2); // 3 or 4 satellites per hub
+    for (int j = 1; j <= satelliteCount; j++) {
+      final satellite = GraphNode(properties: {'label': 'S${i + 1}-$j'});
+      graph.addNode(satellite);
+      graph.addLink(GraphLink(
+        source: hubs[i],
+        target: satellite,
+        direction: GraphLinkDirection.outgoing,
+      ));
+      
+      // Some satellites connect to other hubs
+      if (j == 1 && i < hubs.length - 1) {
+        graph.addLink(GraphLink(
+          source: satellite,
+          target: hubs[i + 1],
+          direction: GraphLinkDirection.outgoing,
+        ));
+      }
+    }
+  }
 
   return graph;
 }

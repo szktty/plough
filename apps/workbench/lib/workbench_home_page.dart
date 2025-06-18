@@ -386,16 +386,31 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   }
 
   void _loadDataPreset() {
-    // Load the selected data preset (UI only for now)
+    // Load the selected data preset and replace the current graph
     setState(() {
+      graph = loadGraphTemplate(_currentDataPreset);
       _rebuildCount = 0; // Reset rebuild count on preset load
+      // Clear events and reset state
+      _events.clear();
+      _gestureValidationResults.clear();
+      _internalDebugState = createDefaultDebugState();
+      _isDragging = false;
+      _isHovering = false;
+      _isTapTracking = false;
+      _lastDraggedEntityId = null;
+      _hoveredEntityId = null;
+      _trackedTapEntityId = null;
+      _currentTapCount = 0;
+      _doubleTapTimeRemaining = null;
+      _totalGestureEvents = 0;
     });
+    
     _addEvent(DebugEvent(
-      type: EventType.callback,
+      type: EventType.layout,
       source: 'WorkbenchHomePage',
-      message: 'Data preset selected',
+      message: 'Graph template loaded',
       timestamp: DateTime.now(),
-      details: 'Preset: $_currentDataPreset',
+      details: 'Template: $_currentDataPreset (Nodes: ${graph.nodes.length}, Links: ${graph.links.length})',
     ));
   }
 

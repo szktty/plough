@@ -18,16 +18,106 @@ class TemplateSection extends StatelessWidget {
       case 'Default':
         return '4つのノードの基本的な循環グラフ';
       case 'Small Network':
-        return '6-8ノードの小規模ネットワーク';
+        return '6ノードの小規模ネットワーク';
       case 'Large Network':
-        return '20-30ノードの大規模ネットワーク';
+        return '25ノードの大規模ネットワーク';
       case 'Tree Structure':
-        return '階層的なツリー構造';
+        return '階層的なツリー構造（10ノード）';
       case 'Complex Graph':
-        return '複雑な接続を持つグラフ';
+        return 'ハブ・スポーク型の複雑なグラフ（18ノード）';
       default:
         return 'カスタムグラフ構造';
     }
+  }
+
+  void _showLoadConfirmationDialog(BuildContext context, String preset) {
+    // Don't show dialog if the same preset is already selected
+    if (preset == currentDataPreset) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'グラフテンプレートをロード',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '現在のグラフデータを上書きして、新しいテンプレートをロードしますか？',
+                style: TextStyle(fontSize: 16 * uiScale),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  border: Border.all(color: Colors.green[200]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      preset,
+                      style: TextStyle(
+                        fontSize: 16 * uiScale,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[800],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getPresetDescription(preset),
+                      style: TextStyle(
+                        fontSize: 14 * uiScale,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'キャンセル',
+                style: TextStyle(
+                  fontSize: 16 * uiScale,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDataPresetChanged(preset);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600],
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                'ロード',
+                style: TextStyle(
+                  fontSize: 16 * uiScale,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -65,7 +155,7 @@ class TemplateSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(4),
-                      onTap: () => onDataPresetChanged(preset),
+                      onTap: () => _showLoadConfirmationDialog(context, preset),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         decoration: BoxDecoration(
