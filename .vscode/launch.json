@@ -31,11 +31,18 @@
             "type": "dart"
         },
         {
-            "name": "monitor",
-            "cwd": "apps/monitor",
+            "name": "workbench (profile mode)",
+            "cwd": "apps/workbench",
             "request": "launch",
             "type": "dart",
-            "program": "bin/monitor_server.dart"
+            "flutterMode": "profile"
+        },
+        {
+            "name": "workbench (release mode)",
+            "cwd": "apps/workbench",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
         }
     ]
 }
