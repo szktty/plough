@@ -49,7 +49,7 @@ class _DebugGraphViewState extends State<DebugGraphView> {
     debugPrint('DebugGraphView rebuild - isDarkMode: $isDarkMode');
 
     return GraphView(
-      key: ValueKey('${widget.graph.hashCode}_$isDarkMode'), // Include dark mode in key to force rebuild
+      key: ValueKey(widget.graph.hashCode), // Use graph hash only, behavior equivalence handles the rest
       graph: widget.graph,
       layoutStrategy: GraphForceDirectedLayoutStrategy(),
       animationEnabled: widget.animationEnabled,
@@ -319,5 +319,12 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       },
       routing: GraphLinkRouting.straight,
     );
+  }
+
+  @override
+  bool isEquivalentTo(GraphViewBehavior other) {
+    if (other is! DebugGraphViewBehavior) return false;
+    return isDarkMode == other.isDarkMode &&
+        monitorCallbacks == other.monitorCallbacks;
   }
 }

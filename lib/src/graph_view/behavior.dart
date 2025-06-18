@@ -266,6 +266,18 @@ abstract interface class GraphViewBehavior {
 
   /// Called when an entity's tooltip is hidden.
   void onTooltipHide(GraphTooltipHideEvent event);
+
+  /// Compares this behavior with another for content equality.
+  ///
+  /// This method should return true if the behaviors would produce
+  /// the same visual result and interaction handling. It's used to
+  /// avoid unnecessary re-initialization during widget updates.
+  ///
+  /// The default implementation compares runtime types only.
+  /// Override this method to provide content-based comparison.
+  bool isEquivalentTo(GraphViewBehavior other) {
+    return runtimeType == other.runtimeType;
+  }
 }
 
 /// A default implementation of graph view behavior with standard visualization features.
@@ -427,4 +439,10 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
 
   @override
   void onTooltipHide(GraphTooltipHideEvent event) {}
+
+  @override
+  bool isEquivalentTo(GraphViewBehavior other) {
+    if (other is! GraphViewDefaultBehavior) return false;
+    return linkRouting == other.linkRouting;
+  }
 }

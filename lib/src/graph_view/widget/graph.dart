@@ -219,12 +219,11 @@ class GraphViewState extends State<GraphView> {
     final needsReinit = widget.graph != oldWidget.graph ||
         widget.layoutStrategy.runtimeType !=
             oldWidget.layoutStrategy.runtimeType ||
-        widget.behavior.runtimeType != oldWidget.behavior.runtimeType ||
-        widget.behavior != oldWidget.behavior; // Also check for instance changes
+        !widget.behavior.isEquivalentTo(oldWidget.behavior);
 
     if (needsReinit) {
       debugPrint(
-          '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behavior=${widget.behavior.runtimeType != oldWidget.behavior.runtimeType}, instance=${widget.behavior != oldWidget.behavior})');
+          '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behaviorEquivalent=${!widget.behavior.isEquivalentTo(oldWidget.behavior)})');
       _initBehavior();
     } else {
       debugPrint(
