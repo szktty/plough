@@ -46,6 +46,7 @@ class _DebugGraphViewState extends State<DebugGraphView> {
     }
 
     return GraphView(
+      key: ValueKey(widget.graph.hashCode),
       graph: widget.graph,
       layoutStrategy: GraphForceDirectedLayoutStrategy(),
       animationEnabled: widget.animationEnabled,

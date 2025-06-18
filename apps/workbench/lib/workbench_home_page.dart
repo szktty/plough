@@ -386,9 +386,12 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   }
 
   void _loadDataPreset() {
+    debugPrint('WORKBENCH: Loading template: $_currentDataPreset');
     // Load the selected data preset and replace the current graph
     setState(() {
-      graph = loadGraphTemplate(_currentDataPreset);
+      final newGraph = loadGraphTemplate(_currentDataPreset);
+      debugPrint('WORKBENCH: Created new graph with ${newGraph.nodes.length} nodes and ${newGraph.links.length} links');
+      graph = newGraph;
       _rebuildCount = 0; // Reset rebuild count on preset load
       // Clear events and reset state
       _events.clear();
@@ -404,6 +407,9 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
       _doubleTapTimeRemaining = null;
       _totalGestureEvents = 0;
     });
+    
+    // Force layout recalculation by applying the current layout strategy
+    _applyLayoutStrategy();
     
     _addEvent(DebugEvent(
       type: EventType.layout,
