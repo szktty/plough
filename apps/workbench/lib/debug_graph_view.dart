@@ -106,11 +106,13 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
         details: details,
       ));
       // Update gesture state tracking
+      debugPrint('📊 CALLING updateGestureState for tap...');
       updateGestureState?.call('tap', {
         'tracking': hasEntities,
         'tapCount': event.tapCount,
         'entityId': hasEntities ? event.entityIds.first.toString() : null,
       });
+      debugPrint('📊 updateGestureState call completed');
     }
   }
 

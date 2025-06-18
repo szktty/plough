@@ -227,18 +227,21 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
   }
 
   void _updateGestureState(String gestureType, Map<String, dynamic> data) {
-    if (!_monitorGestureStates) return;
+    debugPrint('🏠 WORKBENCH: _updateGestureState called with gestureType=$gestureType, data=$data');
+    
+    if (!_monitorGestureStates) {
+      debugPrint('🏠 WORKBENCH: _monitorGestureStates is false, returning early');
+      return;
+    }
 
     // Use addPostFrameCallback to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        debugPrint('🏠 WORKBENCH: Processing gestureType=$gestureType in setState');
         setState(() {
           switch (gestureType) {
-            case 'TAP_DEBUG_STATE':
-              debugPrint('WORKBENCH: Received TAP_DEBUG_STATE event with data: $data');
-              debugPrint('WORKBENCH: Updating internal debug state with: $data');
+            case 'tapDebugState':
               _internalDebugState = Map<String, dynamic>.from(data);
-              debugPrint('WORKBENCH: New internal debug state: $_internalDebugState');
               
               // Execute tap validation
               GestureValidator.validateTapBehavior(
@@ -255,10 +258,12 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
               _isDragging = false;
               break;
             case 'tap':
+              debugPrint('🏠 WORKBENCH: Processing tap case');
               _isTapTracking = data['tracking'] ?? false;
               _currentTapCount = data['tapCount'] ?? 0;
               _trackedTapEntityId = data['entityId'];
               _totalGestureEvents++;
+              debugPrint('🏠 WORKBENCH: Updated tap state - tracking=$_isTapTracking, tapCount=$_currentTapCount, entityId=$_trackedTapEntityId, totalEvents=$_totalGestureEvents');
               break;
             case 'hoverEnter':
               _isHovering = true;
@@ -339,12 +344,33 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
         };
         final eventType = data['type']?.toString() ?? 'unknown';
         debugPrint('WORKBENCH: Received gesture debug event: $eventType with data: $data');
+        
+        // Update internal gesture state for State tab
         _updateGestureState(eventType, data);
+        
+        // Add to event log for Event Log tab
+        _addEvent(DebugEvent(
+          type: EventType.gesture,
+          source: event.component,
+          message: event.message,
+          timestamp: event.timestamp,
+          jsonData: _cleanupEventData(data),
+        ));
       },
       onError: (error) {
         debugPrint('WORKBENCH: Error in gesture debug stream: $error');
       },
     );
+  }
+
+  Map<String, dynamic> _cleanupEventData(Map<String, dynamic> data) {
+    // Clean up event data for display, excluding common fields
+    final cleanData = Map<String, dynamic>.from(data);
+    cleanData.remove('type');
+    cleanData.remove('component');
+    cleanData.remove('message');
+    
+    return cleanData;
   }
 
   void _addEvent(DebugEvent event) {

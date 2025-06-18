@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   plough:
     path: ../../
+  super_clipboard: ^0.8.20
 
 dev_dependencies:
   flutter_lints: ^4.0.0

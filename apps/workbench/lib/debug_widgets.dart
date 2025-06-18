@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:super_clipboard/super_clipboard.dart';
 import 'models.dart';
 
 class ExpandableDebugEvent extends StatefulWidget {
@@ -39,59 +40,87 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Expand/collapse handle on the left
+              if (hasJsonData)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  child: Container(
+                    width: 24 * widget.uiScale,
+                    height: 24 * widget.uiScale,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 18 * widget.uiScale,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              // Event type indicator
               Container(
                 width: 8,
                 height: 8,
-                margin: const EdgeInsets.only(top: 4, right: 8),
+                margin: const EdgeInsets.only(top: 8, right: 8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _getEventColor(event.type),
                 ),
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            event.message,
-                            style: TextStyle(fontSize: 16 * widget.uiScale),
+                child: GestureDetector(
+                  onTap: hasJsonData ? () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  } : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              event.message,
+                              style: TextStyle(fontSize: 16 * widget.uiScale),
+                            ),
                           ),
-                        ),
-                        if (hasJsonData)
+                          // Copy button on the right
                           IconButton(
                             icon: Icon(
-                              _isExpanded ? Icons.expand_less : Icons.expand_more,
-                              size: 20 * widget.uiScale,
+                              Icons.copy,
+                              size: 18 * widget.uiScale,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _isExpanded = !_isExpanded;
-                              });
-                            },
+                            onPressed: () => _copyEventToClipboard(),
+                            tooltip: 'ログをクリップボードにコピー',
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
-                      ],
-                    ),
-                    Text(
-                      '${event.source} - ${_formatTime(event.timestamp)}',
-                      style: TextStyle(
-                        fontSize: 16 * widget.uiScale,
-                        color: Colors.grey[600],
+                        ],
                       ),
-                    ),
-                    if (!hasJsonData && event.details != null)
                       Text(
-                        event.details!,
+                        '${event.source} - ${_formatTime(event.timestamp)}',
                         style: TextStyle(
                           fontSize: 16 * widget.uiScale,
-                          color: Colors.grey[700],
+                          color: Colors.grey[600],
                         ),
                       ),
-                  ],
+                      if (!hasJsonData && event.details != null)
+                        Text(
+                          event.details!,
+                          style: TextStyle(
+                            fontSize: 16 * widget.uiScale,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -121,19 +150,15 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
         1: FlexColumnWidth(),
       },
       children: entries.map((entry) {
-        String valueStr;
-        if (entry.value is Map || entry.value is List) {
-          valueStr = const JsonEncoder.withIndent('  ').convert(entry.value);
-        } else {
-          valueStr = entry.value?.toString() ?? 'null';
-        }
+        final humanReadableKey = _getHumanReadableKey(entry.key);
+        final formattedValue = _formatValue(entry.key, entry.value);
         
         return TableRow(
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 12, bottom: 4),
               child: Text(
-                '${entry.key}:',
+                '$humanReadableKey:',
                 style: TextStyle(
                   fontSize: 14 * widget.uiScale,
                   fontWeight: FontWeight.w600,
@@ -144,10 +169,10 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: SelectableText(
-                valueStr,
+                formattedValue,
                 style: TextStyle(
                   fontSize: 14 * widget.uiScale,
-                  fontFamily: 'monospace',
+                  fontFamily: entry.value is Map || entry.value is List ? 'monospace' : null,
                   color: Colors.grey[800],
                 ),
               ),
@@ -156,6 +181,174 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
         );
       }).toList(),
     );
+  }
+
+  String _getHumanReadableKey(String key) {
+    const keyTranslations = {
+      // Event information
+      'event_type': 'イベント種別',
+      'phase': 'フェーズ',
+      'timestamp': 'タイムスタンプ',
+      
+      // Entity information
+      'nodeTargetId': 'ターゲットノード',
+      'entityId': 'エンティティID',
+      'tracked_entity_id': '追跡エンティティ',
+      'node_at_position': 'ポジションのノード',
+      
+      // State information
+      'state_exists': '状態存在',
+      'state_completed': '状態完了',
+      'state_cancelled': '状態キャンセル',
+      'tap_count': 'タップ回数',
+      
+      // Drag information
+      'is_still_dragging_after_up': 'アップ後ドラッグ継続',
+      'is_tap_completed_after_up': 'アップ後タップ完了',
+      'will_toggle_selection': '選択状態切替',
+      'drag_state_exists': 'ドラッグ状態存在',
+      'drag_manager_is_dragging': 'ドラッグマネージャー動作中',
+      
+      // Touch/gesture information
+      'touch_slop': 'タッチスロップ',
+      'k_touch_slop': 'タッチスロップ定数',
+      'distance': '距離',
+      'isWithinSlop': 'スロップ内',
+      'gesture_mode': 'ジェスチャーモード',
+      
+      // Position information
+      'pointer_position': 'ポインター位置',
+      'node_position': 'ノード位置',
+      'down_position': 'ダウン位置',
+      'up_position': 'アップ位置',
+      'downPosition': 'ダウン位置',
+      
+      // Node capabilities
+      'node_can_select': 'ノード選択可能',
+      'node_can_drag': 'ノードドラッグ可能',
+      'node_is_selected': 'ノード選択済み',
+      
+      // Timing information
+      'downTime': 'ダウン時刻',
+      'timeout_ms': 'タイムアウト(ms)',
+      'double_tap_timeout_ms': 'ダブルタップタイムアウト(ms)',
+      'has_double_tap_timer': 'ダブルタップタイマー有',
+      'time_since_down_ms': 'ダウンからの時間(ms)',
+      
+      // State counts
+      'tap_manager_states_count': 'タップマネージャー状態数',
+      
+      // Debug information
+      'tap_debug_info': 'タップデバッグ情報',
+      'completed': '完了',
+      'cancelled': 'キャンセル',
+      'tapCount': 'タップ回数',
+      
+      // Failure information
+      'failure_reason': '失敗理由',
+      'reason': '理由',
+    };
+    
+    return keyTranslations[key] ?? _convertCamelCaseToReadable(key);
+  }
+  
+  String _convertCamelCaseToReadable(String camelCase) {
+    // Convert camelCase to readable format
+    final result = camelCase.replaceAllMapped(
+      RegExp(r'([a-z])([A-Z])'),
+      (match) => '${match.group(1)} ${match.group(2)}',
+    );
+    
+    // Convert underscores to spaces and capitalize first letter
+    return result
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+  
+  String _formatValue(String key, dynamic value) {
+    if (value == null) return 'null';
+    
+    // Format specific value types
+    if (key.contains('position') && value is Map<String, dynamic>) {
+      final x = value['x']?.toString() ?? '0';
+      final y = value['y']?.toString() ?? '0';
+      return '($x, $y)';
+    }
+    
+    if (key.contains('Id') || key.contains('entity')) {
+      final str = value.toString();
+      if (str != 'null' && str.length > 8) {
+        return '${str.substring(0, 8)}...';
+      }
+    }
+    
+    if (key.contains('Time') && value is int) {
+      return '${value}ms';
+    }
+    
+    if (value is bool) {
+      return value ? '真' : '偽';
+    }
+    
+    if (value is Map || value is List) {
+      return const JsonEncoder.withIndent('  ').convert(value);
+    }
+    
+    return value.toString();
+  }
+
+  Future<void> _copyEventToClipboard() async {
+    try {
+      final event = widget.event;
+      
+      // Create a comprehensive log entry
+      final logData = {
+        'timestamp': event.timestamp.toIso8601String(),
+        'type': event.type.toString(),
+        'source': event.source,
+        'message': event.message,
+        if (event.details != null) 'details': event.details,
+        if (event.jsonData != null) 'data': event.jsonData,
+      };
+      
+      // Format as readable JSON
+      final jsonString = const JsonEncoder.withIndent('  ').convert(logData);
+      
+      // Copy to clipboard
+      final clipboard = SystemClipboard.instance;
+      if (clipboard != null) {
+        final item = DataWriterItem();
+        item.add(Formats.plainText(jsonString));
+        await clipboard.write([item]);
+        
+        // Show success feedback
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('ログをクリップボードにコピーしました'),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to copy to clipboard: $e');
+      
+      // Show error feedback
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('コピーに失敗しました: $e'),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Color _getEventColor(EventType type) {

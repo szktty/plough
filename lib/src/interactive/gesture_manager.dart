@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1134,6 +1135,62 @@ class GraphGestureManager {
   void handlePointerMove(PointerMoveEvent event) {
     if (_nodeDragManager.isActive || findNodeAt(event.localPosition) != null) {
       _nodeDragManager.handlePointerMove(event);
+      
+      // Send real-time TAP_DEBUG_STATE during drag operations
+      final draggedEntityId = _nodeDragManager.lastDraggedEntityId;
+      if (draggedEntityId != null) {
+        final node = getEntity(draggedEntityId) as GraphNode?;
+        if (node != null) {
+          final tapState = _nodeTapManager.getState(draggedEntityId);
+          final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(draggedEntityId);
+          final dragState = _nodeDragManager.getState(draggedEntityId);
+          
+          logGestureDebug(
+            GestureDebugEventType.tapDebugState,
+            'GraphGestureManager',
+            'TAP_DEBUG_STATE_MOVE',
+            {
+              'event_type': 'tap_debug_state',
+              'phase': 'move',
+              'nodeTargetId': draggedEntityId.value,
+              'state_exists': tapState != null,
+              'state_completed': tapState?.completed ?? false,
+              'state_cancelled': tapState?.cancelled ?? false,
+              'tap_count': tapState?.tapCount ?? 0,
+              'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
+              'is_still_dragging_after_up': false, // Always false during move
+              'is_tap_completed_after_up': false, // Always false during move
+              'touch_slop': kTouchSlop * 8,
+              'k_touch_slop': kTouchSlop,
+              'timestamp': DateTime.now().toIso8601String(),
+              'tap_debug_info': tapDebugInfo,
+              'node_can_select': node.canSelect,
+              'node_can_drag': node.canDrag,
+              'node_is_selected': graph.selectedEntityIds.contains(node.id),
+              'gesture_mode': gestureMode.name,
+              'pointer_position': {
+                'x': event.localPosition.dx,
+                'y': event.localPosition.dy
+              },
+              'node_position': {
+                'x': node.logicalPosition.dx,
+                'y': node.logicalPosition.dy
+              },
+              'tap_manager_states_count': _nodeTapManager.states.length,
+              'drag_state_exists': dragState != null,
+              'drag_manager_is_dragging': _nodeDragManager.isDragging(draggedEntityId),
+              'distance': _calculateDistance(
+                event.localPosition, 
+                tapDebugInfo?['downPosition'] as Map<String, dynamic>?,
+              ),
+              'isWithinSlop': _isWithinTouchSlop(
+                event.localPosition, 
+                tapDebugInfo?['downPosition'] as Map<String, dynamic>?,
+              ),
+            },
+          );
+        }
+      }
       return;
     }
 
@@ -1265,5 +1322,30 @@ class GraphGestureManager {
     } else if (entity is GraphLink) {
       _linkTooltipManager.toggle(entityId);
     }
+  }
+
+  /// Calculate distance between current position and down position
+  double _calculateDistance(
+    Offset currentPosition, 
+    Map<String, dynamic>? downPosition,
+  ) {
+    if (downPosition == null) return 0;
+    
+    final downX = downPosition['x'] as double? ?? 0;
+    final downY = downPosition['y'] as double? ?? 0;
+    final dx = currentPosition.dx - downX;
+    final dy = currentPosition.dy - downY;
+    return math.sqrt(dx * dx + dy * dy);
+  }
+
+  /// Check if current position is within touch slop of down position
+  bool _isWithinTouchSlop(
+    Offset currentPosition, 
+    Map<String, dynamic>? downPosition,
+  ) {
+    if (downPosition == null) return true;
+    
+    final distance = _calculateDistance(currentPosition, downPosition);
+    return distance <= kTouchSlop * 8; // Use the same touch slop as debug state
   }
 }
