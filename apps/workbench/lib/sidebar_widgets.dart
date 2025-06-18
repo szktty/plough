@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
 import 'template_section.dart';
 
-class LeftSidebar extends StatelessWidget {
+class LeftSidebar extends StatefulWidget {
   final Graph graph;
   final double uiScale;
   final String currentDataPreset;
@@ -17,6 +17,15 @@ class LeftSidebar extends StatelessWidget {
   });
 
   @override
+  State<LeftSidebar> createState() => _LeftSidebarState();
+}
+
+class _LeftSidebarState extends State<LeftSidebar> {
+  double _nodesSectionHeight = 200.0;
+  final double _minSectionHeight = 100.0;
+  final double _maxSectionHeight = 400.0;
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 300,
@@ -27,9 +36,9 @@ class LeftSidebar extends StatelessWidget {
       child: Column(
         children: [
           TemplateSection(
-            currentDataPreset: currentDataPreset,
-            onDataPresetChanged: onDataPresetChanged,
-            uiScale: uiScale,
+            currentDataPreset: widget.currentDataPreset,
+            onDataPresetChanged: widget.onDataPresetChanged,
+            uiScale: widget.uiScale,
           ),
           Container(
             padding: const EdgeInsets.all(16),
@@ -43,18 +52,207 @@ class LeftSidebar extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text('Graph Entities',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16 * uiScale)),
+                        fontWeight: FontWeight.bold, fontSize: 16 * widget.uiScale)),
               ],
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  NodesSection(graph: graph, uiScale: uiScale),
-                  LinksSection(graph: graph, uiScale: uiScale),
-                ],
-              ),
+            child: Column(
+              children: [
+                // Nodes section with variable height
+                SizedBox(
+                  height: _nodesSectionHeight,
+                  child: Container(
+                    color: Colors.blue[50],
+                    child: Column(
+                      children: [
+                        // Header
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          child: Row(
+                            children: [
+                              Icon(Icons.account_tree, size: 16, color: Colors.blue[700]),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Nodes (${widget.graph.nodes.length})',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, 
+                                  fontSize: 16 * widget.uiScale,
+                                  color: Colors.blue[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // List
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: widget.graph.nodes.length,
+                            itemBuilder: (context, index) {
+                              final node = widget.graph.nodes.elementAt(index);
+                              final label = node.properties['label']?.toString() ?? 'Node ${index + 1}';
+                              return Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.blue[200]!),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            label,
+                                            style: TextStyle(
+                                              fontSize: 16 * widget.uiScale, 
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'ID: ${node.id.toString().substring(0, 8)}...',
+                                            style: TextStyle(
+                                              fontSize: 16 * widget.uiScale, 
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Draggable divider
+                MouseRegion(
+                  cursor: SystemMouseCursors.resizeRow,
+                  child: GestureDetector(
+                    onVerticalDragUpdate: (details) {
+                      setState(() {
+                        final newHeight = _nodesSectionHeight + details.delta.dy;
+                        _nodesSectionHeight = newHeight.clamp(_minSectionHeight, _maxSectionHeight);
+                      });
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 8,
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Container(
+                          width: 40,
+                          height: 2,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[400],
+                            borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Links section takes remaining space
+                Expanded(
+                  child: Container(
+                    color: Colors.orange[50],
+                    child: Column(
+                      children: [
+                        // Header
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          child: Row(
+                            children: [
+                              Icon(Icons.link, size: 16, color: Colors.orange[700]),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Links (${widget.graph.links.length})',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, 
+                                  fontSize: 16 * widget.uiScale,
+                                  color: Colors.orange[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // List
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: widget.graph.links.length,
+                            itemBuilder: (context, index) {
+                              final link = widget.graph.links.elementAt(index);
+                              final sourceLabel = link.source.properties['label']?.toString() ?? 'Node';
+                              final targetLabel = link.target.properties['label']?.toString() ?? 'Node';
+                              return Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.orange[200]!),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '$sourceLabel → $targetLabel',
+                                            style: TextStyle(
+                                              fontSize: 16 * widget.uiScale, 
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'ID: ${link.id.toString().substring(0, 8)}...',
+                                            style: TextStyle(
+                                              fontSize: 16 * widget.uiScale, 
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -91,10 +289,9 @@ class NodesSection extends StatelessWidget {
         collapsedShape: const Border(),
         controlAffinity: ListTileControlAffinity.leading,
         children: [
-          Container(
-            constraints: const BoxConstraints(maxHeight: 200),
+          SizedBox(
+            height: 150, // Fixed height for the ListView inside ExpansionTile
             child: ListView.builder(
-              shrinkWrap: true,
               itemCount: graph.nodes.length,
               itemBuilder: (context, index) {
                 final node = graph.nodes.elementAt(index);
@@ -179,10 +376,9 @@ class LinksSection extends StatelessWidget {
         collapsedShape: const Border(),
         controlAffinity: ListTileControlAffinity.leading,
         children: [
-          Container(
-            constraints: const BoxConstraints(maxHeight: 200),
+          SizedBox(
+            height: 150, // Fixed height for the ListView inside ExpansionTile
             child: ListView.builder(
-              shrinkWrap: true,
               itemCount: graph.links.length,
               itemBuilder: (context, index) {
                 final link = graph.links.elementAt(index);
