@@ -117,6 +117,33 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
   }
 
   @override
+  void onDoubleTap(GraphTapEvent event) {
+    super.onDoubleTap(event);
+    debugPrint('🔥🔥 DEBUG: onDoubleTap called! Event: ${event.entityIds.length} entities');
+    if (monitorCallbacks) {
+      final hasEntities = event.entityIds.isNotEmpty;
+      final details = hasEntities
+          ? 'Entities: ${event.entityIds.length}, Tap count: ${event.tapCount}, Position: ${event.details.localPosition}'
+          : 'Background double tap at ${event.details.localPosition}';
+      onEvent(DebugEvent(
+        type: EventType.callback,
+        source: 'DebugGraphViewBehavior',
+        message: 'onDoubleTap fired',
+        timestamp: DateTime.now(),
+        details: details,
+      ));
+      // Update gesture state tracking
+      debugPrint('📊 CALLING updateGestureState for doubleTap...');
+      updateGestureState?.call('doubleTap', {
+        'tracking': hasEntities,
+        'tapCount': event.tapCount,
+        'entityId': hasEntities ? event.entityIds.first.toString() : null,
+      });
+      debugPrint('📊 updateGestureState call completed for doubleTap');
+    }
+  }
+
+  @override
   void onSelectionChange(GraphSelectionChangeEvent event) {
     super.onSelectionChange(event);
     if (monitorCallbacks) {

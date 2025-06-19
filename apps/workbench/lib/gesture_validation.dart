@@ -159,7 +159,28 @@ class GestureValidator {
   static List<GestureValidationCheck> _validateDoubleTap(Map<String, dynamic> state, String phase) {
     final checks = <GestureValidationCheck>[];
     
-    if (phase == 'up') {
+    if (phase == 'down') {
+      // Double tap detection on pointer down
+      final tapCount = state['tap_count'] ?? 1;
+      if (tapCount == 2) {
+        checks.add(GestureValidationCheck(
+          name: 'double_tap_detected_on_down',
+          description: 'ダブルタップがpointer downで検出される',
+          passed: true,
+          expectedValue: '2',
+          actualValue: tapCount.toString(),
+        ));
+      } else {
+        checks.add(GestureValidationCheck(
+          name: 'first_tap_down',
+          description: '1回目のタップのpointer down',
+          passed: tapCount == 1,
+          expectedValue: '1',
+          actualValue: tapCount.toString(),
+          failureReason: tapCount != 1 ? '初回タップでない' : null,
+        ));
+      }
+    } else if (phase == 'up') {
       final tapCount = state['tap_count'] ?? 0;
       checks.add(GestureValidationCheck(
         name: 'double_tap_count',
@@ -169,6 +190,29 @@ class GestureValidator {
         actualValue: tapCount.toString(),
         failureReason: tapCount != 2 ? 'タップ回数が2回でない' : null,
       ));
+
+      if (tapCount == 2) {
+        final hasDoubleTapTimer = state['has_double_tap_timer'] ?? false;
+        checks.add(GestureValidationCheck(
+          name: 'no_timer_on_double_tap',
+          description: 'ダブルタップ時はタイマーが設定されない',
+          passed: !hasDoubleTapTimer,
+          expectedValue: 'false',
+          actualValue: hasDoubleTapTimer.toString(),
+          failureReason: hasDoubleTapTimer ? 'ダブルタップ時にタイマーが残っている' : null,
+        ));
+
+        final timeSinceDown = state['time_since_down_ms'] ?? 0;
+        final doubleTapTimeoutMs = state['double_tap_timeout_ms'] ?? 200;
+        checks.add(GestureValidationCheck(
+          name: 'double_tap_within_timeout',
+          description: 'ダブルタップタイムアウト内である',
+          passed: timeSinceDown <= doubleTapTimeoutMs,
+          expectedValue: '<= ${doubleTapTimeoutMs}ms',
+          actualValue: '${timeSinceDown}ms',
+          failureReason: timeSinceDown > doubleTapTimeoutMs ? 'タイムアウト時間を超過' : null,
+        ));
+      }
     }
     
     return checks;

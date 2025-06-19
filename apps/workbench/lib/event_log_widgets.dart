@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'models.dart';
 import 'debug_widgets.dart';
 import 'gesture_validation.dart';
@@ -121,6 +122,16 @@ class EventLogPanel extends StatelessWidget {
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _copyAllEventsToClipboard(context),
+                tooltip: 'Copy all events to clipboard',
+                icon: const Icon(Icons.copy, size: 18),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(32, 32),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+              const SizedBox(width: 4),
               TextButton(
                 onPressed: onClearEvents,
                 style: TextButton.styleFrom(
@@ -290,5 +301,129 @@ class EventLogPanel extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _copyAllEventsToClipboard(BuildContext context) async {
+    try {
+      final filteredEvents = events
+          .where((event) {
+            if (timelineFilters.isEmpty) return true;
+            return timelineFilters.contains(event.type);
+          })
+          .toList();
+
+      final buffer = StringBuffer();
+      buffer.writeln('=== Event Log (${filteredEvents.length} events) ===');
+      buffer.writeln('Generated: ${DateTime.now().toIso8601String()}');
+      buffer.writeln();
+
+      for (int i = 0; i < filteredEvents.length; i++) {
+        final event = filteredEvents[i];
+        buffer.writeln('[$i] ${event.timestamp.toIso8601String()}');
+        buffer.writeln('    Type: ${getEventTypeLabel(event.type)}');
+        buffer.writeln('    Source: ${event.source}');
+        buffer.writeln('    Message: ${event.message}');
+        
+        // Include all details with proper formatting
+        if (event.details != null && event.details!.isNotEmpty) {
+          buffer.writeln('    Details: ${event.details}');
+        }
+        
+        // Include JSON data if available
+        if (event.jsonData != null && event.jsonData!.isNotEmpty) {
+          buffer.writeln('    Data:');
+          _formatDetailsMap(event.jsonData!, buffer, '        ');
+        }
+        
+        // Also include raw JSON representation of the entire event
+        buffer.writeln('    Raw JSON:');
+        buffer.writeln('    ${_eventToJson(event)}');
+        buffer.writeln();
+      }
+
+      await Clipboard.setData(ClipboardData(text: buffer.toString()));
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${filteredEvents.length} events copied to clipboard'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to copy events: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+  
+  void _formatDetailsMap(Map<String, dynamic> details, StringBuffer buffer, String indent) {
+    details.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        buffer.writeln('$indent$key:');
+        _formatDetailsMap(value, buffer, '$indent    ');
+      } else if (value is List) {
+        buffer.writeln('$indent$key: [');
+        for (var item in value) {
+          buffer.writeln('$indent    $item');
+        }
+        buffer.writeln('$indent]');
+      } else {
+        buffer.writeln('$indent$key: $value');
+      }
+    });
+  }
+  
+  String _eventToJson(DebugEvent event) {
+    final jsonMap = <String, dynamic>{
+      'timestamp': event.timestamp.toIso8601String(),
+      'type': event.type.toString(),
+      'source': event.source,
+      'message': event.message,
+    };
+    
+    // Add optional fields if they exist
+    if (event.details != null) jsonMap['details'] = event.details;
+    if (event.jsonData != null) jsonMap['jsonData'] = event.jsonData;
+    if (event.severity != null) jsonMap['severity'] = event.severity;
+    if (event.entityId != null) jsonMap['entityId'] = event.entityId;
+    if (event.gesturePhase != null) jsonMap['gesturePhase'] = event.gesturePhase;
+    if (event.gestureType != null) jsonMap['gestureType'] = event.gestureType;
+    
+    // Simple JSON encoding with indentation
+    return _encodeJsonPretty(jsonMap);
+  }
+  
+  String _encodeJsonPretty(dynamic obj, [String indent = '']) {
+    if (obj == null) return 'null';
+    if (obj is String) return '"$obj"';
+    if (obj is num || obj is bool) return obj.toString();
+    
+    if (obj is Map) {
+      if (obj.isEmpty) return '{}';
+      final entries = obj.entries.map((e) {
+        final key = '"${e.key}"';
+        final value = _encodeJsonPretty(e.value, '$indent  ');
+        return '$indent  $key: $value';
+      }).join(',\n');
+      return '{\n$entries\n$indent}';
+    }
+    
+    if (obj is List) {
+      if (obj.isEmpty) return '[]';
+      final items = obj.map((item) {
+        return '$indent  ${_encodeJsonPretty(item, '$indent  ')}';
+      }).join(',\n');
+      return '[\n$items\n$indent]';
+    }
+    
+    return obj.toString();
   }
 }

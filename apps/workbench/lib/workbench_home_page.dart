@@ -336,41 +336,36 @@ class _WorkbenchHomePageState extends State<WorkbenchHomePage> {
     // Subscribe to gesture debug events from the plough package
     _gestureDebugSubscription = gestureDebugEventStream.listen(
       (event) {
-        final data = {
-          'type': event.type.toString().split('.').last,
+        // Create structured event map for analysis
+        final structuredEventMap = event.toStructuredMap();
+        final eventType = event.type.toString().split('.').last;
+        
+        debugPrint('WORKBENCH: Received structured gesture debug event: $eventType');
+        debugPrint('  Entity: ${event.entityId ?? 'none'}');
+        debugPrint('  Phase: ${event.gesturePhase ?? 'none'}');
+        debugPrint('  Severity: ${event.severity.name}');
+        
+        // Legacy data format for backward compatibility with existing state update logic
+        final legacyData = {
+          'type': eventType,
           'component': event.component,
           'message': event.message,
+          'entityId': event.entityId,
+          'gesturePhase': event.gesturePhase,
+          'severity': event.severity.name,
           ...event.data,
         };
-        final eventType = data['type']?.toString() ?? 'unknown';
-        debugPrint('WORKBENCH: Received gesture debug event: $eventType with data: $data');
         
-        // Update internal gesture state for State tab
-        _updateGestureState(eventType, data);
+        // Update internal gesture state for State tab (using legacy format)
+        _updateGestureState(eventType, legacyData);
         
-        // Add to event log for Event Log tab
-        _addEvent(DebugEvent(
-          type: EventType.gesture,
-          source: event.component,
-          message: event.message,
-          timestamp: event.timestamp,
-          jsonData: _cleanupEventData(data),
-        ));
+        // Add to event log using new structured format
+        _addEvent(DebugEvent.fromGestureDebugEvent(structuredEventMap));
       },
       onError: (error) {
         debugPrint('WORKBENCH: Error in gesture debug stream: $error');
       },
     );
-  }
-
-  Map<String, dynamic> _cleanupEventData(Map<String, dynamic> data) {
-    // Clean up event data for display, excluding common fields
-    final cleanData = Map<String, dynamic>.from(data);
-    cleanData.remove('type');
-    cleanData.remove('component');
-    cleanData.remove('message');
-    
-    return cleanData;
   }
 
   void _addEvent(DebugEvent event) {
