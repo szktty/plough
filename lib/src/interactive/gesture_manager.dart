@@ -1346,6 +1346,7 @@ class GraphGestureManager {
     if (downPosition == null) return true;
     
     final distance = _calculateDistance(currentPosition, downPosition);
-    return distance <= kTouchSlop * 8; // Use the same touch slop as debug state
+    // Use the same touch slop as tap state manager
+    return distance <= kTouchSlop * 4;
   }
 }

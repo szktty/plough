@@ -331,11 +331,9 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
           LogCategory.tap,
           'Double tap confirmed for $entityId, removing state.',
         );
-        // Don't remove state immediately - let GraphGestureManager check completion first
-        // Schedule removal for next frame to allow gesture manager to process
-        Timer(Duration.zero, () {
-          removeStateSilently(entityId);
-        });
+        // Don't remove state here - let GraphGestureManager check completion
+        // first. The state will be cleaned up by GraphGestureManager after
+        // event processing
       }
     } else {
       // Moved too far, cancel tap
@@ -356,9 +354,16 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
           'distance': distance,
           'touch_slop': touchSlop,
           'exceeded_by': distance - touchSlop,
-          'down_position': {'x': state.downPosition.dx, 'y': state.downPosition.dy},
-          'up_position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-          'time_since_down_ms': DateTime.now().difference(state.downTime).inMilliseconds,
+          'down_position': {
+            'x': state.downPosition.dx,
+            'y': state.downPosition.dy
+          },
+          'up_position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
+          'time_since_down_ms':
+              DateTime.now().difference(state.downTime).inMilliseconds,
         },
       );
       
@@ -366,7 +371,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     }
   }
 
-  /// Called when dragging starts or pointer moves too far during a tap sequence.
+  /// Called when dragging starts or pointer moves too far during a tap
+  /// sequence.
   void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
     final state = getState(entityId);
     // Cancel tap if pointer moves beyond slop while tap is active (not completed/cancelled)
@@ -378,7 +384,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
           'Tap cancelled for $entityId due to pan update movement.');
       logDebug(
         LogCategory.tap,
-        'handlePanUpdate ($entityId): Cancelling due to movement beyond slop during pan.',
+        'handlePanUpdate ($entityId): Cancelling due to movement beyond '
+        'slop during pan.',
       );
       cancel(entityId);
     }
@@ -387,7 +394,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   void handlePointerCancel(GraphId entityId, PointerCancelEvent event) {
     logDebug(
       LogCategory.tap,
-      'handlePointerCancel ($entityId): Cancelling due to pointer cancel event.',
+      'handlePointerCancel ($entityId): Cancelling due to pointer cancel '
+      'event.',
     );
     cancel(entityId);
   }
@@ -427,7 +435,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
       // Hide tooltip if it was shown by a tap that got cancelled
       if (tooltipTriggerMode == GraphTooltipTriggerMode.tap &&
           state.completed) {
-        // This condition seems unlikely if cancelled before completed? Check logic.
+        // This condition seems unlikely if cancelled before completed?
+        // Check logic.
         // Maybe check if tooltip *is* showing for this ID instead?
         // Consider adding: gestureManager.isTooltipVisible(entityId) ?
         gestureManager.hideTooltip(entityId);
