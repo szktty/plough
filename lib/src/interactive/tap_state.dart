@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart'; // Add this import
 import 'package:flutter/gestures.dart';
 // Remove unused import
 // import 'package:flutter/widgets.dart';
@@ -37,6 +36,7 @@ class _TapState {
   bool cancelled = false;
   bool completed = false; // Flag set when a valid tap-up occurs
   Timer? doubleTapTimer; // Timer to detect if it's a single or double tap
+  bool timerExpired = false; // Flag set when double tap timer expires
 }
 
 /// Manages tap (single and double) detection for graph entities.
@@ -46,10 +46,9 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   GraphEntityTapStateManager({
     required super.gestureManager,
     required this.tooltipTriggerMode,
-    // ダブルタップタイムアウトを大幅に短縮してドラッグ時の点滅を防ぐ
-    this.doubleTapTimeout = const Duration(milliseconds: 200), // Increased from 100ms
+    this.doubleTapTimeout = const Duration(milliseconds: 500),
     this.touchSlop = kTouchSlop *
-        4, // Increase touch slop for more forgiving taps (reduced from 8)
+        8, // Increase touch slop for more forgiving taps
     this.doubleTapSlop = kDoubleTapSlop,
   });
 
@@ -67,6 +66,12 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   bool isTapCompleted(GraphId entityId) =>
       getState(entityId)?.completed ?? false;
 
+  /// Checks if a double tap timer is running for the given entity.
+  bool hasDoubleTapTimer(GraphId entityId) {
+    final state = getState(entityId);
+    return state?.doubleTapTimer != null;
+  }
+
   /// Gets the number of taps detected (1 or 2) if completed, otherwise null.
   int? getTapCount(GraphId entityId) => getState(entityId)?.tapCount;
 
@@ -74,7 +79,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   Map<String, dynamic>? getTapStateDebugInfo(GraphId entityId) {
     final state = getState(entityId);
     if (state == null) return null;
-    
+
     return {
       'completed': state.completed,
       'cancelled': state.cancelled,
@@ -90,6 +95,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     if (state != null) {
       // Cancel any pending timer
       if (state.doubleTapTimer != null) {
+        logDebug(LogCategory.tap,
+            'Cancelling double tap timer in cleanupTapState for $entityId');
         state.doubleTapTimer!.cancel();
         state.doubleTapTimer = null;
       }
@@ -114,54 +121,85 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     // Allow tap start even if !canSelect, selection check happens on up?
     // if (!canSelect(entityId)) return;
 
-    debugPrint('TAP_STATE handlePointerDown called for entityId=${entityId.value.substring(0, 8)}');
-    debugPrint('TAP_STATE Before: states count=${states.length}');
 
     final existingState = getState(entityId);
     final now = DateTime.now();
 
     // Check for double tap
+    if (existingState != null) {
+      final timeDiff = now.difference(existingState.downTime);
+      final isWithinTimeout = timeDiff < doubleTapTimeout;
+      final isWithinSlop = _isWithinDoubleTapSlop(
+          existingState.downPosition, event.localPosition);
+
+      logDebug(LogCategory.tap,
+          'Double tap check for $entityId: cancelled=${existingState.cancelled}, completed=${existingState.completed}, timeDiff=${timeDiff.inMilliseconds}ms, timeout=${doubleTapTimeout.inMilliseconds}ms, withinTimeout=$isWithinTimeout, withinSlop=$isWithinSlop');
+    }
+
     if (existingState != null &&
         !existingState.cancelled &&
+        existingState
+            .completed && // Only allow double tap if first tap was completed
         now.difference(existingState.downTime) < doubleTapTimeout &&
         _isWithinDoubleTapSlop(
           existingState.downPosition,
           event.localPosition,
         )) {
-      existingState.doubleTapTimer?.cancel(); // Cancel the single tap timer
+      // Double tap detected - update existing state
+      if (existingState.doubleTapTimer != null) {
+        logDebug(LogCategory.tap,
+            'Cancelling single tap timer for double tap detection on $entityId');
+        existingState.doubleTapTimer!.cancel(); // Cancel the single tap timer
+        existingState.doubleTapTimer = null; // Clear the timer reference
+      }
+
+      // Update existing state for double tap
       existingState.tapCount = 2;
       existingState.completed =
-          false; // Reset completion for the second tap down
-      logDebug(LogCategory.tap, 'Potential double tap detected for $entityId');
+          false; // Reset completion so second tap up can process
+      // DON'T create new state - just update the existing one
+      logDebug(LogCategory.tap,
+          'Double tap detected for $entityId, tapCount updated to 2');
     } else {
       // Start a new single tap recognition
-      cancelAll(); // Cancel any previous tap attempts on *other* entities
-      setState(
-        entityId,
-        _TapState(
-          entityId: entityId,
-          downPosition: event.localPosition,
-          downTime: now,
-        ),
-      );
+      // Cancel any previous tap attempts on *other* entities (not this one)
+      final statesToCancel = List<_TapState>.from(states);
+      for (final tapState in statesToCancel) {
+        if (tapState.entityId != entityId) {
+          cancel(tapState.entityId);
+        }
+      }
+
+      // Only create new state if no existing state or existing state is invalid for double tap
+      if (existingState == null ||
+          existingState.cancelled ||
+          !existingState.completed ||
+          now.difference(existingState.downTime) >= doubleTapTimeout ||
+          !_isWithinDoubleTapSlop(
+              existingState.downPosition, event.localPosition)) {
+        setState(
+          entityId,
+          _TapState(
+            entityId: entityId,
+            downPosition: event.localPosition,
+            downTime: now,
+          ),
+        );
+        logDebug(LogCategory.tap, 'New tap state created for $entityId');
+      } else {
+        logDebug(LogCategory.tap,
+            'Keeping existing tap state for $entityId (potential double tap)');
+      }
       logDebug(LogCategory.tap, 'Tap sequence started for $entityId');
-      debugPrint('TAP_STATE New state created for entityId=${entityId.value.substring(0, 8)}');
     }
-    
-    debugPrint('TAP_STATE After: states count=${states.length}');
-    // 登録されている state を出力
-    for (final s in states) {
-      final tapState = s as _TapState;
-      debugPrint('TAP_STATE Registered state: entityId=${tapState.entityId.value.substring(0, 8)}');
-    }
-    
+
     // Log tap state after handling pointer down
     final newState = getState(entityId);
     logGestureDebug(
       GestureDebugEventType.tapDebugState,
       'TapStateManager',
       'TAP_STATE_AFTER_DOWN',
-      {
+      data: {
         'entityId': entityId.toString(),
         'state_exists': newState != null,
         'tap_count': newState?.tapCount ?? 0,
@@ -174,64 +212,49 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
 
   void handlePointerUp(GraphId entityId, PointerUpEvent event) {
     final state = getState(entityId);
-    
-    // 詳細なデバッグログを追加
-    debugPrint('TAP_STATE handlePointerUp called for entityId=${entityId.value.substring(0, 8)}');
-    debugPrint('TAP_STATE state exists=${state != null}');
-    if (state != null) {
-      debugPrint('TAP_STATE state.cancelled=${state.cancelled}');
-      debugPrint('TAP_STATE state.completed=${state.completed}');
-    }
-    
-    // すべての登録されている state をデバッグ出力
-    debugPrint('TAP_STATE All states count=${states.length}');
-    for (final s in states) {
-      final tapState = s as _TapState;
-      debugPrint('TAP_STATE Registered state: entityId=${tapState.entityId.value.substring(0, 8)}, cancelled=${tapState.cancelled}, completed=${tapState.completed}');
-    }
-    
-    if (state == null || state.cancelled || state.completed) {
+
+    if (state == null ||
+        state.cancelled ||
+        (state.completed && state.tapCount == 1)) {
       // Log why the pointer up was ignored
       String reason = '';
-      if (state == null) reason = 'no_state';
-      else if (state.cancelled) reason = 'already_cancelled';
-      else if (state.completed) reason = 'already_completed';
-      
+      if (state == null)
+        reason = 'no_state';
+      else if (state.cancelled)
+        reason = 'already_cancelled';
+      else if (state.completed && state.tapCount == 1)
+        reason = 'single_tap_already_completed';
+
       logGestureDebug(
         GestureDebugEventType.tapDebugState,
         'TapStateManager',
         'TAP_UP_IGNORED',
-        {
+        data: {
           'entityId': entityId.toString(),
           'reason': reason,
           'state_exists': state != null,
           'state_completed': state?.completed ?? false,
           'state_cancelled': state?.cancelled ?? false,
-          'up_position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+          'tap_count': state?.tapCount ?? 0,
+          'up_position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy
+          },
         },
       );
-      return; // Ignore if cancelled or already completed
+      return; // Ignore if cancelled or single tap already completed
     }
 
     final isWithinSlop =
         _isWithinTapSlop(state.downPosition, event.localPosition);
     final distance = (state.downPosition - event.localPosition).distance;
-    
-    debugPrint('TAP STATE DEBUG: handlePointerUp for $entityId');
-    debugPrint('TAP STATE DEBUG: downPos=${state.downPosition}');
-    debugPrint('TAP STATE DEBUG: upPos=${event.localPosition}');
-    debugPrint('TAP STATE DEBUG: distance=$distance');
-    debugPrint('TAP STATE DEBUG: touchSlop=$touchSlop');
-    debugPrint('TAP STATE DEBUG: isWithinSlop=$isWithinSlop');
-    debugPrint('TAP STATE DEBUG: state.completed=${state.completed}');
-    debugPrint('TAP STATE DEBUG: state.cancelled=${state.cancelled}');
-    
+
     // Log tap state before processing
     logGestureDebug(
       GestureDebugEventType.tapDebugState,
       'TapStateManager',
       'TAP_STATE_BEFORE_UP',
-      {
+      data: {
         'entityId': entityId.toString(),
         'state_exists': true,
         'state_completed': state.completed,
@@ -241,11 +264,18 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         'isWithinSlop': isWithinSlop,
         'touch_slop': touchSlop,
         'k_touch_slop': kTouchSlop,
-        'down_position': {'x': state.downPosition.dx, 'y': state.downPosition.dy},
-        'up_position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
+        'down_position': {
+          'x': state.downPosition.dx,
+          'y': state.downPosition.dy
+        },
+        'up_position': {
+          'x': event.localPosition.dx,
+          'y': event.localPosition.dy
+        },
         'double_tap_timeout_ms': doubleTapTimeout.inMilliseconds,
         'has_double_tap_timer': state.doubleTapTimer != null,
-        'time_since_down_ms': DateTime.now().difference(state.downTime).inMilliseconds,
+        'time_since_down_ms':
+            DateTime.now().difference(state.downTime).inMilliseconds,
       },
     );
 
@@ -257,13 +287,13 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         LogCategory.tap,
         'handlePointerUp ($entityId): state.completed set to true',
       );
-      
+
       // Log tap state after marking as completed
       logGestureDebug(
         GestureDebugEventType.tapDebugState,
         'TapStateManager',
         'TAP_STATE_AFTER_COMPLETED',
-        {
+        data: {
           'entityId': entityId.toString(),
           'state_exists': true,
           'state_completed': state.completed,
@@ -286,15 +316,15 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         logGestureDebug(
           GestureDebugEventType.timerStart,
           'TapStateManager',
-          'Double-tap timer started for entity $entityId',
-          {
+          'DOUBLE_TAP_TIMER_STARTED',
+          data: {
             'timeout_ms': doubleTapTimeout.inMilliseconds,
             'entity_id': entityId.toString(),
             'tap_count': state.tapCount,
             'position': state.downPosition.toString(),
           },
         );
-        
+
         state.doubleTapTimer = Timer(doubleTapTimeout, () {
           // Timer expired, it was just a single tap.
           // Event dispatch happens in GraphGestureManager based on isTapCompleted and getTapCount.
@@ -311,16 +341,18 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
           logGestureDebug(
             GestureDebugEventType.timerExpire,
             'TapStateManager',
-            'Double-tap timer expired - confirming single tap',
-            {
+            'DOUBLE_TAP_TIMER_EXPIRED',
+            data: {
               'entity_id': entityId.toString(),
               'final_tap_count': state.tapCount,
               'elapsed_ms': doubleTapTimeout.inMilliseconds,
             },
           );
 
-          // DO NOT remove state here - let GraphGestureManager check completion first
-          // The state will be cleaned up later by cleanupTapState or when a new tap starts
+          // Mark state as timer expired for single tap confirmation
+          state.doubleTapTimer = null; // Clear timer reference
+          state.timerExpired = true; // Set flag for gesture manager
+          // Don't clean up state yet - let gesture manager handle it
         });
         // Don't remove state immediately for single taps - let the timer handle it
       } else {
@@ -342,13 +374,13 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         LogCategory.tap,
         'handlePointerUp ($entityId): Cancelling due to movement beyond slop.',
       );
-      
+
       // Log detailed failure reason
       logGestureDebug(
         GestureDebugEventType.tapDebugState,
         'TapStateManager',
         'TAP_CANCELLED_MOVEMENT',
-        {
+        data: {
           'entityId': entityId.toString(),
           'reason': 'movement_beyond_slop',
           'distance': distance,
@@ -366,7 +398,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
               DateTime.now().difference(state.downTime).inMilliseconds,
         },
       );
-      
+
       cancel(entityId);
     }
   }
@@ -404,6 +436,17 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   @override
   void cancel(GraphId entityId) {
     final state = getState(entityId);
+    logGestureDebug(
+      GestureDebugEventType.tapCancel,
+      'TapStateManager',
+      'CANCEL_TAP_STATE',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'stateExists': state != null,
+        'wasCompleted': state?.completed ?? false,
+        'tapCount': state?.tapCount ?? 0,
+      },
+    );
     if (state != null && !state.cancelled) {
       logDebug(LogCategory.tap, 'Cancelling tap state for $entityId');
       logDebug(
@@ -414,12 +457,14 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
 
       // タイマーをキャンセルして、不要な状態変更通知を防ぐ
       if (state.doubleTapTimer != null) {
+        logDebug(LogCategory.tap,
+            'Cancelling double tap timer in cancel() for $entityId');
         // Log timer cancellation for debugging
         logGestureDebug(
           GestureDebugEventType.timerCancel,
           'TapStateManager',
-          'Double-tap timer cancelled for entity $entityId',
-          {
+          'DOUBLE_TAP_TIMER_CANCELLED',
+          data: {
             'entity_id': entityId.toString(),
             'tap_count': state.tapCount,
             'was_completed': state.completed,

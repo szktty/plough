@@ -239,6 +239,9 @@ abstract interface class GraphViewBehavior {
   /// Called when entities are tapped (single or double).
   void onTap(GraphTapEvent event);
 
+  /// Called when entities are double-tapped.
+  void onDoubleTap(GraphTapEvent event);
+
   /// Called when the selection changes.
   void onSelectionChange(GraphSelectionChangeEvent event);
 
@@ -412,6 +415,9 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
 
   @override
   void onTap(GraphTapEvent event) {}
+
+  @override
+  void onDoubleTap(GraphTapEvent event) {}
 
   @override
   void onSelectionChange(GraphSelectionChangeEvent event) {}

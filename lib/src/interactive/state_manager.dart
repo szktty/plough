@@ -75,28 +75,78 @@ abstract base class GraphStateManager<T> with Diagnosticable {
 
   bool get isActive => activeCount > 0;
 
-  T? getState(GraphId entityId) => _states[entityId];
+  T? getState(GraphId entityId) {
+    final state = _states[entityId];
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'GET_STATE',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hasState': state != null,
+        'entityType': entityType.name,
+        'totalStates': _states.length,
+      },
+    );
+    return state;
+  }
 
   void setState(GraphId entityId, T state) {
+    final hadState = _states.containsKey(entityId);
     _states[entityId] = state;
     _lastActiveEntityId = entityId; // Update last active ID
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'SET_STATE',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hadState': hadState,
+        'entityType': entityType.name,
+        'statesCount': _states.length,
+      },
+    );
   }
 
   void removeState(GraphId entityId) {
+    final hadState = _states.containsKey(entityId);
     _states.remove(entityId);
     // Optionally, clear _lastActiveEntityId if it matches entityId
     if (_lastActiveEntityId == entityId) {
       // Set to null or find the new last? Setting to null is simpler.
       _lastActiveEntityId = null;
     }
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'REMOVE_STATE',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hadState': hadState,
+        'entityType': entityType.name,
+        'statesCount': _states.length,
+      },
+    );
   }
 
   /// 再描画をトリガーしない「静かな」状態削除
   void removeStateSilently(GraphId entityId) {
+    final hadState = _states.containsKey(entityId);
     _states.remove(entityId);
     if (_lastActiveEntityId == entityId) {
       _lastActiveEntityId = null;
     }
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'REMOVE_STATE_SILENTLY',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hadState': hadState,
+        'entityType': entityType.name,
+        'statesCount': _states.length,
+      },
+    );
   }
 
   void clearAllStates() {

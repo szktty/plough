@@ -18,6 +18,7 @@ import 'package:plough/src/interactive/gesture_debug.dart';
 import 'package:plough/src/interactive/hover_state.dart';
 import 'package:plough/src/interactive/tap_state.dart';
 import 'package:plough/src/interactive/tooltip_state.dart';
+import 'package:plough/src/interactive/pan_ready_state.dart';
 import 'package:plough/src/tooltip/behavior.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/debug/external_debug_client.dart';
@@ -84,6 +85,12 @@ class GraphGestureManager {
     gestureManager: this,
     triggerMode: linkTooltipTriggerMode,
   );
+  
+  // Pan Ready状態マネージャー（遅延ドラッグ検出用）
+  late final GraphNodePanReadyStateManager _nodePanReadyManager =
+      GraphNodePanReadyStateManager(gestureManager: this);
+  late final GraphLinkPanReadyStateManager _linkPanReadyManager =
+      GraphLinkPanReadyStateManager(gestureManager: this);
 
   late final GraphOrderManager _orderManager;
 
@@ -95,6 +102,8 @@ class GraphGestureManager {
   GraphNodeDragStateManager get nodeDragManager => _nodeDragManager;
   GraphLinkTapStateManager get linkTapManager => _linkTapManager;
   GraphLinkDragStateManager get linkDragManager => _linkDragManager;
+  GraphNodePanReadyStateManager get nodePanReadyManager => _nodePanReadyManager;
+  GraphLinkPanReadyStateManager get linkPanReadyManager => _linkPanReadyManager;
 
   GraphEntity? getEntity(GraphId entityId) =>
       graph.getNode(entityId) ?? graph.getLink(entityId);
@@ -411,7 +420,7 @@ class GraphGestureManager {
         GestureDebugEventType.tapDebugState,
         'GraphGestureManager',
         'TAP_DEBUG_STATE_DOWN',
-        {
+        data: {
           'event_type': 'tap_debug_state',
           'phase': 'down',
           'nodeTargetId': node.id.value,
@@ -651,7 +660,7 @@ class GraphGestureManager {
         GestureDebugEventType.tapDebugState,
         'GraphGestureManager',
         'TAP_DEBUG_STATE_UP',
-        {
+        data: {
           'event_type': 'tap_debug_state',
           'phase': 'up',
           'nodeTargetId': nodeTargetId?.value ?? 'null',
@@ -725,22 +734,30 @@ class GraphGestureManager {
           'isStillDraggingAfterUp: $isStillDraggingAfterUp, isTapCompletedAfterUp: $isTapCompletedAfterUp');
       if (!isStillDraggingAfterUp && isTapCompletedAfterUp) {
         debugPrint('tap!');
+        
+        final tapCount = _nodeTapManager.getTapCount(nodeTargetId) ?? 1;
+        logDebug(LogCategory.tap, 'Node tap count detected: $tapCount for ${nodeTargetId.value.substring(0, 8)}');
+        
         logDebug(
           LogCategory.gesture,
           'Toggling selection for Node: ${nodeTargetId.value.substring(0, 4)}',
         );
         toggleSelection(nodeTargetId, details: details);
-        final tapCount = _nodeTapManager.getTapCount(nodeTargetId) ?? 1;
+        
         final tapEvent = GraphTapEvent(
           entityIds: [nodeTargetId],
           details: details,
           tapCount: tapCount,
         );
         viewBehavior.onTap(tapEvent);
+        if (tapCount == 2) {
+          logDebug(LogCategory.tap, 'Double tap detected for node: ${nodeTargetId.value.substring(0, 8)}');
+          viewBehavior.onDoubleTap(tapEvent);
+          // Clean up immediately for double tap
+          _nodeTapManager.cleanupTapState(nodeTargetId);
+        }
+        // For single tap, the timer will clean up the state
         entityProcessed = true;
-
-        // Clean up tap state after successful tap processing
-        _nodeTapManager.cleanupTapState(nodeTargetId);
       } else {
         logDebug(
           LogCategory.gesture,
@@ -763,7 +780,7 @@ class GraphGestureManager {
           GestureDebugEventType.tapDebugState,
           'GraphGestureManager',
           'TAP_RECOGNITION_FAILED',
-          {
+          data: {
             'event_type': 'tap_recognition_failed',
             'nodeTargetId': nodeTargetId.value,
             'failure_reason': failureReason,
@@ -804,22 +821,29 @@ class GraphGestureManager {
       );
 
       if (!isStillDraggingAfterUp && isTapCompletedAfterUp) {
+        final tapCount = _linkTapManager.getTapCount(linkTargetId) ?? 1;
+        logDebug(LogCategory.tap, 'Link tap count detected: $tapCount for ${linkTargetId.value.substring(0, 8)}');
+        
         logDebug(
           LogCategory.gesture,
           'Toggling selection for Link: ${linkTargetId.value.substring(0, 4)}',
         );
         toggleSelection(linkTargetId, details: details);
-        final tapCount = _linkTapManager.getTapCount(linkTargetId) ?? 1;
+        
         final tapEvent = GraphTapEvent(
           entityIds: [linkTargetId],
           details: details,
           tapCount: tapCount,
         );
         viewBehavior.onTap(tapEvent);
+        if (tapCount == 2) {
+          logDebug(LogCategory.tap, 'Double tap detected for link: ${linkTargetId.value.substring(0, 8)}');
+          viewBehavior.onDoubleTap(tapEvent);
+          // Clean up immediately for double tap
+          _linkTapManager.cleanupTapState(linkTargetId);
+        }
+        // For single tap, the timer will clean up the state
         entityProcessed = true;
-
-        // Clean up tap state after successful tap processing
-        _linkTapManager.cleanupTapState(linkTargetId);
       } else {
         logDebug(
           LogCategory.gesture,
@@ -859,39 +883,37 @@ class GraphGestureManager {
   }
 
   void handlePanStart(DragStartDetails details) {
-    // Store details, can be useful for events
-    // Note: DragStartDetails doesn't directly map to PointerEventDetails easily
-    // We might need to rely on _lastPointerDetails from PointerDownEvent
+    logGestureDebug(
+      GestureDebugEventType.gestureDecision,
+      'GestureManager',
+      'PAN_START_RECEIVED',
+      data: {
+        'position': {'x': details.localPosition.dx, 'y': details.localPosition.dy},
+        'improved_algorithm': true,
+      },
+    );
 
-    // Prefer dragging nodes over links if both are present
+    // 新しいアプローチ：pan startでは即座にドラッグを開始せず、Pan Ready状態にする
+    // Prefer nodes over links if both are present
     final node = findNodeAt(details.localPosition);
     if (node != null && node.canDrag) {
-      _nodeDragManager.handlePanStart([node.id], details);
-      if (_nodeDragManager.isActive) {
-        // Check if drag actually started
-        // Use the details captured during PointerDown
-        if (_lastPointerDetails == null) {
-          // Should not happen if PointerDown was processed correctly
-          logError(LogCategory.gesture,
-              '_lastPointerDetails is null in handlePanStart');
-          return;
-        }
-        final event = GraphDragStartEvent(
-          entityIds: [node.id],
-          details: _lastPointerDetails!, // Assumes not null after PointerDown
-        );
-        viewBehavior.onDragStart(event);
-        // ドラッグ開始時にタップタイマーをキャンセル（少し遅延を加える）
-        Future.delayed(const Duration(milliseconds: 50), () {
-          _nodeTapManager.cancel(node.id);
-        });
-        logDebug(LogCategory.gesture,
-            'Cancelled tap timer for dragged node: ${node.id.value.substring(0, 4)}');
-      }
+      // ノードをPan Ready状態にする（まだドラッグは開始しない）
+      _nodePanReadyManager.handlePanStart(node.id, details);
+      
+      logGestureDebug(
+        GestureDebugEventType.stateCreate,
+        'GestureManager',
+        'NODE_PAN_READY_CREATED',
+        data: {
+          'nodeId': node.id.value.substring(0, 8),
+          'position': {'x': details.localPosition.dx, 'y': details.localPosition.dy},
+        },
+      );
+      
       // In nodeEdgeOnly mode, we handled the node, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
         logDebug(LogCategory.gesture,
-            'handlePanStart: Skipping background callback - node handled in nodeEdgeOnly mode');
+            'handlePanStart: Node set to ready state - skipping background callback in nodeEdgeOnly mode');
         return;
       }
       // In transparent mode, don't return early so gestures can pass through
@@ -902,29 +924,23 @@ class GraphGestureManager {
 
     final link = findLinkAt(details.localPosition);
     if (link != null && link.canDrag) {
-      _linkDragManager.handlePanStart([link.id], details);
-      if (_linkDragManager.isActive) {
-        if (_lastPointerDetails == null) {
-          logError(
-            LogCategory.gesture,
-            '_lastPointerDetails is null in handlePanStart (link)',
-          );
-          return;
-        }
-        final event = GraphDragStartEvent(
-          entityIds: [link.id],
-          details: _lastPointerDetails!, // Assumes not null after PointerDown
-        );
-        viewBehavior.onDragStart(event);
-        // ドラッグ開始時にタップタイマーを即座にキャンセルして再描画を防ぐ
-        _linkTapManager.cancel(link.id);
-        logDebug(LogCategory.gesture,
-            'Cancelled tap timer for dragged link: ${link.id.value.substring(0, 4)}');
-      }
+      // リンクをPan Ready状態にする（まだドラッグは開始しない）
+      _linkPanReadyManager.handlePanStart(link.id, details);
+      
+      logGestureDebug(
+        GestureDebugEventType.stateCreate,
+        'GestureManager',
+        'LINK_PAN_READY_CREATED',
+        data: {
+          'linkId': link.id.value.substring(0, 8),
+          'position': {'x': details.localPosition.dx, 'y': details.localPosition.dy},
+        },
+      );
+      
       // In nodeEdgeOnly mode, we handled the link, so don't call background callback
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
         logDebug(LogCategory.gesture,
-            'handlePanStart: Skipping background callback - link handled in nodeEdgeOnly mode');
+            'handlePanStart: Link set to ready state - skipping background callback in nodeEdgeOnly mode');
         return;
       }
       // In transparent mode, don't return early so gestures can pass through
@@ -962,7 +978,20 @@ class GraphGestureManager {
       return;
     }
 
-    // If dragging a node, always update the node drag manager
+    // Priority 1: Check Pan Ready states first - this is where we transition to actual dragging
+    // Check if any nodes are in Pan Ready state and should start dragging
+    final readyNodeIds = _nodePanReadyManager.readyEntityIds;
+    for (final nodeId in readyNodeIds) {
+      _nodePanReadyManager.handlePanUpdate(nodeId, details);
+    }
+    
+    // Check if any links are in Pan Ready state and should start dragging
+    final readyLinkIds = _linkPanReadyManager.readyEntityIds;
+    for (final linkId in readyLinkIds) {
+      _linkPanReadyManager.handlePanUpdate(linkId, details);
+    }
+
+    // Priority 2: If dragging a node, always update the node drag manager
     if (_nodeDragManager.isActive) {
       final updatedIds = _nodeDragManager.handlePanUpdate(details);
       // Dispatch drag update event if nodes were actually moved
@@ -982,7 +1011,7 @@ class GraphGestureManager {
       return; // Don't check for links if already dragging a node
     }
 
-    // If dragging a link (currently not supported but for completeness)
+    // Priority 3: If dragging a link (currently not supported but for completeness)
     if (_linkDragManager.isActive) {
       final updatedIds = _linkDragManager.handlePanUpdate(details);
       // Dispatch drag update event if links were actually moved (if supported)
@@ -1001,7 +1030,7 @@ class GraphGestureManager {
       return;
     }
 
-    // If not currently dragging, check if movement cancels a pending tap
+    // Priority 4: If not currently dragging and no ready states, check if movement cancels a pending tap
     final node = findNodeAt(details.localPosition);
     if (node != null) {
       _nodeTapManager.handlePanUpdate(node.id, details);
@@ -1149,7 +1178,7 @@ class GraphGestureManager {
             GestureDebugEventType.tapDebugState,
             'GraphGestureManager',
             'TAP_DEBUG_STATE_MOVE',
-            {
+            data: {
               'event_type': 'tap_debug_state',
               'phase': 'move',
               'nodeTargetId': draggedEntityId.value,
