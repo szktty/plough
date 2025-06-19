@@ -287,6 +287,159 @@ Event Dispatch (notify listeners)
 Behavior Callbacks (UI updates)
 ```
 
+### Gesture Detection Flow Diagrams
+
+#### Single Tap Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant InteractiveOverlay
+    participant GestureManager
+    participant TapState
+    participant GraphBehavior
+
+    User->>InteractiveOverlay: Pointer Down
+    InteractiveOverlay->>GestureManager: handlePointerDown()
+    GestureManager->>GestureManager: Hit test entity
+    GestureManager->>TapState: Create tap state
+    Note over TapState: Store position, time, entityId
+
+    User->>InteractiveOverlay: Pointer Up (within slop)
+    InteractiveOverlay->>GestureManager: handlePointerUp()
+    GestureManager->>TapState: Validate tap (slop check)
+    TapState->>TapState: Mark completed
+    GestureManager->>GestureManager: Start 200ms timer
+    
+    Note over GestureManager: Wait for potential double tap
+    GestureManager->>GraphBehavior: onTap(GraphTapEvent)
+    GestureManager->>GraphBehavior: onSelectionChange()
+```
+
+#### Double Tap Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant InteractiveOverlay
+    participant GestureManager
+    participant TapState
+    participant GraphBehavior
+
+    User->>InteractiveOverlay: First Pointer Down
+    InteractiveOverlay->>GestureManager: handlePointerDown()
+    GestureManager->>TapState: Create tap state (count: 1)
+
+    User->>InteractiveOverlay: First Pointer Up
+    InteractiveOverlay->>GestureManager: handlePointerUp()
+    GestureManager->>GestureManager: Start 200ms timer
+
+    User->>InteractiveOverlay: Second Pointer Down (within 200ms)
+    InteractiveOverlay->>GestureManager: handlePointerDown()
+    GestureManager->>TapState: Update tap state (count: 2)
+
+    User->>InteractiveOverlay: Second Pointer Up
+    InteractiveOverlay->>GestureManager: handlePointerUp()
+    GestureManager->>TapState: Validate double tap
+    GestureManager->>GraphBehavior: onTap(GraphTapEvent, tapCount: 2)
+```
+
+#### Drag Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant InteractiveOverlay
+    participant GestureManager
+    participant DragState
+    participant TapState
+    participant GraphBehavior
+    participant GraphNode
+
+    User->>InteractiveOverlay: Pointer Down
+    InteractiveOverlay->>GestureManager: handlePointerDown()
+    GestureManager->>TapState: Create tap state
+
+    User->>InteractiveOverlay: Pan Start (exceeds drag threshold)
+    InteractiveOverlay->>GestureManager: handlePanStart()
+    GestureManager->>TapState: Cancel tap state
+    GestureManager->>DragState: Create drag state
+    GestureManager->>GraphNode: Stop animations
+    GestureManager->>GraphBehavior: onDragStart(GraphDragStartEvent)
+
+    loop Pan Updates
+        User->>InteractiveOverlay: Pan Update
+        InteractiveOverlay->>GestureManager: handlePanUpdate()
+        GestureManager->>DragState: Update positions
+        GestureManager->>GraphNode: Update node position
+        GestureManager->>GraphBehavior: onDragUpdate(GraphDragUpdateEvent)
+    end
+
+    User->>InteractiveOverlay: Pan End
+    InteractiveOverlay->>GestureManager: handlePanEnd()
+    GestureManager->>DragState: Clean up state
+    GestureManager->>GraphBehavior: onDragEnd(GraphDragEndEvent)
+```
+
+#### Hover and Tooltip Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant InteractiveOverlay
+    participant GestureManager
+    participant HoverState
+    participant TooltipState
+    participant GraphBehavior
+
+    User->>InteractiveOverlay: Mouse Enter Entity
+    InteractiveOverlay->>GestureManager: handleMouseHover()
+    GestureManager->>GestureManager: Hit test entity
+    GestureManager->>HoverState: Set hover state
+    GestureManager->>GraphBehavior: onHoverEnter(GraphHoverEvent)
+    GestureManager->>TooltipState: Start show timer (500ms)
+
+    loop Mouse Move within Entity
+        User->>InteractiveOverlay: Mouse Move
+        InteractiveOverlay->>GestureManager: handleMouseHover()
+        GestureManager->>GraphBehavior: onHoverMove(GraphHoverEvent)
+    end
+
+    Note over TooltipState: 500ms delay expires
+    TooltipState->>GraphBehavior: onTooltipShow(GraphTooltipShowEvent)
+
+    User->>InteractiveOverlay: Mouse Exit Entity
+    InteractiveOverlay->>GestureManager: handleMouseHover()
+    GestureManager->>HoverState: Clear hover state
+    GestureManager->>GraphBehavior: onHoverEnd(GraphHoverEndEvent)
+    GestureManager->>TooltipState: Start hide timer (200ms)
+    
+    Note over TooltipState: 200ms delay expires
+    TooltipState->>GraphBehavior: onTooltipHide(GraphTooltipHideEvent)
+```
+
+#### Background Tap Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant InteractiveOverlay
+    participant GestureManager
+    participant GraphBehavior
+
+    User->>InteractiveOverlay: Pointer Down (no entity hit)
+    InteractiveOverlay->>GestureManager: handlePointerDown()
+    GestureManager->>GestureManager: Hit test (no entity found)
+    Note over GestureManager: No tap state created
+
+    User->>InteractiveOverlay: Pointer Up
+    InteractiveOverlay->>GestureManager: handlePointerUp()
+    GestureManager->>GestureManager: Background tap detected
+    GestureManager->>GraphBehavior: onBackgroundTapped()
+    GestureManager->>GestureManager: Deselect all entities
+    GestureManager->>GraphBehavior: onSelectionChange(deselectedIds: all)
+```
+
 ### Key Algorithms
 
 #### Touch Slop Validation
