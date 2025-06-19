@@ -158,3 +158,221 @@ The `example/` directory contains a full demonstration app showcasing:
 - Sample data generation
 
 When testing changes, use the example app to verify functionality across different scenarios.
+
+## Interaction System Implementation Details
+
+This section provides detailed technical documentation for the interaction system in `lib/src/interactive/`.
+
+### Architecture Overview
+
+The interaction system implements a sophisticated event-driven architecture with:
+- **GraphGestureManager**: Central coordinator orchestrating all gesture handling
+- **Specialized State Managers**: Individual managers for tap, drag, hover, and tooltip
+- **Event System**: Type-safe events for communicating gesture results
+- **Debug System**: Comprehensive debugging and telemetry capabilities
+
+### Low-Level Gesture API Usage
+
+The interaction system deliberately uses low-level Flutter gesture APIs (`MouseRegion`, `Listener`, `RawGestureDetector`) instead of the high-level `GestureDetector` widget.
+
+**Why Low-Level APIs?**
+- **Performance**: `GestureDetector` introduces noticeable latency due to its gesture disambiguation logic
+- **Direct Control**: Low-level APIs provide immediate access to pointer events without delays
+- **Precise Timing**: Critical for responsive graph interactions where milliseconds matter
+- **Custom Hit Testing**: Enables per-gesture hit test customization
+
+**API Stack**:
+```dart
+MouseRegion      // Mouse hover events
+    ↓
+Listener         // Raw pointer events (down/up/move)
+    ↓
+RawGestureDetector  // Custom gesture recognizers
+```
+
+This architecture ensures the most responsive possible interaction experience.
+
+### Gesture Detection Algorithms
+
+#### Tap Detection (`tap_state.dart`)
+
+**Algorithm and Thresholds**:
+- **Touch Slop**: `kTouchSlop * 4` (32 pixels on most devices) for forgiving tap recognition
+- **Double Tap**: 200ms timeout between taps, uses `kDoubleTapSlop` for position tolerance
+- **State Tracking**: Tracks entityId, positions, timestamps, and completion status
+
+**Detection Flow**:
+1. Pointer down → Create/update tap state with position and time
+2. Pointer up → Validate movement within slop, mark completed if valid
+3. Timer (200ms) → Distinguish single vs double tap
+4. Cancellation → Drag movement beyond slop cancels tap
+
+**Callback Timing**:
+- `onTap(GraphTapEvent)` - Called immediately after pointer up when tap is valid
+  - Parameters: entityIds, tapCount (1 or 2), pointer details
+
+#### Drag Detection (`drag_state.dart`)
+
+**Features and Behavior**:
+- Uses Flutter's standard pan gesture thresholds
+- Automatically stops node animations during drag
+- Real-time position updates with delta calculation
+- Link dragging explicitly disabled
+
+**State Management**:
+- Tracks start position, initial logical position, current position
+- Maintains drag state throughout gesture lifecycle
+
+**Callback Timing**:
+- `onDragStart(GraphDragStartEvent)` - Called when pan gesture begins
+  - Parameters: entityIds, start position details
+- `onDragUpdate(GraphDragUpdateEvent)` - Called for each pan update
+  - Parameters: entityIds, current position, delta from last update
+- `onDragEnd(GraphDragEndEvent)` - Called when pan gesture ends
+  - Parameters: entityIds, end position details
+
+#### Hover Detection (`hover_state.dart`)
+
+**Implementation**:
+- Single entity hover at a time
+- Simple state with just entityId
+- Automatic cancellation on pointer down
+- Clean transitions between hover states
+
+**Callback Timing**:
+- `onHoverEnter(GraphHoverEvent)` - Called when mouse enters entity bounds
+  - Parameters: entityId, mouse position details
+- `onHoverMove(GraphHoverEvent)` - Called when mouse moves within entity
+  - Parameters: entityId, current mouse position
+- `onHoverEnd(GraphHoverEndEvent)` - Called when mouse exits entity
+  - Parameters: entityId, exit position details
+
+#### Tooltip Management (`tooltip_state.dart`)
+
+**Sophisticated Timing Logic**:
+- **Trigger Modes**: hover, hoverStay, tap, longPress, doubleTap
+- **Default Delays**: 500ms show, 200ms hide
+- **Smart Behavior**: Different timing for different triggers
+- **State Machine**: Tracks visibility, timers, and transitions
+
+**Callback Timing**:
+- `onTooltipShow(GraphTooltipShowEvent)` - Called after show delay expires
+  - Parameters: entityId, trigger position, trigger mode
+- `onTooltipHide(GraphTooltipHideEvent)` - Called after hide delay expires
+  - Parameters: entityId, optional hide position
+
+### Coordinate Systems and Hit Testing
+
+**Hit Test Flow**:
+```
+Global Position → findNodeAt/findLinkAt → Order-aware search → Frontmost entity
+```
+
+**Gesture Priority Rules**:
+1. Nodes have priority over links at same position
+2. Frontmost entity (highest z-order) selected
+3. Background gestures only when no entity hit
+
+### Event Flow Architecture
+
+```
+Pointer Event
+    ↓
+GraphGestureManager (coordinates)
+    ↓
+State Managers (update states)
+    ↓
+Event Dispatch (notify listeners)
+    ↓
+Behavior Callbacks (UI updates)
+```
+
+### Key Algorithms
+
+#### Touch Slop Validation
+```dart
+bool _isWithinTapSlop(Offset p1, Offset p2) {
+  final distanceSquared = (p1 - p2).distanceSquared;
+  return distanceSquared < touchSlop * touchSlop;
+}
+```
+
+#### Gesture Consumption Logic
+```dart
+switch (gestureMode) {
+  case GraphGestureMode.exclusive:
+    return true; // Always consume
+  case GraphGestureMode.nodeEdgeOnly:
+    return hitTestResult.hasEntity; // Only if entity hit
+  case GraphGestureMode.transparent:
+    return false; // Never consume
+  case GraphGestureMode.custom:
+    return shouldConsumeGesture?.call(position, hitTestResult) ?? true;
+}
+```
+
+### State Management Details
+
+**Base State Manager (`state_manager.dart`)**:
+- Generic `GraphStateManager<T>` for type-safe state storage
+- Entity type awareness (nodes vs links)
+- Silent state removal to prevent unnecessary rebuilds
+- Bulk operations for performance
+
+**Selection Management**:
+- Toggle selection on tap completion
+- Batch selection changes for efficiency
+- Dispatch consolidated selection events
+
+**Callback Timing**:
+- `onSelectionChange(GraphSelectionChangeEvent)` - Called after selection state changes
+  - Parameters: selectedIds, deselectedIds, currentSelectionIds, optional pointer details
+  - Triggered by: tap completion, background tap (deselect all), programmatic selection
+
+### Performance Optimizations
+
+1. **Touch Target Forgiveness**: 4x standard slop for better mobile UX
+2. **State Isolation**: Separate managers prevent conflicts
+3. **Event Batching**: Reduces rebuild frequency
+4. **Silent Operations**: Avoid triggering rebuilds when cleaning up
+5. **Animation Control**: Auto-stop during interactions
+
+### Debug and Telemetry
+
+**Debug Event Types**:
+- 🕐 Timer events (tap timeouts, tooltip delays)
+- 🔧 State transitions (tap down/up/cancel)
+- ✅ Condition checks (slop validation)
+- 🎯 Hit test results
+- 📊 Performance metrics
+
+**Debug Output Example**:
+```
+🔧 [14:23:45.123] TapStateManager: TAP_DEBUG_STATE_UP | Data: {
+  entityId: 'node_123',
+  state_completed: true,
+  tap_count: 1,
+  distance: 3.5,
+  touch_slop: 32.0
+}
+```
+
+### Common Interaction Patterns
+
+1. **Single Tap Selection**: Toggle node/link selection state
+   - Flow: PointerDown → PointerUp → onTap → onSelectionChange
+2. **Double Tap Action**: Custom behavior via callbacks
+   - Flow: First tap → 200ms wait → Second tap → onTap(tapCount: 2)
+3. **Drag to Move**: Real-time node position updates
+   - Flow: PanStart → onDragStart → PanUpdate(s) → onDragUpdate(s) → PanEnd → onDragEnd
+4. **Hover Preview**: Tooltip display after delay
+   - Flow: MouseEnter → onHoverEnter → 500ms delay → onTooltipShow
+5. **Background Tap**: Deselect all when tapping empty space
+   - Flow: Tap on background → onBackgroundTapped → onSelectionChange(deselectedIds: all)
+
+### Extension Points
+
+- Custom gesture modes via `GraphGestureMode.custom`
+- Override `shouldConsumeGesture` for custom hit testing
+- Add new state managers by extending `GraphStateManager`
+- Custom debug events via `GraphGestureDebug.addEvent()`
