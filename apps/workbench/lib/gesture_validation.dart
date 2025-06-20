@@ -14,7 +14,7 @@ class GestureValidator {
 
     final checks = <GestureValidationCheck>[];
     
-    // 選択されたテストタイプに応じて検証を実行
+    // Execute validation based on selected test type
     switch (selectedGestureTest) {
       case GestureTestType.tap:
         if (phase == 'down') {
@@ -51,7 +51,7 @@ class GestureValidator {
       
       validationResults.insert(0, result);
       
-      // 最大100件まで保持
+      // Keep maximum 100 items
       if (validationResults.length > 100) {
         validationResults.removeRange(100, validationResults.length);
       }
@@ -64,31 +64,31 @@ class GestureValidator {
     final nodeCanSelect = state['node_can_select'] ?? false;
     checks.add(GestureValidationCheck(
       name: 'node_selectable',
-      description: 'ノードが選択可能である',
+      description: 'Node is selectable',
       passed: nodeCanSelect,
       expectedValue: 'true',
       actualValue: nodeCanSelect.toString(),
-      failureReason: nodeCanSelect ? null : 'ノードのcanSelectがfalse',
+      failureReason: nodeCanSelect ? null : 'Node canSelect is false',
     ));
 
     final stateExists = state['state_exists'] ?? false;
     checks.add(GestureValidationCheck(
       name: 'tap_state_created',
-      description: 'タップ状態が作成される',
+      description: 'Tap state is created',
       passed: stateExists,
       expectedValue: 'true',
       actualValue: stateExists.toString(),
-      failureReason: stateExists ? null : 'タップ状態が作成されていない',
+      failureReason: stateExists ? null : 'Tap state was not created',
     ));
 
     final stateCancelled = state['state_cancelled'] ?? false;
     checks.add(GestureValidationCheck(
       name: 'tap_state_not_cancelled',
-      description: 'タップ状態がキャンセルされていない',
+      description: 'Tap state is not cancelled',
       passed: !stateCancelled,
       expectedValue: 'false',
       actualValue: stateCancelled.toString(),
-      failureReason: stateCancelled ? 'タップ状態がキャンセルされた' : null,
+      failureReason: stateCancelled ? 'Tap state was cancelled' : null,
     ));
 
     return checks;
@@ -100,43 +100,43 @@ class GestureValidator {
     final stateExists = state['state_exists'] ?? false;
     checks.add(GestureValidationCheck(
       name: 'tap_state_exists_on_up',
-      description: 'ポインターアップ時にタップ状態が存在する',
+      description: 'Tap state exists on pointer up',
       passed: stateExists,
       expectedValue: 'true',
       actualValue: stateExists.toString(),
-      failureReason: stateExists ? null : 'ポインターアップ時にタップ状態が存在しない',
+      failureReason: stateExists ? null : 'Tap state does not exist on pointer up',
     ));
 
     if (stateExists) {
       final isStillDragging = state['is_still_dragging_after_up'] ?? true;
       checks.add(GestureValidationCheck(
         name: 'not_dragging',
-        description: 'ドラッグ中でない',
+        description: 'Not dragging',
         passed: !isStillDragging,
         expectedValue: 'false',
         actualValue: isStillDragging.toString(),
-        failureReason: isStillDragging ? 'まだドラッグ中' : null,
+        failureReason: isStillDragging ? 'Still dragging' : null,
       ));
 
       final isTapCompleted = state['is_tap_completed_after_up'] ?? false;
       checks.add(GestureValidationCheck(
         name: 'tap_completed',
-        description: 'タップが完了している',
+        description: 'Tap is completed',
         passed: isTapCompleted,
         expectedValue: 'true',
         actualValue: isTapCompleted.toString(),
-        failureReason: isTapCompleted ? null : 'タップが完了していない',
+        failureReason: isTapCompleted ? null : 'Tap is not completed',
       ));
 
       final isWithinSlop = state['isWithinSlop'];
       if (isWithinSlop != null) {
         checks.add(GestureValidationCheck(
           name: 'within_slop',
-          description: 'Touch slop範囲内',
+          description: 'Within touch slop range',
           passed: isWithinSlop,
           expectedValue: 'true',
           actualValue: isWithinSlop.toString(),
-          failureReason: isWithinSlop ? null : 'Touch slop範囲外に移動した',
+          failureReason: isWithinSlop ? null : 'Moved outside touch slop range',
         ));
       }
 
@@ -144,12 +144,12 @@ class GestureValidator {
       final shouldToggle = !isStillDragging && isTapCompleted;
       checks.add(GestureValidationCheck(
         name: 'will_toggle_selection',
-        description: '選択状態が切り替わる',
+        description: 'Selection state will toggle',
         passed: willToggleSelection == shouldToggle,
         expectedValue: shouldToggle.toString(),
         actualValue: willToggleSelection.toString(),
         failureReason: willToggleSelection != shouldToggle 
-          ? '選択切り替えの判定が不正' : null,
+          ? 'Selection toggle judgment is incorrect' : null,
       ));
     }
 
@@ -165,7 +165,7 @@ class GestureValidator {
       if (tapCount == 2) {
         checks.add(GestureValidationCheck(
           name: 'double_tap_detected_on_down',
-          description: 'ダブルタップがpointer downで検出される',
+          description: 'Double tap detected on pointer down',
           passed: true,
           expectedValue: '2',
           actualValue: tapCount.toString(),
@@ -173,44 +173,44 @@ class GestureValidator {
       } else {
         checks.add(GestureValidationCheck(
           name: 'first_tap_down',
-          description: '1回目のタップのpointer down',
+          description: 'First tap pointer down',
           passed: tapCount == 1,
           expectedValue: '1',
           actualValue: tapCount.toString(),
-          failureReason: tapCount != 1 ? '初回タップでない' : null,
+          failureReason: tapCount != 1 ? 'Not the first tap' : null,
         ));
       }
     } else if (phase == 'up') {
       final tapCount = state['tap_count'] ?? 0;
       checks.add(GestureValidationCheck(
         name: 'double_tap_count',
-        description: 'タップ回数が2回である',
+        description: 'Tap count is 2',
         passed: tapCount == 2,
         expectedValue: '2',
         actualValue: tapCount.toString(),
-        failureReason: tapCount != 2 ? 'タップ回数が2回でない' : null,
+        failureReason: tapCount != 2 ? 'Tap count is not 2' : null,
       ));
 
       if (tapCount == 2) {
         final hasDoubleTapTimer = state['has_double_tap_timer'] ?? false;
         checks.add(GestureValidationCheck(
           name: 'no_timer_on_double_tap',
-          description: 'ダブルタップ時はタイマーが設定されない',
+          description: 'Timer is not set on double tap',
           passed: !hasDoubleTapTimer,
           expectedValue: 'false',
           actualValue: hasDoubleTapTimer.toString(),
-          failureReason: hasDoubleTapTimer ? 'ダブルタップ時にタイマーが残っている' : null,
+          failureReason: hasDoubleTapTimer ? 'Timer remains on double tap' : null,
         ));
 
         final timeSinceDown = state['time_since_down_ms'] ?? 0;
         final doubleTapTimeoutMs = state['double_tap_timeout_ms'] ?? 200;
         checks.add(GestureValidationCheck(
           name: 'double_tap_within_timeout',
-          description: 'ダブルタップタイムアウト内である',
+          description: 'Within double tap timeout',
           passed: timeSinceDown <= doubleTapTimeoutMs,
           expectedValue: '<= ${doubleTapTimeoutMs}ms',
           actualValue: '${timeSinceDown}ms',
-          failureReason: timeSinceDown > doubleTapTimeoutMs ? 'タイムアウト時間を超過' : null,
+          failureReason: timeSinceDown > doubleTapTimeoutMs ? 'Timeout exceeded' : null,
         ));
       }
     }
@@ -224,22 +224,22 @@ class GestureValidator {
     final nodeCanDrag = state['node_can_drag'] ?? false;
     checks.add(GestureValidationCheck(
       name: 'node_draggable',
-      description: 'ノードがドラッグ可能である',
+      description: 'Node is draggable',
       passed: nodeCanDrag,
       expectedValue: 'true',
       actualValue: nodeCanDrag.toString(),
-      failureReason: nodeCanDrag ? null : 'ノードのcanDragがfalse',
+      failureReason: nodeCanDrag ? null : 'Node canDrag is false',
     ));
 
     if (phase == 'up') {
       final isDragging = state['drag_manager_is_dragging'] ?? false;
       checks.add(GestureValidationCheck(
         name: 'drag_active',
-        description: 'ドラッグが実行されている',
+        description: 'Drag is being executed',
         passed: isDragging,
         expectedValue: 'true',
         actualValue: isDragging.toString(),
-        failureReason: isDragging ? null : 'ドラッグが開始されていない',
+        failureReason: isDragging ? null : 'Drag has not started',
       ));
     }
     
@@ -247,11 +247,11 @@ class GestureValidator {
   }
 
   static List<GestureValidationCheck> _validateHover(Map<String, dynamic> state, String phase) {
-    // ホバー検証（今回は簡易実装）
+    // Hover validation (simplified implementation)
     return [
       GestureValidationCheck(
         name: 'hover_support',
-        description: 'ホバー状態をサポート',
+        description: 'Supports hover state',
         passed: true,
         expectedValue: 'true',
         actualValue: 'true',
@@ -260,11 +260,11 @@ class GestureValidator {
   }
 
   static List<GestureValidationCheck> _validateLongPress(Map<String, dynamic> state, String phase) {
-    // 長押し検証（今回は簡易実装）
+    // Long press validation (simplified implementation)
     return [
       GestureValidationCheck(
         name: 'long_press_support',
-        description: '長押しをサポート',
+        description: 'Supports long press',
         passed: true,
         expectedValue: 'true',
         actualValue: 'true',
@@ -273,11 +273,11 @@ class GestureValidator {
   }
 
   static List<GestureValidationCheck> _validateTapAndHold(Map<String, dynamic> state, String phase) {
-    // タップ&ホールド検証（今回は簡易実装）
+    // Tap & hold validation (simplified implementation)
     return [
       GestureValidationCheck(
         name: 'tap_hold_support',
-        description: 'タップ&ホールドをサポート',
+        description: 'Supports tap & hold',
         passed: true,
         expectedValue: 'true',
         actualValue: 'true',
@@ -309,7 +309,7 @@ class GestureTestTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ジェスチャーテスト選択セクション
+          // Gesture test selection section
           GestureTestSelector(
             selectedGestureTest: selectedGestureTest,
             onGestureTestChanged: onGestureTestChanged,
@@ -321,7 +321,7 @@ class GestureTestTab extends StatelessWidget {
           Divider(color: Colors.grey[400]),
           const SizedBox(height: 16),
           
-          // テスト結果表示セクション
+          // Test results display section
           GestureTestResults(
             selectedGestureTest: selectedGestureTest,
             gestureValidationResults: gestureValidationResults,
@@ -386,7 +386,7 @@ class GestureTestSelector extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           
-          // ドロップダウン
+          // Dropdown
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -418,7 +418,7 @@ class GestureTestSelector extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           
-          // 選択されたテストの説明
+          // Description of selected test
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
@@ -438,7 +438,7 @@ class GestureTestSelector extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           
-          // クリアボタン
+          // Clear button
           Row(
             children: [
               ElevatedButton.icon(
@@ -590,7 +590,7 @@ class DetailedValidationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ヘッダー
+          // Header
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -649,7 +649,7 @@ class DetailedValidationCard extends StatelessWidget {
             ),
           ),
           
-          // 検証項目の詳細
+          // Validation item details
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(

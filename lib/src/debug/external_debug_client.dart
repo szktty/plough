@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:http/http.dart' as http;
 import 'package:plough/src/utils/logger.dart';
 
-/// 外部デバッグサーバーへログを送信するクライアント
+/// Client that sends logs to external debug server
 @internal
 class ExternalDebugClient {
   ExternalDebugClient._();
@@ -20,12 +20,12 @@ class ExternalDebugClient {
   static const int _batchSize = 10;
   static const Duration _batchInterval = Duration(milliseconds: 500);
 
-  /// サーバーURLを設定
+  /// Set server URL
   void setServerUrl(String url) {
     _serverUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
   }
 
-  /// 外部デバッグサーバーへの送信を有効化
+  /// Enable sending to external debug server
   void enable({String? serverUrl}) {
     if (serverUrl != null) {
       _serverUrl = serverUrl;
@@ -35,15 +35,15 @@ class ExternalDebugClient {
     logInfo(LogCategory.debug, 'External debug client enabled: $_serverUrl');
   }
 
-  /// 外部デバッグサーバーへの送信を無効化
+  /// Disable sending to external debug server
   void disable() {
     _enabled = false;
     _stopBatchTimer();
-    _flushLogs(); // 残っているログを送信
+    _flushLogs(); // Send remaining logs
     logInfo(LogCategory.debug, 'External debug client disabled');
   }
 
-  /// ログを送信（バッチング）
+  /// Send log (batching)
   void sendLog({
     required LogCategory category,
     required String level,

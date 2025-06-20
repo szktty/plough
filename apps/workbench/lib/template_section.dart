@@ -16,17 +16,17 @@ class TemplateSection extends StatelessWidget {
   String _getPresetDescription(String preset) {
     switch (preset) {
       case 'Default':
-        return '4つのノードの基本的な循環グラフ';
+        return 'Basic cyclic graph with 4 nodes';
       case 'Small Network':
-        return '6ノードの小規模ネットワーク';
+        return 'Small network with 6 nodes';
       case 'Large Network':
-        return '25ノードの大規模ネットワーク';
+        return 'Large network with 25 nodes';
       case 'Tree Structure':
-        return '階層的なツリー構造（10ノード）';
+        return 'Hierarchical tree structure (10 nodes)';
       case 'Complex Graph':
-        return 'ハブ・スポーク型の複雑なグラフ（18ノード）';
+        return 'Hub-spoke complex graph (18 nodes)';
       default:
-        return 'カスタムグラフ構造';
+        return 'Custom graph structure';
     }
   }
 
@@ -41,7 +41,7 @@ class TemplateSection extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(
-            'グラフテンプレートをロード',
+            'Load Graph Template',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Column(
@@ -49,7 +49,7 @@ class TemplateSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '現在のグラフデータを上書きして、新しいテンプレートをロードしますか？',
+                'Do you want to overwrite the current graph data and load a new template?',
                 style: TextStyle(fontSize: 16 * uiScale),
               ),
               const SizedBox(height: 16),
@@ -90,7 +90,7 @@ class TemplateSection extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               child: Text(
-                'キャンセル',
+                'Cancel',
                 style: TextStyle(
                   fontSize: 16 * uiScale,
                   color: Colors.grey[600],
@@ -107,7 +107,7 @@ class TemplateSection extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
               child: Text(
-                'ロード',
+                'Load',
                 style: TextStyle(
                   fontSize: 16 * uiScale,
                   fontWeight: FontWeight.bold,

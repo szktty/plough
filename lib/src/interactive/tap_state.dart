@@ -455,7 +455,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
       );
       state.cancelled = true;
 
-      // タイマーをキャンセルして、不要な状態変更通知を防ぐ
+      // Cancel timer to prevent unnecessary state change notifications
       if (state.doubleTapTimer != null) {
         logDebug(LogCategory.tap,
             'Cancelling double tap timer in cancel() for $entityId');
@@ -475,7 +475,7 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         state.doubleTapTimer = null;
       }
 
-      // 状態を静かに削除して、再描画を防ぐ
+      // Silently remove state to prevent rebuilds
       removeStateSilently(entityId);
       // Hide tooltip if it was shown by a tap that got cancelled
       if (tooltipTriggerMode == GraphTooltipTriggerMode.tap &&

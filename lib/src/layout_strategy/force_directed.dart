@@ -82,18 +82,18 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
   void performLayout(Graph graph, Size size) {
     super.performLayout(graph, size);
 
-    // 中心ノードの位置を取得
+    // Get center node position
     final centerNode =
         centerNodeId != null ? graph.getNode(centerNodeId!) : null;
     if (centerNode != null) {
       positionNode(centerNode, size.center(Offset.zero));
     }
 
-    // ノードの初期配置（既に配置されているノードはスキップ）
+    // Initial node placement (skip already positioned nodes)
     final width = size.width - padding.left - padding.right;
     final height = size.height - padding.top - padding.bottom;
     for (final node in graph.nodes) {
-      // 既に配置されているノードは初期配置をスキップ
+      // Skip initial placement for already positioned nodes
       final nodeImpl = node as GraphNodeImpl;
       if (nodeImpl.isArranged && node.logicalPosition != Offset.zero) {
         continue;

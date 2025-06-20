@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/debug/debug_server.dart';
 
-/// 構造化ログエントリ
+/// Structured log entry
 @internal
 class StructuredLogEntry {
   const StructuredLogEntry({
@@ -56,7 +56,7 @@ class StructuredLogEntry {
   }
 }
 
-/// 構造化ログ機能を提供するクラス
+/// Class that provides structured logging functionality
 @internal
 class StructuredLogger {
   StructuredLogger._();
@@ -67,7 +67,7 @@ class StructuredLogger {
   final List<StructuredLogEntry> _entries = [];
   final int _maxEntries = 10000;
 
-  /// ログエントリを追加
+  /// Add log entry
   void log({
     required LogCategory category,
     required String level,
@@ -91,7 +91,7 @@ class StructuredLogger {
       _entries.removeAt(0);
     }
 
-    // 通常のログ出力
+    // Normal log output
     switch (level) {
       case 'DEBUG':
         logDebug(category, entry.toString());
@@ -105,14 +105,14 @@ class StructuredLogger {
         logDebug(category, entry.toString());
     }
 
-    // モニタリングサーバーにブロードキャスト
+    // Broadcast to monitoring server
     final monitorServer = PloughMonitorServer();
     if (monitorServer.isRunning) {
       monitorServer.broadcastLog(category, level, message);
     }
   }
 
-  /// デバッグレベルのログ
+  /// Debug level log
   void debug(
     LogCategory category,
     String message, {
@@ -128,7 +128,7 @@ class StructuredLogger {
     );
   }
 
-  /// 情報レベルのログ
+  /// Info level log
   void info(
     LogCategory category,
     String message, {
@@ -144,7 +144,7 @@ class StructuredLogger {
     );
   }
 
-  /// 警告レベルのログ
+  /// Warning level log
   void warning(
     LogCategory category,
     String message, {
@@ -162,7 +162,7 @@ class StructuredLogger {
     );
   }
 
-  /// エラーレベルのログ
+  /// Error level log
   void error(
     LogCategory category,
     String message, {
@@ -180,20 +180,20 @@ class StructuredLogger {
     );
   }
 
-  /// 全ログエントリを取得
+  /// Get all log entries
   List<StructuredLogEntry> getAllEntries() => List.unmodifiable(_entries);
 
-  /// カテゴリでフィルタリング
+  /// Filter by category
   List<StructuredLogEntry> getEntriesByCategory(LogCategory category) {
     return _entries.where((entry) => entry.category == category).toList();
   }
 
-  /// レベルでフィルタリング
+  /// Filter by level
   List<StructuredLogEntry> getEntriesByLevel(String level) {
     return _entries.where((entry) => entry.level == level).toList();
   }
 
-  /// 時間範囲でフィルタリング
+  /// Filter by time range
   List<StructuredLogEntry> getEntriesByTimeRange(DateTime start, DateTime end) {
     return _entries
         .where((entry) =>
@@ -201,21 +201,21 @@ class StructuredLogger {
         .toList();
   }
 
-  /// ログをJSONで出力
+  /// Export logs as JSON
   String exportAsJson() {
     return jsonEncode(_entries.map((entry) => entry.toJson()).toList());
   }
 
-  /// ログをクリア
+  /// Clear logs
   void clear() {
     _entries.clear();
   }
 }
 
-/// グローバルな構造化ログインスタンス
+/// Global structured log instance
 final StructuredLogger structuredLogger = StructuredLogger();
 
-/// 便利な関数群
+/// Convenience functions
 @internal
 void logStructured({
   required LogCategory category,

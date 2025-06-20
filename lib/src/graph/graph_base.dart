@@ -512,23 +512,23 @@ class GraphImpl
 
   @override
   void clearSelection() {
-    // 現在選択されているノードとリンクのIDを保存
+    // Save IDs of currently selected nodes and links
     final selectedNodeIds = state.value.selectedNodeIds.toList();
     final selectedLinkIds = state.value.selectedLinkIds.toList();
 
-    // 選択されているノードをすべて選択解除（個別に状態更新、UIに反映）
+    // Deselect all selected nodes (individual state update, reflected in UI)
     for (final nodeId in selectedNodeIds) {
       final node = getNodeOrThrow(nodeId) as GraphNodeImpl;
       node.isSelected = false;
     }
 
-    // 選択されているリンクをすべて選択解除（個別に状態更新、UIに反映）
+    // Deselect all selected links (individual state update, reflected in UI)
     for (final linkId in selectedLinkIds) {
       final link = getLinkOrThrow(linkId) as GraphLinkImpl;
       link.isSelected = false;
     }
 
-    // グラフの選択状態をクリア
+    // Clear graph selection state
     setState(
         state.value.copyWith(
           selectedNodeIds: const IListConst([]),

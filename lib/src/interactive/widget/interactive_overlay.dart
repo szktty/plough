@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
 
-/// グラフのインタラクティブな操作を受け付けるオーバーレイウィジェットです。
+/// Overlay widget that handles interactive operations for the graph.
 ///
-/// マウス/タッチ操作を検出し、適切なジェスチャーマネージャーに転送します。
-/// 主要な機能：
+/// Detects mouse/touch operations and forwards them to the appropriate gesture manager.
+/// Main features:
 ///
-/// * マウスホバーの検出と処理
-/// * タッチ/クリック操作の検出と処理
-/// * ドラッグ操作の検出と処理
+/// * Mouse hover detection and processing
+/// * Touch/click operation detection and processing
+/// * Drag operation detection and processing
 ///
-/// 使用例：
+/// Usage example:
 /// ```dart
 /// GraphInteractiveOverlay(
 ///   graph: myGraph,
 ///   behavior: myBehavior,
 ///   viewportSize: Size(800, 600),
 ///   nodeTooltipTriggerMode: GraphTooltipTriggerMode.hover,
-///   onTooltipShow: (entity) => print('ツールチップ表示: ${entity.id}'),
+///   onTooltipShow: (entity) => print('Tooltip show: ${entity.id}'),
 /// )
 /// ```
 class GraphInteractiveOverlay extends StatefulWidget {

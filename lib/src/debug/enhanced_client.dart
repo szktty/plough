@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:plough/src/utils/logger.dart';
 import 'diagnostics.dart';
 
-/// 拡張デバッグサーバーへの接続クライアント
+/// Connection client to enhanced debug server
 @internal
 class EnhancedDebugClient {
   EnhancedDebugClient._();
@@ -22,7 +22,7 @@ class EnhancedDebugClient {
   static const int _batchSize = 20;
   static const Duration _batchInterval = Duration(milliseconds: 1000);
 
-  /// クライアントの設定
+  /// Client configuration
   static void configure({
     required String serverUrl,
     required String sessionId,
@@ -34,7 +34,7 @@ class EnhancedDebugClient {
     client._sessionId = sessionId;
   }
 
-  /// デバッグクライアントを有効化
+  /// Enable debug client
   Future<void> enable() async {
     if (_sessionId == null) {
       logWarning(LogCategory.debug, 'Session ID not set. Call configure() first.');
@@ -43,7 +43,7 @@ class EnhancedDebugClient {
 
     _enabled = true;
     
-    // セッションを作成
+    // Create session
     final success = await _createSession();
     if (success) {
       _startBatchTimer();

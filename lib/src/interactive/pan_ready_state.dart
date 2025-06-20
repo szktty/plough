@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/interactive/state_manager.dart';
 
-/// Pan Ready状態を管理するクラス
-/// pan startが発生したが、まだ実際のドラッグは開始されていない中間状態
+/// Class that manages Pan Ready state
+/// An intermediate state where pan start has occurred but actual dragging has not yet begun
 class _PanReadyState {
   _PanReadyState({
     required this.entityId,
@@ -21,31 +21,31 @@ class _PanReadyState {
   bool cancelled = false;
 }
 
-/// Pan Ready状態を管理するベースクラス
+/// Base class for managing Pan Ready state
 abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     extends GraphStateManager<_PanReadyState> {
   GraphEntityPanReadyStateManager({
     required super.gestureManager,
-    this.dragStartThreshold = 8.0, // ドラッグ開始とみなす移動距離の閾値
-    this.maxReadyDuration = const Duration(milliseconds: 200), // Ready状態の最大持続時間
+    this.dragStartThreshold = 8.0, // Threshold distance for considering drag start
+    this.maxReadyDuration = const Duration(milliseconds: 200), // Maximum duration for Ready state
   });
 
   final double dragStartThreshold;
   final Duration maxReadyDuration;
 
-  /// Pan Ready状態のエンティティリスト
+  /// List of entities in Pan Ready state
   List<GraphId> get readyEntityIds => 
       states.where((state) => !state.dragStarted && !state.cancelled)
           .map((state) => state.entityId)
           .toList();
 
-  /// エンティティがPan Ready状態かどうか
+  /// Whether entity is in Pan Ready state
   bool isPanReady(GraphId entityId) {
     final state = getState(entityId);
     return state != null && !state.dragStarted && !state.cancelled;
   }
 
-  /// Pan開始を処理（Ready状態にする）
+  /// Process pan start (set to Ready state)
   void handlePanStart(GraphId entityId, DragStartDetails details) {
     logGestureDebug(
       GestureDebugEventType.stateCreate,
@@ -68,13 +68,13 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
 
     setState(entityId, state);
     
-    // 最大持続時間後に自動キャンセル
+    // Auto-cancel after maximum duration
     Future.delayed(maxReadyDuration, () {
       _timeoutPanReady(entityId);
     });
   }
 
-  /// Pan更新を処理（閾値を超えた場合にドラッグ開始）
+  /// Process pan update (start drag when threshold exceeded)
   void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
     final state = getState(entityId);
     if (state == null || state.dragStarted || state.cancelled) {
@@ -104,12 +104,12 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     );
 
     if (distance >= dragStartThreshold) {
-      // 閾値を超えたため、実際のドラッグ開始
+      // Threshold exceeded, start actual drag
       _startActualDrag(entityId, state, details);
     }
   }
 
-  /// 実際のドラッグを開始
+  /// Start actual drag
   void _startActualDrag(GraphId entityId, _PanReadyState readyState, DragUpdateDetails updateDetails) {
     readyState.dragStarted = true;
     
@@ -125,14 +125,14 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
       },
     );
 
-    // 適切なドラッグマネージャーに委譲
+    // Delegate to appropriate drag manager
     _delegateActualDragStart(entityId, readyState.startDetails, updateDetails);
     
-    // Ready状態をクリーンアップ
+    // Clean up Ready state
     removeStateSilently(entityId);
   }
 
-  /// Ready状態のタイムアウト処理
+  /// Ready state timeout processing
   void _timeoutPanReady(GraphId entityId) {
     final state = getState(entityId);
     if (state != null && !state.dragStarted && !state.cancelled) {
@@ -146,13 +146,13 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
         },
       );
       
-      // タイムアウトしたのでReady状態を解除
-      // タップとして扱われる可能性を残す
+      // Timed out, so release Ready state
+      // Leave possibility of being treated as a tap
       removeStateSilently(entityId);
     }
   }
 
-  /// Ready状態をキャンセル
+  /// Cancel Ready state
   void cancelPanReady(GraphId entityId) {
     final state = getState(entityId);
     if (state != null && !state.dragStarted) {
@@ -172,7 +172,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     }
   }
 
-  /// すべてのReady状態をキャンセル
+  /// Cancel all Ready states
   void cancelAllPanReady() {
     final activeStates = List<_PanReadyState>.from(states);
     for (final state in activeStates) {
@@ -182,7 +182,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     }
   }
 
-  /// 実際のドラッグ開始を適切なマネージャーに委譲（サブクラスで実装）
+  /// Delegate actual drag start to appropriate manager (implemented in subclasses)
   void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails, DragUpdateDetails updateDetails);
 
   @override
@@ -191,7 +191,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
   }
 }
 
-/// ノード用のPan Ready状態マネージャー
+/// Pan Ready state manager for nodes
 final class GraphNodePanReadyStateManager 
     extends GraphEntityPanReadyStateManager<GraphNode> {
   GraphNodePanReadyStateManager({
@@ -205,16 +205,16 @@ final class GraphNodePanReadyStateManager
 
   @override
   void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails, DragUpdateDetails updateDetails) {
-    // ノードドラッグマネージャーに委譲
+    // Delegate to node drag manager
     gestureManager.nodeDragManager.handlePanStart([entityId], startDetails);
     gestureManager.nodeDragManager.handlePanUpdate(updateDetails);
     
-    // タップ状態をキャンセル（ドラッグが確定したため）
+    // Cancel tap state (drag confirmed)
     gestureManager.nodeTapManager.cancel(entityId);
   }
 }
 
-/// リンク用のPan Ready状態マネージャー
+/// Pan Ready state manager for links
 final class GraphLinkPanReadyStateManager 
     extends GraphEntityPanReadyStateManager<GraphLink> {
   GraphLinkPanReadyStateManager({
@@ -228,11 +228,11 @@ final class GraphLinkPanReadyStateManager
 
   @override
   void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails, DragUpdateDetails updateDetails) {
-    // リンクドラッグマネージャーに委譲
+    // Delegate to link drag manager
     gestureManager.linkDragManager.handlePanStart([entityId], startDetails);
     gestureManager.linkDragManager.handlePanUpdate(updateDetails);
     
-    // タップ状態をキャンセル（ドラッグが確定したため）
+    // Cancel tap state (drag confirmed)
     gestureManager.linkTapManager.cancel(entityId);
   }
 }

@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 part 'diagnostics.freezed.dart';
 part 'diagnostics.g.dart';
 
-/// グラフの診断データ
+/// Graph diagnostic data
 @freezed
 class GraphDiagnostics with _$GraphDiagnostics {
   const factory GraphDiagnostics({
@@ -20,7 +20,7 @@ class GraphDiagnostics with _$GraphDiagnostics {
       _$GraphDiagnosticsFromJson(json);
 }
 
-/// グラフの現在の状態スナップショット
+/// Current state snapshot of the graph
 @freezed
 class GraphSnapshot with _$GraphSnapshot {
   const factory GraphSnapshot({
@@ -38,7 +38,7 @@ class GraphSnapshot with _$GraphSnapshot {
       _$GraphSnapshotFromJson(json);
 }
 
-/// ノードの位置情報
+/// Node position information
 @freezed
 class NodePosition with _$NodePosition {
   const factory NodePosition({

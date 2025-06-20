@@ -387,8 +387,8 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
     final geometry = node.geometry;
     if (geometry == null || !node.visible) return false;
 
-    // アニメーション中でもヒットテストを有効にする
-    // アニメーション中の場合は、現在のアニメーション位置を使用
+    // Enable hit testing even during animation
+    // Use current animation position during animation
     if (node.isAnimating) {
       final animatedPosition = node.animatedPosition;
       final bounds = Rect.fromLTWH(

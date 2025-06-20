@@ -117,7 +117,7 @@ abstract base class GraphStateManager<T> with Diagnosticable {
     );
   }
 
-  /// 再描画をトリガーしない「静かな」状態削除
+  /// Silent state removal that does not trigger rebuilds
   void removeStateSilently(GraphId entityId) {
     final hadState = _states.containsKey(entityId);
     _states.remove(entityId);

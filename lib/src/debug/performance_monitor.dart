@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/utils/logger.dart';
 
-/// パフォーマンス測定結果
+/// Performance measurement result
 @internal
 class PerformanceMeasurement {
   const PerformanceMeasurement({
@@ -28,7 +28,7 @@ class PerformanceMeasurement {
   }
 }
 
-/// パフォーマンス統計
+/// Performance statistics
 @internal
 class PerformanceStats {
   const PerformanceStats({

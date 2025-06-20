@@ -86,7 +86,7 @@ class GraphGestureManager {
     triggerMode: linkTooltipTriggerMode,
   );
   
-  // Pan Ready状態マネージャー（遅延ドラッグ検出用）
+  // Pan Ready state manager (for deferred drag detection)
   late final GraphNodePanReadyStateManager _nodePanReadyManager =
       GraphNodePanReadyStateManager(gestureManager: this);
   late final GraphLinkPanReadyStateManager _linkPanReadyManager =
@@ -893,11 +893,11 @@ class GraphGestureManager {
       },
     );
 
-    // 新しいアプローチ：pan startでは即座にドラッグを開始せず、Pan Ready状態にする
+    // New approach: Do not start dragging immediately on pan start, set to Pan Ready state
     // Prefer nodes over links if both are present
     final node = findNodeAt(details.localPosition);
     if (node != null && node.canDrag) {
-      // ノードをPan Ready状態にする（まだドラッグは開始しない）
+      // Set node to Pan Ready state (drag not started yet)
       _nodePanReadyManager.handlePanStart(node.id, details);
       
       logGestureDebug(
@@ -924,7 +924,7 @@ class GraphGestureManager {
 
     final link = findLinkAt(details.localPosition);
     if (link != null && link.canDrag) {
-      // リンクをPan Ready状態にする（まだドラッグは開始しない）
+      // Set link to Pan Ready state (drag not started yet)
       _linkPanReadyManager.handlePanStart(link.id, details);
       
       logGestureDebug(
@@ -1094,7 +1094,7 @@ class GraphGestureManager {
           );
           viewBehavior.onDragEnd(event);
 
-          // ドラッグ終了時に残っているタップ状態を静かにクリーンアップ
+          // Silently clean up remaining tap states when drag ends
           for (final nodeId in endedDragIds) {
             if (_nodeTapManager.hasState(nodeId)) {
               logDebug(LogCategory.gesture,

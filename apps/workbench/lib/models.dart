@@ -7,21 +7,21 @@ enum EventType {
   layout,
 }
 
-// ジェスチャーテストの種類
+// Gesture test types
 enum GestureTestType {
-  tap('タップ', 'ノードを1回タップして選択状態を切り替える'),
-  doubleTap('ダブルタップ', '短時間に2回タップする'),
-  drag('ドラッグ', 'ノードを押してドラッグで移動させる'),
-  hover('ホバー', 'マウスをノード上に置いてホバー状態にする'),
-  longPress('長押し', '長時間押し続ける'),
-  tapAndHold('タップ&ホールド', 'タップ後に少し保持する');
+  tap('Tap', 'Tap a node once to toggle its selection state'),
+  doubleTap('Double Tap', 'Tap twice in quick succession'),
+  drag('Drag', 'Press and drag a node to move it'),
+  hover('Hover', 'Place mouse over a node to enter hover state'),
+  longPress('Long Press', 'Press and hold for an extended period'),
+  tapAndHold('Tap & Hold', 'Tap and hold briefly');
 
   const GestureTestType(this.displayName, this.description);
   final String displayName;
   final String description;
 }
 
-// ジェスチャー検証結果
+// Gesture validation result
 class GestureValidationResult {
   final DateTime timestamp;
   final GestureTestType testType;
@@ -39,7 +39,7 @@ class GestureValidationResult {
   }) : isSuccess = checks.every((check) => check.passed);
 }
 
-// 個別の検証項目
+// Individual validation check
 class GestureValidationCheck {
   final String name;
   final String description;

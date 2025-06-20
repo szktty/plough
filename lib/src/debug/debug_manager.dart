@@ -5,7 +5,7 @@ import 'package:plough/src/debug/debug_server.dart';
 import 'package:plough/src/debug/structured_logger.dart';
 import 'package:plough/src/debug/performance_monitor.dart';
 
-/// デバッグ機能の統合管理クラス
+/// Integrated management class for debug features
 @internal
 class PloughDebugManager {
   PloughDebugManager._();
@@ -19,7 +19,7 @@ class PloughDebugManager {
 
   bool _initialized = false;
 
-  /// デバッグ機能を初期化
+  /// Initialize debug features
   Future<void> initialize({
     bool enableServer = true,
     bool enableStructuredLogging = true,
@@ -34,18 +34,18 @@ class PloughDebugManager {
 
     logInfo(LogCategory.debug, 'Initializing debug manager...');
 
-    // 構造化ログを有効化
+    // Enable structured logging
     if (enableStructuredLogging) {
       logInfo(LogCategory.debug, 'Structured logging enabled');
     }
 
-    // パフォーマンス監視を有効化
+    // Enable performance monitoring
     if (enablePerformanceMonitoring) {
       _performanceMonitor.setEnabled(true);
       logInfo(LogCategory.debug, 'Performance monitoring enabled');
     }
 
-    // デバッグサーバーを開始
+    // Start debug server
     bool serverStarted = false;
     if (enableServer) {
       try {
@@ -62,7 +62,7 @@ class PloughDebugManager {
             'Alternative: Use Flutter DevTools or VM Service for debugging');
       } on Exception catch (e) {
         logError(LogCategory.debug, 'Failed to start debug server: $e');
-        // サーバーの起動に失敗しても、他のデバッグ機能は有効にする
+        // Even if server startup fails, enable other debug features
       }
     }
 
@@ -74,7 +74,7 @@ class PloughDebugManager {
             : 'Debug manager initialized successfully (server not started)');
   }
 
-  /// デバッグ機能を終了
+  /// Shutdown debug features
   Future<void> shutdown() async {
     if (!_initialized) return;
 
@@ -87,16 +87,16 @@ class PloughDebugManager {
     logInfo(LogCategory.debug, 'Debug manager shut down');
   }
 
-  /// デバッグサーバーの状態を取得
+  /// Get debug server status
   bool get isServerRunning => _debugServer.isRunning;
 
-  /// デバッグサーバーのURLを取得
+  /// Get debug server URL
   String get serverUrl => _debugServer.url;
 
-  /// デバッグサーバーのポートを取得
+  /// Get debug server port
   int get serverPort => _debugServer.port;
 
-  /// 構造化ログを記録
+  /// Record structured log
   void logStructured({
     required LogCategory category,
     required String level,
@@ -115,19 +115,19 @@ class PloughDebugManager {
     );
   }
 
-  /// パフォーマンス測定を開始
+  /// Start performance measurement
   void startPerformanceMeasurement(String operationName,
       {Map<String, dynamic>? metadata}) {
     _performanceMonitor.startOperation(operationName, metadata: metadata);
   }
 
-  /// パフォーマンス測定を終了
+  /// End performance measurement
   void endPerformanceMeasurement(String operationName,
       {Map<String, dynamic>? metadata}) {
     _performanceMonitor.endOperation(operationName, metadata: metadata);
   }
 
-  /// パフォーマンス測定（同期）
+  /// Performance measurement (synchronous)
   T measurePerformance<T>(
     String operationName,
     T Function() operation, {
@@ -137,7 +137,7 @@ class PloughDebugManager {
         metadata: metadata);
   }
 
-  /// パフォーマンス測定（非同期）
+  /// Performance measurement (asynchronous)
   Future<T> measurePerformanceAsync<T>(
     String operationName,
     Future<T> Function() operation, {
@@ -147,14 +147,14 @@ class PloughDebugManager {
         metadata: metadata);
   }
 
-  /// グラフの状態をデバッグサーバーにブロードキャスト
+  /// Broadcast graph state to debug server
   void broadcastGraphState(Map<String, dynamic> state) {
     if (_debugServer.isRunning) {
       _debugServer.broadcastGraphState(state);
     }
   }
 
-  /// デバッグレポートを生成
+  /// Generate debug report
   Map<String, dynamic> generateDebugReport() {
     return {
       'timestamp': DateTime.now().toIso8601String(),
@@ -175,14 +175,14 @@ class PloughDebugManager {
     };
   }
 
-  /// デバッグ情報をクリア
+  /// Clear debug information
   void clearDebugData() {
     _structuredLogger.clear();
     _performanceMonitor.clear();
     logInfo(LogCategory.debug, 'Debug data cleared');
   }
 
-  /// デバッグ設定を取得
+  /// Get debug settings
   Map<String, dynamic> getDebugSettings() {
     return {
       'initialized': _initialized,
@@ -192,7 +192,7 @@ class PloughDebugManager {
     };
   }
 
-  /// デバッグ設定を更新
+  /// Update debug settings
   Future<void> updateDebugSettings({
     bool? enableServer,
     bool? enablePerformanceMonitoring,
@@ -213,24 +213,24 @@ class PloughDebugManager {
     logInfo(LogCategory.debug, 'Debug settings updated');
   }
 
-  /// Hot reload時のクリーンアップ
+  /// Cleanup for hot reload
   void _cleanupForHotReload() {
     try {
-      // サーバーを強制停止
+      // Force stop server
       if (_debugServer.isRunning) {
         PloughMonitorServer.resetInstance();
       }
       _initialized = false;
     } on Exception {
-      // エラーを無視
+      // Ignore errors
     }
   }
 }
 
-/// グローバルなデバッグマネージャーインスタンス
+/// Global debug manager instance
 final PloughDebugManager debugManager = PloughDebugManager();
 
-/// 便利な関数群
+/// Convenience functions
 @internal
 Future<void> initializeDebug({
   bool enableServer = true,

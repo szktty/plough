@@ -92,9 +92,9 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   @override
   Listenable get renderStateListenable => _renderStateListenable;
 
-  /// 状態を更新し、変更を通知する
+  /// Update state and notify changes
   ///
-  /// UIに反映したい変更に使用します。
+  /// Use for changes you want to reflect in the UI.
   void updateWith({
     double? weight,
     Offset? logicalPosition,

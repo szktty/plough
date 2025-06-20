@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/utils/logger.dart';
 
-/// モニタリング用HTTPサーバー
+/// HTTP server for monitoring
 ///
-/// リアルタイムでログやグラフの状態を監視できるWebインターフェースを提供
+/// Provides a web interface for real-time monitoring of logs and graph state
 @internal
 class PloughMonitorServer {
   PloughMonitorServer._();
@@ -15,7 +15,7 @@ class PloughMonitorServer {
 
   static PloughMonitorServer? _instance;
 
-  /// Hot reload時のクリーンアップをサポート
+  /// Support cleanup for hot reload
   static void resetInstance() {
     _instance?._forceShutdown();
     _instance = null;
@@ -31,7 +31,7 @@ class PloughMonitorServer {
   int get port => _port;
   String get url => 'http://localhost:$_port';
 
-  /// モニタリングサーバーを開始
+  /// Start monitoring server
   Future<void> start({int port = 8080, bool tryAlternativePorts = true}) async {
     if (_server != null) {
       logWarning(
@@ -41,7 +41,7 @@ class PloughMonitorServer {
 
     _port = port;
 
-    // 代替ポートのリスト
+    // List of alternative ports
     final portsToTry = tryAlternativePorts
         ? [port, port + 1, port + 2, port + 10, port + 100]
         : [port];

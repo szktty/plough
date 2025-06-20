@@ -77,10 +77,10 @@ base class GraphTreeLayoutStrategy extends GraphLayoutStrategy {
     this.siblingNodeComparator,
   });
 
-  /// ツリーの展開方向
+  /// Tree expansion direction
   final GraphTreeLayoutDirection direction;
 
-  /// ルートノードのID
+  /// Root node ID
   final GraphId? rootNodeId;
 
   /// Callback for selecting the root node.

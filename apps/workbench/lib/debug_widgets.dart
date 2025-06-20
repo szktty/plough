@@ -98,7 +98,7 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
                               size: 18 * widget.uiScale,
                             ),
                             onPressed: () => _copyEventToClipboard(),
-                            tooltip: 'ログをクリップボードにコピー',
+                            tooltip: 'Copy log to clipboard',
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
@@ -186,67 +186,67 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
   String _getHumanReadableKey(String key) {
     const keyTranslations = {
       // Event information
-      'event_type': 'イベント種別',
-      'phase': 'フェーズ',
-      'timestamp': 'タイムスタンプ',
+      'event_type': 'Event Type',
+      'phase': 'Phase',
+      'timestamp': 'Timestamp',
       
       // Entity information
-      'nodeTargetId': 'ターゲットノード',
-      'entityId': 'エンティティID',
-      'tracked_entity_id': '追跡エンティティ',
-      'node_at_position': 'ポジションのノード',
+      'nodeTargetId': 'Target Node',
+      'entityId': 'Entity ID',
+      'tracked_entity_id': 'Tracked Entity',
+      'node_at_position': 'Node at Position',
       
       // State information
-      'state_exists': '状態存在',
-      'state_completed': '状態完了',
-      'state_cancelled': '状態キャンセル',
-      'tap_count': 'タップ回数',
+      'state_exists': 'State Exists',
+      'state_completed': 'State Completed',
+      'state_cancelled': 'State Cancelled',
+      'tap_count': 'Tap Count',
       
       // Drag information
-      'is_still_dragging_after_up': 'アップ後ドラッグ継続',
-      'is_tap_completed_after_up': 'アップ後タップ完了',
-      'will_toggle_selection': '選択状態切替',
-      'drag_state_exists': 'ドラッグ状態存在',
-      'drag_manager_is_dragging': 'ドラッグマネージャー動作中',
+      'is_still_dragging_after_up': 'Still Dragging After Up',
+      'is_tap_completed_after_up': 'Tap Completed After Up',
+      'will_toggle_selection': 'Will Toggle Selection',
+      'drag_state_exists': 'Drag State Exists',
+      'drag_manager_is_dragging': 'Drag Manager Active',
       
       // Touch/gesture information
-      'touch_slop': 'タッチスロップ',
-      'k_touch_slop': 'タッチスロップ定数',
-      'distance': '距離',
-      'isWithinSlop': 'スロップ内',
-      'gesture_mode': 'ジェスチャーモード',
+      'touch_slop': 'Touch Slop',
+      'k_touch_slop': 'Touch Slop Constant',
+      'distance': 'Distance',
+      'isWithinSlop': 'Within Slop',
+      'gesture_mode': 'Gesture Mode',
       
       // Position information
-      'pointer_position': 'ポインター位置',
-      'node_position': 'ノード位置',
-      'down_position': 'ダウン位置',
-      'up_position': 'アップ位置',
-      'downPosition': 'ダウン位置',
+      'pointer_position': 'Pointer Position',
+      'node_position': 'Node Position',
+      'down_position': 'Down Position',
+      'up_position': 'Up Position',
+      'downPosition': 'Down Position',
       
       // Node capabilities
-      'node_can_select': 'ノード選択可能',
-      'node_can_drag': 'ノードドラッグ可能',
-      'node_is_selected': 'ノード選択済み',
+      'node_can_select': 'Node Can Select',
+      'node_can_drag': 'Node Can Drag',
+      'node_is_selected': 'Node Is Selected',
       
       // Timing information
-      'downTime': 'ダウン時刻',
-      'timeout_ms': 'タイムアウト(ms)',
-      'double_tap_timeout_ms': 'ダブルタップタイムアウト(ms)',
-      'has_double_tap_timer': 'ダブルタップタイマー有',
-      'time_since_down_ms': 'ダウンからの時間(ms)',
+      'downTime': 'Down Time',
+      'timeout_ms': 'Timeout (ms)',
+      'double_tap_timeout_ms': 'Double Tap Timeout (ms)',
+      'has_double_tap_timer': 'Has Double Tap Timer',
+      'time_since_down_ms': 'Time Since Down (ms)',
       
       // State counts
-      'tap_manager_states_count': 'タップマネージャー状態数',
+      'tap_manager_states_count': 'Tap Manager States Count',
       
       // Debug information
-      'tap_debug_info': 'タップデバッグ情報',
-      'completed': '完了',
-      'cancelled': 'キャンセル',
-      'tapCount': 'タップ回数',
+      'tap_debug_info': 'Tap Debug Info',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled',
+      'tapCount': 'Tap Count',
       
       // Failure information
-      'failure_reason': '失敗理由',
-      'reason': '理由',
+      'failure_reason': 'Failure Reason',
+      'reason': 'Reason',
     };
     
     return keyTranslations[key] ?? _convertCamelCaseToReadable(key);
@@ -289,7 +289,7 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
     }
     
     if (value is bool) {
-      return value ? '真' : '偽';
+      return value ? 'true' : 'false';
     }
     
     if (value is Map || value is List) {
@@ -327,7 +327,7 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('ログをクリップボードにコピーしました'),
+              content: Text('Log copied to clipboard'),
               duration: Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
             ),
@@ -341,7 +341,7 @@ class _ExpandableDebugEventState extends State<ExpandableDebugEvent> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('コピーに失敗しました: $e'),
+            content: Text('Copy failed: $e'),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red,

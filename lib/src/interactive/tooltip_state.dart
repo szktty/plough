@@ -16,17 +16,17 @@ class _TooltipState {
   bool isVisible = false;
 }
 
-/// グラフ要素のツールチップ表示状態を管理します。
+/// Manages tooltip display state for graph elements.
 ///
-/// ツールチップの表示/非表示、遷移のタイミングを制御します。
-/// 主要な機能：
+/// Controls tooltip show/hide and transition timing.
+/// Main features:
 ///
-/// * [handleMouseHover], マウスホバーによる表示を処理
-/// * [handleMouseExit], マウスホバーの終了を処理
-/// * [show], ツールチップを表示
-/// * [toggle], ツールチップの表示/非表示を切り替え
+/// * [handleMouseHover], processes display by mouse hover
+/// * [handleMouseExit], processes end of mouse hover
+/// * [show], displays tooltip
+/// * [toggle], toggles tooltip show/hide
 ///
-/// 使用例：
+/// Usage example:
 /// ```dart
 /// final manager = GraphNodeTooltipStateManager(
 ///   gestureManager: myGestureManager,
@@ -178,9 +178,9 @@ abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
   }
 }
 
-/// ノード要素のツールチップ状態を管理します。
+/// Manages tooltip state for node elements.
 ///
-/// ノード固有のツールチップの表示動作を制御します。
+/// Controls node-specific tooltip display behavior.
 @internal
 final class GraphNodeTooltipStateManager
     extends GraphEntityTooltipStateManager<GraphNode> {
@@ -196,9 +196,9 @@ final class GraphNodeTooltipStateManager
   GraphEntityType get entityType => GraphEntityType.node;
 }
 
-/// リンク要素のツールチップ状態を管理します。
+/// Manages tooltip state for link elements.
 ///
-/// リンク固有のツールチップの表示動作を制御します。
+/// Controls link-specific tooltip display behavior.
 @internal
 final class GraphLinkTooltipStateManager
     extends GraphEntityTooltipStateManager<GraphLink> {

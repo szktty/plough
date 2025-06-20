@@ -215,7 +215,7 @@ class GraphViewState extends State<GraphView> {
   @override
   void didUpdateWidget(covariant GraphView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // より厳密な条件でのみ再初期化を行う
+    // Reinitialize only under stricter conditions
     final needsReinit = widget.graph != oldWidget.graph ||
         widget.layoutStrategy.runtimeType !=
             oldWidget.layoutStrategy.runtimeType ||
