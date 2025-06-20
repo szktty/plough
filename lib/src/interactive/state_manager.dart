@@ -76,19 +76,7 @@ abstract base class GraphStateManager<T> with Diagnosticable {
   bool get isActive => activeCount > 0;
 
   T? getState(GraphId entityId) {
-    final state = _states[entityId];
-    logGestureDebug(
-      GestureDebugEventType.tapDebugState,
-      'StateManager',
-      'GET_STATE',
-      data: {
-        'entityId': entityId.value.substring(0, 8),
-        'hasState': state != null,
-        'entityType': entityType.name,
-        'totalStates': _states.length,
-      },
-    );
-    return state;
+    return _states[entityId];
   }
 
   void setState(GraphId entityId, T state) {

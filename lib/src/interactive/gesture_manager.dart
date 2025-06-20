@@ -419,7 +419,7 @@ class GraphGestureManager {
       logGestureDebug(
         GestureDebugEventType.tapDebugState,
         'GraphGestureManager',
-        'TAP_DEBUG_STATE_DOWN',
+        'TAP_STATE_DOWN',
         data: {
           'event_type': 'tap_debug_state',
           'phase': 'down',
@@ -659,7 +659,7 @@ class GraphGestureManager {
       logGestureDebug(
         GestureDebugEventType.tapDebugState,
         'GraphGestureManager',
-        'TAP_DEBUG_STATE_UP',
+        'TAP_STATE_UP',
         data: {
           'event_type': 'tap_debug_state',
           'phase': 'up',
@@ -701,7 +701,7 @@ class GraphGestureManager {
       externalDebugClient.sendLog(
         category: LogCategory.gesture,
         level: 'DEBUG',
-        message: 'TAP_DEBUG_STATE',
+        message: 'TAP_STATE',
         metadata: {
           'event_type': 'tap_debug_state',
           'nodeTargetId': nodeTargetId?.value ?? 'null',
@@ -1177,7 +1177,7 @@ class GraphGestureManager {
           logGestureDebug(
             GestureDebugEventType.tapDebugState,
             'GraphGestureManager',
-            'TAP_DEBUG_STATE_MOVE',
+            'TAP_STATE_MOVE',
             data: {
               'event_type': 'tap_debug_state',
               'phase': 'move',

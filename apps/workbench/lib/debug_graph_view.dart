@@ -101,7 +101,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onTap fired',
+        message: 'ON_TAP_FIRED',
         timestamp: DateTime.now(),
         details: details,
       ));
@@ -128,7 +128,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onDoubleTap fired',
+        message: 'ON_DOUBLE_TAP_FIRED',
         timestamp: DateTime.now(),
         details: details,
       ));
@@ -153,7 +153,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onSelectionChange fired',
+        message: 'ON_SELECTION_CHANGE_FIRED',
         timestamp: DateTime.now(),
         details:
             'Selected: $selectedCount, Deselected: $deselectedCount, Current: $currentCount',
@@ -228,7 +228,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onHoverEnter fired',
+        message: 'ON_HOVER_ENTER_FIRED',
         timestamp: DateTime.now(),
         details:
             'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
@@ -247,7 +247,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onHoverMove fired',
+        message: 'ON_HOVER_MOVE_FIRED',
         timestamp: DateTime.now(),
         details:
             'Entity ID: ${event.entityId}, Position: ${event.details.localPosition}',
@@ -262,7 +262,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onHoverEnd fired',
+        message: 'ON_HOVER_END_FIRED',
         timestamp: DateTime.now(),
         details: 'Position: ${event.details.localPosition}',
       ));
@@ -278,7 +278,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onTooltipShow fired',
+        message: 'ON_TOOLTIP_SHOW_FIRED',
         timestamp: DateTime.now(),
         details: 'Entity ID: ${event.entityId}',
       ));
@@ -292,7 +292,7 @@ class DebugGraphViewBehavior extends GraphViewDefaultBehavior {
       onEvent(DebugEvent(
         type: EventType.callback,
         source: 'DebugGraphViewBehavior',
-        message: 'onTooltipHide fired',
+        message: 'ON_TOOLTIP_HIDE_FIRED',
         timestamp: DateTime.now(),
         details: 'Entity ID: ${event.entityId}',
       ));
