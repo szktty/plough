@@ -197,36 +197,50 @@ This architecture ensures the most responsive possible interaction experience.
 #### Tap Detection (`tap_state.dart`)
 
 **Algorithm and Thresholds**:
-- **Touch Slop**: `kTouchSlop * 4` (32 pixels on most devices) for forgiving tap recognition
-- **Double Tap**: 200ms timeout between taps, uses `kDoubleTapSlop` for position tolerance
+- **Touch Slop**: `kTouchSlop * 8` (64 pixels on most devices) for highly forgiving tap recognition
+- **Double Tap**: 500ms timeout between taps, uses `kDoubleTapSlop` for position tolerance
 - **State Tracking**: Tracks entityId, positions, timestamps, and completion status
 
 **Detection Flow**:
 1. Pointer down → Create/update tap state with position and time
 2. Pointer up → Validate movement within slop, mark completed if valid
-3. Timer (200ms) → Distinguish single vs double tap
-4. Cancellation → Drag movement beyond slop cancels tap
+3. Timer (500ms) → Distinguish single vs double tap
+4. Cancellation → Drag movement beyond drag threshold cancels tap
 
 **Callback Timing**:
 - `onTap(GraphTapEvent)` - Called immediately after pointer up when tap is valid
   - Parameters: entityIds, tapCount (1 or 2), pointer details
 
-#### Drag Detection (`drag_state.dart`)
+#### Drag Detection with Pan Ready State (`pan_ready_state.dart`, `drag_state.dart`)
+
+**Pan Ready State Algorithm**:
+- **Drag Threshold**: 8.0 pixels movement to trigger actual drag start
+- **Max Ready Duration**: 200ms timeout to prevent stuck states
+- **State Separation**: Distinguishes between "ready to drag" and "actively dragging"
+
+**Improved Detection Flow**:
+1. Pointer down → Create tap state
+2. Pan start → Create Pan Ready state (not actual drag yet)
+3. Pan update → Check movement distance against 8px threshold
+4. Distance ≥ 8px → Cancel tap, start actual drag, trigger onDragStart
+5. Distance < 8px → Maintain Ready state, keep tap possibility alive
 
 **Features and Behavior**:
-- Uses Flutter's standard pan gesture thresholds
-- Automatically stops node animations during drag
-- Real-time position updates with delta calculation
+- Solves Flutter's limitation where `pan start` fires immediately on `pointer down`
+- Prevents accidental drag detection from minor finger movements
+- Enables proper double-tap functionality by delaying drag commitment
+- Automatically stops node animations only when actual drag starts
 - Link dragging explicitly disabled
 
 **State Management**:
-- Tracks start position, initial logical position, current position
-- Maintains drag state throughout gesture lifecycle
+- **Pan Ready State**: Tracks entityId, start position, start time, drag readiness
+- **Actual Drag State**: Tracks start position, initial logical position, current position
+- Maintains state throughout gesture lifecycle with automatic cleanup
 
 **Callback Timing**:
-- `onDragStart(GraphDragStartEvent)` - Called when pan gesture begins
+- `onDragStart(GraphDragStartEvent)` - Called only when movement exceeds 8px threshold
   - Parameters: entityIds, start position details
-- `onDragUpdate(GraphDragUpdateEvent)` - Called for each pan update
+- `onDragUpdate(GraphDragUpdateEvent)` - Called for each pan update after drag starts
   - Parameters: entityIds, current position, delta from last update
 - `onDragEnd(GraphDragEndEvent)` - Called when pan gesture ends
   - Parameters: entityIds, end position details
@@ -442,11 +456,23 @@ sequenceDiagram
 
 ### Key Algorithms
 
-#### Touch Slop Validation
+#### Touch Slop Validation (Tap Detection)
 ```dart
 bool _isWithinTapSlop(Offset p1, Offset p2) {
   final distanceSquared = (p1 - p2).distanceSquared;
-  return distanceSquared < touchSlop * touchSlop;
+  return distanceSquared < touchSlop * touchSlop; // touchSlop = kTouchSlop * 8
+}
+```
+
+#### Drag Threshold Validation (Pan Ready State)
+```dart
+void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
+  final distance = (details.localPosition - state.startPosition).distance;
+  
+  if (distance >= dragStartThreshold) { // dragStartThreshold = 8.0px
+    // 閾値超過 → 実際のドラッグ開始
+    _startActualDrag(entityId, state, details);
+  }
 }
 ```
 
@@ -484,11 +510,14 @@ switch (gestureMode) {
 
 ### Performance Optimizations
 
-1. **Touch Target Forgiveness**: 4x standard slop for better mobile UX
-2. **State Isolation**: Separate managers prevent conflicts
-3. **Event Batching**: Reduces rebuild frequency
-4. **Silent Operations**: Avoid triggering rebuilds when cleaning up
-5. **Animation Control**: Auto-stop during interactions
+1. **Touch Target Forgiveness**: 8x standard slop (64px) for highly forgiving tap recognition
+2. **Pan Ready State**: Delayed drag commitment prevents false positives and enables double-tap
+3. **Drag Threshold**: 8px movement threshold prevents accidental drag detection
+4. **State Isolation**: Separate managers prevent conflicts between gestures
+5. **Event Batching**: Reduces rebuild frequency for selection changes
+6. **Silent Operations**: Avoid triggering rebuilds when cleaning up states
+7. **Animation Control**: Auto-stop only when actual drag starts (not on pan ready)
+8. **Automatic Cleanup**: 200ms timeout for pan ready states prevents memory leaks
 
 ### Debug and Telemetry
 
@@ -514,14 +543,16 @@ switch (gestureMode) {
 
 1. **Single Tap Selection**: Toggle node/link selection state
    - Flow: PointerDown → PointerUp → onTap → onSelectionChange
-2. **Double Tap Action**: Custom behavior via callbacks
-   - Flow: First tap → 200ms wait → Second tap → onTap(tapCount: 2)
-3. **Drag to Move**: Real-time node position updates
-   - Flow: PanStart → onDragStart → PanUpdate(s) → onDragUpdate(s) → PanEnd → onDragEnd
+2. **Double Tap Action**: Improved reliability with pan ready state
+   - Flow: First tap → 500ms wait → Second tap → onTap(tapCount: 2)
+3. **Drag to Move**: Enhanced with pan ready state for precision
+   - Flow: PanStart → PanReady → Movement ≥8px → onDragStart → PanUpdate(s) → onDragUpdate(s) → PanEnd → onDragEnd
 4. **Hover Preview**: Tooltip display after delay
    - Flow: MouseEnter → onHoverEnter → 500ms delay → onTooltipShow
 5. **Background Tap**: Deselect all when tapping empty space
    - Flow: Tap on background → onBackgroundTapped → onSelectionChange(deselectedIds: all)
+6. **Pan Ready State**: Prevents false drag detection
+   - Flow: PointerDown → PanStart → PanReady (waiting) → Movement <8px → PointerUp → Tap successful
 
 ### Extension Points
 

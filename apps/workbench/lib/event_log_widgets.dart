@@ -84,8 +84,10 @@ class EventLogPanel extends StatelessWidget {
                   GestureTestTab(
                     selectedGestureTest: selectedGestureTest,
                     gestureValidationResults: gestureValidationResults,
+                    enhancedValidationResults: const [], // TODO: Add enhanced validation results
                     onGestureTestChanged: onGestureTestChanged,
                     onClearResults: onClearValidationResults,
+                    onClearEnhancedResults: () {}, // TODO: Add enhanced clear callback
                     uiScale: uiScale,
                   ),
                 ],

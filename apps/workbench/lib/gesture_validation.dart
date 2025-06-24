@@ -1,7 +1,41 @@
 import 'package:flutter/material.dart';
 import 'models.dart';
+import 'validation_engine.dart';
+import 'enhanced_validation_widgets.dart';
 
 class GestureValidator {
+  // Enhanced validator instance for advanced validation features
+  static final AdvancedGestureValidator _enhancedValidator = AdvancedGestureValidator();
+  
+  /// Enhanced validation using the new validation engine
+  static Future<void> validateTapBehaviorEnhanced(
+    Map<String, dynamic> debugState,
+    GestureTestType selectedGestureTest,
+    List<EnhancedValidationResult> validationResults,
+  ) async {
+    try {
+      final result = await _enhancedValidator.validate(debugState, selectedGestureTest);
+      
+      if (result.checks.isNotEmpty) {
+        validationResults.insert(0, result);
+        
+        // Keep maximum 100 items
+        if (validationResults.length > 100) {
+          validationResults.removeRange(100, validationResults.length);
+        }
+      }
+    } catch (e) {
+      // Handle validation errors gracefully
+      debugPrint('Enhanced validation error: $e');
+    }
+  }
+  
+  /// Get validation statistics for enhanced results
+  static ValidationStatistics getValidationStatistics(List<EnhancedValidationResult> results) {
+    return _enhancedValidator.getStatistics(results);
+  }
+  
+  /// Legacy validation method (kept for backward compatibility)
   static void validateTapBehavior(
     Map<String, dynamic> debugState,
     GestureTestType selectedGestureTest,
@@ -286,14 +320,123 @@ class GestureValidator {
   }
 }
 
-class GestureTestTab extends StatelessWidget {
+/// Enhanced gesture test tab with mode switching
+class GestureTestTab extends StatefulWidget {
+  final GestureTestType selectedGestureTest;
+  final List<GestureValidationResult> gestureValidationResults;
+  final List<EnhancedValidationResult> enhancedValidationResults;
+  final ValueChanged<GestureTestType> onGestureTestChanged;
+  final VoidCallback onClearResults;
+  final VoidCallback onClearEnhancedResults;
+  final double uiScale;
+
+  const GestureTestTab({
+    super.key,
+    required this.selectedGestureTest,
+    required this.gestureValidationResults,
+    required this.enhancedValidationResults,
+    required this.onGestureTestChanged,
+    required this.onClearResults,
+    required this.onClearEnhancedResults,
+    required this.uiScale,
+  });
+
+  @override
+  State<GestureTestTab> createState() => _GestureTestTabState();
+}
+
+class _GestureTestTabState extends State<GestureTestTab> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+  
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Mode selection tabs
+        Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: Colors.blue[600],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey[600],
+            labelStyle: TextStyle(
+              fontSize: 14 * widget.uiScale,
+              fontWeight: FontWeight.w600,
+            ),
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.science, size: 20),
+                text: 'Enhanced',
+              ),
+              Tab(
+                icon: Icon(Icons.list_alt, size: 20),
+                text: 'Legacy',
+              ),
+            ],
+          ),
+        ),
+        
+        // Tab content
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              // Enhanced validation tab
+              EnhancedGestureTestTab(
+                selectedGestureTest: widget.selectedGestureTest,
+                validationResults: widget.enhancedValidationResults,
+                onGestureTestChanged: widget.onGestureTestChanged,
+                onClearResults: widget.onClearEnhancedResults,
+                uiScale: widget.uiScale,
+                validator: GestureValidator._enhancedValidator,
+              ),
+              
+              // Legacy validation tab
+              LegacyGestureTestTab(
+                selectedGestureTest: widget.selectedGestureTest,
+                gestureValidationResults: widget.gestureValidationResults,
+                onGestureTestChanged: widget.onGestureTestChanged,
+                onClearResults: widget.onClearResults,
+                uiScale: widget.uiScale,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Legacy gesture test tab (original implementation)
+class LegacyGestureTestTab extends StatelessWidget {
   final GestureTestType selectedGestureTest;
   final List<GestureValidationResult> gestureValidationResults;
   final ValueChanged<GestureTestType> onGestureTestChanged;
   final VoidCallback onClearResults;
   final double uiScale;
 
-  const GestureTestTab({
+  const LegacyGestureTestTab({
     super.key,
     required this.selectedGestureTest,
     required this.gestureValidationResults,
