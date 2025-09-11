@@ -13,7 +13,7 @@ format:
 	$(DART) format lib test
 
 test:
-	$(DART) test
+	$(FLUTTER) test
 
 test-web:
 	$(DART) test -p chrome
@@ -29,3 +29,11 @@ pubpoints:
 
 generate:
 	$(DART) run build_runner build --delete-conflicting-outputs
+
+
+# Flutter tests (widget/gesture)
+test-flutter:
+	$(FLUTTER) test
+
+# Run both dart (if any pure-dart tests exist) and flutter tests
+test-all: test
