@@ -63,3 +63,4 @@ test/node_position_debug.dart
 test/pure_background_flickering_test.dart
 test/race_condition_test.dart
 test/simple_background_test.dart
+_private
