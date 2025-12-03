@@ -98,7 +98,7 @@ class _GraphDefaultNodeRendererState extends State<GraphDefaultNodeRenderer> {
                 ),
               ),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: style.padding,
                 decoration: BoxDecoration(
                   color: style.color,
                   shape: BoxShape.circle,
@@ -133,7 +133,7 @@ class _GraphDefaultNodeRendererState extends State<GraphDefaultNodeRenderer> {
             ),
           ),
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: style.padding,
             decoration: BoxDecoration(
               color: style.color,
               border: Border.all(
