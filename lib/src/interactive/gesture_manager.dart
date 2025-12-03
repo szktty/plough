@@ -406,12 +406,12 @@ class GraphGestureManager {
         },
       );
 
-      debugPrint('TAP DEBUG DOWN: node.id=${node.id.value.substring(0, 8)}');
-      debugPrint('TAP DEBUG DOWN: Before handlePointerDown - trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
+      logDebug(LogCategory.tap, 'TAP DEBUG DOWN: node.id=${node.id.value.substring(0, 8)}');
+      logDebug(LogCategory.tap, 'TAP DEBUG DOWN: Before handlePointerDown - trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
       _nodeTapManager.handlePointerDown(node.id, event);
       _nodeDragManager.handlePointerDown(node.id, event);
-      debugPrint(
-          'TAP DEBUG DOWN: trackedEntityId after handlePointerDown=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
+      logDebug(
+          LogCategory.tap, 'TAP DEBUG DOWN: trackedEntityId after handlePointerDown=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
 
       // Send TAP_DEBUG_STATE after pointer down
       final tapState = _nodeTapManager.getState(node.id);
@@ -548,22 +548,22 @@ class GraphGestureManager {
     final nodeAtPosition = findNodeAt(event.localPosition);
     
     // CRITICAL DEBUG: Check all tap states before determining nodeTargetId
-    debugPrint('TAP DEBUG UP: All tap states before nodeTargetId determination:');
+    logDebug(LogCategory.tap, 'TAP DEBUG UP: All tap states before nodeTargetId determination:');
     for (final state in _nodeTapManager.states) {
       final tapState = state as dynamic;
-      debugPrint('  - entityId=${tapState.entityId.value.substring(0, 8)}, cancelled=${tapState.cancelled}, completed=${tapState.completed}');
+      logDebug(LogCategory.tap, '  - entityId=${tapState.entityId.value.substring(0, 8)}, cancelled=${tapState.cancelled}, completed=${tapState.completed}');
     }
     
     final nodeTargetId = nodeAtPosition?.id ??
         _nodeTapManager.trackedEntityId ??
         _nodeDragManager.lastDraggedEntityId;
-    debugPrint(
+    logDebug(LogCategory.tap,
         'TAP DEBUG: nodeAtPosition=${nodeAtPosition?.id.value.substring(0, 8) ?? 'null'}');
-    debugPrint(
+    logDebug(LogCategory.tap,
         'TAP DEBUG: trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
-    debugPrint(
+    logDebug(LogCategory.tap,
         'TAP DEBUG: lastDraggedEntityId=${_nodeDragManager.lastDraggedEntityId?.value.substring(0, 8) ?? 'null'}');
-    debugPrint(
+    logDebug(LogCategory.tap,
         'TAP DEBUG: final nodeTargetId=${nodeTargetId?.value.substring(0, 8) ?? 'null'}');
 
     logDebug(
@@ -718,22 +718,22 @@ class GraphGestureManager {
         },
       );
 
-      debugPrint(
+      logDebug(LogCategory.tap,
           'TAP DEBUG: nodeTargetId=${nodeTargetId?.value.substring(0, 8) ?? 'null'}');
-      debugPrint('TAP DEBUG: state exists=${tapState != null}');
-      debugPrint('TAP DEBUG: completed=${tapState?.completed}');
-      debugPrint('TAP DEBUG: cancelled=${tapState?.cancelled}');
-      debugPrint('TAP DEBUG: tapCount=${tapState?.tapCount}');
-      debugPrint(
+      logDebug(LogCategory.tap, 'TAP DEBUG: state exists=${tapState != null}');
+      logDebug(LogCategory.tap, 'TAP DEBUG: completed=${tapState?.completed}');
+      logDebug(LogCategory.tap, 'TAP DEBUG: cancelled=${tapState?.cancelled}');
+      logDebug(LogCategory.tap, 'TAP DEBUG: tapCount=${tapState?.tapCount}');
+      logDebug(LogCategory.tap,
           'TAP DEBUG: trackedEntityId=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}');
 
-      debugPrint(
+      logDebug(LogCategory.tap,
           'TAP DEBUG: Final check - isStillDraggingAfterUp=$isStillDraggingAfterUp, isTapCompletedAfterUp=$isTapCompletedAfterUp');
 
-      debugPrint(
+      logDebug(LogCategory.tap,
           'isStillDraggingAfterUp: $isStillDraggingAfterUp, isTapCompletedAfterUp: $isTapCompletedAfterUp');
       if (!isStillDraggingAfterUp && isTapCompletedAfterUp) {
-        debugPrint('tap!');
+        logDebug(LogCategory.tap, 'tap!');
         
         final tapCount = _nodeTapManager.getTapCount(nodeTargetId) ?? 1;
         logDebug(LogCategory.tap, 'Node tap count detected: $tapCount for ${nodeTargetId.value.substring(0, 8)}');

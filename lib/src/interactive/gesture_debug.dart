@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:plough/src/utils/logger.dart';
 import '../graph/id.dart';
 
 /// Global gesture debug mode flag
@@ -15,9 +16,9 @@ final _debugEventController = StreamController<GestureDebugEvent>.broadcast();
 void setGestureDebugMode(bool enabled) {
   _gestureDebugEnabled = enabled;
   if (enabled) {
-    debugPrint('🔧 Gesture Debug Mode ENABLED - Internal state logging activated');
+    logDebug(LogCategory.debug, '🔧 Gesture Debug Mode ENABLED - Internal state logging activated');
   } else {
-    debugPrint('🔧 Gesture Debug Mode DISABLED');
+    logDebug(LogCategory.debug, '🔧 Gesture Debug Mode DISABLED');
   }
 }
 
@@ -167,7 +168,7 @@ void logGestureDebug(
   );
 
   // Human-readable console output
-  debugPrint(event.toString());
+  logDebug(LogCategory.gesture, event.toString());
   
   // Structured event for external consumption (workbench)
   _debugEventController.add(event);

@@ -7,6 +7,7 @@ import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/signals.dart';
 import 'package:plough/src/graph_view/inherited_data.dart';
 
@@ -227,7 +228,7 @@ class GraphImpl
 
   /// Notify layout-related changes
   void _notifyLayoutChange() {
-    debugPrint(
+    logDebug(LogCategory.layout,
         '📐 Graph._notifyLayoutChange() called - value: ${_layoutChangeNotifier.value} -> ${_layoutChangeNotifier.value + 1}');
     _layoutChangeNotifier.value++;
   }

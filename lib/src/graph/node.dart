@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
+import 'package:plough/src/utils/logger.dart';
 
 /// Core component of graph visualization that manages visual properties, animation states,
 /// and interaction behaviors. Extends [GraphEntity] with node-specific functionality.
@@ -136,7 +137,7 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   @override
   set logicalPosition(Offset position) {
     if (_logicalPosition.value != position) {
-      debugPrint(
+      logDebug(LogCategory.layout,
           '📍 Node ${id.value.substring(0, 4)} position changed: ${_logicalPosition.value} -> $position');
     }
     _logicalPosition.value = position;
