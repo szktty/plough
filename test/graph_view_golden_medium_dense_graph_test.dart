@@ -5,7 +5,9 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: medium dense graph (2x5 grid, mixed links, mixed selections)', (tester) async {
+  testWidgets(
+      'GraphView golden: medium dense graph (2x5 grid, mixed links, mixed selections)',
+      (tester) async {
     final g = Graph();
 
     GraphNode mk(String name) => GraphNode(properties: {'label': name});
@@ -21,29 +23,56 @@ void main() {
     final n9 = mk('N9');
     final n10 = mk('N10');
 
-    for (final n in [n1,n2,n3,n4,n5,n6,n7,n8,n9,n10]) {
+    for (final n in [n1, n2, n3, n4, n5, n6, n7, n8, n9, n10]) {
       g.addNode(n);
     }
 
     // Row links
-    final l12 = GraphLink(source: n1, target: n2, direction: GraphLinkDirection.outgoing);
-    final l23 = GraphLink(source: n2, target: n3, direction: GraphLinkDirection.bidirectional);
-    final l34 = GraphLink(source: n3, target: n4, direction: GraphLinkDirection.outgoing);
-    final l45 = GraphLink(source: n4, target: n5, direction: GraphLinkDirection.none);
+    final l12 = GraphLink(
+        source: n1, target: n2, direction: GraphLinkDirection.outgoing);
+    final l23 = GraphLink(
+        source: n2, target: n3, direction: GraphLinkDirection.bidirectional);
+    final l34 = GraphLink(
+        source: n3, target: n4, direction: GraphLinkDirection.outgoing);
+    final l45 =
+        GraphLink(source: n4, target: n5, direction: GraphLinkDirection.none);
 
-    final l67 = GraphLink(source: n6, target: n7, direction: GraphLinkDirection.outgoing);
-    final l78 = GraphLink(source: n7, target: n8, direction: GraphLinkDirection.outgoing);
-    final l89 = GraphLink(source: n8, target: n9, direction: GraphLinkDirection.bidirectional);
-    final l9a = GraphLink(source: n9, target: n10, direction: GraphLinkDirection.outgoing);
+    final l67 = GraphLink(
+        source: n6, target: n7, direction: GraphLinkDirection.outgoing);
+    final l78 = GraphLink(
+        source: n7, target: n8, direction: GraphLinkDirection.outgoing);
+    final l89 = GraphLink(
+        source: n8, target: n9, direction: GraphLinkDirection.bidirectional);
+    final l9a = GraphLink(
+        source: n9, target: n10, direction: GraphLinkDirection.outgoing);
 
     // Cross links
-    final l16 = GraphLink(source: n1, target: n6, direction: GraphLinkDirection.outgoing);
-    final l27 = GraphLink(source: n2, target: n7, direction: GraphLinkDirection.outgoing);
-    final l38 = GraphLink(source: n3, target: n8, direction: GraphLinkDirection.outgoing);
-    final l49 = GraphLink(source: n4, target: n9, direction: GraphLinkDirection.outgoing);
-    final l5a = GraphLink(source: n5, target: n10, direction: GraphLinkDirection.outgoing);
+    final l16 = GraphLink(
+        source: n1, target: n6, direction: GraphLinkDirection.outgoing);
+    final l27 = GraphLink(
+        source: n2, target: n7, direction: GraphLinkDirection.outgoing);
+    final l38 = GraphLink(
+        source: n3, target: n8, direction: GraphLinkDirection.outgoing);
+    final l49 = GraphLink(
+        source: n4, target: n9, direction: GraphLinkDirection.outgoing);
+    final l5a = GraphLink(
+        source: n5, target: n10, direction: GraphLinkDirection.outgoing);
 
-    for (final l in [l12,l23,l34,l45,l67,l78,l89,l9a,l16,l27,l38,l49,l5a]) {
+    for (final l in [
+      l12,
+      l23,
+      l34,
+      l45,
+      l67,
+      l78,
+      l89,
+      l9a,
+      l16,
+      l27,
+      l38,
+      l49,
+      l5a
+    ]) {
       g.addLink(l);
     }
 
@@ -86,7 +115,7 @@ void main() {
                 height: 260,
                 child: GraphView(
                   graph: g,
-                  behavior: const GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.straight),
+                  behavior: const GraphViewDefaultBehavior(),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),
@@ -105,4 +134,3 @@ void main() {
     );
   });
 }
-

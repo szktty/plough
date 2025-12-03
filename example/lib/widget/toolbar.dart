@@ -25,7 +25,7 @@ class MainPageToolbar extends StatelessWidget {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: state.selectedData.name,
+                      initialValue: state.selectedData.name,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:

@@ -4,6 +4,7 @@ import 'package:plough/src/graph/graph.dart';
 import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/graph_view/shape.dart';
 import 'package:plough/src/interactive/events.dart';
 import 'package:plough/src/renderer/style/node.dart';
@@ -11,7 +12,6 @@ import 'package:plough/src/renderer/widget/link.dart';
 import 'package:plough/src/renderer/widget/node.dart';
 import 'package:plough/src/tooltip/behavior.dart';
 import 'package:plough/src/tooltip/widget/tooltip.dart';
-import 'package:plough/src/graph_view/inherited_data.dart';
 
 /// A function type for building node widgets.
 ///

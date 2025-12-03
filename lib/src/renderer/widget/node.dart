@@ -70,7 +70,7 @@ class GraphDefaultNodeRenderer extends StatefulWidget {
 }
 
 class _GraphDefaultNodeRendererState extends State<GraphDefaultNodeRenderer> {
-  final _rectangleKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _rectangleKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {

@@ -5,7 +5,9 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: small mixed graph (5 nodes, mixed links, mixed selections)', (tester) async {
+  testWidgets(
+      'GraphView golden: small mixed graph (5 nodes, mixed links, mixed selections)',
+      (tester) async {
     final graph = Graph();
     final n1 = GraphNode(properties: {'label': 'N1'});
     final n2 = GraphNode(properties: {'label': 'N2'});
@@ -18,10 +20,14 @@ void main() {
     graph.addNode(n4);
     graph.addNode(n5);
 
-    final l12 = GraphLink(source: n1, target: n2, direction: GraphLinkDirection.outgoing);
-    final l23 = GraphLink(source: n2, target: n3, direction: GraphLinkDirection.bidirectional);
-    final l35 = GraphLink(source: n3, target: n5, direction: GraphLinkDirection.none);
-    final l41 = GraphLink(source: n4, target: n1, direction: GraphLinkDirection.incoming);
+    final l12 = GraphLink(
+        source: n1, target: n2, direction: GraphLinkDirection.outgoing);
+    final l23 = GraphLink(
+        source: n2, target: n3, direction: GraphLinkDirection.bidirectional);
+    final l35 =
+        GraphLink(source: n3, target: n5, direction: GraphLinkDirection.none);
+    final l41 = GraphLink(
+        source: n4, target: n1, direction: GraphLinkDirection.incoming);
     graph.addLink(l12);
     graph.addLink(l23);
     graph.addLink(l35);
@@ -71,4 +77,3 @@ void main() {
     );
   });
 }
-

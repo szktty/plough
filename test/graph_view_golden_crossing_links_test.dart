@@ -5,16 +5,23 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: crossing links (straight routing)', (tester) async {
+  testWidgets('GraphView golden: crossing links (straight routing)',
+      (tester) async {
     final graph = Graph();
     final n1 = GraphNode(properties: {'label': 'N1'});
     final n2 = GraphNode(properties: {'label': 'N2'});
     final n3 = GraphNode(properties: {'label': 'N3'});
     final n4 = GraphNode(properties: {'label': 'N4'});
-    graph..addNode(n1)..addNode(n2)..addNode(n3)..addNode(n4);
+    graph
+      ..addNode(n1)
+      ..addNode(n2)
+      ..addNode(n3)
+      ..addNode(n4);
 
-    graph.addLink(GraphLink(source: n1, target: n3, direction: GraphLinkDirection.outgoing));
-    graph.addLink(GraphLink(source: n2, target: n4, direction: GraphLinkDirection.outgoing));
+    graph.addLink(GraphLink(
+        source: n1, target: n3, direction: GraphLinkDirection.outgoing));
+    graph.addLink(GraphLink(
+        source: n2, target: n4, direction: GraphLinkDirection.outgoing));
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
@@ -36,7 +43,7 @@ void main() {
                 height: 240,
                 child: GraphView(
                   graph: graph,
-                  behavior: const GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.straight),
+                  behavior: const GraphViewDefaultBehavior(),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),
@@ -55,4 +62,3 @@ void main() {
     );
   });
 }
-

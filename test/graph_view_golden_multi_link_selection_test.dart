@@ -3,11 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:plough/plough.dart';
 
 class _ThickSelectedLinksBehavior extends GraphViewDefaultBehavior {
-  const _ThickSelectedLinksBehavior({super.linkRouting});
+  const _ThickSelectedLinksBehavior();
   @override
   GraphLinkViewBehavior createLinkViewBehavior() {
     return GraphLinkViewBehavior(
-      builder: (context, graph, link, sourceView, targetView, routing, geometry, _) {
+      builder:
+          (context, graph, link, sourceView, targetView, routing, geometry, _) {
         return GraphDefaultLinkRenderer(
           link: link,
           sourceView: sourceView,
@@ -17,7 +18,6 @@ class _ThickSelectedLinksBehavior extends GraphViewDefaultBehavior {
           thickness: 16,
           lineWidth: 3,
           arrowSize: 14,
-          color: Colors.black,
         );
       },
       routing: linkRouting,
@@ -31,19 +31,31 @@ class _ThickSelectedLinksBehavior extends GraphViewDefaultBehavior {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: multiple link selections highlighted (thicker)', (tester) async {
+  testWidgets(
+      'GraphView golden: multiple link selections highlighted (thicker)',
+      (tester) async {
     final graph = Graph();
 
     final a = GraphNode(properties: {'label': 'A'});
     final b = GraphNode(properties: {'label': 'B'});
     final c = GraphNode(properties: {'label': 'C'});
     final d = GraphNode(properties: {'label': 'D'});
-    graph..addNode(a)..addNode(b)..addNode(c)..addNode(d);
+    graph
+      ..addNode(a)
+      ..addNode(b)
+      ..addNode(c)
+      ..addNode(d);
 
-    final l1 = GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
-    final l2 = GraphLink(source: b, target: c, direction: GraphLinkDirection.outgoing);
-    final l3 = GraphLink(source: c, target: d, direction: GraphLinkDirection.outgoing);
-    graph..addLink(l1)..addLink(l2)..addLink(l3);
+    final l1 =
+        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
+    final l2 =
+        GraphLink(source: b, target: c, direction: GraphLinkDirection.outgoing);
+    final l3 =
+        GraphLink(source: c, target: d, direction: GraphLinkDirection.outgoing);
+    graph
+      ..addLink(l1)
+      ..addLink(l2)
+      ..addLink(l3);
 
     // select two links (non-adjacent to make thickness contrast clear)
     graph.selectLink(l1.id);
@@ -88,4 +100,3 @@ void main() {
     );
   });
 }
-

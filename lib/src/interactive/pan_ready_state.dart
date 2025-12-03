@@ -16,7 +16,7 @@ class _PanReadyState {
   final Offset startPosition;
   final DateTime startTime;
   final DragStartDetails startDetails;
-  
+
   bool dragStarted = false;
   bool cancelled = false;
 }
@@ -26,18 +26,20 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     extends GraphStateManager<_PanReadyState> {
   GraphEntityPanReadyStateManager({
     required super.gestureManager,
-    this.dragStartThreshold = 8.0, // Threshold distance for considering drag start
-    this.maxReadyDuration = const Duration(milliseconds: 200), // Maximum duration for Ready state
+    this.dragStartThreshold =
+        8.0, // Threshold distance for considering drag start
+    this.maxReadyDuration =
+        const Duration(milliseconds: 200), // Maximum duration for Ready state
   });
 
   final double dragStartThreshold;
   final Duration maxReadyDuration;
 
   /// List of entities in Pan Ready state
-  List<GraphId> get readyEntityIds => 
-      states.where((state) => !state.dragStarted && !state.cancelled)
-          .map((state) => state.entityId)
-          .toList();
+  List<GraphId> get readyEntityIds => states
+      .where((state) => !state.dragStarted && !state.cancelled)
+      .map((state) => state.entityId)
+      .toList();
 
   /// Whether entity is in Pan Ready state
   bool isPanReady(GraphId entityId) {
@@ -53,7 +55,10 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
       'PAN_READY_STATE_CREATED',
       data: {
         'entityId': entityId.value.substring(0, 8),
-        'position': {'x': details.localPosition.dx, 'y': details.localPosition.dy},
+        'position': {
+          'x': details.localPosition.dx,
+          'y': details.localPosition.dy
+        },
         'threshold': dragStartThreshold,
         'maxDuration': maxReadyDuration.inMilliseconds,
       },
@@ -67,7 +72,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     );
 
     setState(entityId, state);
-    
+
     // Auto-cancel after maximum duration
     Future.delayed(maxReadyDuration, () {
       _timeoutPanReady(entityId);
@@ -82,7 +87,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     }
 
     final distance = (details.localPosition - state.startPosition).distance;
-    
+
     logGestureDebug(
       GestureDebugEventType.conditionCheck,
       'PanReadyStateManager',
@@ -93,11 +98,11 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
         'threshold': dragStartThreshold,
         'exceeds_threshold': distance >= dragStartThreshold,
         'start_position': {
-          'x': state.startPosition.dx, 
+          'x': state.startPosition.dx,
           'y': state.startPosition.dy
         },
         'current_position': {
-          'x': details.localPosition.dx, 
+          'x': details.localPosition.dx,
           'y': details.localPosition.dy
         },
       },
@@ -110,24 +115,27 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
   }
 
   /// Start actual drag
-  void _startActualDrag(GraphId entityId, _PanReadyState readyState, DragUpdateDetails updateDetails) {
+  void _startActualDrag(GraphId entityId, _PanReadyState readyState,
+      DragUpdateDetails updateDetails) {
     readyState.dragStarted = true;
-    
+
     logGestureDebug(
       GestureDebugEventType.dragStart,
       'PanReadyStateManager',
       'ACTUAL_DRAG_STARTED',
       data: {
         'entityId': entityId.value.substring(0, 8),
-        'ready_duration_ms': DateTime.now().difference(readyState.startTime).inMilliseconds,
-        'trigger_distance': (updateDetails.localPosition - readyState.startPosition).distance,
+        'ready_duration_ms':
+            DateTime.now().difference(readyState.startTime).inMilliseconds,
+        'trigger_distance':
+            (updateDetails.localPosition - readyState.startPosition).distance,
         'threshold': dragStartThreshold,
       },
     );
 
     // Delegate to appropriate drag manager
     _delegateActualDragStart(entityId, readyState.startDetails, updateDetails);
-    
+
     // Clean up Ready state
     removeStateSilently(entityId);
   }
@@ -145,7 +153,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
           'duration_ms': maxReadyDuration.inMilliseconds,
         },
       );
-      
+
       // Timed out, so release Ready state
       // Leave possibility of being treated as a tap
       removeStateSilently(entityId);
@@ -157,7 +165,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     final state = getState(entityId);
     if (state != null && !state.dragStarted) {
       state.cancelled = true;
-      
+
       logGestureDebug(
         GestureDebugEventType.stateDestroy,
         'PanReadyStateManager',
@@ -167,7 +175,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
           'reason': 'manual_cancellation',
         },
       );
-      
+
       removeStateSilently(entityId);
     }
   }
@@ -183,7 +191,8 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
   }
 
   /// Delegate actual drag start to appropriate manager (implemented in subclasses)
-  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails, DragUpdateDetails updateDetails);
+  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails,
+      DragUpdateDetails updateDetails);
 
   @override
   void cancel(GraphId entityId) {
@@ -192,7 +201,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
 }
 
 /// Pan Ready state manager for nodes
-final class GraphNodePanReadyStateManager 
+final class GraphNodePanReadyStateManager
     extends GraphEntityPanReadyStateManager<GraphNode> {
   GraphNodePanReadyStateManager({
     required super.gestureManager,
@@ -204,18 +213,19 @@ final class GraphNodePanReadyStateManager
   GraphEntityType get entityType => GraphEntityType.node;
 
   @override
-  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails,
+      DragUpdateDetails updateDetails) {
     // Delegate to node drag manager
     gestureManager.nodeDragManager.handlePanStart([entityId], startDetails);
     gestureManager.nodeDragManager.handlePanUpdate(updateDetails);
-    
+
     // Cancel tap state (drag confirmed)
     gestureManager.nodeTapManager.cancel(entityId);
   }
 }
 
 /// Pan Ready state manager for links
-final class GraphLinkPanReadyStateManager 
+final class GraphLinkPanReadyStateManager
     extends GraphEntityPanReadyStateManager<GraphLink> {
   GraphLinkPanReadyStateManager({
     required super.gestureManager,
@@ -227,11 +237,12 @@ final class GraphLinkPanReadyStateManager
   GraphEntityType get entityType => GraphEntityType.link;
 
   @override
-  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails,
+      DragUpdateDetails updateDetails) {
     // Delegate to link drag manager
     gestureManager.linkDragManager.handlePanStart([entityId], startDetails);
     gestureManager.linkDragManager.handlePanUpdate(updateDetails);
-    
+
     // Cancel tap state (drag confirmed)
     gestureManager.linkTapManager.cancel(entityId);
   }

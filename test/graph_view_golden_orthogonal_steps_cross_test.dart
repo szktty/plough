@@ -5,7 +5,8 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: orthogonal steps with crossing', (tester) async {
+  testWidgets('GraphView golden: orthogonal steps with crossing',
+      (tester) async {
     final g = Graph();
 
     final a = GraphNode(properties: {'label': 'A'});
@@ -18,27 +19,45 @@ void main() {
     final h = GraphNode(properties: {'label': 'H'});
     final i = GraphNode(properties: {'label': 'I'});
 
-    g..addNode(a)..addNode(b)..addNode(c)..addNode(d)
-     ..addNode(e)..addNode(f)..addNode(h)..addNode(i);
+    g
+      ..addNode(a)
+      ..addNode(b)
+      ..addNode(c)
+      ..addNode(d)
+      ..addNode(e)
+      ..addNode(f)
+      ..addNode(h)
+      ..addNode(i);
 
     // Top row A-B-C-D, bottom row E-F-H-I (offset creating steps)
-    g.addLink(GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: b, target: c, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: c, target: d, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: a, target: b, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: b, target: c, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: c, target: d, direction: GraphLinkDirection.outgoing));
 
-    g.addLink(GraphLink(source: e, target: f, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: f, target: h, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: h, target: i, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: e, target: f, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: f, target: h, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: h, target: i, direction: GraphLinkDirection.outgoing));
 
     // Vertical connections with crossings B->F and C->H
-    g.addLink(GraphLink(source: b, target: f, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: c, target: h, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: b, target: f, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: c, target: h, direction: GraphLinkDirection.outgoing));
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
         GraphNodeLayoutPosition(id: a.id, position: const Offset(40, 60)),
-        GraphNodeLayoutPosition(id: b.id, position: const Offset(180, 40)), // slightly up for step
-        GraphNodeLayoutPosition(id: c.id, position: const Offset(320, 80)), // slightly down for step
+        GraphNodeLayoutPosition(
+            id: b.id, position: const Offset(180, 40)), // slightly up for step
+        GraphNodeLayoutPosition(
+            id: c.id,
+            position: const Offset(320, 80)), // slightly down for step
         GraphNodeLayoutPosition(id: d.id, position: const Offset(460, 60)),
 
         GraphNodeLayoutPosition(id: e.id, position: const Offset(40, 220)),
@@ -62,7 +81,8 @@ void main() {
                 height: 320,
                 child: GraphView(
                   graph: g,
-                  behavior: const GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.orthogonal),
+                  behavior: const GraphViewDefaultBehavior(
+                      linkRouting: GraphLinkRouting.orthogonal),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),
@@ -81,4 +101,3 @@ void main() {
     );
   });
 }
-

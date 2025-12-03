@@ -20,7 +20,6 @@ class _MixedHighlightBehavior extends GraphViewDefaultBehavior {
           thickness: 14,
           lineWidth: 3,
           arrowSize: 12,
-          color: Colors.black,
         );
       },
       routing: linkRouting,

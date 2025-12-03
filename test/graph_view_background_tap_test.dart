@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:plough/plough.dart';
 
 class _FixedNodeSizeBehavior extends GraphViewDefaultBehavior {
-  const _FixedNodeSizeBehavior({super.linkRouting});
+  const _FixedNodeSizeBehavior();
 
   @override
   GraphNodeViewBehavior createNodeViewBehavior() {
@@ -21,7 +21,7 @@ class _FixedNodeSizeBehavior extends GraphViewDefaultBehavior {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> _pumpGraph(
+  Future<void> pumpGraph(
     WidgetTester tester, {
     required GraphGestureMode gestureMode,
     required void Function() onBackgroundTap,
@@ -66,15 +66,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> _flushTimers(WidgetTester tester) async {
+  Future<void> flushTimers(WidgetTester tester) async {
     // Flush timers used by tap/double-tap detection
     await tester.pump(const Duration(milliseconds: 600));
   }
 
   testWidgets('onBackgroundTapped fires only on empty area (exclusive)',
       (tester) async {
-    int bgTap = 0;
-    await _pumpGraph(
+    var bgTap = 0;
+    await pumpGraph(
       tester,
       gestureMode: GraphGestureMode.exclusive,
       onBackgroundTap: () => bgTap++,
@@ -85,20 +85,20 @@ void main() {
     // Background tap
     await tester.tapAt(viewTopLeft + const Offset(10, 10));
     await tester.pump();
-    await _flushTimers(tester);
+    await flushTimers(tester);
     expect(bgTap, 1);
 
     // Node tap (node A center at 90,110)
     await tester.tapAt(viewTopLeft + const Offset(90, 110));
     await tester.pump();
-    await _flushTimers(tester);
+    await flushTimers(tester);
     expect(bgTap, 1, reason: 'Should not increase on node tap');
   });
 
   testWidgets('onBackgroundTapped fires only on empty area (transparent)',
       (tester) async {
-    int bgTap = 0;
-    await _pumpGraph(
+    var bgTap = 0;
+    await pumpGraph(
       tester,
       gestureMode: GraphGestureMode.transparent,
       onBackgroundTap: () => bgTap++,
@@ -109,13 +109,13 @@ void main() {
     // Background tap
     await tester.tapAt(viewTopLeft + const Offset(10, 10));
     await tester.pump();
-    await _flushTimers(tester);
+    await flushTimers(tester);
     expect(bgTap, 1);
 
     // Node tap should not count as background
     await tester.tapAt(viewTopLeft + const Offset(90, 110));
     await tester.pump();
-    await _flushTimers(tester);
+    await flushTimers(tester);
     expect(bgTap, 1);
   });
 }

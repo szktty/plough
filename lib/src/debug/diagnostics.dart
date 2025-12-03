@@ -1,6 +1,6 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'diagnostics.freezed.dart';
 part 'diagnostics.g.dart';
@@ -90,10 +90,10 @@ class GestureEvent with _$GestureEvent {
     required DateTime timestamp,
     required GestureEventType type,
     required Offset position,
-    String? targetNodeId,
-    String? targetLinkId,
     required bool wasConsumed,
     required String callbackInvoked,
+    String? targetNodeId,
+    String? targetLinkId,
     Map<String, dynamic>? metadata,
   }) = _GestureEvent;
 
@@ -147,9 +147,9 @@ class StateChange with _$StateChange {
     required DateTime timestamp,
     required StateChangeType type,
     required String target,
+    required String source,
     Map<String, dynamic>? oldValue,
     Map<String, dynamic>? newValue,
-    required String source,
     String? stackTrace,
   }) = _StateChange;
 
@@ -197,12 +197,12 @@ class DiagnosticsCollector {
 
   final int maxHistorySize;
   final int performanceWindowSize;
-  
+
   final List<GestureEvent> _gestureHistory = [];
   final List<RenderEvent> _renderHistory = [];
   final List<StateChange> _stateHistory = [];
   final List<Duration> _frameTimes = [];
-  
+
   GraphSnapshot? _lastSnapshot;
   DateTime? _performanceStart;
   int _droppedFrames = 0;
@@ -227,12 +227,12 @@ class DiagnosticsCollector {
     if (_frameTimes.length > performanceWindowSize) {
       _frameTimes.removeAt(0);
     }
-    
+
     // 16.67ms (60fps) を超えたらドロップフレームとしてカウント
     if (frameTime.inMicroseconds > 16667) {
       _droppedFrames++;
     }
-    
+
     _performanceStart ??= DateTime.now();
   }
 
@@ -242,26 +242,27 @@ class DiagnosticsCollector {
 
   GraphDiagnostics collectDiagnostics() {
     final now = DateTime.now();
-    
+
     return GraphDiagnostics(
-      snapshot: _lastSnapshot ?? GraphSnapshot(
-        timestamp: now,
-        nodeCount: 0,
-        linkCount: 0,
-        nodePositions: {},
-        layoutMetrics: const LayoutMetrics(
-          strategy: 'unknown',
-          lastCalculationTime: Duration.zero,
-          iterationCount: 0,
-          totalEnergy: 0.0,
-          graphBounds: Size.zero,
-        ),
-        currentGesture: const GestureState(
-          isPanning: false,
-          isDragging: false,
-          isSelecting: false,
-        ),
-      ),
+      snapshot: _lastSnapshot ??
+          GraphSnapshot(
+            timestamp: now,
+            nodeCount: 0,
+            linkCount: 0,
+            nodePositions: {},
+            layoutMetrics: const LayoutMetrics(
+              strategy: 'unknown',
+              lastCalculationTime: Duration.zero,
+              iterationCount: 0,
+              totalEnergy: 0,
+              graphBounds: Size.zero,
+            ),
+            currentGesture: const GestureState(
+              isPanning: false,
+              isDragging: false,
+              isSelecting: false,
+            ),
+          ),
       gestureHistory: List.unmodifiable(_gestureHistory),
       renderHistory: List.unmodifiable(_renderHistory),
       stateChanges: List.unmodifiable(_stateHistory),
@@ -284,9 +285,10 @@ class DiagnosticsCollector {
     }
 
     final averageFrameTime = _frameTimes.fold<Duration>(
-      Duration.zero,
-      (total, time) => total + time,
-    ) ~/ _frameTimes.length;
+          Duration.zero,
+          (total, time) => total + time,
+        ) ~/
+        _frameTimes.length;
 
     final worstFrameTime = _frameTimes.reduce(
       (max, time) => time > max ? time : max,
@@ -296,10 +298,10 @@ class DiagnosticsCollector {
         ? 1000000.0 / averageFrameTime.inMicroseconds
         : 0.0;
 
-    final currentFps = _frameTimes.isNotEmpty && 
-        _frameTimes.last.inMicroseconds > 0
-        ? 1000000.0 / _frameTimes.last.inMicroseconds
-        : 0.0;
+    final currentFps =
+        _frameTimes.isNotEmpty && _frameTimes.last.inMicroseconds > 0
+            ? 1000000.0 / _frameTimes.last.inMicroseconds
+            : 0.0;
 
     return PerformanceMetrics(
       averageFps: averageFps,

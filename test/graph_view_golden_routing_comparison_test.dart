@@ -43,8 +43,7 @@ void main() {
       origin: GraphLayoutPositionOrigin.topLeft,
     );
 
-    const straight =
-        GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.straight);
+    const straight = GraphViewDefaultBehavior();
     const ortho =
         GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.orthogonal);
 

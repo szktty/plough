@@ -13,11 +13,18 @@ void main() {
     final c = GraphNode(properties: {'label': 'C'});
     final d = GraphNode(properties: {'label': 'D'});
 
-    graph..addNode(a)..addNode(b)..addNode(c)..addNode(d);
+    graph
+      ..addNode(a)
+      ..addNode(b)
+      ..addNode(c)
+      ..addNode(d);
 
-    graph.addLink(GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing));
-    graph.addLink(GraphLink(source: b, target: c, direction: GraphLinkDirection.outgoing));
-    graph.addLink(GraphLink(source: c, target: d, direction: GraphLinkDirection.outgoing));
+    graph.addLink(GraphLink(
+        source: a, target: b, direction: GraphLinkDirection.outgoing));
+    graph.addLink(GraphLink(
+        source: b, target: c, direction: GraphLinkDirection.outgoing));
+    graph.addLink(GraphLink(
+        source: c, target: d, direction: GraphLinkDirection.outgoing));
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
@@ -39,7 +46,8 @@ void main() {
                 height: 180,
                 child: GraphView(
                   graph: graph,
-                  behavior: const GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.orthogonal),
+                  behavior: const GraphViewDefaultBehavior(
+                      linkRouting: GraphLinkRouting.orthogonal),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),
@@ -58,4 +66,3 @@ void main() {
     );
   });
 }
-

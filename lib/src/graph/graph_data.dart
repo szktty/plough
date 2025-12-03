@@ -32,7 +32,6 @@ abstract interface class GraphEntityData {
 
   bool get canSelect;
 
-
   bool get canDrag;
 }
 
@@ -64,8 +63,6 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
   const factory GraphNodeData({
     required GraphId id,
     @Default(Offset.zero) Offset logicalPosition,
-
-
     @Default(1.0) double weight,
     @Default(-1) int stackOrder,
     @Default(true) bool isEnabled,

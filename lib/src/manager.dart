@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
+import 'package:plough/src/debug/debug_manager.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:plough/src/debug/debug_manager.dart';
 
 /// Singleton class that manages the global settings of the Plough library.
 final class Plough {
@@ -27,7 +27,7 @@ final class Plough {
             : _enabledLogCategories,
       );
     } else {
-      configureLogging(defaultLevel: Level.off);
+      configureLogging();
     }
   }
 
@@ -83,7 +83,6 @@ final class Plough {
     _enabledLogCategories = Map.from(categories);
     if (_debugLogEnabled) {
       configureLogging(
-        defaultLevel: Level.off,
         categoryLevels: _enabledLogCategories,
       );
     }
@@ -106,7 +105,7 @@ final class Plough {
   Plough clearLogCategories() {
     _enabledLogCategories.clear();
     if (_debugLogEnabled) {
-      configureLogging(defaultLevel: Level.off);
+      configureLogging();
     }
     return this;
   }

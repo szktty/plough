@@ -55,7 +55,7 @@ void main() {
     test('tap on node selects it and emits events', () {
       final node = GraphNode(properties: {'label': 'tap'});
       graph.addNode(node);
-      final impl = graph.getNode(node.id) as GraphNodeImpl;
+      final impl = graph.getNode(node.id)! as GraphNodeImpl;
       impl.logicalPosition = const Offset(100, 100);
       impl.geometry = const GraphNodeViewGeometry(
         bounds: Rect.fromLTWH(75, 75, 50, 50),
@@ -65,12 +65,11 @@ void main() {
         graph: graph,
         viewBehavior: behavior,
         viewportSize: const Size(400, 400),
-        gestureMode: GraphGestureMode.exclusive,
       );
 
       const p = Offset(100, 100);
-      gestures.handlePointerDown(PointerDownEvent(position: p));
-      gestures.handlePointerUp(PointerUpEvent(position: p));
+      gestures.handlePointerDown(const PointerDownEvent(position: p));
+      gestures.handlePointerUp(const PointerUpEvent(position: p));
 
       expect(graph.selectedEntityIds, contains(node.id));
       expect(behavior.selectionEvents.length, greaterThan(0));
@@ -80,7 +79,7 @@ void main() {
     test('drag updates position and emits drag events', () {
       final node = GraphNode(properties: {'label': 'drag'});
       graph.addNode(node);
-      final impl = graph.getNode(node.id) as GraphNodeImpl;
+      final impl = graph.getNode(node.id)! as GraphNodeImpl;
       impl.logicalPosition = const Offset(100, 100);
       impl.geometry = const GraphNodeViewGeometry(
         bounds: Rect.fromLTWH(75, 75, 50, 50),
@@ -90,7 +89,6 @@ void main() {
         graph: graph,
         viewBehavior: behavior,
         viewportSize: const Size(400, 400),
-        gestureMode: GraphGestureMode.exclusive,
       );
 
       const start = Offset(100, 100);
@@ -104,7 +102,7 @@ void main() {
         DragStartDetails(localPosition: start, globalPosition: start),
       );
       // Set last pointer details used by the manager
-      gestures.handleMouseHover(PointerHoverEvent(position: start));
+      gestures.handleMouseHover(const PointerHoverEvent(position: start));
       gestures.handlePanUpdate(
         DragUpdateDetails(
             globalPosition: end, localPosition: end, delta: delta),
@@ -121,7 +119,7 @@ void main() {
     test('gestureMode.nodeEdgeOnly consumes only on entities', () {
       final node = GraphNode(properties: {'label': 'n'});
       graph.addNode(node);
-      final impl = graph.getNode(node.id) as GraphNodeImpl;
+      final impl = graph.getNode(node.id)! as GraphNodeImpl;
       impl.logicalPosition = const Offset(100, 100);
       impl.geometry = const GraphNodeViewGeometry(
         bounds: Rect.fromLTWH(75, 75, 50, 50),

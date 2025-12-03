@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plough/plough.dart';
 
 class _FixedNodeSizeBehavior extends GraphViewDefaultBehavior {
-  const _FixedNodeSizeBehavior({super.linkRouting});
+  const _FixedNodeSizeBehavior();
 
   @override
   GraphNodeViewBehavior createNodeViewBehavior() {
@@ -42,9 +42,9 @@ void main() {
       origin: GraphLayoutPositionOrigin.topLeft,
     );
 
-    int panStartCount = 0;
-    int panUpdateCount = 0;
-    int panEndCount = 0;
+    var panStartCount = 0;
+    var panUpdateCount = 0;
+    var panEndCount = 0;
 
     await tester.pumpWidget(
       MaterialApp(

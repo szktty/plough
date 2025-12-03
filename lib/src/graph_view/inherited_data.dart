@@ -48,7 +48,8 @@ class GraphInheritedData extends InheritedWidget {
   /// Returns the nearest [GraphInheritedData] ancestor.
   /// Throws if no ancestor is found.
   static GraphInheritedData of(BuildContext context) {
-    final result = context.dependOnInheritedWidgetOfExactType<GraphInheritedData>();
+    final result =
+        context.dependOnInheritedWidgetOfExactType<GraphInheritedData>();
     if (result == null) {
       throw FlutterError(
         'GraphInheritedData.of() called with a context that does not contain '

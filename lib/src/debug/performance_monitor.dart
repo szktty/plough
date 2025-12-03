@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/src/utils/logger.dart';
 
@@ -65,9 +64,8 @@ class PerformanceStats {
 /// パフォーマンス監視クラス
 @internal
 class PerformanceMonitor {
-  PerformanceMonitor._();
-
   factory PerformanceMonitor() => _instance ??= PerformanceMonitor._();
+  PerformanceMonitor._();
 
   static PerformanceMonitor? _instance;
 

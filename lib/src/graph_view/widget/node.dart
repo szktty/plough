@@ -6,7 +6,6 @@ import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/data.dart';
 import 'package:plough/src/graph_view/inherited_data.dart';
-import 'package:plough/src/graph_view/widget/graph.dart';
 import 'package:plough/src/tooltip/widget/container.dart';
 import 'package:plough/src/utils/widget.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
@@ -136,7 +135,7 @@ class GraphNodeViewState extends State<GraphNodeView>
   @override
   void didUpdateWidget(GraphNodeView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Reset tracked position if animation is disabled
     if (!widget.animationEnabled && oldWidget.animationEnabled) {
       _lastAnimatedToPosition = null;
@@ -170,7 +169,7 @@ class GraphNodeViewState extends State<GraphNodeView>
     }
 
     _lastAnimatedToPosition = _node.logicalPosition;
-    
+
     _positionAnimation = Tween<Offset>(
       begin: begin,
       end: _node.logicalPosition,
@@ -224,7 +223,7 @@ class GraphNodeViewState extends State<GraphNodeView>
       valueListenable: widget.buildState,
       builder: (context, buildState, _) {
         return AnimatedBuilder(
-          animation: (_node as GraphNodeImpl).positionListenable,
+          animation: _node.positionListenable,
           builder: (context, _) {
             if (buildState == GraphViewBuildState.initialize) {
               return _buildInitialPosition(context);
@@ -275,9 +274,9 @@ class GraphNodeViewState extends State<GraphNodeView>
     final child = _buildTooltipContainer(context, graphViewData.graph, _node);
 
     // Only show animated position if animation is actually running
-    if (widget.animationEnabled && 
-        _node.isAnimating && 
-        _positionController != null && 
+    if (widget.animationEnabled &&
+        _node.isAnimating &&
+        _positionController != null &&
         _positionController!.isAnimating) {
       return _buildAnimatedPosition(child);
     }

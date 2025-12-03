@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:plough/src/graph/link.dart';
-import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/data.dart';
 import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/graph_view/graph_view.dart';
@@ -72,13 +71,14 @@ class _GraphLinkViewState extends State<GraphLinkView> {
     logDebug(LogCategory.rendering, 'GraphLinkView: ${link.id}: build');
     final graphViewData = GraphViewData.of(context);
     final graphViewBehavior = graphViewData.behavior;
-    logDebug(LogCategory.rendering,
+    logDebug(
+      LogCategory.rendering,
       'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
     );
 
     // Listen to both source and target node position changes to update link
-    final sourceNode = link.source as GraphNodeImpl;
-    final targetNode = link.target as GraphNodeImpl;
+    final sourceNode = link.source;
+    final targetNode = link.target;
     return AnimatedBuilder(
       animation: Listenable.merge([
         sourceNode.positionListenable,
@@ -91,7 +91,8 @@ class _GraphLinkViewState extends State<GraphLinkView> {
         final targetGeometry = link.target.geometry;
 
         if (sourceGeometry == null || targetGeometry == null) {
-          logDebug(LogCategory.rendering, 'GraphLinkView: waiting to get node geometries...');
+          logDebug(LogCategory.rendering,
+              'GraphLinkView: waiting to get node geometries...');
           return const SizedBox();
         }
 
@@ -102,12 +103,14 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           widget.targetView,
         );
         if (connPoints == null) {
-          logDebug(LogCategory.rendering, 'GraphLinkView: waiting to calculate connection points...');
+          logDebug(LogCategory.rendering,
+              'GraphLinkView: waiting to calculate connection points...');
           return const SizedBox();
         }
 
         if (!connPoints.incoming.isFinite || !connPoints.outgoing.isFinite) {
-          logError(LogCategory.rendering,
+          logError(
+            LogCategory.rendering,
             'GraphLinkView: ${link.id}: connection points must be infinite',
           );
           return const SizedBox();

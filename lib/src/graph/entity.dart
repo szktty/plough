@@ -170,7 +170,6 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
   @override
   bool get canSelect => state.value.canSelect;
 
-
   @override
   bool get canDrag => state.value.canDrag;
 

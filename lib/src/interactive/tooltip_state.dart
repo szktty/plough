@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
-import 'package:plough/src/interactive/events.dart';
 import 'package:plough/src/interactive/state_manager.dart';
 import 'package:plough/src/utils/logger.dart';
 

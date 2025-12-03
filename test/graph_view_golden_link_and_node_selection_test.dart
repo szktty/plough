@@ -3,22 +3,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:plough/plough.dart';
 
 class _ThickOnSelectedBehavior extends GraphViewDefaultBehavior {
-  const _ThickOnSelectedBehavior({super.linkRouting});
+  const _ThickOnSelectedBehavior();
 
   @override
   GraphLinkViewBehavior createLinkViewBehavior() {
     return GraphLinkViewBehavior(
-      builder: (context, graph, link, sourceView, targetView, routing, geometry, _) {
+      builder:
+          (context, graph, link, sourceView, targetView, routing, geometry, _) {
         return GraphDefaultLinkRenderer(
           link: link,
           sourceView: sourceView,
           targetView: targetView,
           routing: routing,
           geometry: geometry,
-          thickness: 20,
           lineWidth: 3,
-          arrowSize: 15,
-          color: Colors.black,
         );
       },
       routing: linkRouting,
@@ -32,13 +30,16 @@ class _ThickOnSelectedBehavior extends GraphViewDefaultBehavior {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: link and node selection highlight (custom thickness)', (tester) async {
+  testWidgets(
+      'GraphView golden: link and node selection highlight (custom thickness)',
+      (tester) async {
     final graph = Graph();
     final a = GraphNode(properties: {'label': 'A'});
     final b = GraphNode(properties: {'label': 'B'});
     graph.addNode(a);
     graph.addNode(b);
-    final l = GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
+    final l =
+        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
     graph.addLink(l);
 
     // Select one node and the link
@@ -82,4 +83,3 @@ void main() {
     );
   });
 }
-

@@ -1,17 +1,18 @@
 import 'dart:async';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/debug/debug_server.dart';
-import 'package:plough/src/debug/structured_logger.dart';
 import 'package:plough/src/debug/performance_monitor.dart';
+import 'package:plough/src/debug/structured_logger.dart';
+import 'package:plough/src/utils/logger.dart';
 
 /// Integrated management class for debug features
 @internal
 class PloughDebugManager {
+  factory PloughDebugManager() => _instance ??= PloughDebugManager._();
   PloughDebugManager._();
 
   static PloughDebugManager? _instance;
-  factory PloughDebugManager() => _instance ??= PloughDebugManager._();
 
   final PloughMonitorServer _debugServer = PloughMonitorServer();
   final StructuredLogger _structuredLogger = StructuredLogger();
@@ -46,7 +47,7 @@ class PloughDebugManager {
     }
 
     // Start debug server
-    bool serverStarted = false;
+    var serverStarted = false;
     if (enableServer) {
       try {
         await _debugServer.start(

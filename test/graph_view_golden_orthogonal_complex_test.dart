@@ -5,7 +5,8 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: orthogonal complex (steps + crossings)', (tester) async {
+  testWidgets('GraphView golden: orthogonal complex (steps + crossings)',
+      (tester) async {
     final g = Graph();
 
     final a = GraphNode(properties: {'label': 'A'});
@@ -15,22 +16,35 @@ void main() {
     final e = GraphNode(properties: {'label': 'E'});
     final f = GraphNode(properties: {'label': 'F'});
 
-    g..addNode(a)..addNode(b)..addNode(c)..addNode(d)..addNode(e)..addNode(f);
+    g
+      ..addNode(a)
+      ..addNode(b)
+      ..addNode(c)
+      ..addNode(d)
+      ..addNode(e)
+      ..addNode(f);
 
     // Horizontal chain top row A->B->C
-    g.addLink(GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: b, target: c, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: a, target: b, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: b, target: c, direction: GraphLinkDirection.outgoing));
 
     // Horizontal chain bottom row D<-E<-F (reverse direction to show arrowheads)
-    g.addLink(GraphLink(source: f, target: e, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: e, target: d, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: f, target: e, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: e, target: d, direction: GraphLinkDirection.outgoing));
 
     // Verticals A->D and C->F to create crossings with bottom chain
-    g.addLink(GraphLink(source: a, target: d, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: c, target: f, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: a, target: d, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: c, target: f, direction: GraphLinkDirection.outgoing));
 
     // Diagonal-like via orthogonal (B->E)
-    g.addLink(GraphLink(source: b, target: e, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: b, target: e, direction: GraphLinkDirection.outgoing));
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
@@ -57,7 +71,8 @@ void main() {
                 height: 300,
                 child: GraphView(
                   graph: g,
-                  behavior: const GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.orthogonal),
+                  behavior: const GraphViewDefaultBehavior(
+                      linkRouting: GraphLinkRouting.orthogonal),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),
@@ -76,4 +91,3 @@ void main() {
     );
   });
 }
-

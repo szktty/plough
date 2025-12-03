@@ -82,7 +82,8 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
           ),
         );
       } else {
-        logWarning(LogCategory.drag, 'Attempted to start drag on non-draggable entity: $entityId');
+        logWarning(LogCategory.drag,
+            'Attempted to start drag on non-draggable entity: $entityId');
       }
     }
   }
@@ -182,7 +183,8 @@ final class GraphLinkDragStateManager
   bool canDrag(GraphId entityId) => false;
   @override
   void handlePanStart(List<GraphId> entityIds, DragStartDetails details) {
-    logWarning(LogCategory.drag, 'Attempted to drag links: $entityIds. Link dragging not supported.');
+    logWarning(LogCategory.drag,
+        'Attempted to drag links: $entityIds. Link dragging not supported.');
   }
 
   @override

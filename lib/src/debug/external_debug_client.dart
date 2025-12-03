@@ -7,9 +7,8 @@ import 'package:plough/src/utils/logger.dart';
 /// Client that sends logs to external debug server
 @internal
 class ExternalDebugClient {
-  ExternalDebugClient._();
-
   factory ExternalDebugClient() => _instance ??= ExternalDebugClient._();
+  ExternalDebugClient._();
 
   static ExternalDebugClient? _instance;
 
@@ -93,15 +92,18 @@ class ExternalDebugClient {
     _logQueue.clear();
 
     try {
-      final response = await http.post(
-        Uri.parse('$_serverUrl/api/logs/batch'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'logs': logsToSend}),
-      ).timeout(const Duration(seconds: 2));
+      final response = await http
+          .post(
+            Uri.parse('$_serverUrl/api/logs/batch'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'logs': logsToSend}),
+          )
+          .timeout(const Duration(seconds: 2));
 
       if (response.statusCode != 200) {
         // エラーの場合はコンソールに出力（無限ループを避けるため）
-        print('[ExternalDebugClient] Failed to send logs: ${response.statusCode}');
+        print(
+            '[ExternalDebugClient] Failed to send logs: ${response.statusCode}');
       }
     } catch (e) {
       // ネットワークエラーなどはコンソールに出力
@@ -112,9 +114,11 @@ class ExternalDebugClient {
   /// サーバーの接続テスト
   Future<bool> testConnection() async {
     try {
-      final response = await http.get(
-        Uri.parse('$_serverUrl/api/status'),
-      ).timeout(const Duration(seconds: 2));
+      final response = await http
+          .get(
+            Uri.parse('$_serverUrl/api/status'),
+          )
+          .timeout(const Duration(seconds: 2));
 
       return response.statusCode == 200;
     } catch (e) {
@@ -125,9 +129,11 @@ class ExternalDebugClient {
   /// サーバー情報を取得
   Future<Map<String, dynamic>?> getServerInfo() async {
     try {
-      final response = await http.get(
-        Uri.parse('$_serverUrl/api/status'),
-      ).timeout(const Duration(seconds: 2));
+      final response = await http
+          .get(
+            Uri.parse('$_serverUrl/api/status'),
+          )
+          .timeout(const Duration(seconds: 2));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as Map<String, dynamic>;

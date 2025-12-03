@@ -2,9 +2,8 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:plough/src/graph/id.dart';
 import 'package:plough/src/utils/logger.dart';
-import '../graph/id.dart';
 
 /// Global gesture debug mode flag
 bool _gestureDebugEnabled = false;
@@ -16,7 +15,8 @@ final _debugEventController = StreamController<GestureDebugEvent>.broadcast();
 void setGestureDebugMode(bool enabled) {
   _gestureDebugEnabled = enabled;
   if (enabled) {
-    logDebug(LogCategory.debug, '🔧 Gesture Debug Mode ENABLED - Internal state logging activated');
+    logDebug(LogCategory.debug,
+        '🔧 Gesture Debug Mode ENABLED - Internal state logging activated');
   } else {
     logDebug(LogCategory.debug, '🔧 Gesture Debug Mode DISABLED');
   }
@@ -26,7 +26,8 @@ void setGestureDebugMode(bool enabled) {
 bool get isGestureDebugEnabled => _gestureDebugEnabled;
 
 /// Get stream of debug events
-Stream<GestureDebugEvent> get gestureDebugEventStream => _debugEventController.stream;
+Stream<GestureDebugEvent> get gestureDebugEventStream =>
+    _debugEventController.stream;
 
 /// Debug event types for internal gesture processing
 enum GestureDebugEventType {
@@ -34,20 +35,20 @@ enum GestureDebugEventType {
   timerStart,
   timerCancel,
   timerExpire,
-  
+
   // State transitions
   stateTransition,
   stateCreate,
   stateDestroy,
-  
+
   // Validation events
   conditionCheck,
   gestureDecision,
-  
+
   // Interaction events
   hitTest,
   backgroundCallback,
-  
+
   // Gesture flow events
   tapStart,
   tapComplete,
@@ -57,7 +58,7 @@ enum GestureDebugEventType {
   dragEnd,
   hoverEnter,
   hoverExit,
-  
+
   // Debug state snapshots
   tapDebugState,
   dragDebugState,
@@ -101,7 +102,7 @@ class GestureDebugEvent {
     final dataStr = data.isNotEmpty ? ' | Data: $data' : '';
     return '$prefix [${_formatTime(timestamp)}] $component: $message$dataStr';
   }
-  
+
   /// Structured format for workbench analysis
   Map<String, dynamic> toStructuredMap() {
     return {
@@ -115,7 +116,7 @@ class GestureDebugEvent {
       'data': data,
     };
   }
-  
+
   /// Creates event from structured map (for deserialization)
   static GestureDebugEvent fromStructuredMap(Map<String, dynamic> map) {
     return GestureDebugEvent(
@@ -139,9 +140,9 @@ class GestureDebugEvent {
 
   String _formatTime(DateTime time) {
     return '${time.hour.toString().padLeft(2, '0')}:'
-           '${time.minute.toString().padLeft(2, '0')}:'
-           '${time.second.toString().padLeft(2, '0')}.'
-           '${time.millisecond.toString().padLeft(3, '0')}';
+        '${time.minute.toString().padLeft(2, '0')}:'
+        '${time.second.toString().padLeft(2, '0')}.'
+        '${time.millisecond.toString().padLeft(3, '0')}';
   }
 }
 
@@ -169,7 +170,7 @@ void logGestureDebug(
 
   // Human-readable console output
   logDebug(LogCategory.gesture, event.toString());
-  
+
   // Structured event for external consumption (workbench)
   _debugEventController.add(event);
 }
@@ -202,7 +203,7 @@ String _getEventPrefix(GestureDebugEventType type) {
       return '⏹️';
     case GestureDebugEventType.timerExpire:
       return '⏰';
-    
+
     // State events
     case GestureDebugEventType.stateTransition:
       return '🔄';
@@ -210,19 +211,19 @@ String _getEventPrefix(GestureDebugEventType type) {
       return '🆕';
     case GestureDebugEventType.stateDestroy:
       return '🗑️';
-    
+
     // Validation events
     case GestureDebugEventType.conditionCheck:
       return '🔍';
     case GestureDebugEventType.gestureDecision:
       return '⚖️';
-    
+
     // Interaction events
     case GestureDebugEventType.hitTest:
       return '🎯';
     case GestureDebugEventType.backgroundCallback:
       return '📞';
-    
+
     // Gesture flow events
     case GestureDebugEventType.tapStart:
       return '👆';
@@ -240,7 +241,7 @@ String _getEventPrefix(GestureDebugEventType type) {
       return '🔍';
     case GestureDebugEventType.hoverExit:
       return '👋';
-    
+
     // Debug state snapshots
     case GestureDebugEventType.tapDebugState:
       return '🔧';
@@ -266,7 +267,7 @@ class GestureTimerLogger {
       '$timerName timer started (${duration.inMilliseconds}ms)',
       data: data,
       entityId: entityId,
-      );
+    );
   }
 
   void cancelled([Map<String, dynamic>? data]) {
@@ -276,7 +277,7 @@ class GestureTimerLogger {
       '$timerName timer cancelled',
       data: data,
       entityId: entityId,
-      );
+    );
   }
 
   void expired([Map<String, dynamic>? data]) {
@@ -286,7 +287,7 @@ class GestureTimerLogger {
       '$timerName timer expired',
       data: data,
       entityId: entityId,
-      );
+    );
   }
 }
 

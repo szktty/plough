@@ -5,7 +5,8 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: large star+mesh (hub with ring)', (tester) async {
+  testWidgets('GraphView golden: large star+mesh (hub with ring)',
+      (tester) async {
     final g = Graph();
 
     GraphNode mk(String name) => GraphNode(properties: {'label': name});
@@ -20,24 +21,33 @@ void main() {
     final r7 = mk('R7');
     final r8 = mk('R8');
 
-    for (final n in [o,r1,r2,r3,r4,r5,r6,r7,r8]) {
+    for (final n in [o, r1, r2, r3, r4, r5, r6, r7, r8]) {
       g.addNode(n);
     }
 
     // Star from hub O to ring nodes
-    for (final n in [r1,r2,r3,r4,r5,r6,r7,r8]) {
-      g.addLink(GraphLink(source: o, target: n, direction: GraphLinkDirection.outgoing));
+    for (final n in [r1, r2, r3, r4, r5, r6, r7, r8]) {
+      g.addLink(GraphLink(
+          source: o, target: n, direction: GraphLinkDirection.outgoing));
     }
 
     // Ring mesh (bidirectional on quarters, outgoing otherwise)
-    g.addLink(GraphLink(source: r1, target: r2, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: r2, target: r3, direction: GraphLinkDirection.bidirectional));
-    g.addLink(GraphLink(source: r3, target: r4, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: r4, target: r5, direction: GraphLinkDirection.none));
-    g.addLink(GraphLink(source: r5, target: r6, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: r6, target: r7, direction: GraphLinkDirection.bidirectional));
-    g.addLink(GraphLink(source: r7, target: r8, direction: GraphLinkDirection.outgoing));
-    g.addLink(GraphLink(source: r8, target: r1, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: r1, target: r2, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: r2, target: r3, direction: GraphLinkDirection.bidirectional));
+    g.addLink(GraphLink(
+        source: r3, target: r4, direction: GraphLinkDirection.outgoing));
+    g.addLink(
+        GraphLink(source: r4, target: r5, direction: GraphLinkDirection.none));
+    g.addLink(GraphLink(
+        source: r5, target: r6, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: r6, target: r7, direction: GraphLinkDirection.bidirectional));
+    g.addLink(GraphLink(
+        source: r7, target: r8, direction: GraphLinkDirection.outgoing));
+    g.addLink(GraphLink(
+        source: r8, target: r1, direction: GraphLinkDirection.outgoing));
 
     // Select some nodes and ring links
     g.selectNode(r2.id);
@@ -78,7 +88,7 @@ void main() {
                 height: 300,
                 child: GraphView(
                   graph: g,
-                  behavior: const GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.straight),
+                  behavior: const GraphViewDefaultBehavior(),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),
@@ -97,4 +107,3 @@ void main() {
     );
   });
 }
-

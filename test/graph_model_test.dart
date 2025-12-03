@@ -60,13 +60,16 @@ void main() {
       final graph = Graph();
       final a = GraphNode(properties: {'label': 'a'});
       final b = GraphNode(properties: {'label': 'b'});
-      graph..addNode(a)..addNode(b);
+      graph
+        ..addNode(a)
+        ..addNode(b);
 
-      final ai = graph.getNode(a.id) as GraphNodeImpl;
-      final bi = graph.getNode(b.id) as GraphNodeImpl;
+      final ai = graph.getNode(a.id)! as GraphNodeImpl;
+      final bi = graph.getNode(b.id)! as GraphNodeImpl;
 
       // initial order
-      final initialMax = [ai.stackOrder, bi.stackOrder].reduce((x, y) => x > y ? x : y);
+      final initialMax =
+          [ai.stackOrder, bi.stackOrder].reduce((x, y) => x > y ? x : y);
 
       graph.bringToFront(a.id);
       expect(ai.stackOrder, greaterThanOrEqualTo(initialMax));
@@ -77,4 +80,3 @@ void main() {
     });
   });
 }
-

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plough/plough.dart';
-import 'package:plough/src/graph/graph_base.dart' show GraphImpl; // internal to enable multi selection
+import 'package:plough/src/graph/graph_base.dart'
+    show GraphImpl; // internal to enable multi selection
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: multi node selection highlight', (tester) async {
+  testWidgets('GraphView golden: multi node selection highlight',
+      (tester) async {
     final graph = Graph();
     final a = GraphNode(properties: {'label': 'A'});
     final b = GraphNode(properties: {'label': 'B'});
@@ -61,4 +63,3 @@ void main() {
     );
   });
 }
-

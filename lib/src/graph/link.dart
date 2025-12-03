@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
@@ -73,10 +72,8 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     this.properties = properties ?? const {};
   }
 
-
   final ValueNotifier<GraphLinkViewGeometry?> _geometry = ValueNotifier(null);
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
-
 
   /// 状態を更新し、変更を通知する
   ///

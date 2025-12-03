@@ -50,8 +50,7 @@ void main() {
 
     _CountingBehavior.reset();
 
-    final behavior1 =
-        const _CountingBehavior(linkRouting: GraphLinkRouting.straight);
+    const behavior1 = _CountingBehavior();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -79,8 +78,7 @@ void main() {
     expect(_CountingBehavior.linkCreateCount, 1);
 
     // Pump with equivalent behavior (new instance, same params)
-    final behavior2 =
-        const _CountingBehavior(linkRouting: GraphLinkRouting.straight);
+    const behavior2 = _CountingBehavior();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -106,8 +104,8 @@ void main() {
     expect(_CountingBehavior.linkCreateCount, 1);
 
     // Pump with different behavior (orthogonal) to trigger reinit
-    final behavior3 =
-        const _CountingBehavior(linkRouting: GraphLinkRouting.orthogonal);
+    const behavior3 =
+        _CountingBehavior(linkRouting: GraphLinkRouting.orthogonal);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

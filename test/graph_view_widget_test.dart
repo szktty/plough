@@ -4,7 +4,8 @@ import 'package:plough/plough.dart';
 import 'package:plough/src/graph/node.dart' show GraphNodeImpl;
 
 void main() {
-  testWidgets('GraphView with ManualLayout applies fixed logical positions', (tester) async {
+  testWidgets('GraphView with ManualLayout applies fixed logical positions',
+      (tester) async {
     final graph = Graph();
     final node = GraphNode(properties: {'label': 'n'});
     graph.addNode(node);
@@ -37,8 +38,7 @@ void main() {
 
     expect(find.byType(GraphView), findsOneWidget);
     // Logical position is set by layout strategy
-    final impl = graph.getNode(node.id) as GraphNodeImpl;
+    final impl = graph.getNode(node.id)! as GraphNodeImpl;
     expect(impl.logicalPosition, const Offset(100, 120));
   });
 }
-

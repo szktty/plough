@@ -23,7 +23,7 @@ class _FixedNodeSizeBehavior extends GraphViewDefaultBehavior {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> _pumpGraph(
+  Future<void> pumpGraph(
     WidgetTester tester, {
     required bool allowMultiSelection,
     required Graph graph,
@@ -67,7 +67,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> _flushTapTimers(WidgetTester tester) async {
+  Future<void> flushTapTimers(WidgetTester tester) async {
     await tester.pump(const Duration(milliseconds: 600));
   }
 
@@ -81,21 +81,21 @@ void main() {
       ..addLink(GraphLink(
           source: a, target: b, direction: GraphLinkDirection.outgoing));
 
-    await _pumpGraph(tester, allowMultiSelection: false, graph: graph);
+    await pumpGraph(tester, allowMultiSelection: false, graph: graph);
 
     final viewTopLeft = tester.getTopLeft(find.byType(GraphView));
 
     // Tap A, then B
     await tester.tapAt(viewTopLeft + const Offset(90, 110));
     await tester.pump();
-    await _flushTapTimers(tester);
+    await flushTapTimers(tester);
 
     expect(graph.selectedNodeIds, contains(a.id));
     expect(graph.selectedNodeIds.length, 1);
 
     await tester.tapAt(viewTopLeft + const Offset(230, 110));
     await tester.pump();
-    await _flushTapTimers(tester);
+    await flushTapTimers(tester);
 
     expect(graph.selectedNodeIds, contains(b.id));
     expect(graph.selectedNodeIds, isNot(contains(a.id)));
@@ -114,17 +114,17 @@ void main() {
         ..addLink(GraphLink(
             source: a, target: b, direction: GraphLinkDirection.outgoing));
 
-      await _pumpGraph(tester, allowMultiSelection: true, graph: graph);
+      await pumpGraph(tester, allowMultiSelection: true, graph: graph);
 
       final viewTopLeft = tester.getTopLeft(find.byType(GraphView));
 
       await tester.tapAt(viewTopLeft + const Offset(90, 110));
       await tester.pump();
-      await _flushTapTimers(tester);
+      await flushTapTimers(tester);
 
       await tester.tapAt(viewTopLeft + const Offset(230, 110));
       await tester.pump();
-      await _flushTapTimers(tester);
+      await flushTapTimers(tester);
 
       expect(graph.selectedNodeIds, containsAll([a.id, b.id]));
       expect(graph.selectedNodeIds.length, 2);

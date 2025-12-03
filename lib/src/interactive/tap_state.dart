@@ -47,8 +47,8 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
     required super.gestureManager,
     required this.tooltipTriggerMode,
     this.doubleTapTimeout = const Duration(milliseconds: 500),
-    this.touchSlop = kTouchSlop *
-        8, // Increase touch slop for more forgiving taps
+    this.touchSlop =
+        kTouchSlop * 8, // Increase touch slop for more forgiving taps
     this.doubleTapSlop = kDoubleTapSlop,
   });
 
@@ -120,7 +120,6 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
   void handlePointerDown(GraphId entityId, PointerDownEvent event) {
     // Allow tap start even if !canSelect, selection check happens on up?
     // if (!canSelect(entityId)) return;
-
 
     final existingState = getState(entityId);
     final now = DateTime.now();
@@ -217,10 +216,10 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
         state.cancelled ||
         (state.completed && state.tapCount == 1)) {
       // Log why the pointer up was ignored
-      String reason = '';
-      if (state == null)
+      var reason = '';
+      if (state == null) {
         reason = 'no_state';
-      else if (state.cancelled)
+      } else if (state.cancelled)
         reason = 'already_cancelled';
       else if (state.completed && state.tapCount == 1)
         reason = 'single_tap_already_completed';

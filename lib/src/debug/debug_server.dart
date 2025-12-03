@@ -9,9 +9,8 @@ import 'package:plough/src/utils/logger.dart';
 /// Provides a web interface for real-time monitoring of logs and graph state
 @internal
 class PloughMonitorServer {
-  PloughMonitorServer._();
-
   factory PloughMonitorServer() => _instance ??= PloughMonitorServer._();
+  PloughMonitorServer._();
 
   static PloughMonitorServer? _instance;
 
@@ -54,10 +53,12 @@ class PloughMonitorServer {
         await _tryCleanupExistingServer();
 
         // ローカルホストのみでバインド（macOS サンドボックスの制限を回避）
-        _server = await HttpServer.bind(InternetAddress.loopbackIPv4, _port, shared: true);
+        _server = await HttpServer.bind(InternetAddress.loopbackIPv4, _port,
+            shared: true);
         logInfo(LogCategory.debug, 'Monitor server started on $url');
         logInfo(LogCategory.debug, 'Server port: ${_server!.port}');
-        logInfo(LogCategory.debug, 'Server address: ${_server!.address.address}');
+        logInfo(
+            LogCategory.debug, 'Server address: ${_server!.address.address}');
 
         // リスナーを設定してすぐにテスト
         _server!.listen(
@@ -72,15 +73,15 @@ class PloughMonitorServer {
             logInfo(LogCategory.debug, 'Server connection closed');
           },
         );
-        
+
         // サーバーが実際にリスニングしているか確認
-        logInfo(LogCategory.debug, 
+        logInfo(LogCategory.debug,
             'Server listening: address=${_server!.address}, port=${_server!.port}');
-        
+
         // サーバーが正しく動作しているかテスト
         Future<void>.delayed(const Duration(milliseconds: 100))
             .then((_) => _testServerConnection());
-        
+
         return; // 成功
       } on SocketException catch (e) {
         logWarning(LogCategory.debug,
@@ -97,33 +98,34 @@ class PloughMonitorServer {
       }
     }
   }
-  
+
   /// サーバーの接続テスト
   Future<void> _testServerConnection() async {
     try {
       final client = HttpClient();
-      
+
       // User-Agentを設定
       client.userAgent = 'PloughMonitorServer/1.0';
-      
-      final request = await client.getUrl(Uri.parse('http://localhost:$_port/test'));
+
+      final request =
+          await client.getUrl(Uri.parse('http://localhost:$_port/test'));
       final response = await request.close();
-      
+
       if (response.statusCode == 200) {
         logInfo(LogCategory.debug, 'Server connection test successful');
       } else {
-        logWarning(LogCategory.debug, 
+        logWarning(LogCategory.debug,
             'Server connection test failed: ${response.statusCode}');
       }
-      
+
       client.close();
     } catch (e) {
       logWarning(LogCategory.debug, 'Server connection test failed: $e');
-      logWarning(LogCategory.debug, 
-          'This may be due to macOS sandbox restrictions');
-      
+      logWarning(
+          LogCategory.debug, 'This may be due to macOS sandbox restrictions');
+
       // macOS サンドボックスの問題の場合の代替案を提示
-      logInfo(LogCategory.debug, 
+      logInfo(LogCategory.debug,
           'Alternative: Use the CLI monitor server (dart monitor/monitor_server.dart)');
     }
   }
@@ -229,15 +231,13 @@ class PloughMonitorServer {
     try {
       logInfo(LogCategory.debug,
           'Received request: ${request.method} ${request.uri.path}');
-      logInfo(LogCategory.debug,
-          'Headers: ${request.headers}');
+      logInfo(LogCategory.debug, 'Headers: ${request.headers}');
       logInfo(LogCategory.debug,
           'Remote: ${request.connectionInfo?.remoteAddress}');
-      logInfo(LogCategory.debug,
-          'Protocol: ${request.protocolVersion}');
+      logInfo(LogCategory.debug, 'Protocol: ${request.protocolVersion}');
 
       final uri = request.uri;
-      
+
       // シンプルなテストレスポンス
       if (uri.path == '/test') {
         request.response

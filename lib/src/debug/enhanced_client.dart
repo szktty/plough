@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:plough/src/debug/diagnostics.dart';
 import 'package:plough/src/utils/logger.dart';
-import 'diagnostics.dart';
 
 /// Connection client to enhanced debug server
 @internal
 class EnhancedDebugClient {
-  EnhancedDebugClient._();
-
   factory EnhancedDebugClient() => _instance ??= EnhancedDebugClient._();
+  EnhancedDebugClient._();
 
   static EnhancedDebugClient? _instance;
 
@@ -28,8 +28,8 @@ class EnhancedDebugClient {
     required String sessionId,
   }) {
     final client = EnhancedDebugClient();
-    client._serverUrl = serverUrl.endsWith('/') 
-        ? serverUrl.substring(0, serverUrl.length - 1) 
+    client._serverUrl = serverUrl.endsWith('/')
+        ? serverUrl.substring(0, serverUrl.length - 1)
         : serverUrl;
     client._sessionId = sessionId;
   }
@@ -37,17 +37,18 @@ class EnhancedDebugClient {
   /// Enable debug client
   Future<void> enable() async {
     if (_sessionId == null) {
-      logWarning(LogCategory.debug, 'Session ID not set. Call configure() first.');
+      logWarning(
+          LogCategory.debug, 'Session ID not set. Call configure() first.');
       return;
     }
 
     _enabled = true;
-    
+
     // Create session
     final success = await _createSession();
     if (success) {
       _startBatchTimer();
-      logInfo(LogCategory.debug, 
+      logInfo(LogCategory.debug,
           'Enhanced debug client enabled: $_serverUrl (session: $_sessionId)');
     } else {
       _enabled = false;
@@ -67,10 +68,10 @@ class EnhancedDebugClient {
   void sendGestureEvent({
     required GestureEventType type,
     required Offset position,
-    String? targetNodeId,
-    String? targetLinkId,
     required bool wasConsumed,
     required String callbackInvoked,
+    String? targetNodeId,
+    String? targetLinkId,
     Map<String, dynamic>? metadata,
   }) {
     if (!_enabled) return;
@@ -115,9 +116,9 @@ class EnhancedDebugClient {
   void sendStateChange({
     required StateChangeType type,
     required String target,
+    required String source,
     Map<String, dynamic>? oldValue,
     Map<String, dynamic>? newValue,
-    required String source,
     String? stackTrace,
   }) {
     if (!_enabled) return;
@@ -196,11 +197,13 @@ class EnhancedDebugClient {
   /// セッションを作成
   Future<bool> _createSession() async {
     try {
-      final response = await http.post(
-        Uri.parse('$_serverUrl/api/sessions'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'session_id': _sessionId}),
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .post(
+            Uri.parse('$_serverUrl/api/sessions'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'session_id': _sessionId}),
+          )
+          .timeout(const Duration(seconds: 5));
 
       return response.statusCode == 200;
     } catch (e) {
@@ -235,11 +238,13 @@ class EnhancedDebugClient {
 
     for (final item in dataToSend) {
       try {
-        await http.post(
-          Uri.parse('$_serverUrl/api/sessions/$_sessionId/diagnostics'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(item),
-        ).timeout(const Duration(seconds: 2));
+        await http
+            .post(
+              Uri.parse('$_serverUrl/api/sessions/$_sessionId/diagnostics'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(item),
+            )
+            .timeout(const Duration(seconds: 2));
       } catch (e) {
         // エラーは静かに処理（デバッグログが無限ループしないように）
         if (kDebugMode) {
@@ -252,9 +257,11 @@ class EnhancedDebugClient {
   /// 接続テスト
   Future<bool> testConnection() async {
     try {
-      final response = await http.get(
-        Uri.parse('$_serverUrl/api/sessions'),
-      ).timeout(const Duration(seconds: 3));
+      final response = await http
+          .get(
+            Uri.parse('$_serverUrl/api/sessions'),
+          )
+          .timeout(const Duration(seconds: 3));
 
       return response.statusCode == 200;
     } catch (e) {

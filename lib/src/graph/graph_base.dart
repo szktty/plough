@@ -1,15 +1,14 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/signals.dart';
-import 'package:plough/src/graph_view/inherited_data.dart';
 
 /// A core data structure that provides the foundation for graph visualization through [GraphView].
 ///

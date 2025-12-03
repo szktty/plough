@@ -6,9 +6,12 @@ void main() {
     final g = Graph();
     final a = GraphNode();
     final b = GraphNode();
-    g..addNode(a)..addNode(b);
+    g
+      ..addNode(a)
+      ..addNode(b);
 
-    final l = GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
+    final l =
+        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
     g.addLink(l);
 
     // select link, record selection ids
@@ -25,4 +28,3 @@ void main() {
     expect(g.selectedNodeIds, isEmpty);
   });
 }
-

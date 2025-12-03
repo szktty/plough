@@ -1,7 +1,8 @@
 import 'dart:convert';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/debug/debug_server.dart';
+import 'package:plough/src/utils/logger.dart';
 
 /// Structured log entry
 @internal
@@ -59,10 +60,10 @@ class StructuredLogEntry {
 /// Class that provides structured logging functionality
 @internal
 class StructuredLogger {
+  factory StructuredLogger() => _instance ??= StructuredLogger._();
   StructuredLogger._();
 
   static StructuredLogger? _instance;
-  factory StructuredLogger() => _instance ??= StructuredLogger._();
 
   final List<StructuredLogEntry> _entries = [];
   final int _maxEntries = 10000;

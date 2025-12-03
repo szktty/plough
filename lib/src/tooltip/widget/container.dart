@@ -22,7 +22,7 @@ class GraphTooltipContainer extends StatefulWidget {
 
 class _GraphTooltipContainerState extends State<GraphTooltipContainer> {
   final GlobalKey _childKey = GlobalKey();
-  final _tooltipKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _tooltipKey = GlobalKey();
   Size? _widgetSize;
   Size? _tooltipSize;
   final OverlayPortalController _overlayPortalController =

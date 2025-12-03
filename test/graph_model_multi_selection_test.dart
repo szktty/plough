@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_base.dart' show GraphImpl;
-import 'package:plough/src/graph/node.dart' show GraphNodeImpl;
 import 'package:plough/src/graph/graph_data.dart' show GraphNodeData;
-import 'package:plough/src/graph/id.dart' show GraphId, GraphIdType;
+import 'package:plough/src/graph/node.dart' show GraphNodeImpl;
 
 void main() {
   test('GraphImpl allowMultiSelection=true keeps multiple nodes selected', () {

@@ -5,23 +5,30 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: reverseLink before/after comparison', (tester) async {
+  testWidgets('GraphView golden: reverseLink before/after comparison',
+      (tester) async {
     GraphNode mk(String label) => GraphNode(properties: {'label': label});
 
     // graphA: outgoing A->B
     final graphA = Graph();
     final a1 = mk('A');
     final b1 = mk('B');
-    graphA..addNode(a1)..addNode(b1);
-    final linkA = GraphLink(source: a1, target: b1, direction: GraphLinkDirection.outgoing);
+    graphA
+      ..addNode(a1)
+      ..addNode(b1);
+    final linkA = GraphLink(
+        source: a1, target: b1, direction: GraphLinkDirection.outgoing);
     graphA.addLink(linkA);
 
     // graphB: same but reversed via reverseLink
     final graphB = Graph();
     final a2 = mk('A');
     final b2 = mk('B');
-    graphB..addNode(a2)..addNode(b2);
-    final linkB = GraphLink(source: a2, target: b2, direction: GraphLinkDirection.outgoing);
+    graphB
+      ..addNode(a2)
+      ..addNode(b2);
+    final linkB = GraphLink(
+        source: a2, target: b2, direction: GraphLinkDirection.outgoing);
     graphB.addLink(linkB);
     graphB.reverseLink(linkB.id);
 
@@ -91,4 +98,3 @@ void main() {
     );
   });
 }
-

@@ -21,9 +21,8 @@ enum LogCategory {
 /// Centralized logging configuration
 @internal
 class PloughLogger {
-  PloughLogger._();
-
   factory PloughLogger() => _instance ??= PloughLogger._();
+  PloughLogger._();
 
   static PloughLogger? _instance;
 
@@ -62,24 +61,25 @@ class PloughLogger {
     getLogger(category).d(message);
     _sendToExternalDebug(category, 'DEBUG', message);
   }
-  
+
   void i(LogCategory category, String message) {
     getLogger(category).i(message);
     _sendToExternalDebug(category, 'INFO', message);
   }
-  
+
   void w(LogCategory category, String message) {
     getLogger(category).w(message);
     _sendToExternalDebug(category, 'WARNING', message);
   }
-  
+
   void e(LogCategory category, String message) {
     getLogger(category).e(message);
     _sendToExternalDebug(category, 'ERROR', message);
   }
-  
+
   /// 外部デバッグサーバーにログを送信
-  void _sendToExternalDebug(LogCategory category, String level, String message) {
+  void _sendToExternalDebug(
+      LogCategory category, String level, String message) {
     try {
       externalDebugClient.sendLog(
         category: category,
