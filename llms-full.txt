@@ -1114,6 +1114,164 @@ A builder function type for customizing node rendering content within `GraphDefa
 `typedef GraphTooltipWidgetBuilder = Widget Function(BuildContext context, GraphEntity entity)`
 A builder function type for creating tooltip widgets for graph entities, used with `GraphTooltipBehavior`.
 
+### Event Objects
+
+Graph interaction events provide detailed information about user interactions. All events inherit from `GraphEvent` and are passed to behavior callback methods.
+
+#### PointerEventDetails
+
+Contains details about the pointer event that triggered a graph event.
+
+##### Properties
+
+*   `Offset localPosition`: The position of the pointer relative to the graph view.
+*   `Offset globalPosition`: The position of the pointer in global screen coordinates.
+*   `PointerDeviceKind kind`: The type of pointer device (touch, mouse, stylus, etc.).
+*   `int? buttons`: The buttons pressed during the event (for mouse events).
+
+##### Factory Constructors
+
+*   `PointerEventDetails.fromPointerEvent(PointerEvent event)`: Creates from a Flutter pointer event.
+*   `PointerEventDetails.fromDragStartDetails(DragStartDetails details)`: Creates from drag start details.
+*   `PointerEventDetails.fromDragUpdateDetails(DragUpdateDetails details)`: Creates from drag update details.
+*   `PointerEventDetails.fromLastKnownPosition(Offset local, Offset global, PointerDeviceKind kind)`: Creates from known position values.
+
+#### GraphTapEvent
+
+Event fired when one or more entities are tapped (single or double).
+
+##### Properties
+
+*   `List<GraphId> entityIds`: IDs of the entities that were tapped.
+*   `PointerEventDetails details`: Details about the pointer event that triggered the tap.
+*   `int tapCount`: The number of taps (1 for single tap, 2 for double tap).
+
+##### Computed Properties
+
+*   `bool isSingleTap`: Returns `true` if `tapCount == 1`.
+*   `bool isDoubleTap`: Returns `true` if `tapCount == 2`.
+
+##### Helper Methods
+
+*   `Iterable<GraphNode> getNodes(Graph graph)`: Returns the nodes involved in this event.
+*   `Iterable<GraphLink> getLinks(Graph graph)`: Returns the links involved in this event.
+
+#### GraphSelectionChangeEvent
+
+Event fired when the selection state of entities changes.
+
+##### Properties
+
+*   `List<GraphId> selectedIds`: IDs of entities that were newly selected in this change.
+*   `List<GraphId> deselectedIds`: IDs of entities that were deselected in this change.
+*   `List<GraphId> currentSelectionIds`: All entity IDs currently selected *after* this change.
+*   `PointerEventDetails? details`: Optional details about the pointer event that triggered the selection change.
+
+##### Helper Methods
+
+*   `bool didSelect(GraphId id)`: Checks if a specific entity was newly selected in this event.
+*   `bool didDeselect(GraphId id)`: Checks if a specific entity was deselected in this event.
+
+#### GraphDragStartEvent
+
+Event fired when a drag operation starts on one or more entities.
+
+##### Properties
+
+*   `List<GraphId> entityIds`: IDs of the entities being dragged.
+*   `PointerEventDetails details`: Details about the pointer event that started the drag.
+
+##### Helper Methods
+
+*   `Iterable<GraphNode> getNodes(Graph graph)`: Returns the nodes involved in this event.
+*   `Iterable<GraphLink> getLinks(Graph graph)`: Returns the links involved in this event.
+
+#### GraphDragUpdateEvent
+
+Event fired during a drag operation on one or more entities.
+
+##### Properties
+
+*   `List<GraphId> entityIds`: IDs of the entities being dragged.
+*   `PointerEventDetails details`: Details about the current pointer position.
+*   `Offset delta`: The change in position since the last update (in logical coordinates).
+
+##### Helper Methods
+
+*   `Iterable<GraphNode> getNodes(Graph graph)`: Returns the nodes involved in this event.
+*   `Iterable<GraphLink> getLinks(Graph graph)`: Returns the links involved in this event.
+
+#### GraphDragEndEvent
+
+Event fired when a drag operation on one or more entities ends.
+
+##### Properties
+
+*   `List<GraphId> entityIds`: IDs of the entities that were being dragged.
+*   `PointerEventDetails details`: Details about the pointer event that ended the drag.
+
+##### Helper Methods
+
+*   `Iterable<GraphNode> getNodes(Graph graph)`: Returns the nodes involved in this event.
+*   `Iterable<GraphLink> getLinks(Graph graph)`: Returns the links involved in this event.
+
+#### GraphHoverEvent
+
+Event fired when the mouse pointer enters or moves within the area of an entity.
+
+##### Properties
+
+*   `GraphId entityId`: ID of the entity being hovered over.
+*   `PointerEventDetails details`: Details about the pointer position.
+
+##### Helper Methods
+
+*   `GraphNode? getNode(Graph graph)`: Returns the node if this event is for a node, otherwise null.
+*   `GraphLink? getLink(Graph graph)`: Returns the link if this event is for a link, otherwise null.
+
+#### GraphHoverEndEvent
+
+Event fired when the mouse pointer leaves the area of an entity.
+
+##### Properties
+
+*   `GraphId entityId`: ID of the entity that was being hovered over.
+*   `PointerEventDetails details`: Details about the pointer position when leaving.
+
+##### Helper Methods
+
+*   `GraphNode? getNode(Graph graph)`: Returns the node if this event is for a node, otherwise null.
+*   `GraphLink? getLink(Graph graph)`: Returns the link if this event is for a link, otherwise null.
+
+#### GraphTooltipShowEvent
+
+Event fired when an entity's tooltip is shown.
+
+##### Properties
+
+*   `GraphId entityId`: ID of the entity whose tooltip is being shown.
+*   `PointerEventDetails details`: Details about the event that triggered the tooltip (e.g., hover or tap position).
+*   `GraphTooltipTriggerMode triggerMode`: The mode that triggered the tooltip display (hover, tap, longPress, doubleTap, hoverStay).
+
+##### Helper Methods
+
+*   `GraphNode? getNode(Graph graph)`: Returns the node if this event is for a node, otherwise null.
+*   `GraphLink? getLink(Graph graph)`: Returns the link if this event is for a link, otherwise null.
+
+#### GraphTooltipHideEvent
+
+Event fired when an entity's tooltip is hidden.
+
+##### Properties
+
+*   `GraphId entityId`: ID of the entity whose tooltip is being hidden.
+*   `PointerEventDetails? details`: Optional details if hiding was triggered by a specific event.
+
+##### Helper Methods
+
+*   `GraphNode? getNode(Graph graph)`: Returns the node if this event is for a node, otherwise null.
+*   `GraphLink? getLink(Graph graph)`: Returns the link if this event is for a link, otherwise null.
+
 ### Tooltip Components
 
 #### GraphTooltipBehavior
