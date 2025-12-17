@@ -7,12 +7,12 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // 固定サイズでテスト（ゴールデンの安定性向上）
+  // Test with fixed size (improves golden test stability)
   final binding = TestWidgetsFlutterBinding.instance;
   binding.window.physicalSizeTestValue = const ui.Size(800, 600);
   binding.window.devicePixelRatioTestValue = 2.0;
 
-  // フォントをロードして文字描画の差異を抑制
+  // Load fonts to suppress differences in text rendering
   await loadAppFonts();
 
   // Note: We intentionally do not reset the window size here because

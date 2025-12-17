@@ -470,7 +470,7 @@ void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
   final distance = (details.localPosition - state.startPosition).distance;
   
   if (distance >= dragStartThreshold) { // dragStartThreshold = 8.0px
-    // 閾値超過 → 実際のドラッグ開始
+    // Threshold exceeded → actual drag started
     _startActualDrag(entityId, state, details);
   }
 }

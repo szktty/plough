@@ -61,7 +61,7 @@ class PerformanceStats {
   }
 }
 
-/// パフォーマンス監視クラス
+/// Performance monitoring class
 @internal
 class PerformanceMonitor {
   factory PerformanceMonitor() => _instance ??= PerformanceMonitor._();
@@ -75,7 +75,7 @@ class PerformanceMonitor {
 
   bool _enabled = false;
 
-  /// パフォーマンス監視を有効/無効にする
+  /// Enables/disables performance monitoring
   void setEnabled(bool enabled) {
     _enabled = enabled;
     if (enabled) {
@@ -87,7 +87,7 @@ class PerformanceMonitor {
 
   bool get isEnabled => _enabled;
 
-  /// 操作の開始を記録
+  /// Records the start of an operation
   void startOperation(String operationName, {Map<String, dynamic>? metadata}) {
     if (!_enabled) return;
 
@@ -104,7 +104,7 @@ class PerformanceMonitor {
         LogCategory.performance, 'Started measuring operation: $operationName');
   }
 
-  /// 操作の終了を記録
+  /// Records the end of an operation
   void endOperation(String operationName, {Map<String, dynamic>? metadata}) {
     if (!_enabled) return;
 
@@ -131,7 +131,7 @@ class PerformanceMonitor {
         'Completed operation: $operationName in ${duration.inMicroseconds / 1000}ms');
   }
 
-  /// 操作を測定する（同期）
+  /// Measures an operation (synchronous)
   T measureOperation<T>(
     String operationName,
     T Function() operation, {
@@ -147,7 +147,7 @@ class PerformanceMonitor {
     }
   }
 
-  /// 操作を測定する（非同期）
+  /// Measures an operation (asynchronous)
   Future<T> measureOperationAsync<T>(
     String operationName,
     Future<T> Function() operation, {
@@ -170,13 +170,13 @@ class PerformanceMonitor {
 
     measurements.add(measurement);
 
-    // 古い測定結果を削除
+    // Remove old measurements
     if (measurements.length > _maxMeasurementsPerOperation) {
       measurements.removeAt(0);
     }
   }
 
-  /// 統計情報を取得
+  /// Gets statistics
   PerformanceStats? getStats(String operationName) {
     final measurements = _measurements[operationName];
     if (measurements == null || measurements.isEmpty) return null;
@@ -202,7 +202,7 @@ class PerformanceMonitor {
     );
   }
 
-  /// 全ての統計情報を取得
+  /// Gets all statistics
   Map<String, PerformanceStats> getAllStats() {
     final stats = <String, PerformanceStats>{};
     for (final operationName in _measurements.keys) {
@@ -214,14 +214,14 @@ class PerformanceMonitor {
     return stats;
   }
 
-  /// 測定結果をクリア
+  /// Clears measurement results
   void clear() {
     _measurements.clear();
     _activeTimers.clear();
     logInfo(LogCategory.performance, 'Performance measurements cleared');
   }
 
-  /// 統計レポートを生成
+  /// Generates a statistics report
   String generateReport() {
     final buffer = StringBuffer();
     buffer.writeln('=== Performance Report ===');
@@ -234,7 +234,7 @@ class PerformanceMonitor {
       return buffer.toString();
     }
 
-    // 平均実行時間でソート
+    // Sort by average execution time
     final sortedStats = stats.entries.toList()
       ..sort(
           (a, b) => b.value.averageDuration.compareTo(a.value.averageDuration));
@@ -254,7 +254,7 @@ class PerformanceMonitor {
     return buffer.toString();
   }
 
-  /// JSON形式でエクスポート
+  /// Exports in JSON format
   Map<String, dynamic> exportAsJson() {
     return {
       'timestamp': DateTime.now().toIso8601String(),
@@ -270,10 +270,10 @@ class PerformanceMonitor {
   }
 }
 
-/// グローバルなパフォーマンス監視インスタンス
+/// Global performance monitoring instance
 final PerformanceMonitor performanceMonitor = PerformanceMonitor();
 
-/// 便利な関数群
+/// Utility functions
 @internal
 void startPerformanceMeasurement(String operationName,
     {Map<String, dynamic>? metadata}) {

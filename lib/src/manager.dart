@@ -159,7 +159,7 @@ final class Plough {
     );
     _debugAdvancedEnabled = true;
 
-    // デバッグサーバーが起動した場合、URLを表示
+    // Display URL if debug server started
     if (enableServer) {
       if (debugManager.isServerRunning) {
         logInfo(LogCategory.debug,

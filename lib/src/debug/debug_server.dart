@@ -49,10 +49,10 @@ class PloughMonitorServer {
       try {
         _port = tryPort;
 
-        // 既存のサーバーがポートを使用している可能性があるため、まず停止を試みる
+        // Attempt to stop existing server first, as port might be in use
         await _tryCleanupExistingServer();
 
-        // ローカルホストのみでバインド（macOS サンドボックスの制限を回避）
+        // Bind to localhost only (to bypass macOS sandbox restrictions)
         _server = await HttpServer.bind(InternetAddress.loopbackIPv4, _port,
             shared: true);
         logInfo(LogCategory.debug, 'Monitor server started on $url');
@@ -60,7 +60,7 @@ class PloughMonitorServer {
         logInfo(
             LogCategory.debug, 'Server address: ${_server!.address.address}');
 
-        // リスナーを設定してすぐにテスト
+        // Set up listener and test immediately
         _server!.listen(
           (HttpRequest request) {
             logInfo(LogCategory.debug, 'Got HTTP request!');
@@ -74,22 +74,22 @@ class PloughMonitorServer {
           },
         );
 
-        // サーバーが実際にリスニングしているか確認
+        // Verify if the server is actually listening
         logInfo(LogCategory.debug,
             'Server listening: address=${_server!.address}, port=${_server!.port}');
 
-        // サーバーが正しく動作しているかテスト
+        // Test if the server is working correctly
         Future<void>.delayed(const Duration(milliseconds: 100))
             .then((_) => _testServerConnection());
 
-        return; // 成功
+        return; // Success
       } on SocketException catch (e) {
         logWarning(LogCategory.debug,
             'Failed to start server on port $tryPort: ${e.message}');
         _server = null;
 
         if (tryPort == portsToTry.last) {
-          // 最後のポートでも失敗
+          // Failed even on the last port
           logError(LogCategory.debug,
               'Failed to start monitor server on any port: $portsToTry');
           throw SocketException(
@@ -99,12 +99,12 @@ class PloughMonitorServer {
     }
   }
 
-  /// サーバーの接続テスト
+  /// Tests server connection
   Future<void> _testServerConnection() async {
     try {
       final client = HttpClient();
 
-      // User-Agentを設定
+      // Set User-Agent
       client.userAgent = 'PloughMonitorServer/1.0';
 
       final request =
@@ -124,36 +124,36 @@ class PloughMonitorServer {
       logWarning(
           LogCategory.debug, 'This may be due to macOS sandbox restrictions');
 
-      // macOS サンドボックスの問題の場合の代替案を提示
+      // Suggest alternative in case of macOS sandbox issues
       logInfo(LogCategory.debug,
           'Alternative: Use the CLI monitor server (dart monitor/monitor_server.dart)');
     }
   }
 
-  /// 既存のサーバーのクリーンアップを試みる
+  /// Attempts to clean up existing server
   Future<void> _tryCleanupExistingServer() async {
     try {
-      // 短時間だけ接続を試みて、既存のサーバーがあるか確認
+      // Attempt a short connection to check for an existing server
       final socket = await Socket.connect(
         'localhost',
         _port,
         timeout: const Duration(milliseconds: 100),
       );
       await socket.close();
-      // 接続できた場合は、少し待ってから再試行
+      // If connected, wait a bit and retry
       logWarning(LogCategory.debug,
           'Found existing server on port $_port, waiting for cleanup...');
       await Future<void>.delayed(const Duration(milliseconds: 500));
     } on SocketException {
-      // 接続できない場合は問題なし（ポートが空いている）
+      // If unable to connect, no issue (port is free)
     }
   }
 
-  /// モニタリングサーバーを停止
+  /// Stops the monitoring server
   Future<void> stop() async {
     if (_server == null) return;
 
-    // 全クライアントを切断
+    // Disconnect all clients
     for (final client in _clients) {
       await client.close();
     }
@@ -164,7 +164,7 @@ class PloughMonitorServer {
     logInfo(LogCategory.debug, 'Monitor server stopped');
   }
 
-  /// 強制的にシャットダウン（同期的）
+  /// Forces shutdown (synchronous)
   void _forceShutdown() {
     try {
       for (final client in _clients) {
@@ -175,11 +175,11 @@ class PloughMonitorServer {
       _server?.close(force: true);
       _server = null;
     } on Exception {
-      // エラーを無視
+      // Ignore errors
     }
   }
 
-  /// ログをブロードキャスト
+  /// Broadcasts log
   void broadcastLog(LogCategory category, String level, String message) {
     final logEntry = {
       'timestamp': DateTime.now().toIso8601String(),
@@ -188,13 +188,13 @@ class PloughMonitorServer {
       'message': message,
     };
 
-    // バッファに追加
+    // Add to buffer
     _logBuffer.add(logEntry);
     if (_logBuffer.length > _maxLogBuffer) {
       _logBuffer.removeAt(0);
     }
 
-    // 接続中のクライアントにブロードキャスト
+    // Broadcast to connected clients
     final data = jsonEncode({
       'type': 'log',
       'data': logEntry,
@@ -205,12 +205,12 @@ class PloughMonitorServer {
         client.add(data);
         return false;
       } catch (e) {
-        return true; // 切断されたクライアントを削除
+        return true; // Remove disconnected client
       }
     });
   }
 
-  /// グラフ状態をブロードキャスト
+  /// Broadcasts graph state
   void broadcastGraphState(Map<String, dynamic> state) {
     final data = jsonEncode({
       'type': 'graph_state',
@@ -238,7 +238,7 @@ class PloughMonitorServer {
 
       final uri = request.uri;
 
-      // シンプルなテストレスポンス
+      // Simple test response
       if (uri.path == '/test') {
         request.response
           ..statusCode = HttpStatus.ok
@@ -297,7 +297,7 @@ class PloughMonitorServer {
       logDebug(LogCategory.debug,
           'WebSocket client connected (${_clients.length} total)');
 
-      // 接続時に過去のログを送信
+      // Send past logs on connection
       for (final log in _logBuffer) {
         socket.add(jsonEncode({
           'type': 'log',
@@ -307,7 +307,7 @@ class PloughMonitorServer {
 
       socket.listen(
         (data) {
-          // クライアントからのメッセージ処理（将来の拡張用）
+          // Handle messages from client (for future extension)
         },
         onDone: () {
           _clients.remove(socket);
@@ -326,7 +326,7 @@ class PloughMonitorServer {
     try {
       logDebug(LogCategory.debug, 'API /api/logs requested');
 
-      // まずはバッファのログのみを返す（シンプルに）
+      // For now, return only buffered logs (simple)
       final response = {
         'logs': _logBuffer,
         'count': _logBuffer.length,
@@ -388,18 +388,18 @@ class PloughMonitorServer {
 <body>
     <div class="header">
         <h1>🔍 Plough Monitor Console</h1>
-        <p>リアルタイムログ監視とデバッグ情報</p>
+        <p>Real-time log monitoring and debug information</p>
     </div>
     
     <div class="controls">
-        <button onclick="clearLogs()">ログクリア</button>
-        <button onclick="exportLogs()">ログエクスポート</button>
-        <span id="status">接続中...</span>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <button onclick="exportLogs()">Export Logs</button>
+        <span id="status">Connecting...</span>
     </div>
     
     <div class="filter-controls">
         <select id="categoryFilter">
-            <option value="">全カテゴリ</option>
+            <option value="">All Categories</option>
             <option value="gesture">Gesture</option>
             <option value="selection">Selection</option>
             <option value="drag">Drag</option>
@@ -415,14 +415,14 @@ class PloughMonitorServer {
         </select>
         
         <select id="levelFilter">
-            <option value="">全レベル</option>
+            <option value="">All Levels</option>
             <option value="DEBUG">Debug</option>
             <option value="INFO">Info</option>
             <option value="WARNING">Warning</option>
             <option value="ERROR">Error</option>
         </select>
         
-        <input type="text" id="searchFilter" placeholder="メッセージ検索...">
+        <input type="text" id="searchFilter" placeholder="Search message...">
     </div>
     
     <div class="log-container" id="logContainer"></div>
@@ -434,12 +434,12 @@ class PloughMonitorServer {
         let logs = [];
         
         ws.onopen = () => {
-            statusElement.textContent = '接続済み';
+            statusElement.textContent = 'Connected';
             statusElement.style.color = '#4fc1ff';
         };
         
         ws.onclose = () => {
-            statusElement.textContent = '切断';
+            statusElement.textContent = 'Disconnected';
             statusElement.style.color = '#f44747';
         };
         
@@ -493,7 +493,7 @@ class PloughMonitorServer {
             URL.revokeObjectURL(url);
         }
         
-        // フィルター変更時の処理
+        // Handle filter change
         document.getElementById('categoryFilter').addEventListener('change', updateLogDisplay);
         document.getElementById('levelFilter').addEventListener('change', updateLogDisplay);
         document.getElementById('searchFilter').addEventListener('input', updateLogDisplay);

@@ -77,7 +77,7 @@ class PloughLogger {
     _sendToExternalDebug(category, 'ERROR', message);
   }
 
-  /// 外部デバッグサーバーにログを送信
+  /// Sends logs to external debug server
   void _sendToExternalDebug(
       LogCategory category, String level, String message) {
     try {
@@ -87,7 +87,7 @@ class PloughLogger {
         message: message,
       );
     } catch (_) {
-      // エラーは無視（ログシステムでエラーが起きてもアプリは継続）
+      // Ignore errors (app continues even if logging system fails)
     }
   }
 }

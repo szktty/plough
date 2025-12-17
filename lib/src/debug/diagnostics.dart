@@ -5,31 +5,31 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'diagnostics.freezed.dart';
 part 'diagnostics.g.dart';
 
-// シリアライズヘルパー
+// Serialization helper
 Map<String, dynamic> sizeToJson(Size size) => {
       'width': size.width,
       'height': size.height,
     };
 
-// デシリアライズヘルパー
+// Deserialization helper
 Size sizeFromJson(Map<String, dynamic> json) => Size(
       (json['width'] as num).toDouble(),
       (json['height'] as num).toDouble(),
     );
 
-// Offset シリアライズヘルパー (null 非許容)
+// Offset serialization helper (non-nullable)
 Map<String, dynamic> offsetToJson(Offset offset) => {
       'dx': offset.dx,
       'dy': offset.dy,
     };
 
-// Offset デシリアライズヘルパー (null 非許容)
+// Offset deserialization helper (non-nullable)
 Offset offsetFromJson(Map<String, dynamic> json) => Offset(
       (json['dx'] as num).toDouble(),
       (json['dy'] as num).toDouble(),
     );
 
-// Offset シリアライズヘルパー (null 許容)
+// Offset serialization helper (nullable)
 Map<String, dynamic>? nullableOffsetToJson(Offset? offset) {
   if (offset == null) return null;
   return {
@@ -38,7 +38,7 @@ Map<String, dynamic>? nullableOffsetToJson(Offset? offset) {
   };
 }
 
-// Offset デシリアライズヘルパー (null 許容)
+// Offset deserialization helper (nullable)
 Offset? nullableOffsetFromJson(Map<String, dynamic>? json) {
   if (json == null) return null;
   return Offset(
@@ -95,7 +95,7 @@ class NodePosition with _$NodePosition {
       _$NodePositionFromJson(json);
 }
 
-/// レイアウトメトリクス
+/// Layout metrics
 @freezed
 class LayoutMetrics with _$LayoutMetrics {
   const factory LayoutMetrics({
@@ -111,7 +111,7 @@ class LayoutMetrics with _$LayoutMetrics {
       _$LayoutMetricsFromJson(json);
 }
 
-/// ジェスチャーの現在の状態
+/// Current gesture state
 @freezed
 class GestureState with _$GestureState {
   const factory GestureState({
@@ -126,11 +126,7 @@ class GestureState with _$GestureState {
   factory GestureState.fromJson(Map<String, dynamic> json) =>
       _$GestureStateFromJson(json);
 }
-
-/// ジェスチャーイベント
-@freezed
-class GestureEvent with _$GestureEvent {
-  const factory GestureEvent({
+/// Gesture event  const factory GestureEvent({
     required DateTime timestamp,
     required GestureEventType type,
     @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
@@ -146,7 +142,7 @@ class GestureEvent with _$GestureEvent {
       _$GestureEventFromJson(json);
 }
 
-/// ジェスチャーイベントのタイプ
+/// Type of gesture event
 enum GestureEventType {
   pointerDown,
   pointerUp,
@@ -160,7 +156,7 @@ enum GestureEventType {
   scale,
 }
 
-/// レンダリングイベント
+/// Render event
 @freezed
 class RenderEvent with _$RenderEvent {
   const factory RenderEvent({
@@ -176,7 +172,7 @@ class RenderEvent with _$RenderEvent {
       _$RenderEventFromJson(json);
 }
 
-/// レンダリングフェーズ
+/// Render phase
 enum RenderPhase {
   layout,
   paint,
@@ -185,7 +181,7 @@ enum RenderPhase {
   postFrameCallback,
 }
 
-/// 状態変更イベント
+/// State change event
 @freezed
 class StateChange with _$StateChange {
   const factory StateChange({
@@ -202,7 +198,7 @@ class StateChange with _$StateChange {
       _$StateChangeFromJson(json);
 }
 
-/// 状態変更のタイプ
+/// Type of state change
 enum StateChangeType {
   valueNotifier,
   setState,
@@ -214,7 +210,7 @@ enum StateChangeType {
   animation,
 }
 
-/// パフォーマンスメトリクス
+/// Performance metrics
 @freezed
 class PerformanceMetrics with _$PerformanceMetrics {
   const factory PerformanceMetrics({
@@ -232,12 +228,12 @@ class PerformanceMetrics with _$PerformanceMetrics {
       _$PerformanceMetricsFromJson(json);
 }
 
-/// 診断データコレクター
+/// Diagnostics data collector
 @internal
 class DiagnosticsCollector {
   DiagnosticsCollector({
     this.maxHistorySize = 1000,
-    this.performanceWindowSize = 60, // 60フレーム = 約1秒
+    this.performanceWindowSize = 60, // 60 frames = approx 1 second
   });
 
   final int maxHistorySize;
@@ -273,7 +269,7 @@ class DiagnosticsCollector {
       _frameTimes.removeAt(0);
     }
 
-    // 16.67ms (60fps) を超えたらドロップフレームとしてカウント
+    // Count as dropped frame if exceeds 16.67ms (60fps)
     if (frameTime.inMicroseconds > 16667) {
       _droppedFrames++;
     }
@@ -354,7 +350,7 @@ class DiagnosticsCollector {
       droppedFrames: _droppedFrames,
       averageFrameTime: averageFrameTime,
       worstFrameTime: worstFrameTime,
-      memoryUsageMB: 0, // TODO: 実際のメモリ使用量を取得
+      memoryUsageMB: 0, // TODO: Get actual memory usage
       measurementStart: _performanceStart ?? now,
       measurementEnd: now,
     );

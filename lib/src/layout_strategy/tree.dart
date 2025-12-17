@@ -179,20 +179,20 @@ base class GraphTreeLayoutStrategy extends GraphLayoutStrategy {
     if (levelMap.isEmpty) return;
 
     final maxLevel = levelMap.keys.reduce(math.max);
-    // TODO: 指定可能にする
+    // TODO: Make configurable
     const levelSpacing = 100.0;
     const minNodeSpacing = 60.0;
 
-    // 各レベルのノード位置を計算
+    // Calculate node positions for each level
     final xPositions = <GraphId, double>{};
 
-    // ルートノードの配置
+    // Position root node
     final rootLevel = levelMap[0] ?? [];
     if (rootLevel.isNotEmpty) {
       xPositions[rootLevel[0].node.id] = 0;
     }
 
-    // 各レベルのノードを配置
+    // Position nodes at each level
     for (var level = 0; level <= maxLevel; level++) {
       final nodes = levelMap[level] ?? [];
       double currentX = 0;
@@ -221,13 +221,13 @@ base class GraphTreeLayoutStrategy extends GraphLayoutStrategy {
       }
     }
 
-    // X座標の中央寄せ
+    // Center X-coordinates
     final minX = xPositions.values.reduce(math.min);
     final maxX = xPositions.values.reduce(math.max);
     final totalWidth = maxX - minX;
     final centerOffset = (size.width - totalWidth) / 2 - minX;
 
-    // 最終的なノード位置を設定
+    // Set final node positions
     for (var level = 0; level <= maxLevel; level++) {
       final nodes = levelMap[level] ?? [];
       final y = level * levelSpacing + padding.top;

@@ -75,9 +75,9 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   final ValueNotifier<GraphLinkViewGeometry?> _geometry = ValueNotifier(null);
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
 
-  /// 状態を更新し、変更を通知する
+  /// Updates the state and notifies changes
   ///
-  /// UIに反映したい変更に使用します。
+  /// Used for changes to be reflected in the UI.
   void updateWith() {
     // No properties need batch notification
     // keeping method for consistency with base pattern

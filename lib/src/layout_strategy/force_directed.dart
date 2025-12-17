@@ -103,7 +103,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       positionNode(node, Offset(dx, dy));
     }
 
-    // レイアウトの反復計算
+    // Iterative layout calculation
     var iteration = 0;
     var totalDisplacement = double.infinity;
 
@@ -111,7 +111,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       totalDisplacement = 0.0;
       final forces = {for (final node in graph.nodes) node: Offset.zero};
 
-      // クーロン力（反発力）の計算
+      // Calculate Coulomb force (repulsion)
       for (final node1 in graph.nodes) {
         for (final node2 in graph.nodes) {
           if (node1 == node2) continue;
@@ -120,7 +120,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
           final distance = delta.distance;
           if (distance == 0) continue;
 
-          // 反発力の計算 (クーロンの法則に基づく)
+          // Calculate repulsion force (based on Coulomb's law)
           final force = coulombConstant / (distance * distance);
           final directionScale = force / distance;
           forces[node1] = forces[node1]! -
@@ -130,7 +130,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         }
       }
 
-      // バネ力（引力）の計算
+      // Calculate spring force (attraction)
       for (final link in graph.links) {
         final source = link.source;
         final target = link.target;
@@ -138,7 +138,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         final distance = delta.distance;
         if (distance == 0) continue;
 
-        // バネ力の計算 (フックの法則に基づく)
+        // Calculate spring force (based on Hooke's law)
         final force = springConstant * (distance - springLength);
         final directionScale = force / distance;
         forces[source] = forces[source]! +
@@ -147,11 +147,11 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
             Offset(delta.dx * directionScale, delta.dy * directionScale);
       }
 
-      // ノードの位置を更新
+      // Update node positions
       for (final node in graph.nodes) {
         var force = forces[node]! * damping;
 
-        // 最大変位の制限
+        // Limit maximum displacement
         final displacement = force.distance;
         if (displacement > maxDisplacement) {
           force = Offset(
@@ -160,7 +160,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
           );
         }
 
-        // 新しい位置の計算と境界チェック
+        // Calculate new position and boundary check
         var newPosition = node.logicalPosition + force;
 
         // Ensure clamp bounds are valid (min <= max)

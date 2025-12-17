@@ -56,7 +56,7 @@ class EnhancedDebugClient {
     }
   }
 
-  /// デバッグクライアントを無効化
+  /// Disables the debug client
   void disable() {
     _enabled = false;
     _stopBatchTimer();
@@ -64,7 +64,7 @@ class EnhancedDebugClient {
     logInfo(LogCategory.debug, 'Enhanced debug client disabled');
   }
 
-  /// ジェスチャーイベントを送信
+  /// Sends a gesture event
   void sendGestureEvent({
     required GestureEventType type,
     required Offset position,
@@ -90,7 +90,7 @@ class EnhancedDebugClient {
     _enqueueData('gesture_event', event.toJson());
   }
 
-  /// レンダリングイベントを送信
+  /// Sends a rendering event
   void sendRenderEvent({
     required RenderPhase phase,
     required Duration duration,
@@ -112,7 +112,7 @@ class EnhancedDebugClient {
     _enqueueData('render_event', event.toJson());
   }
 
-  /// 状態変更イベントを送信
+  /// Sends a state change event
   void sendStateChange({
     required StateChangeType type,
     required String target,
@@ -136,7 +136,7 @@ class EnhancedDebugClient {
     _enqueueData('state_change', change.toJson());
   }
 
-  /// パフォーマンスサンプルを送信
+  /// Sends a performance sample
   void sendPerformanceSample({
     required double fps,
     required Duration frameTime,
@@ -155,7 +155,7 @@ class EnhancedDebugClient {
     _enqueueData('performance_sample', sample);
   }
 
-  /// グラフスナップショットを送信
+  /// Sends a graph snapshot
   void sendSnapshot({
     required int nodeCount,
     required int linkCount,
@@ -181,20 +181,20 @@ class EnhancedDebugClient {
     _enqueueData('snapshot', snapshot.toJson());
   }
 
-  /// データをキューに追加
+  /// Enqueues data
   void _enqueueData(String type, Map<String, dynamic> data) {
     _dataQueue.add({
       'type': type,
       'data': data,
     });
 
-    // キューが大きくなったら即座に送信
+    // Send immediately if queue grows large
     if (_dataQueue.length >= _batchSize) {
       _flushData();
     }
   }
 
-  /// セッションを作成
+  /// Creates a session
   Future<bool> _createSession() async {
     try {
       final response = await http
@@ -212,7 +212,7 @@ class EnhancedDebugClient {
     }
   }
 
-  /// バッチタイマーを開始
+  /// Starts the batch timer
   void _startBatchTimer() {
     _stopBatchTimer();
     _sendTimer = Timer.periodic(_batchInterval, (_) {
@@ -222,17 +222,17 @@ class EnhancedDebugClient {
     });
   }
 
-  /// バッチタイマーを停止
+  /// Stops the batch timer
   void _stopBatchTimer() {
     _sendTimer?.cancel();
     _sendTimer = null;
   }
 
-  /// キューのデータを送信
+  /// Sends data in the queue
   Future<void> _flushData() async {
     if (_dataQueue.isEmpty || _sessionId == null) return;
 
-    // キューをコピーして即座にクリア
+    // Copy and clear the queue immediately
     final dataToSend = List<Map<String, dynamic>>.from(_dataQueue);
     _dataQueue.clear();
 
@@ -246,7 +246,7 @@ class EnhancedDebugClient {
             )
             .timeout(const Duration(seconds: 2));
       } catch (e) {
-        // エラーは静かに処理（デバッグログが無限ループしないように）
+        // Handle errors silently (to prevent infinite debug logging loop)
         if (kDebugMode) {
           print('[EnhancedDebugClient] Failed to send data: $e');
         }
@@ -254,7 +254,7 @@ class EnhancedDebugClient {
     }
   }
 
-  /// 接続テスト
+  /// Tests connection
   Future<bool> testConnection() async {
     try {
       final response = await http
@@ -270,5 +270,5 @@ class EnhancedDebugClient {
   }
 }
 
-/// グローバルインスタンス
+/// Global instance
 final enhancedDebugClient = EnhancedDebugClient();

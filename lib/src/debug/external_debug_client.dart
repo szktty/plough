@@ -61,13 +61,13 @@ class ExternalDebugClient {
 
     _logQueue.add(logEntry);
 
-    // キューが大きくなったら即座に送信
+    // Send immediately if queue grows large
     if (_logQueue.length >= _batchSize) {
       _flushLogs();
     }
   }
 
-  /// バッチタイマーを開始
+  /// Starts the batch timer
   void _startBatchTimer() {
     _stopBatchTimer();
     _batchTimer = Timer.periodic(_batchInterval, (_) {
@@ -77,17 +77,17 @@ class ExternalDebugClient {
     });
   }
 
-  /// バッチタイマーを停止
+  /// Stops the batch timer
   void _stopBatchTimer() {
     _batchTimer?.cancel();
     _batchTimer = null;
   }
 
-  /// 溜まったログを送信
+  /// Sends accumulated logs
   Future<void> _flushLogs() async {
     if (_logQueue.isEmpty) return;
 
-    // キューをコピーして即座にクリア（並行性の問題を避ける）
+    // Copy and clear the queue immediately (to avoid concurrency issues)
     final logsToSend = List<Map<String, dynamic>>.from(_logQueue);
     _logQueue.clear();
 
@@ -101,17 +101,17 @@ class ExternalDebugClient {
           .timeout(const Duration(seconds: 2));
 
       if (response.statusCode != 200) {
-        // エラーの場合はコンソールに出力（無限ループを避けるため）
+        // Print to console on error (to avoid infinite loop)
         print(
             '[ExternalDebugClient] Failed to send logs: ${response.statusCode}');
       }
     } catch (e) {
-      // ネットワークエラーなどはコンソールに出力
+      // Print network errors etc. to console
       print('[ExternalDebugClient] Error sending logs: $e');
     }
   }
 
-  /// サーバーの接続テスト
+  /// Tests server connection
   Future<bool> testConnection() async {
     try {
       final response = await http
@@ -126,7 +126,7 @@ class ExternalDebugClient {
     }
   }
 
-  /// サーバー情報を取得
+  /// Gets server information
   Future<Map<String, dynamic>?> getServerInfo() async {
     try {
       final response = await http
@@ -139,11 +139,11 @@ class ExternalDebugClient {
         return jsonDecode(response.body) as Map<String, dynamic>;
       }
     } catch (e) {
-      // エラーは無視
+      // Ignore errors
     }
     return null;
   }
 }
 
-/// グローバルインスタンス
+/// Global instance
 final externalDebugClient = ExternalDebugClient();
