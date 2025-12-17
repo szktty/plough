@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        exclude:
+          - "**/*.g.dart"
+          - "pigeons/**/*.dart" # Pigeon が生成するファイルをjson_serializableの対象から除外
+          - "test/**/*.dart" # テストファイルも除外
