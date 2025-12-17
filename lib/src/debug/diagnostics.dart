@@ -127,10 +127,10 @@ class GestureState with _$GestureState {
       _$GestureStateFromJson(json);
 }
 /// Gesture event  const factory GestureEvent({
-    required DateTime timestamp,
+    DateTime timestamp,
     required GestureEventType type,
-    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
-    required Offset position,
+    @JsonKey(fromJson = offsetFromJson, toJson = offsetToJson)
+    Offset position,
     required bool wasConsumed,
     required String callbackInvoked,
     String? targetNodeId,
@@ -138,7 +138,7 @@ class GestureState with _$GestureState {
     Map<String, dynamic>? metadata,
   }) = _GestureEvent;
 
-  factory GestureEvent.fromJson(Map<String, dynamic> json) =>
+  GestureEvent.fromJson(Map<String, dynamic> json) =>
       _$GestureEventFromJson(json);
 }
 

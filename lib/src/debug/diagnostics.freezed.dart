@@ -1750,10 +1750,7 @@ abstract class _GestureEvent implements GestureEvent {
       @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
       required final Offset position,
       required final bool wasConsumed,
-      required final String callbackInvoked,
-      final String? targetNodeId,
-      final String? targetLinkId,
-      final Map<String, dynamic>? metadata}) = _$GestureEventImpl;
+      required final String callbackInvoked}) = _$GestureEventImpl;
 
   factory _GestureEvent.fromJson(Map<String, dynamic> json) =
       _$GestureEventImpl.fromJson;
