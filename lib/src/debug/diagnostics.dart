@@ -5,6 +5,48 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'diagnostics.freezed.dart';
 part 'diagnostics.g.dart';
 
+// シリアライズヘルパー
+Map<String, dynamic> sizeToJson(Size size) => {
+      'width': size.width,
+      'height': size.height,
+    };
+
+// デシリアライズヘルパー
+Size sizeFromJson(Map<String, dynamic> json) => Size(
+      (json['width'] as num).toDouble(),
+      (json['height'] as num).toDouble(),
+    );
+
+// Offset シリアライズヘルパー (null 非許容)
+Map<String, dynamic> offsetToJson(Offset offset) => {
+      'dx': offset.dx,
+      'dy': offset.dy,
+    };
+
+// Offset デシリアライズヘルパー (null 非許容)
+Offset offsetFromJson(Map<String, dynamic> json) => Offset(
+      (json['dx'] as num).toDouble(),
+      (json['dy'] as num).toDouble(),
+    );
+
+// Offset シリアライズヘルパー (null 許容)
+Map<String, dynamic>? nullableOffsetToJson(Offset? offset) {
+  if (offset == null) return null;
+  return {
+    'dx': offset.dx,
+    'dy': offset.dy,
+  };
+}
+
+// Offset デシリアライズヘルパー (null 許容)
+Offset? nullableOffsetFromJson(Map<String, dynamic>? json) {
+  if (json == null) return null;
+  return Offset(
+    (json['dx'] as num).toDouble(),
+    (json['dy'] as num).toDouble(),
+  );
+}
+
 /// Graph diagnostic data
 @freezed
 class GraphDiagnostics with _$GraphDiagnostics {
@@ -61,6 +103,7 @@ class LayoutMetrics with _$LayoutMetrics {
     required Duration lastCalculationTime,
     required int iterationCount,
     required double totalEnergy,
+    @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson)
     required Size graphBounds,
   }) = _LayoutMetrics;
 
@@ -75,6 +118,7 @@ class GestureState with _$GestureState {
     required bool isPanning,
     required bool isDragging,
     required bool isSelecting,
+    @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
     Offset? currentPosition,
     String? hoveredNodeId,
   }) = _GestureState;
@@ -89,6 +133,7 @@ class GestureEvent with _$GestureEvent {
   const factory GestureEvent({
     required DateTime timestamp,
     required GestureEventType type,
+    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
     required Offset position,
     required bool wasConsumed,
     required String callbackInvoked,
