@@ -12,7 +12,8 @@ part of 'id.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 GraphId _$GraphIdFromJson(Map<String, dynamic> json) {
   return _GraphId.fromJson(json);
@@ -57,28 +58,28 @@ class _$GraphIdCopyWithImpl<$Res, $Val extends GraphId>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-    Object? value = null,
-  }) {
-    return _then(_value.copyWith(
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as GraphIdType,
-      value: null == value
-          ? _value.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+  $Res call({Object? type = null, Object? value = null}) {
+    return _then(
+      _value.copyWith(
+        type: null == type
+            ? _value.type
+            : type // ignore: cast_nullable_to_non_nullable
+                as GraphIdType,
+        value: null == value
+            ? _value.value
+            : value // ignore: cast_nullable_to_non_nullable
+                as String,
+      ) as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$GraphIdImplCopyWith<$Res> implements $GraphIdCopyWith<$Res> {
   factory _$$GraphIdImplCopyWith(
-          _$GraphIdImpl value, $Res Function(_$GraphIdImpl) then) =
-      __$$GraphIdImplCopyWithImpl<$Res>;
+    _$GraphIdImpl value,
+    $Res Function(_$GraphIdImpl) then,
+  ) = __$$GraphIdImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({GraphIdType type, String value});
@@ -89,27 +90,27 @@ class __$$GraphIdImplCopyWithImpl<$Res>
     extends _$GraphIdCopyWithImpl<$Res, _$GraphIdImpl>
     implements _$$GraphIdImplCopyWith<$Res> {
   __$$GraphIdImplCopyWithImpl(
-      _$GraphIdImpl _value, $Res Function(_$GraphIdImpl) _then)
-      : super(_value, _then);
+    _$GraphIdImpl _value,
+    $Res Function(_$GraphIdImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of GraphId
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? type = null,
-    Object? value = null,
-  }) {
-    return _then(_$GraphIdImpl(
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as GraphIdType,
-      value: null == value
-          ? _value.value
-          : value // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? type = null, Object? value = null}) {
+    return _then(
+      _$GraphIdImpl(
+        type: null == type
+            ? _value.type
+            : type // ignore: cast_nullable_to_non_nullable
+                as GraphIdType,
+        value: null == value
+            ? _value.value
+            : value // ignore: cast_nullable_to_non_nullable
+                as String,
+      ),
+    );
   }
 }
 
@@ -152,16 +153,15 @@ class _$GraphIdImpl extends _GraphId {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GraphIdImplToJson(
-      this,
-    );
+    return _$$GraphIdImplToJson(this);
   }
 }
 
 abstract class _GraphId extends GraphId {
-  const factory _GraphId(
-      {required final GraphIdType type,
-      required final String value}) = _$GraphIdImpl;
+  const factory _GraphId({
+    required final GraphIdType type,
+    required final String value,
+  }) = _$GraphIdImpl;
   const _GraphId._() : super._();
 
   factory _GraphId.fromJson(Map<String, dynamic> json) = _$GraphIdImpl.fromJson;

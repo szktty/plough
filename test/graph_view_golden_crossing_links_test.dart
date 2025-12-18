@@ -5,8 +5,9 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: crossing links (straight routing)',
-      (tester) async {
+  testWidgets('GraphView golden: crossing links (straight routing)', (
+    tester,
+  ) async {
     final graph = Graph();
     final n1 = GraphNode(properties: {'label': 'N1'});
     final n2 = GraphNode(properties: {'label': 'N2'});
@@ -18,10 +19,12 @@ void main() {
       ..addNode(n3)
       ..addNode(n4);
 
-    graph.addLink(GraphLink(
-        source: n1, target: n3, direction: GraphLinkDirection.outgoing));
-    graph.addLink(GraphLink(
-        source: n2, target: n4, direction: GraphLinkDirection.outgoing));
+    graph.addLink(
+      GraphLink(source: n1, target: n3, direction: GraphLinkDirection.outgoing),
+    );
+    graph.addLink(
+      GraphLink(source: n2, target: n4, direction: GraphLinkDirection.outgoing),
+    );
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [

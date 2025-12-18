@@ -5,8 +5,9 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: routing comparison (straight vs orthogonal)',
-      (tester) async {
+  testWidgets('GraphView golden: routing comparison (straight vs orthogonal)', (
+    tester,
+  ) async {
     final graph1 = Graph();
     final graph2 = Graph();
 
@@ -17,16 +18,26 @@ void main() {
     graph1
       ..addNode(a1)
       ..addNode(b1)
-      ..addLink(GraphLink(
-          source: a1, target: b1, direction: GraphLinkDirection.outgoing));
+      ..addLink(
+        GraphLink(
+          source: a1,
+          target: b1,
+          direction: GraphLinkDirection.outgoing,
+        ),
+      );
 
     final a2 = mkNode('A');
     final b2 = mkNode('B');
     graph2
       ..addNode(a2)
       ..addNode(b2)
-      ..addLink(GraphLink(
-          source: a2, target: b2, direction: GraphLinkDirection.outgoing));
+      ..addLink(
+        GraphLink(
+          source: a2,
+          target: b2,
+          direction: GraphLinkDirection.outgoing,
+        ),
+      );
 
     final layout1 = GraphManualLayoutStrategy(
       nodePositions: [
@@ -44,8 +55,9 @@ void main() {
     );
 
     const straight = GraphViewDefaultBehavior();
-    const ortho =
-        GraphViewDefaultBehavior(linkRouting: GraphLinkRouting.orthogonal);
+    const ortho = GraphViewDefaultBehavior(
+      linkRouting: GraphLinkRouting.orthogonal,
+    );
 
     final key = UniqueKey();
 

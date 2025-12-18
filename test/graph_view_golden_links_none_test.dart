@@ -11,11 +11,9 @@ void main() {
     final n2 = GraphNode(properties: {'label': 'Y'});
     graph.addNode(n1);
     graph.addNode(n2);
-    graph.addLink(GraphLink(
-      source: n1,
-      target: n2,
-      direction: GraphLinkDirection.none,
-    ));
+    graph.addLink(
+      GraphLink(source: n1, target: n2, direction: GraphLinkDirection.none),
+    );
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [

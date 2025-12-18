@@ -103,7 +103,8 @@ class ExternalDebugClient {
       if (response.statusCode != 200) {
         // Print to console on error (to avoid infinite loop)
         print(
-            '[ExternalDebugClient] Failed to send logs: ${response.statusCode}');
+          '[ExternalDebugClient] Failed to send logs: ${response.statusCode}',
+        );
       }
     } catch (e) {
       // Print network errors etc. to console
@@ -115,9 +116,7 @@ class ExternalDebugClient {
   Future<bool> testConnection() async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$_serverUrl/api/status'),
-          )
+          .get(Uri.parse('$_serverUrl/api/status'))
           .timeout(const Duration(seconds: 2));
 
       return response.statusCode == 200;
@@ -130,9 +129,7 @@ class ExternalDebugClient {
   Future<Map<String, dynamic>?> getServerInfo() async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$_serverUrl/api/status'),
-          )
+          .get(Uri.parse('$_serverUrl/api/status'))
           .timeout(const Duration(seconds: 2));
 
       if (response.statusCode == 200) {

@@ -29,105 +29,108 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
-      'GraphView: equivalent behavior skips reinit; different triggers reinit',
-      (tester) async {
-    final graph = Graph();
-    final a = GraphNode(properties: {'label': 'A'});
-    final b = GraphNode(properties: {'label': 'B'});
-    graph
-      ..addNode(a)
-      ..addNode(b);
-    graph.addLink(GraphLink(
-        source: a, target: b, direction: GraphLinkDirection.outgoing));
+    'GraphView: equivalent behavior skips reinit; different triggers reinit',
+    (tester) async {
+      final graph = Graph();
+      final a = GraphNode(properties: {'label': 'A'});
+      final b = GraphNode(properties: {'label': 'B'});
+      graph
+        ..addNode(a)
+        ..addNode(b);
+      graph.addLink(
+        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing),
+      );
 
-    final layout = GraphManualLayoutStrategy(
-      nodePositions: [
-        GraphNodeLayoutPosition(id: a.id, position: const Offset(40, 60)),
-        GraphNodeLayoutPosition(id: b.id, position: const Offset(180, 60)),
-      ],
-      origin: GraphLayoutPositionOrigin.topLeft,
-    );
+      final layout = GraphManualLayoutStrategy(
+        nodePositions: [
+          GraphNodeLayoutPosition(id: a.id, position: const Offset(40, 60)),
+          GraphNodeLayoutPosition(id: b.id, position: const Offset(180, 60)),
+        ],
+        origin: GraphLayoutPositionOrigin.topLeft,
+      );
 
-    _CountingBehavior.reset();
+      _CountingBehavior.reset();
 
-    const behavior1 = _CountingBehavior();
+      const behavior1 = _CountingBehavior();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 260,
-              height: 160,
-              child: GraphView(
-                graph: graph,
-                behavior: behavior1,
-                layoutStrategy: layout,
-                animationEnabled: false,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 260,
+                height: 160,
+                child: GraphView(
+                  graph: graph,
+                  behavior: behavior1,
+                  layoutStrategy: layout,
+                  animationEnabled: false,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    // After initial mount, create*Behavior should have been called exactly once each.
-    expect(_CountingBehavior.nodeCreateCount, 1);
-    expect(_CountingBehavior.linkCreateCount, 1);
+      // After initial mount, create*Behavior should have been called exactly once each.
+      expect(_CountingBehavior.nodeCreateCount, 1);
+      expect(_CountingBehavior.linkCreateCount, 1);
 
-    // Pump with equivalent behavior (new instance, same params)
-    const behavior2 = _CountingBehavior();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 260,
-              height: 160,
-              child: GraphView(
-                graph: graph,
-                behavior: behavior2,
-                layoutStrategy: layout,
-                animationEnabled: false,
+      // Pump with equivalent behavior (new instance, same params)
+      const behavior2 = _CountingBehavior();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 260,
+                height: 160,
+                child: GraphView(
+                  graph: graph,
+                  behavior: behavior2,
+                  layoutStrategy: layout,
+                  animationEnabled: false,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    // Equivalent behavior: no reinit, counters unchanged
-    expect(_CountingBehavior.nodeCreateCount, 1);
-    expect(_CountingBehavior.linkCreateCount, 1);
+      // Equivalent behavior: no reinit, counters unchanged
+      expect(_CountingBehavior.nodeCreateCount, 1);
+      expect(_CountingBehavior.linkCreateCount, 1);
 
-    // Pump with different behavior (orthogonal) to trigger reinit
-    const behavior3 =
-        _CountingBehavior(linkRouting: GraphLinkRouting.orthogonal);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 260,
-              height: 160,
-              child: GraphView(
-                graph: graph,
-                behavior: behavior3,
-                layoutStrategy: layout,
-                animationEnabled: false,
+      // Pump with different behavior (orthogonal) to trigger reinit
+      const behavior3 = _CountingBehavior(
+        linkRouting: GraphLinkRouting.orthogonal,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 260,
+                height: 160,
+                child: GraphView(
+                  graph: graph,
+                  behavior: behavior3,
+                  layoutStrategy: layout,
+                  animationEnabled: false,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    // Different behavior: reinit, counters incremented
-    expect(_CountingBehavior.nodeCreateCount, 2);
-    expect(_CountingBehavior.linkCreateCount, 2);
-  });
+      // Different behavior: reinit, counters incremented
+      expect(_CountingBehavior.nodeCreateCount, 2);
+      expect(_CountingBehavior.linkCreateCount, 2);
+    },
+  );
 }

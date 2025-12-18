@@ -8,10 +8,12 @@ void main() {
   test('GraphImpl allowMultiSelection=true keeps multiple nodes selected', () {
     final graph = Graph();
     final gi = graph as GraphImpl;
-    final a =
-        GraphNodeImpl(GraphNodeData(id: GraphId.unique(GraphIdType.node)));
-    final b =
-        GraphNodeImpl(GraphNodeData(id: GraphId.unique(GraphIdType.node)));
+    final a = GraphNodeImpl(
+      GraphNodeData(id: GraphId.unique(GraphIdType.node)),
+    );
+    final b = GraphNodeImpl(
+      GraphNodeData(id: GraphId.unique(GraphIdType.node)),
+    );
     graph
       ..addNode(a)
       ..addNode(b);

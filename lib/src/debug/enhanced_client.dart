@@ -38,7 +38,9 @@ class EnhancedDebugClient {
   Future<void> enable() async {
     if (_sessionId == null) {
       logWarning(
-          LogCategory.debug, 'Session ID not set. Call configure() first.');
+        LogCategory.debug,
+        'Session ID not set. Call configure() first.',
+      );
       return;
     }
 
@@ -48,8 +50,10 @@ class EnhancedDebugClient {
     final success = await _createSession();
     if (success) {
       _startBatchTimer();
-      logInfo(LogCategory.debug,
-          'Enhanced debug client enabled: $_serverUrl (session: $_sessionId)');
+      logInfo(
+        LogCategory.debug,
+        'Enhanced debug client enabled: $_serverUrl (session: $_sessionId)',
+      );
     } else {
       _enabled = false;
       logError(LogCategory.debug, 'Failed to create debug session');
@@ -183,10 +187,7 @@ class EnhancedDebugClient {
 
   /// Enqueues data
   void _enqueueData(String type, Map<String, dynamic> data) {
-    _dataQueue.add({
-      'type': type,
-      'data': data,
-    });
+    _dataQueue.add({'type': type, 'data': data});
 
     // Send immediately if queue grows large
     if (_dataQueue.length >= _batchSize) {
@@ -258,9 +259,7 @@ class EnhancedDebugClient {
   Future<bool> testConnection() async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$_serverUrl/api/sessions'),
-          )
+          .get(Uri.parse('$_serverUrl/api/sessions'))
           .timeout(const Duration(seconds: 3));
 
       return response.statusCode == 200;

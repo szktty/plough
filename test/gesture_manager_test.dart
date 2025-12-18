@@ -95,9 +95,7 @@ void main() {
       const delta = Offset(40, 30);
       final end = start + delta;
 
-      gestures.handlePointerDown(
-        const PointerDownEvent(position: start),
-      );
+      gestures.handlePointerDown(const PointerDownEvent(position: start));
       gestures.handlePanStart(
         DragStartDetails(localPosition: start, globalPosition: start),
       );
@@ -105,7 +103,10 @@ void main() {
       gestures.handleMouseHover(const PointerHoverEvent(position: start));
       gestures.handlePanUpdate(
         DragUpdateDetails(
-            globalPosition: end, localPosition: end, delta: delta),
+          globalPosition: end,
+          localPosition: end,
+          delta: delta,
+        ),
       );
       gestures.handlePanEnd(DragEndDetails());
 

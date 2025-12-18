@@ -7,8 +7,9 @@ import 'package:plough/src/graph/node.dart'
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: after programmatic drag (position updated)',
-      (tester) async {
+  testWidgets('GraphView golden: after programmatic drag (position updated)', (
+    tester,
+  ) async {
     final graph = Graph();
     final n = GraphNode(properties: {'label': 'Drag'});
     graph.addNode(n);

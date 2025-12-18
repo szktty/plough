@@ -28,10 +28,7 @@ import 'package:plough/plough.dart';
 /// ```
 base class GraphRandomLayoutStrategy extends GraphLayoutStrategy {
   /// Creates a random layout strategy with optional configuration.
-  GraphRandomLayoutStrategy({
-    super.seed,
-    super.padding,
-  });
+  GraphRandomLayoutStrategy({super.seed, super.padding});
 
   @override
   bool shouldRelayout(GraphRandomLayoutStrategy oldStrategy) {

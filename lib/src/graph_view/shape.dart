@@ -78,8 +78,9 @@ class GraphCircle implements GraphShape {
       position: Vector2(bounds.left, bounds.top),
       radius: radius,
     );
-    final intersections =
-        flameCircle.lineSegmentIntersections(line.flameLineSegment);
+    final intersections = flameCircle.lineSegmentIntersections(
+      line.flameLineSegment,
+    );
     return _vector2SetToOffsetSet(intersections);
   }
 }

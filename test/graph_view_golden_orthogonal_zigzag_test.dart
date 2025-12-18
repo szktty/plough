@@ -19,12 +19,15 @@ void main() {
       ..addNode(c)
       ..addNode(d);
 
-    graph.addLink(GraphLink(
-        source: a, target: b, direction: GraphLinkDirection.outgoing));
-    graph.addLink(GraphLink(
-        source: b, target: c, direction: GraphLinkDirection.outgoing));
-    graph.addLink(GraphLink(
-        source: c, target: d, direction: GraphLinkDirection.outgoing));
+    graph.addLink(
+      GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing),
+    );
+    graph.addLink(
+      GraphLink(source: b, target: c, direction: GraphLinkDirection.outgoing),
+    );
+    graph.addLink(
+      GraphLink(source: c, target: d, direction: GraphLinkDirection.outgoing),
+    );
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
@@ -47,7 +50,8 @@ void main() {
                 child: GraphView(
                   graph: graph,
                   behavior: const GraphViewDefaultBehavior(
-                      linkRouting: GraphLinkRouting.orthogonal),
+                    linkRouting: GraphLinkRouting.orthogonal,
+                  ),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),

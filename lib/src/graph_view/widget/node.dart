@@ -160,9 +160,7 @@ class GraphNodeViewState extends State<GraphNodeView>
     }
   }
 
-  void _updateAnimationPosition({
-    required Offset begin,
-  }) {
+  void _updateAnimationPosition({required Offset begin}) {
     // Only start a new animation if we're moving to a different position
     if (_lastAnimatedToPosition == _node.logicalPosition) {
       return;
@@ -170,10 +168,8 @@ class GraphNodeViewState extends State<GraphNodeView>
 
     _lastAnimatedToPosition = _node.logicalPosition;
 
-    _positionAnimation = Tween<Offset>(
-      begin: begin,
-      end: _node.logicalPosition,
-    ).animate(
+    _positionAnimation =
+        Tween<Offset>(begin: begin, end: _node.logicalPosition).animate(
       CurvedAnimation(
         parent: _positionController!,
         curve: widget.animationCurve,
@@ -250,11 +246,7 @@ class GraphNodeViewState extends State<GraphNodeView>
       _updateGeometry();
     });
 
-    return Positioned(
-      left: -10000,
-      top: -10000,
-      child: _buildNode(context),
-    );
+    return Positioned(left: -10000, top: -10000, child: _buildNode(context));
   }
 
   Widget _buildPreArrangedPosition(BuildContext context) {
@@ -285,11 +277,7 @@ class GraphNodeViewState extends State<GraphNodeView>
       _updateGeometry();
     });
 
-    return Positioned(
-      left: left,
-      top: top,
-      child: child,
-    );
+    return Positioned(left: left, top: top, child: child);
   }
 
   Widget _buildAnimatedPosition(Widget child) {
@@ -355,8 +343,6 @@ class GraphNodeViewState extends State<GraphNodeView>
     if (widget is GraphDefaultNodeRenderer) {
       _renderer = widget;
     }
-    return GraphPositionPlotter.wrapOr(
-      child: widget,
-    );
+    return GraphPositionPlotter.wrapOr(child: widget);
   }
 }

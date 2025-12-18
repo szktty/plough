@@ -12,7 +12,8 @@ part of 'link.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$GraphDefaultLinkRendererStyle {
@@ -52,20 +53,21 @@ mixin _$GraphDefaultLinkRendererStyle {
 /// @nodoc
 abstract class $GraphDefaultLinkRendererStyleCopyWith<$Res> {
   factory $GraphDefaultLinkRendererStyleCopyWith(
-          GraphDefaultLinkRendererStyle value,
-          $Res Function(GraphDefaultLinkRendererStyle) then) =
-      _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
-          GraphDefaultLinkRendererStyle>;
+    GraphDefaultLinkRendererStyle value,
+    $Res Function(GraphDefaultLinkRendererStyle) then,
+  ) = _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
+      GraphDefaultLinkRendererStyle>;
   @useResult
-  $Res call(
-      {Color arrowColor,
-      Color borderColor,
-      Color labelColor,
-      Color hoverColor,
-      Color selectedHoverColor,
-      Color selectedUnhoverColor,
-      Color highlightColor,
-      Size arrowSize});
+  $Res call({
+    Color arrowColor,
+    Color borderColor,
+    Color labelColor,
+    Color hoverColor,
+    Color selectedHoverColor,
+    Color selectedUnhoverColor,
+    Color highlightColor,
+    Size arrowSize,
+  });
 }
 
 /// @nodoc
@@ -93,40 +95,42 @@ class _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
     Object? highlightColor = null,
     Object? arrowSize = null,
   }) {
-    return _then(_value.copyWith(
-      arrowColor: null == arrowColor
-          ? _value.arrowColor
-          : arrowColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      borderColor: null == borderColor
-          ? _value.borderColor
-          : borderColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      labelColor: null == labelColor
-          ? _value.labelColor
-          : labelColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      hoverColor: null == hoverColor
-          ? _value.hoverColor
-          : hoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      selectedHoverColor: null == selectedHoverColor
-          ? _value.selectedHoverColor
-          : selectedHoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      selectedUnhoverColor: null == selectedUnhoverColor
-          ? _value.selectedUnhoverColor
-          : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      highlightColor: null == highlightColor
-          ? _value.highlightColor
-          : highlightColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      arrowSize: null == arrowSize
-          ? _value.arrowSize
-          : arrowSize // ignore: cast_nullable_to_non_nullable
-              as Size,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+        arrowColor: null == arrowColor
+            ? _value.arrowColor
+            : arrowColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        borderColor: null == borderColor
+            ? _value.borderColor
+            : borderColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        labelColor: null == labelColor
+            ? _value.labelColor
+            : labelColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        hoverColor: null == hoverColor
+            ? _value.hoverColor
+            : hoverColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        selectedHoverColor: null == selectedHoverColor
+            ? _value.selectedHoverColor
+            : selectedHoverColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        selectedUnhoverColor: null == selectedUnhoverColor
+            ? _value.selectedUnhoverColor
+            : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        highlightColor: null == highlightColor
+            ? _value.highlightColor
+            : highlightColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        arrowSize: null == arrowSize
+            ? _value.arrowSize
+            : arrowSize // ignore: cast_nullable_to_non_nullable
+                as Size,
+      ) as $Val,
+    );
   }
 }
 
@@ -134,20 +138,21 @@ class _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
 abstract class _$$GraphDefaultLinkRendererStyleImplCopyWith<$Res>
     implements $GraphDefaultLinkRendererStyleCopyWith<$Res> {
   factory _$$GraphDefaultLinkRendererStyleImplCopyWith(
-          _$GraphDefaultLinkRendererStyleImpl value,
-          $Res Function(_$GraphDefaultLinkRendererStyleImpl) then) =
-      __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>;
+    _$GraphDefaultLinkRendererStyleImpl value,
+    $Res Function(_$GraphDefaultLinkRendererStyleImpl) then,
+  ) = __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {Color arrowColor,
-      Color borderColor,
-      Color labelColor,
-      Color hoverColor,
-      Color selectedHoverColor,
-      Color selectedUnhoverColor,
-      Color highlightColor,
-      Size arrowSize});
+  $Res call({
+    Color arrowColor,
+    Color borderColor,
+    Color labelColor,
+    Color hoverColor,
+    Color selectedHoverColor,
+    Color selectedUnhoverColor,
+    Color highlightColor,
+    Size arrowSize,
+  });
 }
 
 /// @nodoc
@@ -156,9 +161,9 @@ class __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>
         _$GraphDefaultLinkRendererStyleImpl>
     implements _$$GraphDefaultLinkRendererStyleImplCopyWith<$Res> {
   __$$GraphDefaultLinkRendererStyleImplCopyWithImpl(
-      _$GraphDefaultLinkRendererStyleImpl _value,
-      $Res Function(_$GraphDefaultLinkRendererStyleImpl) _then)
-      : super(_value, _then);
+    _$GraphDefaultLinkRendererStyleImpl _value,
+    $Res Function(_$GraphDefaultLinkRendererStyleImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of GraphDefaultLinkRendererStyle
   /// with the given fields replaced by the non-null parameter values.
@@ -174,40 +179,42 @@ class __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>
     Object? highlightColor = null,
     Object? arrowSize = null,
   }) {
-    return _then(_$GraphDefaultLinkRendererStyleImpl(
-      arrowColor: null == arrowColor
-          ? _value.arrowColor
-          : arrowColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      borderColor: null == borderColor
-          ? _value.borderColor
-          : borderColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      labelColor: null == labelColor
-          ? _value.labelColor
-          : labelColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      hoverColor: null == hoverColor
-          ? _value.hoverColor
-          : hoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      selectedHoverColor: null == selectedHoverColor
-          ? _value.selectedHoverColor
-          : selectedHoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      selectedUnhoverColor: null == selectedUnhoverColor
-          ? _value.selectedUnhoverColor
-          : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      highlightColor: null == highlightColor
-          ? _value.highlightColor
-          : highlightColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      arrowSize: null == arrowSize
-          ? _value.arrowSize
-          : arrowSize // ignore: cast_nullable_to_non_nullable
-              as Size,
-    ));
+    return _then(
+      _$GraphDefaultLinkRendererStyleImpl(
+        arrowColor: null == arrowColor
+            ? _value.arrowColor
+            : arrowColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        borderColor: null == borderColor
+            ? _value.borderColor
+            : borderColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        labelColor: null == labelColor
+            ? _value.labelColor
+            : labelColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        hoverColor: null == hoverColor
+            ? _value.hoverColor
+            : hoverColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        selectedHoverColor: null == selectedHoverColor
+            ? _value.selectedHoverColor
+            : selectedHoverColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        selectedUnhoverColor: null == selectedUnhoverColor
+            ? _value.selectedUnhoverColor
+            : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        highlightColor: null == highlightColor
+            ? _value.highlightColor
+            : highlightColor // ignore: cast_nullable_to_non_nullable
+                as Color,
+        arrowSize: null == arrowSize
+            ? _value.arrowSize
+            : arrowSize // ignore: cast_nullable_to_non_nullable
+                as Size,
+      ),
+    );
   }
 }
 
@@ -215,15 +222,16 @@ class __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>
 
 class _$GraphDefaultLinkRendererStyleImpl
     implements _GraphDefaultLinkRendererStyle {
-  const _$GraphDefaultLinkRendererStyleImpl(
-      {this.arrowColor = Colors.black,
-      this.borderColor = Colors.black,
-      this.labelColor = Colors.black,
-      this.hoverColor = Colors.red,
-      this.selectedHoverColor = Colors.green,
-      this.selectedUnhoverColor = Colors.blue,
-      this.highlightColor = Colors.yellow,
-      this.arrowSize = const Size(1, 1)});
+  const _$GraphDefaultLinkRendererStyleImpl({
+    this.arrowColor = Colors.black,
+    this.borderColor = Colors.black,
+    this.labelColor = Colors.black,
+    this.hoverColor = Colors.red,
+    this.selectedHoverColor = Colors.green,
+    this.selectedUnhoverColor = Colors.blue,
+    this.highlightColor = Colors.yellow,
+    this.arrowSize = const Size(1, 1),
+  });
 
   /// The color of the arrow at the end of the link.
   @override
@@ -297,15 +305,16 @@ class _$GraphDefaultLinkRendererStyleImpl
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      arrowColor,
-      borderColor,
-      labelColor,
-      hoverColor,
-      selectedHoverColor,
-      selectedUnhoverColor,
-      highlightColor,
-      arrowSize);
+        runtimeType,
+        arrowColor,
+        borderColor,
+        labelColor,
+        hoverColor,
+        selectedHoverColor,
+        selectedUnhoverColor,
+        highlightColor,
+        arrowSize,
+      );
 
   /// Create a copy of GraphDefaultLinkRendererStyle
   /// with the given fields replaced by the non-null parameter values.
@@ -320,15 +329,16 @@ class _$GraphDefaultLinkRendererStyleImpl
 
 abstract class _GraphDefaultLinkRendererStyle
     implements GraphDefaultLinkRendererStyle {
-  const factory _GraphDefaultLinkRendererStyle(
-      {final Color arrowColor,
-      final Color borderColor,
-      final Color labelColor,
-      final Color hoverColor,
-      final Color selectedHoverColor,
-      final Color selectedUnhoverColor,
-      final Color highlightColor,
-      final Size arrowSize}) = _$GraphDefaultLinkRendererStyleImpl;
+  const factory _GraphDefaultLinkRendererStyle({
+    final Color arrowColor,
+    final Color borderColor,
+    final Color labelColor,
+    final Color hoverColor,
+    final Color selectedHoverColor,
+    final Color selectedUnhoverColor,
+    final Color highlightColor,
+    final Size arrowSize,
+  }) = _$GraphDefaultLinkRendererStyleImpl;
 
   /// The color of the arrow at the end of the link.
   @override

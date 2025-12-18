@@ -32,8 +32,9 @@ void main() {
     graph
       ..addNode(a)
       ..addNode(b);
-    graph.addLink(GraphLink(
-        source: a, target: b, direction: GraphLinkDirection.outgoing));
+    graph.addLink(
+      GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing),
+    );
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
@@ -71,8 +72,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
   }
 
-  testWidgets('onBackgroundTapped fires only on empty area (exclusive)',
-      (tester) async {
+  testWidgets('onBackgroundTapped fires only on empty area (exclusive)', (
+    tester,
+  ) async {
     var bgTap = 0;
     await pumpGraph(
       tester,
@@ -95,8 +97,9 @@ void main() {
     expect(bgTap, 1, reason: 'Should not increase on node tap');
   });
 
-  testWidgets('onBackgroundTapped fires only on empty area (transparent)',
-      (tester) async {
+  testWidgets('onBackgroundTapped fires only on empty area (transparent)', (
+    tester,
+  ) async {
     var bgTap = 0;
     await pumpGraph(
       tester,

@@ -45,10 +45,7 @@ class PloughLogger {
   }
 
   Logger _createLogger(Level level, LogCategory category) {
-    return Logger(
-      printer: _SimplePrinter(category),
-      level: level,
-    );
+    return Logger(printer: _SimplePrinter(category), level: level);
   }
 
   /// Get logger for specific category
@@ -79,7 +76,10 @@ class PloughLogger {
 
   /// Sends logs to external debug server
   void _sendToExternalDebug(
-      LogCategory category, String level, String message) {
+    LogCategory category,
+    String level,
+    String message,
+  ) {
     try {
       externalDebugClient.sendLog(
         category: category,
@@ -115,10 +115,7 @@ void configureLogging({
   Level defaultLevel = Level.off,
   Map<LogCategory, Level>? categoryLevels,
 }) {
-  _logger.configure(
-    defaultLevel: defaultLevel,
-    categoryLevels: categoryLevels,
-  );
+  _logger.configure(defaultLevel: defaultLevel, categoryLevels: categoryLevels);
 }
 
 /// Legacy support - gradually replace these

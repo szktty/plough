@@ -18,9 +18,7 @@ enum GraphEntityType {
 
 @internal
 abstract base class GraphStateManager<T> with Diagnosticable {
-  GraphStateManager({
-    required this.gestureManager,
-  });
+  GraphStateManager({required this.gestureManager});
 
   final GraphGestureManager gestureManager;
 

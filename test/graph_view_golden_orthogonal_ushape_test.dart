@@ -5,8 +5,9 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: orthogonal U-shape (two links via bottom)',
-      (tester) async {
+  testWidgets('GraphView golden: orthogonal U-shape (two links via bottom)', (
+    tester,
+  ) async {
     final graph = Graph();
 
     final a = GraphNode(properties: {'label': 'A'});
@@ -19,10 +20,16 @@ void main() {
       ..addNode(c);
 
     // A -> C -> B to form a "U" shape with orthogonal routing
-    final l1 =
-        GraphLink(source: a, target: c, direction: GraphLinkDirection.outgoing);
-    final l2 =
-        GraphLink(source: c, target: b, direction: GraphLinkDirection.outgoing);
+    final l1 = GraphLink(
+      source: a,
+      target: c,
+      direction: GraphLinkDirection.outgoing,
+    );
+    final l2 = GraphLink(
+      source: c,
+      target: b,
+      direction: GraphLinkDirection.outgoing,
+    );
     graph
       ..addLink(l1)
       ..addLink(l2);
@@ -30,11 +37,17 @@ void main() {
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
         GraphNodeLayoutPosition(
-            id: a.id, position: const Offset(60, 50)), // left-top
+          id: a.id,
+          position: const Offset(60, 50),
+        ), // left-top
         GraphNodeLayoutPosition(
-            id: b.id, position: const Offset(360, 50)), // right-top
+          id: b.id,
+          position: const Offset(360, 50),
+        ), // right-top
         GraphNodeLayoutPosition(
-            id: c.id, position: const Offset(210, 170)), // bottom-center
+          id: c.id,
+          position: const Offset(210, 170),
+        ), // bottom-center
       ],
       origin: GraphLayoutPositionOrigin.topLeft,
     );
@@ -53,7 +66,8 @@ void main() {
                 child: GraphView(
                   graph: graph,
                   behavior: const GraphViewDefaultBehavior(
-                      linkRouting: GraphLinkRouting.orthogonal),
+                    linkRouting: GraphLinkRouting.orthogonal,
+                  ),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),

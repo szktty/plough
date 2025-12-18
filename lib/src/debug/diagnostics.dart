@@ -12,10 +12,8 @@ Map<String, dynamic> sizeToJson(Size size) => {
     };
 
 // Deserialization helper
-Size sizeFromJson(Map<String, dynamic> json) => Size(
-      (json['width'] as num).toDouble(),
-      (json['height'] as num).toDouble(),
-    );
+Size sizeFromJson(Map<String, dynamic> json) =>
+    Size((json['width'] as num).toDouble(), (json['height'] as num).toDouble());
 
 // Offset serialization helper (non-nullable)
 Map<String, dynamic> offsetToJson(Offset offset) => {
@@ -24,27 +22,19 @@ Map<String, dynamic> offsetToJson(Offset offset) => {
     };
 
 // Offset deserialization helper (non-nullable)
-Offset offsetFromJson(Map<String, dynamic> json) => Offset(
-      (json['dx'] as num).toDouble(),
-      (json['dy'] as num).toDouble(),
-    );
+Offset offsetFromJson(Map<String, dynamic> json) =>
+    Offset((json['dx'] as num).toDouble(), (json['dy'] as num).toDouble());
 
 // Offset serialization helper (nullable)
 Map<String, dynamic>? nullableOffsetToJson(Offset? offset) {
   if (offset == null) return null;
-  return {
-    'dx': offset.dx,
-    'dy': offset.dy,
-  };
+  return {'dx': offset.dx, 'dy': offset.dy};
 }
 
 // Offset deserialization helper (nullable)
 Offset? nullableOffsetFromJson(Map<String, dynamic>? json) {
   if (json == null) return null;
-  return Offset(
-    (json['dx'] as num).toDouble(),
-    (json['dy'] as num).toDouble(),
-  );
+  return Offset((json['dx'] as num).toDouble(), (json['dy'] as num).toDouble());
 }
 
 /// Graph diagnostic data
@@ -126,11 +116,15 @@ class GestureState with _$GestureState {
   factory GestureState.fromJson(Map<String, dynamic> json) =>
       _$GestureStateFromJson(json);
 }
-/// Gesture event  const factory GestureEvent({
-    DateTime timestamp,
+
+/// Gesture event
+@freezed
+class GestureEvent with _$GestureEvent {
+  const factory GestureEvent({
+    required DateTime timestamp,
     required GestureEventType type,
-    @JsonKey(fromJson = offsetFromJson, toJson = offsetToJson)
-    Offset position,
+    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
+    required Offset position,
     required bool wasConsumed,
     required String callbackInvoked,
     String? targetNodeId,
@@ -173,13 +167,7 @@ class RenderEvent with _$RenderEvent {
 }
 
 /// Render phase
-enum RenderPhase {
-  layout,
-  paint,
-  composite,
-  build,
-  postFrameCallback,
-}
+enum RenderPhase { layout, paint, composite, build, postFrameCallback }
 
 /// State change event
 @freezed

@@ -10,8 +10,11 @@ void main() {
       ..addNode(a)
       ..addNode(b);
 
-    final l =
-        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
+    final l = GraphLink(
+      source: a,
+      target: b,
+      direction: GraphLinkDirection.outgoing,
+    );
     g.addLink(l);
 
     // select link, record selection ids

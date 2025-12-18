@@ -65,9 +65,7 @@ class GraphOrderManager {
   }
 
   /// Creates a copy of this manager with optional new [entityIds].
-  GraphOrderManager copyWith({
-    Iterable<GraphId>? entityIds,
-  }) {
+  GraphOrderManager copyWith({Iterable<GraphId>? entityIds}) {
     return GraphOrderManager(graph, entityIds ?? _entityIds);
   }
 

@@ -30,16 +30,20 @@ void main() {
   }) async {
     // Also propagate to GraphImpl state (widget prop does not sync graph state)
     final gi = graph as GraphImpl;
-    gi.setState(gi.state.value.copyWith(
-      allowMultiSelection: allowMultiSelection,
-    ));
+    gi.setState(
+      gi.state.value.copyWith(allowMultiSelection: allowMultiSelection),
+    );
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [
         GraphNodeLayoutPosition(
-            id: graph.nodes.first.id, position: const Offset(60, 80)),
+          id: graph.nodes.first.id,
+          position: const Offset(60, 80),
+        ),
         GraphNodeLayoutPosition(
-            id: graph.nodes.elementAt(1).id, position: const Offset(200, 80)),
+          id: graph.nodes.elementAt(1).id,
+          position: const Offset(200, 80),
+        ),
       ],
       origin: GraphLayoutPositionOrigin.topLeft,
     );
@@ -78,8 +82,9 @@ void main() {
     graph
       ..addNode(a)
       ..addNode(b)
-      ..addLink(GraphLink(
-          source: a, target: b, direction: GraphLinkDirection.outgoing));
+      ..addLink(
+        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing),
+      );
 
     await pumpGraph(tester, allowMultiSelection: false, graph: graph);
 
@@ -111,8 +116,13 @@ void main() {
       graph
         ..addNode(a)
         ..addNode(b)
-        ..addLink(GraphLink(
-            source: a, target: b, direction: GraphLinkDirection.outgoing));
+        ..addLink(
+          GraphLink(
+            source: a,
+            target: b,
+            direction: GraphLinkDirection.outgoing,
+          ),
+        );
 
       await pumpGraph(tester, allowMultiSelection: true, graph: graph);
 

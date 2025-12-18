@@ -7,7 +7,8 @@ part of 'diagnostics.dart';
 // **************************************************************************
 
 _$GraphDiagnosticsImpl _$$GraphDiagnosticsImplFromJson(
-        Map<String, dynamic> json) =>
+  Map<String, dynamic> json,
+) =>
     _$GraphDiagnosticsImpl(
       snapshot:
           GraphSnapshot.fromJson(json['snapshot'] as Map<String, dynamic>),
@@ -21,11 +22,13 @@ _$GraphDiagnosticsImpl _$$GraphDiagnosticsImplFromJson(
           .map((e) => StateChange.fromJson(e as Map<String, dynamic>))
           .toList(),
       performance: PerformanceMetrics.fromJson(
-          json['performance'] as Map<String, dynamic>),
+        json['performance'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$$GraphDiagnosticsImplToJson(
-        _$GraphDiagnosticsImpl instance) =>
+  _$GraphDiagnosticsImpl instance,
+) =>
     <String, dynamic>{
       'snapshot': instance.snapshot,
       'gestureHistory': instance.gestureHistory,
@@ -42,10 +45,12 @@ _$GraphSnapshotImpl _$$GraphSnapshotImplFromJson(Map<String, dynamic> json) =>
       nodePositions: (json['nodePositions'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(k, NodePosition.fromJson(e as Map<String, dynamic>)),
       ),
-      layoutMetrics:
-          LayoutMetrics.fromJson(json['layoutMetrics'] as Map<String, dynamic>),
-      currentGesture:
-          GestureState.fromJson(json['currentGesture'] as Map<String, dynamic>),
+      layoutMetrics: LayoutMetrics.fromJson(
+        json['layoutMetrics'] as Map<String, dynamic>,
+      ),
+      currentGesture: GestureState.fromJson(
+        json['currentGesture'] as Map<String, dynamic>,
+      ),
       selectedNodeId: json['selectedNodeId'] as String?,
       draggedNodeIds: (json['draggedNodeIds'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -85,8 +90,9 @@ Map<String, dynamic> _$$NodePositionImplToJson(_$NodePositionImpl instance) =>
 _$LayoutMetricsImpl _$$LayoutMetricsImplFromJson(Map<String, dynamic> json) =>
     _$LayoutMetricsImpl(
       strategy: json['strategy'] as String,
-      lastCalculationTime:
-          Duration(microseconds: (json['lastCalculationTime'] as num).toInt()),
+      lastCalculationTime: Duration(
+        microseconds: (json['lastCalculationTime'] as num).toInt(),
+      ),
       iterationCount: (json['iterationCount'] as num).toInt(),
       totalEnergy: (json['totalEnergy'] as num).toDouble(),
       graphBounds: sizeFromJson(json['graphBounds'] as Map<String, dynamic>),
@@ -107,7 +113,8 @@ _$GestureStateImpl _$$GestureStateImplFromJson(Map<String, dynamic> json) =>
       isDragging: json['isDragging'] as bool,
       isSelecting: json['isSelecting'] as bool,
       currentPosition: nullableOffsetFromJson(
-          json['currentPosition'] as Map<String, dynamic>?),
+        json['currentPosition'] as Map<String, dynamic>?,
+      ),
       hoveredNodeId: json['hoveredNodeId'] as String?,
     );
 
@@ -219,22 +226,26 @@ const _$StateChangeTypeEnumMap = {
 };
 
 _$PerformanceMetricsImpl _$$PerformanceMetricsImplFromJson(
-        Map<String, dynamic> json) =>
+  Map<String, dynamic> json,
+) =>
     _$PerformanceMetricsImpl(
       averageFps: (json['averageFps'] as num).toDouble(),
       currentFps: (json['currentFps'] as num).toDouble(),
       droppedFrames: (json['droppedFrames'] as num).toInt(),
-      averageFrameTime:
-          Duration(microseconds: (json['averageFrameTime'] as num).toInt()),
-      worstFrameTime:
-          Duration(microseconds: (json['worstFrameTime'] as num).toInt()),
+      averageFrameTime: Duration(
+        microseconds: (json['averageFrameTime'] as num).toInt(),
+      ),
+      worstFrameTime: Duration(
+        microseconds: (json['worstFrameTime'] as num).toInt(),
+      ),
       memoryUsageMB: (json['memoryUsageMB'] as num).toInt(),
       measurementStart: DateTime.parse(json['measurementStart'] as String),
       measurementEnd: DateTime.parse(json['measurementEnd'] as String),
     );
 
 Map<String, dynamic> _$$PerformanceMetricsImplToJson(
-        _$PerformanceMetricsImpl instance) =>
+  _$PerformanceMetricsImpl instance,
+) =>
     <String, dynamic>{
       'averageFps': instance.averageFps,
       'currentFps': instance.currentFps,

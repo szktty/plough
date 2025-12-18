@@ -227,8 +227,10 @@ class GraphImpl
 
   /// Notify layout-related changes
   void _notifyLayoutChange() {
-    logDebug(LogCategory.layout,
-        '📐 Graph._notifyLayoutChange() called - value: ${_layoutChangeNotifier.value} -> ${_layoutChangeNotifier.value + 1}');
+    logDebug(
+      LogCategory.layout,
+      '📐 Graph._notifyLayoutChange() called - value: ${_layoutChangeNotifier.value} -> ${_layoutChangeNotifier.value + 1}',
+    );
     _layoutChangeNotifier.value++;
   }
 
@@ -293,8 +295,9 @@ class GraphImpl
 
   @override
   void addLink(GraphLinkImpl link) {
-    state.value =
-        state.value.copyWith(links: state.value.links.add(link.id, link));
+    state.value = state.value.copyWith(
+      links: state.value.links.add(link.id, link),
+    );
     _notifyLayoutChange();
   }
 
@@ -338,8 +341,9 @@ class GraphImpl
     if (!state.value.links.containsKey(id)) {
       throw ArgumentError('link not found: $id');
     }
-    _nodeDependencies
-        .removeWhere((key, value) => state.value.links.containsKey(key));
+    _nodeDependencies.removeWhere(
+      (key, value) => state.value.links.containsKey(key),
+    );
     state.value = state.value.copyWith(links: state.value.links.remove(id));
   }
 
@@ -530,11 +534,12 @@ class GraphImpl
 
     // Clear graph selection state
     setState(
-        state.value.copyWith(
-          selectedNodeIds: const IListConst([]),
-          selectedLinkIds: const IListConst([]),
-        ),
-        force: true);
+      state.value.copyWith(
+        selectedNodeIds: const IListConst([]),
+        selectedLinkIds: const IListConst([]),
+      ),
+      force: true,
+    );
   }
 
   @override
@@ -570,10 +575,10 @@ class GraphImpl
       }
       return GraphOrderManager(this, ids);
     } else {
-      return GraphOrderManager(
-        this,
-        [...state.value.nodes.keys, ...state.value.links.keys],
-      );
+      return GraphOrderManager(this, [
+        ...state.value.nodes.keys,
+        ...state.value.links.keys,
+      ]);
     }
   }
 
@@ -587,7 +592,10 @@ class GraphImpl
     } else {
       return GraphOrderManager(
         this,
-        [...state.value.nodes.keys, ...state.value.links.keys],
+        [
+          ...state.value.nodes.keys,
+          ...state.value.links.keys,
+        ],
         sync: true,
       );
     }
@@ -638,11 +646,9 @@ extension GraphInternal on GraphImpl {
 
   void onLayoutFinished() {
     setState(
-        state.value.copyWith(
-          needsLayout: false,
-          shouldAnimateLayout: false,
-        ),
-        force: true);
+      state.value.copyWith(needsLayout: false, shouldAnimateLayout: false),
+      force: true,
+    );
 
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;

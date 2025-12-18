@@ -6,16 +6,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // Current behavior documentation: self-loop is not rendered (no connection points)
-  testWidgets('GraphView golden: self-loop (current behavior: not rendered)',
-      (tester) async {
+  testWidgets('GraphView golden: self-loop (current behavior: not rendered)', (
+    tester,
+  ) async {
     final graph = Graph();
     final a = GraphNode(properties: {'label': 'A'});
     graph.addNode(a);
 
     // Add a self-loop link. As of current implementation, this results in no
     // connection points and thus nothing is drawn for the link.
-    graph.addLink(GraphLink(
-        source: a, target: a, direction: GraphLinkDirection.outgoing));
+    graph.addLink(
+      GraphLink(source: a, target: a, direction: GraphLinkDirection.outgoing),
+    );
 
     final layout = GraphManualLayoutStrategy(
       nodePositions: [

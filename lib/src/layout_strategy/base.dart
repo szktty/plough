@@ -117,9 +117,7 @@ abstract base class GraphLayoutStrategy {
 
   /// Gets the predefined position for a node, if any exists.
   GraphNodeLayoutPosition? getNodePosition(GraphNode node) {
-    return nodePositions.firstWhereOrNull(
-      (element) => element.id == node.id,
-    );
+    return nodePositions.firstWhereOrNull((element) => element.id == node.id);
   }
 
   /// Checks if a node's position should remain fixed during layout.
@@ -138,8 +136,10 @@ abstract base class GraphLayoutStrategy {
   /// Used by subclasses to implement [shouldRelayout].
   bool baseEquals(covariant GraphLayoutStrategy oldStrategy) {
     return padding == oldStrategy.padding &&
-        const IterableEquality<GraphNodeLayoutPosition>()
-            .equals(nodePositions, oldStrategy.nodePositions);
+        const IterableEquality<GraphNodeLayoutPosition>().equals(
+          nodePositions,
+          oldStrategy.nodePositions,
+        );
   }
 
   /// Calculates and applies node positions based on the layout algorithm.

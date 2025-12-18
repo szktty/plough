@@ -167,8 +167,10 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         final minX = padding.left;
         final maxX = (size.width - padding.right).clamp(minX, double.infinity);
         final minY = padding.top;
-        final maxY =
-            (size.height - padding.bottom).clamp(minY, double.infinity);
+        final maxY = (size.height - padding.bottom).clamp(
+          minY,
+          double.infinity,
+        );
 
         newPosition = Offset(
           newPosition.dx.clamp(minX, maxX),

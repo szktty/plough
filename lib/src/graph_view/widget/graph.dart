@@ -151,13 +151,16 @@ class GraphViewState extends State<GraphView> {
 
   GraphImpl get _graph => widget.graph as GraphImpl;
 
-  final ValueNotifier<GraphViewBuildState> _buildState =
-      ValueNotifier(GraphViewBuildState.initialize);
+  final ValueNotifier<GraphViewBuildState> _buildState = ValueNotifier(
+    GraphViewBuildState.initialize,
+  );
 
   void _setBuildState(GraphViewBuildState newState) {
     if (_buildState.value != newState) {
-      logDebug(LogCategory.state,
-          '🏗️ GraphView _buildState changed: ${_buildState.value} -> $newState');
+      logDebug(
+        LogCategory.state,
+        '🏗️ GraphView _buildState changed: ${_buildState.value} -> $newState',
+      );
       _buildState.value = newState;
     }
   }
@@ -222,12 +225,16 @@ class GraphViewState extends State<GraphView> {
         !widget.behavior.isEquivalentTo(oldWidget.behavior);
 
     if (needsReinit) {
-      logDebug(LogCategory.state,
-          '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behaviorEquivalent=${!widget.behavior.isEquivalentTo(oldWidget.behavior)})');
+      logDebug(
+        LogCategory.state,
+        '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behaviorEquivalent=${!widget.behavior.isEquivalentTo(oldWidget.behavior)})',
+      );
       _initBehavior();
     } else {
-      logDebug(LogCategory.state,
-          '🔄 GraphView didUpdateWidget: skipping reinit (no significant changes)');
+      logDebug(
+        LogCategory.state,
+        '🔄 GraphView didUpdateWidget: skipping reinit (no significant changes)',
+      );
     }
   }
 
@@ -235,10 +242,7 @@ class GraphViewState extends State<GraphView> {
     WidgetUtils.withSizedRenderBoxIfPresent(_layoutKey, (renderBox) {
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
-      final newGeometry = GraphViewGeometry(
-        position: position,
-        size: size,
-      );
+      final newGeometry = GraphViewGeometry(position: position, size: size);
 
       // Only update if geometry actually changed
       if (_graph.geometry == null ||
@@ -300,8 +304,10 @@ class GraphViewState extends State<GraphView> {
           widget.animationEnabled && _graph.shouldAnimateLayout;
 
       if (shouldAnimateLayout) {
-        logDebug(LogCategory.layout,
-            'GraphView: Enabling animation - explicitly requested');
+        logDebug(
+          LogCategory.layout,
+          'GraphView: Enabling animation - explicitly requested',
+        );
         _layoutStrategy.nodeAnimationStartPosition =
             _getNodeAnimationStartPosition(constrains);
         // Reset animation states for all nodes
@@ -309,8 +315,10 @@ class GraphViewState extends State<GraphView> {
           (node as GraphNodeImpl).resetAnimationState();
         }
       } else {
-        logDebug(LogCategory.layout,
-            'GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})');
+        logDebug(
+          LogCategory.layout,
+          'GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})',
+        );
       }
       _layoutStrategy.performLayout(
         _graph,
@@ -336,20 +344,26 @@ class GraphViewState extends State<GraphView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return AnimatedBuilder(
-          animation:
-              Listenable.merge([_graph.layoutChangeListenable, _buildState]),
+          animation: Listenable.merge([
+            _graph.layoutChangeListenable,
+            _buildState,
+          ]),
           builder: (context, child) {
             final timestamp = DateTime.now().millisecondsSinceEpoch;
-            logDebug(LogCategory.rendering,
-                'AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}');
+            logDebug(
+              LogCategory.rendering,
+              'AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}',
+            );
             late List<GraphEntity> elements;
             if (_buildState.value == GraphViewBuildState.initialize) {
               if (!_isGeometryUpdateScheduled) {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    logDebug(LogCategory.rendering,
-                        'PostFrameCallback in initialize phase');
+                    logDebug(
+                      LogCategory.rendering,
+                      'PostFrameCallback in initialize phase',
+                    );
                     _updateGraphGeometry();
                     _updateNodeGeometry();
                     _setBuildState(GraphViewBuildState.performLayout);
@@ -365,8 +379,10 @@ class GraphViewState extends State<GraphView> {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
-                    logDebug(LogCategory.rendering,
-                        'PostFrameCallback in performLayout phase');
+                    logDebug(
+                      LogCategory.rendering,
+                      'PostFrameCallback in performLayout phase',
+                    );
                     _updateGraphGeometry();
                     _setBuildState(GraphViewBuildState.ready);
                     _isGeometryUpdateScheduled = false;
@@ -442,8 +458,10 @@ class GraphViewState extends State<GraphView> {
       animation: _graph,
       builder: (context, _) {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
-        logDebug(LogCategory.rendering,
-            '_buildCommonProviders AnimatedBuilder.builder called at $timestamp');
+        logDebug(
+          LogCategory.rendering,
+          '_buildCommonProviders AnimatedBuilder.builder called at $timestamp',
+        );
         return GraphInheritedData(
           data: _data,
           buildState: _buildState.value,

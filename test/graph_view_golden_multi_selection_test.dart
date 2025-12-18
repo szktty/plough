@@ -7,8 +7,9 @@ import 'package:plough/src/graph/graph_base.dart'
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: multi node selection highlight',
-      (tester) async {
+  testWidgets('GraphView golden: multi node selection highlight', (
+    tester,
+  ) async {
     final graph = Graph();
     final a = GraphNode(properties: {'label': 'A'});
     final b = GraphNode(properties: {'label': 'B'});

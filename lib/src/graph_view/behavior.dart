@@ -71,9 +71,7 @@ class GraphNodeViewBehavior {
             return GraphDefaultNodeRenderer(
               node: node,
               style: nodeRendererStyle,
-              child: Center(
-                child: Text(s),
-              ),
+              child: Center(child: Text(s)),
             );
           },
       child: child,
@@ -116,10 +114,7 @@ typedef GraphLinkWidgetThicknessGetter = double Function(
 ///
 /// * [straight] - Direct straight line connection
 /// * [orthogonal] - Connection using horizontal and vertical line segments
-enum GraphLinkRouting {
-  straight,
-  orthogonal,
-}
+enum GraphLinkRouting { straight, orthogonal }
 
 /// Controls the visualization and interaction behavior of graph links.
 ///
@@ -374,8 +369,10 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
       source.geometry!.bounds.center,
       target.geometry!.bounds.center,
     );
-    final intersections =
-        source.shape!.getLineIntersections(source.geometry!.bounds, line);
+    final intersections = source.shape!.getLineIntersections(
+      source.geometry!.bounds,
+      line,
+    );
     if (intersections.isEmpty) {
       return null;
     }

@@ -33,8 +33,9 @@ class _MixedHighlightBehavior extends GraphViewDefaultBehavior {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView golden: mixed multi-selection (nodes+links)',
-      (tester) async {
+  testWidgets('GraphView golden: mixed multi-selection (nodes+links)', (
+    tester,
+  ) async {
     final graph = Graph();
 
     final a = GraphNode(properties: {'label': 'A'});
@@ -50,14 +51,26 @@ void main() {
       ..addNode(d)
       ..addNode(e);
 
-    final l1 =
-        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
+    final l1 = GraphLink(
+      source: a,
+      target: b,
+      direction: GraphLinkDirection.outgoing,
+    );
     final l2 = GraphLink(
-        source: b, target: c, direction: GraphLinkDirection.bidirectional);
-    final l3 =
-        GraphLink(source: c, target: d, direction: GraphLinkDirection.outgoing);
-    final l4 =
-        GraphLink(source: b, target: e, direction: GraphLinkDirection.none);
+      source: b,
+      target: c,
+      direction: GraphLinkDirection.bidirectional,
+    );
+    final l3 = GraphLink(
+      source: c,
+      target: d,
+      direction: GraphLinkDirection.outgoing,
+    );
+    final l4 = GraphLink(
+      source: b,
+      target: e,
+      direction: GraphLinkDirection.none,
+    );
 
     graph
       ..addLink(l1)
@@ -97,7 +110,8 @@ void main() {
                 child: GraphView(
                   graph: graph,
                   behavior: const _MixedHighlightBehavior(
-                      linkRouting: GraphLinkRouting.orthogonal),
+                    linkRouting: GraphLinkRouting.orthogonal,
+                  ),
                   layoutStrategy: layout,
                   animationEnabled: false,
                 ),

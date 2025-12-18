@@ -155,15 +155,13 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       // For transparent mode, use custom recognizer that allows pass-through
       recognizers[_TransparentPanGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<
-              _TransparentPanGestureRecognizer>(
-        _TransparentPanGestureRecognizer.new,
-        (recognizer) {
-          recognizer
-            ..onStart = _handlePanStartConditional
-            ..onUpdate = _handlePanUpdateConditional
-            ..onEnd = _handlePanEndConditional;
-        },
-      );
+                  _TransparentPanGestureRecognizer>(
+              _TransparentPanGestureRecognizer.new, (recognizer) {
+        recognizer
+          ..onStart = _handlePanStartConditional
+          ..onUpdate = _handlePanUpdateConditional
+          ..onEnd = _handlePanEndConditional;
+      });
     } else {
       // For other modes, use standard PanGestureRecognizer
       recognizers[PanGestureRecognizer] =
@@ -202,9 +200,7 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
 
 /// Custom pan gesture recognizer that can selectively accept gestures.
 class _CustomPanGestureRecognizer extends PanGestureRecognizer {
-  _CustomPanGestureRecognizer({
-    required this.shouldAcceptGesture,
-  });
+  _CustomPanGestureRecognizer({required this.shouldAcceptGesture});
 
   final bool Function(Offset) shouldAcceptGesture;
 

@@ -90,7 +90,4 @@ class GraphDefaultNodeRendererStyle with _$GraphDefaultNodeRendererStyle {
 /// Shape options available for nodes in the default renderer.
 ///
 /// The shape affects both the node's visual appearance and its hit testing behavior.
-enum GraphDefaultNodeRendererShape {
-  circle,
-  rectangle,
-}
+enum GraphDefaultNodeRendererShape { circle, rectangle }

@@ -91,8 +91,10 @@ class _GraphLinkViewState extends State<GraphLinkView> {
         final targetGeometry = link.target.geometry;
 
         if (sourceGeometry == null || targetGeometry == null) {
-          logDebug(LogCategory.rendering,
-              'GraphLinkView: waiting to get node geometries...');
+          logDebug(
+            LogCategory.rendering,
+            'GraphLinkView: waiting to get node geometries...',
+          );
           return const SizedBox();
         }
 
@@ -103,8 +105,10 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           widget.targetView,
         );
         if (connPoints == null) {
-          logDebug(LogCategory.rendering,
-              'GraphLinkView: waiting to calculate connection points...');
+          logDebug(
+            LogCategory.rendering,
+            'GraphLinkView: waiting to calculate connection points...',
+          );
           return const SizedBox();
         }
 

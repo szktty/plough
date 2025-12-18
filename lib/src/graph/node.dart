@@ -20,9 +20,7 @@ abstract interface class GraphNode implements GraphEntity {
   /// If [id] is not provided, generates a unique identifier.
   factory GraphNode({GraphId? id, Map<String, Object>? properties}) {
     return GraphNodeImpl(
-      GraphNodeData(
-        id: id ?? GraphId.unique(GraphIdType.node),
-      ),
+      GraphNodeData(id: id ?? GraphId.unique(GraphIdType.node)),
       properties: properties,
     );
   }
@@ -70,8 +68,9 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   final ValueNotifier<bool> _isSelected = ValueNotifier(false);
   final ValueNotifier<bool> _isAnimating = ValueNotifier(false);
   final ValueNotifier<bool> _isAnimationCompleted = ValueNotifier(false);
-  final ValueNotifier<Offset> _animationStartPosition =
-      ValueNotifier(Offset.zero);
+  final ValueNotifier<Offset> _animationStartPosition = ValueNotifier(
+    Offset.zero,
+  );
   final ValueNotifier<Offset> _logicalPosition = ValueNotifier(Offset.zero);
   final ValueNotifier<int> _stackOrder = ValueNotifier(-1);
 
@@ -136,8 +135,10 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   @override
   set logicalPosition(Offset position) {
     if (_logicalPosition.value != position) {
-      logDebug(LogCategory.layout,
-          '📍 Node ${id.value.substring(0, 4)} position changed: ${_logicalPosition.value} -> $position');
+      logDebug(
+        LogCategory.layout,
+        '📍 Node ${id.value.substring(0, 4)} position changed: ${_logicalPosition.value} -> $position',
+      );
     }
     _logicalPosition.value = position;
   }
@@ -170,11 +171,7 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
 
   @override
   set canSelect(bool canSelect) {
-    setState(
-      state.value.copyWith(
-        canSelect: canSelect,
-      ),
-    );
+    setState(state.value.copyWith(canSelect: canSelect));
     // If canSelect is disabled, also deselect the node
     if (!canSelect && isSelected) {
       _isSelected.value = false;

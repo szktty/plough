@@ -3,6 +3,8 @@ import 'package:plough/src/debug/debug_manager.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
 
+// ignore_for_file: avoid_return_this
+
 /// Singleton class that manages the global settings of the Plough library.
 final class Plough {
   factory Plough() => _instance;
@@ -82,9 +84,7 @@ final class Plough {
   Plough enableLogCategories(Map<LogCategory, Level> categories) {
     _enabledLogCategories = Map.from(categories);
     if (_debugLogEnabled) {
-      configureLogging(
-        categoryLevels: _enabledLogCategories,
-      );
+      configureLogging(categoryLevels: _enabledLogCategories);
     }
     return this;
   }
@@ -162,26 +162,40 @@ final class Plough {
     // Display URL if debug server started
     if (enableServer) {
       if (debugManager.isServerRunning) {
-        logInfo(LogCategory.debug,
-            '🌐 Debug server is running at: ${debugManager.serverUrl}');
-        logInfo(LogCategory.debug,
-            '💡 Open the URL in your browser to access the debug console');
-        logInfo(LogCategory.debug,
-            '🔧 Use CLI tools: python3 debug/simple_cli.py recent --category gesture');
+        logInfo(
+          LogCategory.debug,
+          '🌐 Debug server is running at: ${debugManager.serverUrl}',
+        );
+        logInfo(
+          LogCategory.debug,
+          '💡 Open the URL in your browser to access the debug console',
+        );
+        logInfo(
+          LogCategory.debug,
+          '🔧 Use CLI tools: python3 debug/simple_cli.py recent --category gesture',
+        );
         if (debugManager.serverPort != serverPort) {
-          logInfo(LogCategory.debug,
-              'ℹ️ Server started on alternative port ${debugManager.serverPort}');
+          logInfo(
+            LogCategory.debug,
+            'ℹ️ Server started on alternative port ${debugManager.serverPort}',
+          );
         }
       } else {
-        logWarning(LogCategory.debug,
-            '⚠️ Debug server failed to start. Check if port $serverPort is available.');
+        logWarning(
+          LogCategory.debug,
+          '⚠️ Debug server failed to start. Check if port $serverPort is available.',
+        );
         logInfo(
-            LogCategory.debug, '💡 You can still use basic logging features');
+          LogCategory.debug,
+          '💡 You can still use basic logging features',
+        );
       }
     }
 
     logInfo(
-        LogCategory.debug, 'Plough debug features initialized successfully');
+      LogCategory.debug,
+      'Plough debug features initialized successfully',
+    );
   }
 
   /// Shutdown all debug features.

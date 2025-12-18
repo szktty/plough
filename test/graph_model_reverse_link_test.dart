@@ -8,8 +8,11 @@ void main() {
     final b = GraphNode();
     g.addNode(a);
     g.addNode(b);
-    final l =
-        GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing);
+    final l = GraphLink(
+      source: a,
+      target: b,
+      direction: GraphLinkDirection.outgoing,
+    );
     g.addLink(l);
 
     expect(l.source.id, a.id);

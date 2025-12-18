@@ -12,7 +12,8 @@ part of 'data.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$GraphViewData {
@@ -53,19 +54,21 @@ mixin _$GraphViewData {
 /// @nodoc
 abstract class $GraphViewDataCopyWith<$Res> {
   factory $GraphViewDataCopyWith(
-          GraphViewData value, $Res Function(GraphViewData) then) =
-      _$GraphViewDataCopyWithImpl<$Res, GraphViewData>;
+    GraphViewData value,
+    $Res Function(GraphViewData) then,
+  ) = _$GraphViewDataCopyWithImpl<$Res, GraphViewData>;
   @useResult
-  $Res call(
-      {Graph graph,
-      GraphViewBehavior behavior,
-      GraphLayoutStrategy? layoutStrategy,
-      bool allowSelection,
-      bool allowMultiSelection,
-      bool animationEnabled,
-      Offset? nodeAnimationStartPosition,
-      Duration nodeAnimationDuration,
-      Curve nodeAnimationCurve});
+  $Res call({
+    Graph graph,
+    GraphViewBehavior behavior,
+    GraphLayoutStrategy? layoutStrategy,
+    bool allowSelection,
+    bool allowMultiSelection,
+    bool animationEnabled,
+    Offset? nodeAnimationStartPosition,
+    Duration nodeAnimationDuration,
+    Curve nodeAnimationCurve,
+  });
 }
 
 /// @nodoc
@@ -93,44 +96,46 @@ class _$GraphViewDataCopyWithImpl<$Res, $Val extends GraphViewData>
     Object? nodeAnimationDuration = null,
     Object? nodeAnimationCurve = null,
   }) {
-    return _then(_value.copyWith(
-      graph: null == graph
-          ? _value.graph
-          : graph // ignore: cast_nullable_to_non_nullable
-              as Graph,
-      behavior: null == behavior
-          ? _value.behavior
-          : behavior // ignore: cast_nullable_to_non_nullable
-              as GraphViewBehavior,
-      layoutStrategy: freezed == layoutStrategy
-          ? _value.layoutStrategy
-          : layoutStrategy // ignore: cast_nullable_to_non_nullable
-              as GraphLayoutStrategy?,
-      allowSelection: null == allowSelection
-          ? _value.allowSelection
-          : allowSelection // ignore: cast_nullable_to_non_nullable
-              as bool,
-      allowMultiSelection: null == allowMultiSelection
-          ? _value.allowMultiSelection
-          : allowMultiSelection // ignore: cast_nullable_to_non_nullable
-              as bool,
-      animationEnabled: null == animationEnabled
-          ? _value.animationEnabled
-          : animationEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      nodeAnimationStartPosition: freezed == nodeAnimationStartPosition
-          ? _value.nodeAnimationStartPosition
-          : nodeAnimationStartPosition // ignore: cast_nullable_to_non_nullable
-              as Offset?,
-      nodeAnimationDuration: null == nodeAnimationDuration
-          ? _value.nodeAnimationDuration
-          : nodeAnimationDuration // ignore: cast_nullable_to_non_nullable
-              as Duration,
-      nodeAnimationCurve: null == nodeAnimationCurve
-          ? _value.nodeAnimationCurve
-          : nodeAnimationCurve // ignore: cast_nullable_to_non_nullable
-              as Curve,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+        graph: null == graph
+            ? _value.graph
+            : graph // ignore: cast_nullable_to_non_nullable
+                as Graph,
+        behavior: null == behavior
+            ? _value.behavior
+            : behavior // ignore: cast_nullable_to_non_nullable
+                as GraphViewBehavior,
+        layoutStrategy: freezed == layoutStrategy
+            ? _value.layoutStrategy
+            : layoutStrategy // ignore: cast_nullable_to_non_nullable
+                as GraphLayoutStrategy?,
+        allowSelection: null == allowSelection
+            ? _value.allowSelection
+            : allowSelection // ignore: cast_nullable_to_non_nullable
+                as bool,
+        allowMultiSelection: null == allowMultiSelection
+            ? _value.allowMultiSelection
+            : allowMultiSelection // ignore: cast_nullable_to_non_nullable
+                as bool,
+        animationEnabled: null == animationEnabled
+            ? _value.animationEnabled
+            : animationEnabled // ignore: cast_nullable_to_non_nullable
+                as bool,
+        nodeAnimationStartPosition: freezed == nodeAnimationStartPosition
+            ? _value.nodeAnimationStartPosition
+            : nodeAnimationStartPosition // ignore: cast_nullable_to_non_nullable
+                as Offset?,
+        nodeAnimationDuration: null == nodeAnimationDuration
+            ? _value.nodeAnimationDuration
+            : nodeAnimationDuration // ignore: cast_nullable_to_non_nullable
+                as Duration,
+        nodeAnimationCurve: null == nodeAnimationCurve
+            ? _value.nodeAnimationCurve
+            : nodeAnimationCurve // ignore: cast_nullable_to_non_nullable
+                as Curve,
+      ) as $Val,
+    );
   }
 }
 
@@ -138,20 +143,22 @@ class _$GraphViewDataCopyWithImpl<$Res, $Val extends GraphViewData>
 abstract class _$$GraphViewDataImplCopyWith<$Res>
     implements $GraphViewDataCopyWith<$Res> {
   factory _$$GraphViewDataImplCopyWith(
-          _$GraphViewDataImpl value, $Res Function(_$GraphViewDataImpl) then) =
-      __$$GraphViewDataImplCopyWithImpl<$Res>;
+    _$GraphViewDataImpl value,
+    $Res Function(_$GraphViewDataImpl) then,
+  ) = __$$GraphViewDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {Graph graph,
-      GraphViewBehavior behavior,
-      GraphLayoutStrategy? layoutStrategy,
-      bool allowSelection,
-      bool allowMultiSelection,
-      bool animationEnabled,
-      Offset? nodeAnimationStartPosition,
-      Duration nodeAnimationDuration,
-      Curve nodeAnimationCurve});
+  $Res call({
+    Graph graph,
+    GraphViewBehavior behavior,
+    GraphLayoutStrategy? layoutStrategy,
+    bool allowSelection,
+    bool allowMultiSelection,
+    bool animationEnabled,
+    Offset? nodeAnimationStartPosition,
+    Duration nodeAnimationDuration,
+    Curve nodeAnimationCurve,
+  });
 }
 
 /// @nodoc
@@ -159,8 +166,9 @@ class __$$GraphViewDataImplCopyWithImpl<$Res>
     extends _$GraphViewDataCopyWithImpl<$Res, _$GraphViewDataImpl>
     implements _$$GraphViewDataImplCopyWith<$Res> {
   __$$GraphViewDataImplCopyWithImpl(
-      _$GraphViewDataImpl _value, $Res Function(_$GraphViewDataImpl) _then)
-      : super(_value, _then);
+    _$GraphViewDataImpl _value,
+    $Res Function(_$GraphViewDataImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of GraphViewData
   /// with the given fields replaced by the non-null parameter values.
@@ -177,60 +185,63 @@ class __$$GraphViewDataImplCopyWithImpl<$Res>
     Object? nodeAnimationDuration = null,
     Object? nodeAnimationCurve = null,
   }) {
-    return _then(_$GraphViewDataImpl(
-      graph: null == graph
-          ? _value.graph
-          : graph // ignore: cast_nullable_to_non_nullable
-              as Graph,
-      behavior: null == behavior
-          ? _value.behavior
-          : behavior // ignore: cast_nullable_to_non_nullable
-              as GraphViewBehavior,
-      layoutStrategy: freezed == layoutStrategy
-          ? _value.layoutStrategy
-          : layoutStrategy // ignore: cast_nullable_to_non_nullable
-              as GraphLayoutStrategy?,
-      allowSelection: null == allowSelection
-          ? _value.allowSelection
-          : allowSelection // ignore: cast_nullable_to_non_nullable
-              as bool,
-      allowMultiSelection: null == allowMultiSelection
-          ? _value.allowMultiSelection
-          : allowMultiSelection // ignore: cast_nullable_to_non_nullable
-              as bool,
-      animationEnabled: null == animationEnabled
-          ? _value.animationEnabled
-          : animationEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      nodeAnimationStartPosition: freezed == nodeAnimationStartPosition
-          ? _value.nodeAnimationStartPosition
-          : nodeAnimationStartPosition // ignore: cast_nullable_to_non_nullable
-              as Offset?,
-      nodeAnimationDuration: null == nodeAnimationDuration
-          ? _value.nodeAnimationDuration
-          : nodeAnimationDuration // ignore: cast_nullable_to_non_nullable
-              as Duration,
-      nodeAnimationCurve: null == nodeAnimationCurve
-          ? _value.nodeAnimationCurve
-          : nodeAnimationCurve // ignore: cast_nullable_to_non_nullable
-              as Curve,
-    ));
+    return _then(
+      _$GraphViewDataImpl(
+        graph: null == graph
+            ? _value.graph
+            : graph // ignore: cast_nullable_to_non_nullable
+                as Graph,
+        behavior: null == behavior
+            ? _value.behavior
+            : behavior // ignore: cast_nullable_to_non_nullable
+                as GraphViewBehavior,
+        layoutStrategy: freezed == layoutStrategy
+            ? _value.layoutStrategy
+            : layoutStrategy // ignore: cast_nullable_to_non_nullable
+                as GraphLayoutStrategy?,
+        allowSelection: null == allowSelection
+            ? _value.allowSelection
+            : allowSelection // ignore: cast_nullable_to_non_nullable
+                as bool,
+        allowMultiSelection: null == allowMultiSelection
+            ? _value.allowMultiSelection
+            : allowMultiSelection // ignore: cast_nullable_to_non_nullable
+                as bool,
+        animationEnabled: null == animationEnabled
+            ? _value.animationEnabled
+            : animationEnabled // ignore: cast_nullable_to_non_nullable
+                as bool,
+        nodeAnimationStartPosition: freezed == nodeAnimationStartPosition
+            ? _value.nodeAnimationStartPosition
+            : nodeAnimationStartPosition // ignore: cast_nullable_to_non_nullable
+                as Offset?,
+        nodeAnimationDuration: null == nodeAnimationDuration
+            ? _value.nodeAnimationDuration
+            : nodeAnimationDuration // ignore: cast_nullable_to_non_nullable
+                as Duration,
+        nodeAnimationCurve: null == nodeAnimationCurve
+            ? _value.nodeAnimationCurve
+            : nodeAnimationCurve // ignore: cast_nullable_to_non_nullable
+                as Curve,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$GraphViewDataImpl implements _GraphViewData {
-  const _$GraphViewDataImpl(
-      {required this.graph,
-      required this.behavior,
-      required this.layoutStrategy,
-      required this.allowSelection,
-      required this.allowMultiSelection,
-      required this.animationEnabled,
-      required this.nodeAnimationStartPosition,
-      required this.nodeAnimationDuration,
-      required this.nodeAnimationCurve});
+  const _$GraphViewDataImpl({
+    required this.graph,
+    required this.behavior,
+    required this.layoutStrategy,
+    required this.allowSelection,
+    required this.allowMultiSelection,
+    required this.animationEnabled,
+    required this.nodeAnimationStartPosition,
+    required this.nodeAnimationDuration,
+    required this.nodeAnimationCurve,
+  });
 
   /// The graph data model to be visualized
   @override
@@ -289,8 +300,10 @@ class _$GraphViewDataImpl implements _GraphViewData {
                 other.allowMultiSelection == allowMultiSelection) &&
             (identical(other.animationEnabled, animationEnabled) ||
                 other.animationEnabled == animationEnabled) &&
-            (identical(other.nodeAnimationStartPosition,
-                    nodeAnimationStartPosition) ||
+            (identical(
+                  other.nodeAnimationStartPosition,
+                  nodeAnimationStartPosition,
+                ) ||
                 other.nodeAnimationStartPosition ==
                     nodeAnimationStartPosition) &&
             (identical(other.nodeAnimationDuration, nodeAnimationDuration) ||
@@ -301,16 +314,17 @@ class _$GraphViewDataImpl implements _GraphViewData {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      graph,
-      behavior,
-      layoutStrategy,
-      allowSelection,
-      allowMultiSelection,
-      animationEnabled,
-      nodeAnimationStartPosition,
-      nodeAnimationDuration,
-      nodeAnimationCurve);
+        runtimeType,
+        graph,
+        behavior,
+        layoutStrategy,
+        allowSelection,
+        allowMultiSelection,
+        animationEnabled,
+        nodeAnimationStartPosition,
+        nodeAnimationDuration,
+        nodeAnimationCurve,
+      );
 
   /// Create a copy of GraphViewData
   /// with the given fields replaced by the non-null parameter values.
@@ -322,16 +336,17 @@ class _$GraphViewDataImpl implements _GraphViewData {
 }
 
 abstract class _GraphViewData implements GraphViewData {
-  const factory _GraphViewData(
-      {required final Graph graph,
-      required final GraphViewBehavior behavior,
-      required final GraphLayoutStrategy? layoutStrategy,
-      required final bool allowSelection,
-      required final bool allowMultiSelection,
-      required final bool animationEnabled,
-      required final Offset? nodeAnimationStartPosition,
-      required final Duration nodeAnimationDuration,
-      required final Curve nodeAnimationCurve}) = _$GraphViewDataImpl;
+  const factory _GraphViewData({
+    required final Graph graph,
+    required final GraphViewBehavior behavior,
+    required final GraphLayoutStrategy? layoutStrategy,
+    required final bool allowSelection,
+    required final bool allowMultiSelection,
+    required final bool animationEnabled,
+    required final Offset? nodeAnimationStartPosition,
+    required final Duration nodeAnimationDuration,
+    required final Curve nodeAnimationCurve,
+  }) = _$GraphViewDataImpl;
 
   /// The graph data model to be visualized
   @override

@@ -21,11 +21,7 @@ class GraphTooltip extends StatelessWidget {
   /// );
   /// ```
 
-  const GraphTooltip({
-    required this.node,
-    this.contentBuilder,
-    super.key,
-  });
+  const GraphTooltip({required this.node, this.contentBuilder, super.key});
 
   final GraphNode node;
   final Widget Function(BuildContext context, GraphNode node)? contentBuilder;

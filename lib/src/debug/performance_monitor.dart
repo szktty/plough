@@ -92,8 +92,10 @@ class PerformanceMonitor {
     if (!_enabled) return;
 
     if (_activeTimers.containsKey(operationName)) {
-      logWarning(LogCategory.performance,
-          'Operation "$operationName" is already being measured');
+      logWarning(
+        LogCategory.performance,
+        'Operation "$operationName" is already being measured',
+      );
       return;
     }
 
@@ -101,7 +103,9 @@ class PerformanceMonitor {
     _activeTimers[operationName] = stopwatch;
 
     logDebug(
-        LogCategory.performance, 'Started measuring operation: $operationName');
+      LogCategory.performance,
+      'Started measuring operation: $operationName',
+    );
   }
 
   /// Records the end of an operation
@@ -110,8 +114,10 @@ class PerformanceMonitor {
 
     final stopwatch = _activeTimers.remove(operationName);
     if (stopwatch == null) {
-      logWarning(LogCategory.performance,
-          'Operation "$operationName" was not started or already ended');
+      logWarning(
+        LogCategory.performance,
+        'Operation "$operationName" was not started or already ended',
+      );
       return;
     }
 
@@ -127,8 +133,10 @@ class PerformanceMonitor {
 
     _addMeasurement(measurement);
 
-    logDebug(LogCategory.performance,
-        'Completed operation: $operationName in ${duration.inMicroseconds / 1000}ms');
+    logDebug(
+      LogCategory.performance,
+      'Completed operation: $operationName in ${duration.inMicroseconds / 1000}ms',
+    );
   }
 
   /// Measures an operation (synchronous)
@@ -165,7 +173,9 @@ class PerformanceMonitor {
 
   void _addMeasurement(PerformanceMeasurement measurement) {
     _measurements.putIfAbsent(
-        measurement.name, () => <PerformanceMeasurement>[]);
+      measurement.name,
+      () => <PerformanceMeasurement>[],
+    );
     final measurements = _measurements[measurement.name]!;
 
     measurements.add(measurement);
@@ -237,14 +247,16 @@ class PerformanceMonitor {
     // Sort by average execution time
     final sortedStats = stats.entries.toList()
       ..sort(
-          (a, b) => b.value.averageDuration.compareTo(a.value.averageDuration));
+        (a, b) => b.value.averageDuration.compareTo(a.value.averageDuration),
+      );
 
     for (final entry in sortedStats) {
       final stat = entry.value;
       buffer.writeln('Operation: ${stat.name}');
       buffer.writeln('  Count: ${stat.count}');
       buffer.writeln(
-          '  Average: ${stat.averageDuration.inMicroseconds / 1000}ms');
+        '  Average: ${stat.averageDuration.inMicroseconds / 1000}ms',
+      );
       buffer.writeln('  Min: ${stat.minDuration.inMicroseconds / 1000}ms');
       buffer.writeln('  Max: ${stat.maxDuration.inMicroseconds / 1000}ms');
       buffer.writeln('  Total: ${stat.totalDuration.inMicroseconds / 1000}ms');
@@ -261,10 +273,7 @@ class PerformanceMonitor {
       'enabled': _enabled,
       'stats': getAllStats().map((key, value) => MapEntry(key, value.toJson())),
       'measurements': _measurements.map(
-        (key, value) => MapEntry(
-          key,
-          value.map((m) => m.toJson()).toList(),
-        ),
+        (key, value) => MapEntry(key, value.map((m) => m.toJson()).toList()),
       ),
     };
   }
@@ -275,14 +284,18 @@ final PerformanceMonitor performanceMonitor = PerformanceMonitor();
 
 /// Utility functions
 @internal
-void startPerformanceMeasurement(String operationName,
-    {Map<String, dynamic>? metadata}) {
+void startPerformanceMeasurement(
+  String operationName, {
+  Map<String, dynamic>? metadata,
+}) {
   performanceMonitor.startOperation(operationName, metadata: metadata);
 }
 
 @internal
-void endPerformanceMeasurement(String operationName,
-    {Map<String, dynamic>? metadata}) {
+void endPerformanceMeasurement(
+  String operationName, {
+  Map<String, dynamic>? metadata,
+}) {
   performanceMonitor.endOperation(operationName, metadata: metadata);
 }
 
@@ -292,8 +305,11 @@ T measurePerformance<T>(
   T Function() operation, {
   Map<String, dynamic>? metadata,
 }) {
-  return performanceMonitor.measureOperation(operationName, operation,
-      metadata: metadata);
+  return performanceMonitor.measureOperation(
+    operationName,
+    operation,
+    metadata: metadata,
+  );
 }
 
 @internal
@@ -302,6 +318,9 @@ Future<T> measurePerformanceAsync<T>(
   Future<T> Function() operation, {
   Map<String, dynamic>? metadata,
 }) {
-  return performanceMonitor.measureOperationAsync(operationName, operation,
-      metadata: metadata);
+  return performanceMonitor.measureOperationAsync(
+    operationName,
+    operation,
+    metadata: metadata,
+  );
 }

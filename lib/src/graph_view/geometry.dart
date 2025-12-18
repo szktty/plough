@@ -50,9 +50,8 @@ class GraphConnectionPoints with _$GraphConnectionPoints {
 @freezed
 class GraphNodeViewGeometry with _$GraphNodeViewGeometry {
   /// Creates node geometry with the specified [bounds] rectangle.
-  const factory GraphNodeViewGeometry({
-    required Rect bounds,
-  }) = _GraphNodeViewGeometry;
+  const factory GraphNodeViewGeometry({required Rect bounds}) =
+      _GraphNodeViewGeometry;
 }
 
 /// Combines spatial information needed to render and interact with links.
@@ -87,10 +86,7 @@ class GraphLinkViewGeometry with _$GraphLinkViewGeometry {
     final rotatedDx = dx * math.cos(angle) - dy * math.sin(angle);
     final rotatedDy = dx * math.sin(angle) + dy * math.cos(angle);
 
-    return Offset(
-      center.dx + rotatedDx,
-      center.dy + rotatedDy,
-    );
+    return Offset(center.dx + rotatedDx, center.dy + rotatedDy);
   }
 }
 

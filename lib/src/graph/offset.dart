@@ -27,9 +27,6 @@ final class OffsetJsonConverter
   /// The resulting map contains 'dx' and 'dy' keys with their respective values.
   @override
   Map<String, Object?> toJson(Offset object) {
-    return <String, Object?>{
-      'dx': object.dx,
-      'dy': object.dy,
-    };
+    return <String, Object?>{'dx': object.dx, 'dy': object.dy};
   }
 }

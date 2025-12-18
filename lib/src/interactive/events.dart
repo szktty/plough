@@ -160,10 +160,7 @@ class GraphDragEndEvent extends GraphEntityEvent {
 
 /// Event fired when the mouse pointer enters the area of an entity.
 class GraphHoverEvent extends GraphEvent {
-  const GraphHoverEvent({
-    required this.entityId,
-    required this.details,
-  });
+  const GraphHoverEvent({required this.entityId, required this.details});
   final GraphId entityId;
   final PointerEventDetails details;
 
@@ -176,10 +173,7 @@ class GraphHoverEvent extends GraphEvent {
 
 /// Event fired when the mouse pointer leaves the area of an entity.
 class GraphHoverEndEvent extends GraphEvent {
-  const GraphHoverEndEvent({
-    required this.entityId,
-    required this.details,
-  });
+  const GraphHoverEndEvent({required this.entityId, required this.details});
   final GraphId entityId;
   final PointerEventDetails details;
 

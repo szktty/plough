@@ -68,8 +68,10 @@ void main() {
       final bi = graph.getNode(b.id)! as GraphNodeImpl;
 
       // initial order
-      final initialMax =
-          [ai.stackOrder, bi.stackOrder].reduce((x, y) => x > y ? x : y);
+      final initialMax = [
+        ai.stackOrder,
+        bi.stackOrder,
+      ].reduce((x, y) => x > y ? x : y);
 
       graph.bringToFront(a.id);
       expect(ai.stackOrder, greaterThanOrEqualTo(initialMax));

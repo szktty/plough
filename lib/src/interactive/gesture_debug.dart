@@ -15,8 +15,10 @@ final _debugEventController = StreamController<GestureDebugEvent>.broadcast();
 void setGestureDebugMode(bool enabled) {
   _gestureDebugEnabled = enabled;
   if (enabled) {
-    logDebug(LogCategory.debug,
-        '🔧 Gesture Debug Mode ENABLED - Internal state logging activated');
+    logDebug(
+      LogCategory.debug,
+      '🔧 Gesture Debug Mode ENABLED - Internal state logging activated',
+    );
   } else {
     logDebug(LogCategory.debug, '🔧 Gesture Debug Mode DISABLED');
   }
@@ -66,13 +68,7 @@ enum GestureDebugEventType {
 }
 
 /// Debug event severity levels
-enum GestureDebugSeverity {
-  trace,
-  debug,
-  info,
-  warn,
-  error,
-}
+enum GestureDebugSeverity { trace, debug, info, warn, error }
 
 /// Internal debug event for gesture processing
 class GestureDebugEvent {

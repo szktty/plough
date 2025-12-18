@@ -197,8 +197,10 @@ class StructuredLogger {
   /// Filter by time range
   List<StructuredLogEntry> getEntriesByTimeRange(DateTime start, DateTime end) {
     return _entries
-        .where((entry) =>
-            entry.timestamp.isAfter(start) && entry.timestamp.isBefore(end))
+        .where(
+          (entry) =>
+              entry.timestamp.isAfter(start) && entry.timestamp.isBefore(end),
+        )
         .toList();
   }
 

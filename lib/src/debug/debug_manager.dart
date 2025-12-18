@@ -51,16 +51,26 @@ class PloughDebugManager {
     if (enableServer) {
       try {
         await _debugServer.start(
-            port: serverPort, tryAlternativePorts: tryAlternativePorts);
+          port: serverPort,
+          tryAlternativePorts: tryAlternativePorts,
+        );
         serverStarted = true;
-        logInfo(LogCategory.debug,
-            'Debug server started on port ${_debugServer.port}');
-        logInfo(LogCategory.debug,
-            'Debug console available at: ${_debugServer.url}');
-        logInfo(LogCategory.debug,
-            'Note: If browser access fails, check macOS sandbox restrictions');
-        logInfo(LogCategory.debug,
-            'Alternative: Use Flutter DevTools or VM Service for debugging');
+        logInfo(
+          LogCategory.debug,
+          'Debug server started on port ${_debugServer.port}',
+        );
+        logInfo(
+          LogCategory.debug,
+          'Debug console available at: ${_debugServer.url}',
+        );
+        logInfo(
+          LogCategory.debug,
+          'Note: If browser access fails, check macOS sandbox restrictions',
+        );
+        logInfo(
+          LogCategory.debug,
+          'Alternative: Use Flutter DevTools or VM Service for debugging',
+        );
       } on Exception catch (e) {
         logError(LogCategory.debug, 'Failed to start debug server: $e');
         // Even if server startup fails, enable other debug features
@@ -69,10 +79,11 @@ class PloughDebugManager {
 
     _initialized = true;
     logInfo(
-        LogCategory.debug,
-        serverStarted
-            ? 'Debug manager initialized successfully with server'
-            : 'Debug manager initialized successfully (server not started)');
+      LogCategory.debug,
+      serverStarted
+          ? 'Debug manager initialized successfully with server'
+          : 'Debug manager initialized successfully (server not started)',
+    );
   }
 
   /// Shutdown debug features
@@ -117,14 +128,18 @@ class PloughDebugManager {
   }
 
   /// Start performance measurement
-  void startPerformanceMeasurement(String operationName,
-      {Map<String, dynamic>? metadata}) {
+  void startPerformanceMeasurement(
+    String operationName, {
+    Map<String, dynamic>? metadata,
+  }) {
     _performanceMonitor.startOperation(operationName, metadata: metadata);
   }
 
   /// End performance measurement
-  void endPerformanceMeasurement(String operationName,
-      {Map<String, dynamic>? metadata}) {
+  void endPerformanceMeasurement(
+    String operationName, {
+    Map<String, dynamic>? metadata,
+  }) {
     _performanceMonitor.endOperation(operationName, metadata: metadata);
   }
 
@@ -134,8 +149,11 @@ class PloughDebugManager {
     T Function() operation, {
     Map<String, dynamic>? metadata,
   }) {
-    return _performanceMonitor.measureOperation(operationName, operation,
-        metadata: metadata);
+    return _performanceMonitor.measureOperation(
+      operationName,
+      operation,
+      metadata: metadata,
+    );
   }
 
   /// Performance measurement (asynchronous)
@@ -144,8 +162,11 @@ class PloughDebugManager {
     Future<T> Function() operation, {
     Map<String, dynamic>? metadata,
   }) {
-    return _performanceMonitor.measureOperationAsync(operationName, operation,
-        metadata: metadata);
+    return _performanceMonitor.measureOperationAsync(
+      operationName,
+      operation,
+      metadata: metadata,
+    );
   }
 
   /// Broadcast graph state to debug server
@@ -274,14 +295,18 @@ void logDebugStructuredGlobal({
 }
 
 @internal
-void startPerformanceMeasurementGlobal(String operationName,
-    {Map<String, dynamic>? metadata}) {
+void startPerformanceMeasurementGlobal(
+  String operationName, {
+  Map<String, dynamic>? metadata,
+}) {
   debugManager.startPerformanceMeasurement(operationName, metadata: metadata);
 }
 
 @internal
-void endPerformanceMeasurementGlobal(String operationName,
-    {Map<String, dynamic>? metadata}) {
+void endPerformanceMeasurementGlobal(
+  String operationName, {
+  Map<String, dynamic>? metadata,
+}) {
   debugManager.endPerformanceMeasurement(operationName, metadata: metadata);
 }
 
@@ -291,8 +316,11 @@ T measurePerformanceGlobal<T>(
   T Function() operation, {
   Map<String, dynamic>? metadata,
 }) {
-  return debugManager.measurePerformance(operationName, operation,
-      metadata: metadata);
+  return debugManager.measurePerformance(
+    operationName,
+    operation,
+    metadata: metadata,
+  );
 }
 
 @internal
@@ -301,8 +329,11 @@ Future<T> measurePerformanceAsyncGlobal<T>(
   Future<T> Function() operation, {
   Map<String, dynamic>? metadata,
 }) {
-  return debugManager.measurePerformanceAsync(operationName, operation,
-      metadata: metadata);
+  return debugManager.measurePerformanceAsync(
+    operationName,
+    operation,
+    metadata: metadata,
+  );
 }
 
 @internal

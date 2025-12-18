@@ -34,7 +34,9 @@ class PloughMonitorServer {
   Future<void> start({int port = 8080, bool tryAlternativePorts = true}) async {
     if (_server != null) {
       logWarning(
-          LogCategory.debug, 'Debug server is already running on port $_port');
+        LogCategory.debug,
+        'Debug server is already running on port $_port',
+      );
       return;
     }
 
@@ -53,12 +55,17 @@ class PloughMonitorServer {
         await _tryCleanupExistingServer();
 
         // Bind to localhost only (to bypass macOS sandbox restrictions)
-        _server = await HttpServer.bind(InternetAddress.loopbackIPv4, _port,
-            shared: true);
+        _server = await HttpServer.bind(
+          InternetAddress.loopbackIPv4,
+          _port,
+          shared: true,
+        );
         logInfo(LogCategory.debug, 'Monitor server started on $url');
         logInfo(LogCategory.debug, 'Server port: ${_server!.port}');
         logInfo(
-            LogCategory.debug, 'Server address: ${_server!.address.address}');
+          LogCategory.debug,
+          'Server address: ${_server!.address.address}',
+        );
 
         // Set up listener and test immediately
         _server!.listen(
@@ -75,25 +82,33 @@ class PloughMonitorServer {
         );
 
         // Verify if the server is actually listening
-        logInfo(LogCategory.debug,
-            'Server listening: address=${_server!.address}, port=${_server!.port}');
+        logInfo(
+          LogCategory.debug,
+          'Server listening: address=${_server!.address}, port=${_server!.port}',
+        );
 
         // Test if the server is working correctly
-        Future<void>.delayed(const Duration(milliseconds: 100))
-            .then((_) => _testServerConnection());
+        Future<void>.delayed(
+          const Duration(milliseconds: 100),
+        ).then((_) => _testServerConnection());
 
         return; // Success
       } on SocketException catch (e) {
-        logWarning(LogCategory.debug,
-            'Failed to start server on port $tryPort: ${e.message}');
+        logWarning(
+          LogCategory.debug,
+          'Failed to start server on port $tryPort: ${e.message}',
+        );
         _server = null;
 
         if (tryPort == portsToTry.last) {
           // Failed even on the last port
-          logError(LogCategory.debug,
-              'Failed to start monitor server on any port: $portsToTry');
+          logError(
+            LogCategory.debug,
+            'Failed to start monitor server on any port: $portsToTry',
+          );
           throw SocketException(
-              'Failed to start monitor server on any port: $portsToTry');
+            'Failed to start monitor server on any port: $portsToTry',
+          );
         }
       }
     }
@@ -107,26 +122,33 @@ class PloughMonitorServer {
       // Set User-Agent
       client.userAgent = 'PloughMonitorServer/1.0';
 
-      final request =
-          await client.getUrl(Uri.parse('http://localhost:$_port/test'));
+      final request = await client.getUrl(
+        Uri.parse('http://localhost:$_port/test'),
+      );
       final response = await request.close();
 
       if (response.statusCode == 200) {
         logInfo(LogCategory.debug, 'Server connection test successful');
       } else {
-        logWarning(LogCategory.debug,
-            'Server connection test failed: ${response.statusCode}');
+        logWarning(
+          LogCategory.debug,
+          'Server connection test failed: ${response.statusCode}',
+        );
       }
 
       client.close();
     } catch (e) {
       logWarning(LogCategory.debug, 'Server connection test failed: $e');
       logWarning(
-          LogCategory.debug, 'This may be due to macOS sandbox restrictions');
+        LogCategory.debug,
+        'This may be due to macOS sandbox restrictions',
+      );
 
       // Suggest alternative in case of macOS sandbox issues
-      logInfo(LogCategory.debug,
-          'Alternative: Use the CLI monitor server (dart monitor/monitor_server.dart)');
+      logInfo(
+        LogCategory.debug,
+        'Alternative: Use the CLI monitor server (dart monitor/monitor_server.dart)',
+      );
     }
   }
 
@@ -141,8 +163,10 @@ class PloughMonitorServer {
       );
       await socket.close();
       // If connected, wait a bit and retry
-      logWarning(LogCategory.debug,
-          'Found existing server on port $_port, waiting for cleanup...');
+      logWarning(
+        LogCategory.debug,
+        'Found existing server on port $_port, waiting for cleanup...',
+      );
       await Future<void>.delayed(const Duration(milliseconds: 500));
     } on SocketException {
       // If unable to connect, no issue (port is free)
@@ -195,10 +219,7 @@ class PloughMonitorServer {
     }
 
     // Broadcast to connected clients
-    final data = jsonEncode({
-      'type': 'log',
-      'data': logEntry,
-    });
+    final data = jsonEncode({'type': 'log', 'data': logEntry});
 
     _clients.removeWhere((client) {
       try {
@@ -212,10 +233,7 @@ class PloughMonitorServer {
 
   /// Broadcasts graph state
   void broadcastGraphState(Map<String, dynamic> state) {
-    final data = jsonEncode({
-      'type': 'graph_state',
-      'data': state,
-    });
+    final data = jsonEncode({'type': 'graph_state', 'data': state});
 
     _clients.removeWhere((client) {
       try {
@@ -229,11 +247,15 @@ class PloughMonitorServer {
 
   void _handleRequest(HttpRequest request) {
     try {
-      logInfo(LogCategory.debug,
-          'Received request: ${request.method} ${request.uri.path}');
+      logInfo(
+        LogCategory.debug,
+        'Received request: ${request.method} ${request.uri.path}',
+      );
       logInfo(LogCategory.debug, 'Headers: ${request.headers}');
-      logInfo(LogCategory.debug,
-          'Remote: ${request.connectionInfo?.remoteAddress}');
+      logInfo(
+        LogCategory.debug,
+        'Remote: ${request.connectionInfo?.remoteAddress}',
+      );
       logInfo(LogCategory.debug, 'Protocol: ${request.protocolVersion}');
 
       final uri = request.uri;
@@ -294,15 +316,14 @@ class PloughMonitorServer {
   void _handleWebSocket(HttpRequest request) {
     WebSocketTransformer.upgrade(request).then((WebSocket socket) {
       _clients.add(socket);
-      logDebug(LogCategory.debug,
-          'WebSocket client connected (${_clients.length} total)');
+      logDebug(
+        LogCategory.debug,
+        'WebSocket client connected (${_clients.length} total)',
+      );
 
       // Send past logs on connection
       for (final log in _logBuffer) {
-        socket.add(jsonEncode({
-          'type': 'log',
-          'data': log,
-        }));
+        socket.add(jsonEncode({'type': 'log', 'data': log}));
       }
 
       socket.listen(
@@ -311,8 +332,10 @@ class PloughMonitorServer {
         },
         onDone: () {
           _clients.remove(socket);
-          logDebug(LogCategory.debug,
-              'WebSocket client disconnected (${_clients.length} total)');
+          logDebug(
+            LogCategory.debug,
+            'WebSocket client disconnected (${_clients.length} total)',
+          );
         },
         onError: (Object error) {
           _clients.remove(socket);
@@ -327,13 +350,12 @@ class PloughMonitorServer {
       logDebug(LogCategory.debug, 'API /api/logs requested');
 
       // For now, return only buffered logs (simple)
-      final response = {
-        'logs': _logBuffer,
-        'count': _logBuffer.length,
-      };
+      final response = {'logs': _logBuffer, 'count': _logBuffer.length};
 
       logDebug(
-          LogCategory.debug, 'Returning ${_logBuffer.length} logs from buffer');
+        LogCategory.debug,
+        'Returning ${_logBuffer.length} logs from buffer',
+      );
 
       request.response
         ..headers.contentType = ContentType.json
@@ -352,8 +374,12 @@ class PloughMonitorServer {
         request.response
           ..statusCode = HttpStatus.internalServerError
           ..headers.contentType = ContentType.json
-          ..write(jsonEncode(
-              {'error': 'Internal server error', 'message': e.toString()}))
+          ..write(
+            jsonEncode({
+              'error': 'Internal server error',
+              'message': e.toString(),
+            }),
+          )
           ..close();
       } catch (closeError) {
         logError(LogCategory.debug, 'Error closing response: $closeError');

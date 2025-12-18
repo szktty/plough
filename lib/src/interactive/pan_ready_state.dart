@@ -28,8 +28,9 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
     required super.gestureManager,
     this.dragStartThreshold =
         8.0, // Threshold distance for considering drag start
-    this.maxReadyDuration =
-        const Duration(milliseconds: 200), // Maximum duration for Ready state
+    this.maxReadyDuration = const Duration(
+      milliseconds: 200,
+    ), // Maximum duration for Ready state
   });
 
   final double dragStartThreshold;
@@ -57,7 +58,7 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
         'entityId': entityId.value.substring(0, 8),
         'position': {
           'x': details.localPosition.dx,
-          'y': details.localPosition.dy
+          'y': details.localPosition.dy,
         },
         'threshold': dragStartThreshold,
         'maxDuration': maxReadyDuration.inMilliseconds,
@@ -99,11 +100,11 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
         'exceeds_threshold': distance >= dragStartThreshold,
         'start_position': {
           'x': state.startPosition.dx,
-          'y': state.startPosition.dy
+          'y': state.startPosition.dy,
         },
         'current_position': {
           'x': details.localPosition.dx,
-          'y': details.localPosition.dy
+          'y': details.localPosition.dy,
         },
       },
     );
@@ -115,8 +116,11 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
   }
 
   /// Start actual drag
-  void _startActualDrag(GraphId entityId, _PanReadyState readyState,
-      DragUpdateDetails updateDetails) {
+  void _startActualDrag(
+    GraphId entityId,
+    _PanReadyState readyState,
+    DragUpdateDetails updateDetails,
+  ) {
     readyState.dragStarted = true;
 
     logGestureDebug(
@@ -191,8 +195,11 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
   }
 
   /// Delegate actual drag start to appropriate manager (implemented in subclasses)
-  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails,
-      DragUpdateDetails updateDetails);
+  void _delegateActualDragStart(
+    GraphId entityId,
+    DragStartDetails startDetails,
+    DragUpdateDetails updateDetails,
+  );
 
   @override
   void cancel(GraphId entityId) {
@@ -213,8 +220,11 @@ final class GraphNodePanReadyStateManager
   GraphEntityType get entityType => GraphEntityType.node;
 
   @override
-  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails,
-      DragUpdateDetails updateDetails) {
+  void _delegateActualDragStart(
+    GraphId entityId,
+    DragStartDetails startDetails,
+    DragUpdateDetails updateDetails,
+  ) {
     // Delegate to node drag manager
     gestureManager.nodeDragManager.handlePanStart([entityId], startDetails);
     gestureManager.nodeDragManager.handlePanUpdate(updateDetails);
@@ -237,8 +247,11 @@ final class GraphLinkPanReadyStateManager
   GraphEntityType get entityType => GraphEntityType.link;
 
   @override
-  void _delegateActualDragStart(GraphId entityId, DragStartDetails startDetails,
-      DragUpdateDetails updateDetails) {
+  void _delegateActualDragStart(
+    GraphId entityId,
+    DragStartDetails startDetails,
+    DragUpdateDetails updateDetails,
+  ) {
     // Delegate to link drag manager
     gestureManager.linkDragManager.handlePanStart([entityId], startDetails);
     gestureManager.linkDragManager.handlePanUpdate(updateDetails);

@@ -5,8 +5,9 @@ import 'package:plough/plough.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('GraphView basic golden (manual layout, single node)',
-      (tester) async {
+  testWidgets('GraphView basic golden (manual layout, single node)', (
+    tester,
+  ) async {
     final graph = Graph();
     final n1 = GraphNode(properties: {'label': 'A'});
     graph.addNode(n1);

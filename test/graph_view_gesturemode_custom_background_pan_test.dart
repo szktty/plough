@@ -71,8 +71,9 @@ void main() {
 
       // Start in consumed area (right side), move a bit within consumed area (no updates),
       // then cross into non-consumed area (updates should fire), and end.
-      final gesture =
-          await tester.startGesture(boxTopLeft + const Offset(300, 20));
+      final gesture = await tester.startGesture(
+        boxTopLeft + const Offset(300, 20),
+      );
       await tester.pump();
 
       // Move within consumed area (dx >= 150) -> no background update expected
@@ -96,8 +97,9 @@ void main() {
       final prevEnds = ends;
 
       // New gesture that stays entirely within consumed area: no updates expected
-      final gesture2 =
-          await tester.startGesture(boxTopLeft + const Offset(300, 40));
+      final gesture2 = await tester.startGesture(
+        boxTopLeft + const Offset(300, 40),
+      );
       await tester.pump();
       await gesture2.moveBy(const Offset(30, 0));
       await tester.pump();
@@ -107,9 +109,9 @@ void main() {
       expect(starts, greaterThanOrEqualTo(prevStarts)); // start may be called
       expect(updates, prevUpdates); // no new updates in consumed-only path
       expect(
-          ends,
-          greaterThanOrEqualTo(
-              prevEnds)); // end always fires for non-nodeEdgeOnly modes
+        ends,
+        greaterThanOrEqualTo(prevEnds),
+      ); // end always fires for non-nodeEdgeOnly modes
     },
     skip: true,
     // TODO: This is flaky under the current custom recognizer semantics. The

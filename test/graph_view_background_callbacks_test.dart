@@ -23,15 +23,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Background pan callbacks fire only on empty area (nodeEdgeOnly)',
-      (tester) async {
+      (
+    tester,
+  ) async {
     final graph = Graph();
     final a = GraphNode(properties: {'label': 'A'});
     final b = GraphNode(properties: {'label': 'B'});
     graph
       ..addNode(a)
       ..addNode(b);
-    graph.addLink(GraphLink(
-        source: a, target: b, direction: GraphLinkDirection.outgoing));
+    graph.addLink(
+      GraphLink(source: a, target: b, direction: GraphLinkDirection.outgoing),
+    );
 
     // Manual fixed positions; nodes are 60x60 by behavior
     final layout = GraphManualLayoutStrategy(
@@ -87,8 +90,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(panStartCount, 1, reason: 'Background panStart should fire once');
-    expect(panUpdateCount, greaterThan(0),
-        reason: 'Background panUpdate should fire');
+    expect(
+      panUpdateCount,
+      greaterThan(0),
+      reason: 'Background panUpdate should fire',
+    );
     expect(panEndCount, 1, reason: 'Background panEnd should fire once');
 
     // Reset counters

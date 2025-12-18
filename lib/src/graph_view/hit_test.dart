@@ -27,11 +27,7 @@ enum GraphGestureMode {
 /// through to parent widgets.
 class GraphHitTestResult {
   /// Creates a hit test result.
-  const GraphHitTestResult({
-    required this.localPosition,
-    this.node,
-    this.link,
-  });
+  const GraphHitTestResult({required this.localPosition, this.node, this.link});
 
   /// The local position where the hit test occurred.
   final Offset localPosition;
@@ -80,9 +76,7 @@ typedef GraphGestureConsumptionCallback = bool Function(
 );
 
 /// Callback for handling background gestures that are not consumed by GraphView.
-typedef GraphBackgroundGestureCallback = void Function(
-  Offset localPosition,
-);
+typedef GraphBackgroundGestureCallback = void Function(Offset localPosition);
 
 /// Callback for handling background pan gestures.
 typedef GraphBackgroundPanCallback = void Function(

@@ -4,8 +4,9 @@ import 'package:plough/plough.dart';
 import 'package:plough/src/graph/node.dart' show GraphNodeImpl;
 
 void main() {
-  testWidgets('GraphView with ManualLayout applies fixed logical positions',
-      (tester) async {
+  testWidgets('GraphView with ManualLayout applies fixed logical positions', (
+    tester,
+  ) async {
     final graph = Graph();
     final node = GraphNode(properties: {'label': 'n'});
     graph.addNode(node);

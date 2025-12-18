@@ -106,8 +106,10 @@ base class GraphTreeLayoutStrategy extends GraphLayoutStrategy {
     return direction != oldStrategy.direction ||
         rootNodeId != oldStrategy.rootNodeId ||
         padding != oldStrategy.padding ||
-        !const IterableEquality<GraphNodeLayoutPosition>()
-            .equals(nodePositions, oldStrategy.nodePositions);
+        !const IterableEquality<GraphNodeLayoutPosition>().equals(
+          nodePositions,
+          oldStrategy.nodePositions,
+        );
   }
 
   @override
