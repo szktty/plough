@@ -234,19 +234,6 @@ class PloughDebugManager {
 
     logInfo(LogCategory.debug, 'Debug settings updated');
   }
-
-  /// Cleanup for hot reload
-  void _cleanupForHotReload() {
-    try {
-      // Force stop server
-      if (_debugServer.isRunning) {
-        PloughMonitorServer.resetInstance();
-      }
-      _initialized = false;
-    } on Exception {
-      // Ignore errors
-    }
-  }
 }
 
 /// Global debug manager instance

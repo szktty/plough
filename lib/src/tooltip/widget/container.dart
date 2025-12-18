@@ -114,7 +114,6 @@ class _GraphTooltipContainerState extends State<GraphTooltipContainer> {
           return (_widgetSize!.width - _tooltipSize!.width) / 2;
       }
     }
-    return null;
   }
 
   double? _getTopPosition(GraphTooltipPosition position) {
@@ -135,6 +134,5 @@ class _GraphTooltipContainerState extends State<GraphTooltipContainer> {
           }
       }
     }
-    return null;
   }
 }

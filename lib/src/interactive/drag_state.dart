@@ -50,10 +50,9 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
 
   /// Cancels all ongoing drag operations.
   void cancelAll() {
-    final statesToCancel = List.from(states);
+    final statesToCancel = List<_DragState>.from(states);
     for (final state in statesToCancel) {
-      // Cast state to _DragState to access entityId safely
-      final dragState = state as _DragState;
+      final dragState = state;
       cancel(dragState.entityId);
     }
     if (isActive) {
@@ -97,10 +96,10 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
     if (startState == null) return [];
     final dragGlobalStart = startState.startPosition;
     final delta = details.globalPosition - dragGlobalStart;
-    final currentStates = List.from(states);
+    final currentStates = List<_DragState>.from(states);
 
     for (final state in currentStates) {
-      final dragState = state as _DragState;
+      final dragState = state;
       if (dragState.cancelled) continue;
       final newLogicalPosition = dragState.initialLogicalPosition + delta;
       dragState.currentLogicalPosition = newLogicalPosition;
@@ -124,9 +123,9 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
   List<GraphId> handlePanEnd(DragEndDetails details) {
     if (!isActive) return [];
     final endedDragIds = <GraphId>[];
-    final statesToEnd = List.from(states);
+    final statesToEnd = List<_DragState>.from(states);
     for (final state in statesToEnd) {
-      final dragState = state as _DragState;
+      final dragState = state;
       if (!dragState.cancelled) {
         endedDragIds.add(dragState.entityId);
       }

@@ -132,7 +132,7 @@ class GestureEvent with _$GestureEvent {
     Map<String, dynamic>? metadata,
   }) = _GestureEvent;
 
-  GestureEvent.fromJson(Map<String, dynamic> json) =>
+  factory GestureEvent.fromJson(Map<String, dynamic> json) =>
       _$GestureEventFromJson(json);
 }
 

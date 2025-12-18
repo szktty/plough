@@ -12,8 +12,7 @@ part of 'node.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$GraphDefaultNodeRendererStyle {
@@ -96,33 +95,32 @@ mixin _$GraphDefaultNodeRendererStyle {
 /// @nodoc
 abstract class $GraphDefaultNodeRendererStyleCopyWith<$Res> {
   factory $GraphDefaultNodeRendererStyleCopyWith(
-    GraphDefaultNodeRendererStyle value,
-    $Res Function(GraphDefaultNodeRendererStyle) then,
-  ) = _$GraphDefaultNodeRendererStyleCopyWithImpl<$Res,
-      GraphDefaultNodeRendererStyle>;
+          GraphDefaultNodeRendererStyle value,
+          $Res Function(GraphDefaultNodeRendererStyle) then) =
+      _$GraphDefaultNodeRendererStyleCopyWithImpl<$Res,
+          GraphDefaultNodeRendererStyle>;
   @useResult
-  $Res call({
-    Color color,
-    Color borderColor,
-    Color labelColor,
-    Color idColor,
-    Color hoverColor,
-    Color selectedHoverColor,
-    Color selectedBorderColor,
-    Color highlightColor,
-    double? radius,
-    double? width,
-    double? height,
-    double minWidth,
-    double minHeight,
-    double borderWidth,
-    double hoverBorderWidth,
-    double selectedBorderWidth,
-    double selectedHoverBorderWidth,
-    double selectedUnhoverBorderWidth,
-    GraphDefaultNodeRendererShape shape,
-    EdgeInsets padding,
-  });
+  $Res call(
+      {Color color,
+      Color borderColor,
+      Color labelColor,
+      Color idColor,
+      Color hoverColor,
+      Color selectedHoverColor,
+      Color selectedBorderColor,
+      Color highlightColor,
+      double? radius,
+      double? width,
+      double? height,
+      double minWidth,
+      double minHeight,
+      double borderWidth,
+      double hoverBorderWidth,
+      double selectedBorderWidth,
+      double selectedHoverBorderWidth,
+      double selectedUnhoverBorderWidth,
+      GraphDefaultNodeRendererShape shape,
+      EdgeInsets padding});
 }
 
 /// @nodoc
@@ -162,90 +160,88 @@ class _$GraphDefaultNodeRendererStyleCopyWithImpl<$Res,
     Object? shape = null,
     Object? padding = null,
   }) {
-    return _then(
-      _value.copyWith(
-        color: null == color
-            ? _value.color
-            : color // ignore: cast_nullable_to_non_nullable
-                as Color,
-        borderColor: null == borderColor
-            ? _value.borderColor
-            : borderColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        labelColor: null == labelColor
-            ? _value.labelColor
-            : labelColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        idColor: null == idColor
-            ? _value.idColor
-            : idColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        hoverColor: null == hoverColor
-            ? _value.hoverColor
-            : hoverColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        selectedHoverColor: null == selectedHoverColor
-            ? _value.selectedHoverColor
-            : selectedHoverColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        selectedBorderColor: null == selectedBorderColor
-            ? _value.selectedBorderColor
-            : selectedBorderColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        highlightColor: null == highlightColor
-            ? _value.highlightColor
-            : highlightColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        radius: freezed == radius
-            ? _value.radius
-            : radius // ignore: cast_nullable_to_non_nullable
-                as double?,
-        width: freezed == width
-            ? _value.width
-            : width // ignore: cast_nullable_to_non_nullable
-                as double?,
-        height: freezed == height
-            ? _value.height
-            : height // ignore: cast_nullable_to_non_nullable
-                as double?,
-        minWidth: null == minWidth
-            ? _value.minWidth
-            : minWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        minHeight: null == minHeight
-            ? _value.minHeight
-            : minHeight // ignore: cast_nullable_to_non_nullable
-                as double,
-        borderWidth: null == borderWidth
-            ? _value.borderWidth
-            : borderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        hoverBorderWidth: null == hoverBorderWidth
-            ? _value.hoverBorderWidth
-            : hoverBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        selectedBorderWidth: null == selectedBorderWidth
-            ? _value.selectedBorderWidth
-            : selectedBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        selectedHoverBorderWidth: null == selectedHoverBorderWidth
-            ? _value.selectedHoverBorderWidth
-            : selectedHoverBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        selectedUnhoverBorderWidth: null == selectedUnhoverBorderWidth
-            ? _value.selectedUnhoverBorderWidth
-            : selectedUnhoverBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        shape: null == shape
-            ? _value.shape
-            : shape // ignore: cast_nullable_to_non_nullable
-                as GraphDefaultNodeRendererShape,
-        padding: null == padding
-            ? _value.padding
-            : padding // ignore: cast_nullable_to_non_nullable
-                as EdgeInsets,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      color: null == color
+          ? _value.color
+          : color // ignore: cast_nullable_to_non_nullable
+              as Color,
+      borderColor: null == borderColor
+          ? _value.borderColor
+          : borderColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      labelColor: null == labelColor
+          ? _value.labelColor
+          : labelColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      idColor: null == idColor
+          ? _value.idColor
+          : idColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      hoverColor: null == hoverColor
+          ? _value.hoverColor
+          : hoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      selectedHoverColor: null == selectedHoverColor
+          ? _value.selectedHoverColor
+          : selectedHoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      selectedBorderColor: null == selectedBorderColor
+          ? _value.selectedBorderColor
+          : selectedBorderColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      highlightColor: null == highlightColor
+          ? _value.highlightColor
+          : highlightColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      radius: freezed == radius
+          ? _value.radius
+          : radius // ignore: cast_nullable_to_non_nullable
+              as double?,
+      width: freezed == width
+          ? _value.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as double?,
+      height: freezed == height
+          ? _value.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as double?,
+      minWidth: null == minWidth
+          ? _value.minWidth
+          : minWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      minHeight: null == minHeight
+          ? _value.minHeight
+          : minHeight // ignore: cast_nullable_to_non_nullable
+              as double,
+      borderWidth: null == borderWidth
+          ? _value.borderWidth
+          : borderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      hoverBorderWidth: null == hoverBorderWidth
+          ? _value.hoverBorderWidth
+          : hoverBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      selectedBorderWidth: null == selectedBorderWidth
+          ? _value.selectedBorderWidth
+          : selectedBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      selectedHoverBorderWidth: null == selectedHoverBorderWidth
+          ? _value.selectedHoverBorderWidth
+          : selectedHoverBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      selectedUnhoverBorderWidth: null == selectedUnhoverBorderWidth
+          ? _value.selectedUnhoverBorderWidth
+          : selectedUnhoverBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      shape: null == shape
+          ? _value.shape
+          : shape // ignore: cast_nullable_to_non_nullable
+              as GraphDefaultNodeRendererShape,
+      padding: null == padding
+          ? _value.padding
+          : padding // ignore: cast_nullable_to_non_nullable
+              as EdgeInsets,
+    ) as $Val);
   }
 }
 
@@ -253,33 +249,32 @@ class _$GraphDefaultNodeRendererStyleCopyWithImpl<$Res,
 abstract class _$$GraphDefaultNodeRendererStyleImplCopyWith<$Res>
     implements $GraphDefaultNodeRendererStyleCopyWith<$Res> {
   factory _$$GraphDefaultNodeRendererStyleImplCopyWith(
-    _$GraphDefaultNodeRendererStyleImpl value,
-    $Res Function(_$GraphDefaultNodeRendererStyleImpl) then,
-  ) = __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>;
+          _$GraphDefaultNodeRendererStyleImpl value,
+          $Res Function(_$GraphDefaultNodeRendererStyleImpl) then) =
+      __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    Color color,
-    Color borderColor,
-    Color labelColor,
-    Color idColor,
-    Color hoverColor,
-    Color selectedHoverColor,
-    Color selectedBorderColor,
-    Color highlightColor,
-    double? radius,
-    double? width,
-    double? height,
-    double minWidth,
-    double minHeight,
-    double borderWidth,
-    double hoverBorderWidth,
-    double selectedBorderWidth,
-    double selectedHoverBorderWidth,
-    double selectedUnhoverBorderWidth,
-    GraphDefaultNodeRendererShape shape,
-    EdgeInsets padding,
-  });
+  $Res call(
+      {Color color,
+      Color borderColor,
+      Color labelColor,
+      Color idColor,
+      Color hoverColor,
+      Color selectedHoverColor,
+      Color selectedBorderColor,
+      Color highlightColor,
+      double? radius,
+      double? width,
+      double? height,
+      double minWidth,
+      double minHeight,
+      double borderWidth,
+      double hoverBorderWidth,
+      double selectedBorderWidth,
+      double selectedHoverBorderWidth,
+      double selectedUnhoverBorderWidth,
+      GraphDefaultNodeRendererShape shape,
+      EdgeInsets padding});
 }
 
 /// @nodoc
@@ -288,9 +283,9 @@ class __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>
         _$GraphDefaultNodeRendererStyleImpl>
     implements _$$GraphDefaultNodeRendererStyleImplCopyWith<$Res> {
   __$$GraphDefaultNodeRendererStyleImplCopyWithImpl(
-    _$GraphDefaultNodeRendererStyleImpl _value,
-    $Res Function(_$GraphDefaultNodeRendererStyleImpl) _then,
-  ) : super(_value, _then);
+      _$GraphDefaultNodeRendererStyleImpl _value,
+      $Res Function(_$GraphDefaultNodeRendererStyleImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphDefaultNodeRendererStyle
   /// with the given fields replaced by the non-null parameter values.
@@ -318,90 +313,88 @@ class __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>
     Object? shape = null,
     Object? padding = null,
   }) {
-    return _then(
-      _$GraphDefaultNodeRendererStyleImpl(
-        color: null == color
-            ? _value.color
-            : color // ignore: cast_nullable_to_non_nullable
-                as Color,
-        borderColor: null == borderColor
-            ? _value.borderColor
-            : borderColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        labelColor: null == labelColor
-            ? _value.labelColor
-            : labelColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        idColor: null == idColor
-            ? _value.idColor
-            : idColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        hoverColor: null == hoverColor
-            ? _value.hoverColor
-            : hoverColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        selectedHoverColor: null == selectedHoverColor
-            ? _value.selectedHoverColor
-            : selectedHoverColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        selectedBorderColor: null == selectedBorderColor
-            ? _value.selectedBorderColor
-            : selectedBorderColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        highlightColor: null == highlightColor
-            ? _value.highlightColor
-            : highlightColor // ignore: cast_nullable_to_non_nullable
-                as Color,
-        radius: freezed == radius
-            ? _value.radius
-            : radius // ignore: cast_nullable_to_non_nullable
-                as double?,
-        width: freezed == width
-            ? _value.width
-            : width // ignore: cast_nullable_to_non_nullable
-                as double?,
-        height: freezed == height
-            ? _value.height
-            : height // ignore: cast_nullable_to_non_nullable
-                as double?,
-        minWidth: null == minWidth
-            ? _value.minWidth
-            : minWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        minHeight: null == minHeight
-            ? _value.minHeight
-            : minHeight // ignore: cast_nullable_to_non_nullable
-                as double,
-        borderWidth: null == borderWidth
-            ? _value.borderWidth
-            : borderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        hoverBorderWidth: null == hoverBorderWidth
-            ? _value.hoverBorderWidth
-            : hoverBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        selectedBorderWidth: null == selectedBorderWidth
-            ? _value.selectedBorderWidth
-            : selectedBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        selectedHoverBorderWidth: null == selectedHoverBorderWidth
-            ? _value.selectedHoverBorderWidth
-            : selectedHoverBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        selectedUnhoverBorderWidth: null == selectedUnhoverBorderWidth
-            ? _value.selectedUnhoverBorderWidth
-            : selectedUnhoverBorderWidth // ignore: cast_nullable_to_non_nullable
-                as double,
-        shape: null == shape
-            ? _value.shape
-            : shape // ignore: cast_nullable_to_non_nullable
-                as GraphDefaultNodeRendererShape,
-        padding: null == padding
-            ? _value.padding
-            : padding // ignore: cast_nullable_to_non_nullable
-                as EdgeInsets,
-      ),
-    );
+    return _then(_$GraphDefaultNodeRendererStyleImpl(
+      color: null == color
+          ? _value.color
+          : color // ignore: cast_nullable_to_non_nullable
+              as Color,
+      borderColor: null == borderColor
+          ? _value.borderColor
+          : borderColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      labelColor: null == labelColor
+          ? _value.labelColor
+          : labelColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      idColor: null == idColor
+          ? _value.idColor
+          : idColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      hoverColor: null == hoverColor
+          ? _value.hoverColor
+          : hoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      selectedHoverColor: null == selectedHoverColor
+          ? _value.selectedHoverColor
+          : selectedHoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      selectedBorderColor: null == selectedBorderColor
+          ? _value.selectedBorderColor
+          : selectedBorderColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      highlightColor: null == highlightColor
+          ? _value.highlightColor
+          : highlightColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      radius: freezed == radius
+          ? _value.radius
+          : radius // ignore: cast_nullable_to_non_nullable
+              as double?,
+      width: freezed == width
+          ? _value.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as double?,
+      height: freezed == height
+          ? _value.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as double?,
+      minWidth: null == minWidth
+          ? _value.minWidth
+          : minWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      minHeight: null == minHeight
+          ? _value.minHeight
+          : minHeight // ignore: cast_nullable_to_non_nullable
+              as double,
+      borderWidth: null == borderWidth
+          ? _value.borderWidth
+          : borderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      hoverBorderWidth: null == hoverBorderWidth
+          ? _value.hoverBorderWidth
+          : hoverBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      selectedBorderWidth: null == selectedBorderWidth
+          ? _value.selectedBorderWidth
+          : selectedBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      selectedHoverBorderWidth: null == selectedHoverBorderWidth
+          ? _value.selectedHoverBorderWidth
+          : selectedHoverBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      selectedUnhoverBorderWidth: null == selectedUnhoverBorderWidth
+          ? _value.selectedUnhoverBorderWidth
+          : selectedUnhoverBorderWidth // ignore: cast_nullable_to_non_nullable
+              as double,
+      shape: null == shape
+          ? _value.shape
+          : shape // ignore: cast_nullable_to_non_nullable
+              as GraphDefaultNodeRendererShape,
+      padding: null == padding
+          ? _value.padding
+          : padding // ignore: cast_nullable_to_non_nullable
+              as EdgeInsets,
+    ));
   }
 }
 
@@ -409,28 +402,27 @@ class __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>
 
 class _$GraphDefaultNodeRendererStyleImpl
     implements _GraphDefaultNodeRendererStyle {
-  const _$GraphDefaultNodeRendererStyleImpl({
-    this.color = const Color(0xFFE2E8F0),
-    this.borderColor = const Color(0xFF64748B),
-    this.labelColor = const Color(0xFF1E293B),
-    this.idColor = Colors.grey,
-    this.hoverColor = Colors.red,
-    this.selectedHoverColor = Colors.green,
-    this.selectedBorderColor = const Color(0xFF4A5568),
-    this.highlightColor = Colors.yellow,
-    this.radius,
-    this.width,
-    this.height,
-    this.minWidth = 50,
-    this.minHeight = 50,
-    this.borderWidth = 2,
-    this.hoverBorderWidth = 2,
-    this.selectedBorderWidth = 2,
-    this.selectedHoverBorderWidth = 2,
-    this.selectedUnhoverBorderWidth = 2,
-    this.shape = GraphDefaultNodeRendererShape.circle,
-    this.padding = const EdgeInsets.all(8),
-  });
+  const _$GraphDefaultNodeRendererStyleImpl(
+      {this.color = const Color(0xFFE2E8F0),
+      this.borderColor = const Color(0xFF64748B),
+      this.labelColor = const Color(0xFF1E293B),
+      this.idColor = Colors.grey,
+      this.hoverColor = Colors.red,
+      this.selectedHoverColor = Colors.green,
+      this.selectedBorderColor = const Color(0xFF4A5568),
+      this.highlightColor = Colors.yellow,
+      this.radius,
+      this.width,
+      this.height,
+      this.minWidth = 50,
+      this.minHeight = 50,
+      this.borderWidth = 2,
+      this.hoverBorderWidth = 2,
+      this.selectedBorderWidth = 2,
+      this.selectedHoverBorderWidth = 2,
+      this.selectedUnhoverBorderWidth = 2,
+      this.shape = GraphDefaultNodeRendererShape.circle,
+      this.padding = const EdgeInsets.all(8)});
 
   /// The background color of the node.
   @override
@@ -466,7 +458,7 @@ class _$GraphDefaultNodeRendererStyleImpl
   @override
   @JsonKey()
   final Color selectedBorderColor;
-  // Complementary color
+// Complementary color
   /// The background color for emphasized nodes.
   @override
   @JsonKey()
@@ -576,14 +568,10 @@ class _$GraphDefaultNodeRendererStyleImpl
             (identical(other.selectedBorderWidth, selectedBorderWidth) ||
                 other.selectedBorderWidth == selectedBorderWidth) &&
             (identical(
-                  other.selectedHoverBorderWidth,
-                  selectedHoverBorderWidth,
-                ) ||
+                    other.selectedHoverBorderWidth, selectedHoverBorderWidth) ||
                 other.selectedHoverBorderWidth == selectedHoverBorderWidth) &&
-            (identical(
-                  other.selectedUnhoverBorderWidth,
-                  selectedUnhoverBorderWidth,
-                ) ||
+            (identical(other.selectedUnhoverBorderWidth,
+                    selectedUnhoverBorderWidth) ||
                 other.selectedUnhoverBorderWidth ==
                     selectedUnhoverBorderWidth) &&
             (identical(other.shape, shape) || other.shape == shape) &&
@@ -612,7 +600,7 @@ class _$GraphDefaultNodeRendererStyleImpl
         selectedHoverBorderWidth,
         selectedUnhoverBorderWidth,
         shape,
-        padding,
+        padding
       ]);
 
   /// Create a copy of GraphDefaultNodeRendererStyle
@@ -628,28 +616,27 @@ class _$GraphDefaultNodeRendererStyleImpl
 
 abstract class _GraphDefaultNodeRendererStyle
     implements GraphDefaultNodeRendererStyle {
-  const factory _GraphDefaultNodeRendererStyle({
-    final Color color,
-    final Color borderColor,
-    final Color labelColor,
-    final Color idColor,
-    final Color hoverColor,
-    final Color selectedHoverColor,
-    final Color selectedBorderColor,
-    final Color highlightColor,
-    final double? radius,
-    final double? width,
-    final double? height,
-    final double minWidth,
-    final double minHeight,
-    final double borderWidth,
-    final double hoverBorderWidth,
-    final double selectedBorderWidth,
-    final double selectedHoverBorderWidth,
-    final double selectedUnhoverBorderWidth,
-    final GraphDefaultNodeRendererShape shape,
-    final EdgeInsets padding,
-  }) = _$GraphDefaultNodeRendererStyleImpl;
+  const factory _GraphDefaultNodeRendererStyle(
+      {final Color color,
+      final Color borderColor,
+      final Color labelColor,
+      final Color idColor,
+      final Color hoverColor,
+      final Color selectedHoverColor,
+      final Color selectedBorderColor,
+      final Color highlightColor,
+      final double? radius,
+      final double? width,
+      final double? height,
+      final double minWidth,
+      final double minHeight,
+      final double borderWidth,
+      final double hoverBorderWidth,
+      final double selectedBorderWidth,
+      final double selectedHoverBorderWidth,
+      final double selectedUnhoverBorderWidth,
+      final GraphDefaultNodeRendererShape shape,
+      final EdgeInsets padding}) = _$GraphDefaultNodeRendererStyleImpl;
 
   /// The background color of the node.
   @override

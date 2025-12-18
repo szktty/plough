@@ -12,8 +12,7 @@ part of 'graph_data.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$GraphNodeData {
@@ -37,21 +36,19 @@ mixin _$GraphNodeData {
 /// @nodoc
 abstract class $GraphNodeDataCopyWith<$Res> {
   factory $GraphNodeDataCopyWith(
-    GraphNodeData value,
-    $Res Function(GraphNodeData) then,
-  ) = _$GraphNodeDataCopyWithImpl<$Res, GraphNodeData>;
+          GraphNodeData value, $Res Function(GraphNodeData) then) =
+      _$GraphNodeDataCopyWithImpl<$Res, GraphNodeData>;
   @useResult
-  $Res call({
-    GraphId id,
-    Offset logicalPosition,
-    double weight,
-    int stackOrder,
-    bool isEnabled,
-    bool visible,
-    bool canSelect,
-    bool canDrag,
-    bool isArranged,
-  });
+  $Res call(
+      {GraphId id,
+      Offset logicalPosition,
+      double weight,
+      int stackOrder,
+      bool isEnabled,
+      bool visible,
+      bool canSelect,
+      bool canDrag,
+      bool isArranged});
 
   $GraphIdCopyWith<$Res> get id;
 }
@@ -81,46 +78,44 @@ class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
     Object? canDrag = null,
     Object? isArranged = null,
   }) {
-    return _then(
-      _value.copyWith(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                as GraphId,
-        logicalPosition: null == logicalPosition
-            ? _value.logicalPosition
-            : logicalPosition // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        weight: null == weight
-            ? _value.weight
-            : weight // ignore: cast_nullable_to_non_nullable
-                as double,
-        stackOrder: null == stackOrder
-            ? _value.stackOrder
-            : stackOrder // ignore: cast_nullable_to_non_nullable
-                as int,
-        isEnabled: null == isEnabled
-            ? _value.isEnabled
-            : isEnabled // ignore: cast_nullable_to_non_nullable
-                as bool,
-        visible: null == visible
-            ? _value.visible
-            : visible // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canSelect: null == canSelect
-            ? _value.canSelect
-            : canSelect // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canDrag: null == canDrag
-            ? _value.canDrag
-            : canDrag // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isArranged: null == isArranged
-            ? _value.isArranged
-            : isArranged // ignore: cast_nullable_to_non_nullable
-                as bool,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      logicalPosition: null == logicalPosition
+          ? _value.logicalPosition
+          : logicalPosition // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      weight: null == weight
+          ? _value.weight
+          : weight // ignore: cast_nullable_to_non_nullable
+              as double,
+      stackOrder: null == stackOrder
+          ? _value.stackOrder
+          : stackOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      isEnabled: null == isEnabled
+          ? _value.isEnabled
+          : isEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      visible: null == visible
+          ? _value.visible
+          : visible // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canSelect: null == canSelect
+          ? _value.canSelect
+          : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _value.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
   }
 
   /// Create a copy of GraphNodeData
@@ -138,22 +133,20 @@ class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
 abstract class _$$GraphNodeDataImplCopyWith<$Res>
     implements $GraphNodeDataCopyWith<$Res> {
   factory _$$GraphNodeDataImplCopyWith(
-    _$GraphNodeDataImpl value,
-    $Res Function(_$GraphNodeDataImpl) then,
-  ) = __$$GraphNodeDataImplCopyWithImpl<$Res>;
+          _$GraphNodeDataImpl value, $Res Function(_$GraphNodeDataImpl) then) =
+      __$$GraphNodeDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    GraphId id,
-    Offset logicalPosition,
-    double weight,
-    int stackOrder,
-    bool isEnabled,
-    bool visible,
-    bool canSelect,
-    bool canDrag,
-    bool isArranged,
-  });
+  $Res call(
+      {GraphId id,
+      Offset logicalPosition,
+      double weight,
+      int stackOrder,
+      bool isEnabled,
+      bool visible,
+      bool canSelect,
+      bool canDrag,
+      bool isArranged});
 
   @override
   $GraphIdCopyWith<$Res> get id;
@@ -164,9 +157,8 @@ class __$$GraphNodeDataImplCopyWithImpl<$Res>
     extends _$GraphNodeDataCopyWithImpl<$Res, _$GraphNodeDataImpl>
     implements _$$GraphNodeDataImplCopyWith<$Res> {
   __$$GraphNodeDataImplCopyWithImpl(
-    _$GraphNodeDataImpl _value,
-    $Res Function(_$GraphNodeDataImpl) _then,
-  ) : super(_value, _then);
+      _$GraphNodeDataImpl _value, $Res Function(_$GraphNodeDataImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphNodeData
   /// with the given fields replaced by the non-null parameter values.
@@ -183,63 +175,60 @@ class __$$GraphNodeDataImplCopyWithImpl<$Res>
     Object? canDrag = null,
     Object? isArranged = null,
   }) {
-    return _then(
-      _$GraphNodeDataImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                as GraphId,
-        logicalPosition: null == logicalPosition
-            ? _value.logicalPosition
-            : logicalPosition // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        weight: null == weight
-            ? _value.weight
-            : weight // ignore: cast_nullable_to_non_nullable
-                as double,
-        stackOrder: null == stackOrder
-            ? _value.stackOrder
-            : stackOrder // ignore: cast_nullable_to_non_nullable
-                as int,
-        isEnabled: null == isEnabled
-            ? _value.isEnabled
-            : isEnabled // ignore: cast_nullable_to_non_nullable
-                as bool,
-        visible: null == visible
-            ? _value.visible
-            : visible // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canSelect: null == canSelect
-            ? _value.canSelect
-            : canSelect // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canDrag: null == canDrag
-            ? _value.canDrag
-            : canDrag // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isArranged: null == isArranged
-            ? _value.isArranged
-            : isArranged // ignore: cast_nullable_to_non_nullable
-                as bool,
-      ),
-    );
+    return _then(_$GraphNodeDataImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      logicalPosition: null == logicalPosition
+          ? _value.logicalPosition
+          : logicalPosition // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      weight: null == weight
+          ? _value.weight
+          : weight // ignore: cast_nullable_to_non_nullable
+              as double,
+      stackOrder: null == stackOrder
+          ? _value.stackOrder
+          : stackOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      isEnabled: null == isEnabled
+          ? _value.isEnabled
+          : isEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      visible: null == visible
+          ? _value.visible
+          : visible // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canSelect: null == canSelect
+          ? _value.canSelect
+          : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _value.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 
 class _$GraphNodeDataImpl implements _GraphNodeData {
-  const _$GraphNodeDataImpl({
-    required this.id,
-    this.logicalPosition = Offset.zero,
-    this.weight = 1.0,
-    this.stackOrder = -1,
-    this.isEnabled = true,
-    this.visible = true,
-    this.canSelect = true,
-    this.canDrag = true,
-    this.isArranged = false,
-  });
+  const _$GraphNodeDataImpl(
+      {required this.id,
+      this.logicalPosition = Offset.zero,
+      this.weight = 1.0,
+      this.stackOrder = -1,
+      this.isEnabled = true,
+      this.visible = true,
+      this.canSelect = true,
+      this.canDrag = true,
+      this.isArranged = false});
 
   @override
   final GraphId id;
@@ -295,18 +284,8 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
   }
 
   @override
-  int get hashCode => Object.hash(
-        runtimeType,
-        id,
-        logicalPosition,
-        weight,
-        stackOrder,
-        isEnabled,
-        visible,
-        canSelect,
-        canDrag,
-        isArranged,
-      );
+  int get hashCode => Object.hash(runtimeType, id, logicalPosition, weight,
+      stackOrder, isEnabled, visible, canSelect, canDrag, isArranged);
 
   /// Create a copy of GraphNodeData
   /// with the given fields replaced by the non-null parameter values.
@@ -318,17 +297,16 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
 }
 
 abstract class _GraphNodeData implements GraphNodeData {
-  const factory _GraphNodeData({
-    required final GraphId id,
-    final Offset logicalPosition,
-    final double weight,
-    final int stackOrder,
-    final bool isEnabled,
-    final bool visible,
-    final bool canSelect,
-    final bool canDrag,
-    final bool isArranged,
-  }) = _$GraphNodeDataImpl;
+  const factory _GraphNodeData(
+      {required final GraphId id,
+      final Offset logicalPosition,
+      final double weight,
+      final int stackOrder,
+      final bool isEnabled,
+      final bool visible,
+      final bool canSelect,
+      final bool canDrag,
+      final bool isArranged}) = _$GraphNodeDataImpl;
 
   @override
   GraphId get id;
@@ -382,24 +360,22 @@ mixin _$GraphLinkData {
 /// @nodoc
 abstract class $GraphLinkDataCopyWith<$Res> {
   factory $GraphLinkDataCopyWith(
-    GraphLinkData value,
-    $Res Function(GraphLinkData) then,
-  ) = _$GraphLinkDataCopyWithImpl<$Res, GraphLinkData>;
+          GraphLinkData value, $Res Function(GraphLinkData) then) =
+      _$GraphLinkDataCopyWithImpl<$Res, GraphLinkData>;
   @useResult
-  $Res call({
-    GraphId id,
-    GraphNode? source,
-    GraphNode? target,
-    GraphLinkDirection direction,
-    Offset logicalPosition,
-    double weight,
-    int stackOrder,
-    bool isEnabled,
-    bool visible,
-    bool canSelect,
-    bool canDrag,
-    bool isArranged,
-  });
+  $Res call(
+      {GraphId id,
+      GraphNode? source,
+      GraphNode? target,
+      GraphLinkDirection direction,
+      Offset logicalPosition,
+      double weight,
+      int stackOrder,
+      bool isEnabled,
+      bool visible,
+      bool canSelect,
+      bool canDrag,
+      bool isArranged});
 
   $GraphIdCopyWith<$Res> get id;
 }
@@ -432,58 +408,56 @@ class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
     Object? canDrag = null,
     Object? isArranged = null,
   }) {
-    return _then(
-      _value.copyWith(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                as GraphId,
-        source: freezed == source
-            ? _value.source
-            : source // ignore: cast_nullable_to_non_nullable
-                as GraphNode?,
-        target: freezed == target
-            ? _value.target
-            : target // ignore: cast_nullable_to_non_nullable
-                as GraphNode?,
-        direction: null == direction
-            ? _value.direction
-            : direction // ignore: cast_nullable_to_non_nullable
-                as GraphLinkDirection,
-        logicalPosition: null == logicalPosition
-            ? _value.logicalPosition
-            : logicalPosition // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        weight: null == weight
-            ? _value.weight
-            : weight // ignore: cast_nullable_to_non_nullable
-                as double,
-        stackOrder: null == stackOrder
-            ? _value.stackOrder
-            : stackOrder // ignore: cast_nullable_to_non_nullable
-                as int,
-        isEnabled: null == isEnabled
-            ? _value.isEnabled
-            : isEnabled // ignore: cast_nullable_to_non_nullable
-                as bool,
-        visible: null == visible
-            ? _value.visible
-            : visible // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canSelect: null == canSelect
-            ? _value.canSelect
-            : canSelect // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canDrag: null == canDrag
-            ? _value.canDrag
-            : canDrag // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isArranged: null == isArranged
-            ? _value.isArranged
-            : isArranged // ignore: cast_nullable_to_non_nullable
-                as bool,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      source: freezed == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as GraphNode?,
+      target: freezed == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as GraphNode?,
+      direction: null == direction
+          ? _value.direction
+          : direction // ignore: cast_nullable_to_non_nullable
+              as GraphLinkDirection,
+      logicalPosition: null == logicalPosition
+          ? _value.logicalPosition
+          : logicalPosition // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      weight: null == weight
+          ? _value.weight
+          : weight // ignore: cast_nullable_to_non_nullable
+              as double,
+      stackOrder: null == stackOrder
+          ? _value.stackOrder
+          : stackOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      isEnabled: null == isEnabled
+          ? _value.isEnabled
+          : isEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      visible: null == visible
+          ? _value.visible
+          : visible // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canSelect: null == canSelect
+          ? _value.canSelect
+          : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _value.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
   }
 
   /// Create a copy of GraphLinkData
@@ -501,25 +475,23 @@ class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
 abstract class _$$GraphLinkDataImplCopyWith<$Res>
     implements $GraphLinkDataCopyWith<$Res> {
   factory _$$GraphLinkDataImplCopyWith(
-    _$GraphLinkDataImpl value,
-    $Res Function(_$GraphLinkDataImpl) then,
-  ) = __$$GraphLinkDataImplCopyWithImpl<$Res>;
+          _$GraphLinkDataImpl value, $Res Function(_$GraphLinkDataImpl) then) =
+      __$$GraphLinkDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    GraphId id,
-    GraphNode? source,
-    GraphNode? target,
-    GraphLinkDirection direction,
-    Offset logicalPosition,
-    double weight,
-    int stackOrder,
-    bool isEnabled,
-    bool visible,
-    bool canSelect,
-    bool canDrag,
-    bool isArranged,
-  });
+  $Res call(
+      {GraphId id,
+      GraphNode? source,
+      GraphNode? target,
+      GraphLinkDirection direction,
+      Offset logicalPosition,
+      double weight,
+      int stackOrder,
+      bool isEnabled,
+      bool visible,
+      bool canSelect,
+      bool canDrag,
+      bool isArranged});
 
   @override
   $GraphIdCopyWith<$Res> get id;
@@ -530,9 +502,8 @@ class __$$GraphLinkDataImplCopyWithImpl<$Res>
     extends _$GraphLinkDataCopyWithImpl<$Res, _$GraphLinkDataImpl>
     implements _$$GraphLinkDataImplCopyWith<$Res> {
   __$$GraphLinkDataImplCopyWithImpl(
-    _$GraphLinkDataImpl _value,
-    $Res Function(_$GraphLinkDataImpl) _then,
-  ) : super(_value, _then);
+      _$GraphLinkDataImpl _value, $Res Function(_$GraphLinkDataImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
@@ -552,78 +523,75 @@ class __$$GraphLinkDataImplCopyWithImpl<$Res>
     Object? canDrag = null,
     Object? isArranged = null,
   }) {
-    return _then(
-      _$GraphLinkDataImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                as GraphId,
-        source: freezed == source
-            ? _value.source
-            : source // ignore: cast_nullable_to_non_nullable
-                as GraphNode?,
-        target: freezed == target
-            ? _value.target
-            : target // ignore: cast_nullable_to_non_nullable
-                as GraphNode?,
-        direction: null == direction
-            ? _value.direction
-            : direction // ignore: cast_nullable_to_non_nullable
-                as GraphLinkDirection,
-        logicalPosition: null == logicalPosition
-            ? _value.logicalPosition
-            : logicalPosition // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        weight: null == weight
-            ? _value.weight
-            : weight // ignore: cast_nullable_to_non_nullable
-                as double,
-        stackOrder: null == stackOrder
-            ? _value.stackOrder
-            : stackOrder // ignore: cast_nullable_to_non_nullable
-                as int,
-        isEnabled: null == isEnabled
-            ? _value.isEnabled
-            : isEnabled // ignore: cast_nullable_to_non_nullable
-                as bool,
-        visible: null == visible
-            ? _value.visible
-            : visible // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canSelect: null == canSelect
-            ? _value.canSelect
-            : canSelect // ignore: cast_nullable_to_non_nullable
-                as bool,
-        canDrag: null == canDrag
-            ? _value.canDrag
-            : canDrag // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isArranged: null == isArranged
-            ? _value.isArranged
-            : isArranged // ignore: cast_nullable_to_non_nullable
-                as bool,
-      ),
-    );
+    return _then(_$GraphLinkDataImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      source: freezed == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as GraphNode?,
+      target: freezed == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as GraphNode?,
+      direction: null == direction
+          ? _value.direction
+          : direction // ignore: cast_nullable_to_non_nullable
+              as GraphLinkDirection,
+      logicalPosition: null == logicalPosition
+          ? _value.logicalPosition
+          : logicalPosition // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      weight: null == weight
+          ? _value.weight
+          : weight // ignore: cast_nullable_to_non_nullable
+              as double,
+      stackOrder: null == stackOrder
+          ? _value.stackOrder
+          : stackOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      isEnabled: null == isEnabled
+          ? _value.isEnabled
+          : isEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      visible: null == visible
+          ? _value.visible
+          : visible // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canSelect: null == canSelect
+          ? _value.canSelect
+          : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _value.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _value.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
 /// @nodoc
 
 class _$GraphLinkDataImpl implements _GraphLinkData {
-  const _$GraphLinkDataImpl({
-    required this.id,
-    this.source,
-    this.target,
-    this.direction = GraphLinkDirection.none,
-    this.logicalPosition = Offset.zero,
-    this.weight = 1.0,
-    this.stackOrder = -1,
-    this.isEnabled = true,
-    this.visible = true,
-    this.canSelect = true,
-    this.canDrag = true,
-    this.isArranged = false,
-  });
+  const _$GraphLinkDataImpl(
+      {required this.id,
+      this.source,
+      this.target,
+      this.direction = GraphLinkDirection.none,
+      this.logicalPosition = Offset.zero,
+      this.weight = 1.0,
+      this.stackOrder = -1,
+      this.isEnabled = true,
+      this.visible = true,
+      this.canSelect = true,
+      this.canDrag = true,
+      this.isArranged = false});
 
   @override
   final GraphId id;
@@ -691,20 +659,19 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
 
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        id,
-        source,
-        target,
-        direction,
-        logicalPosition,
-        weight,
-        stackOrder,
-        isEnabled,
-        visible,
-        canSelect,
-        canDrag,
-        isArranged,
-      );
+      runtimeType,
+      id,
+      source,
+      target,
+      direction,
+      logicalPosition,
+      weight,
+      stackOrder,
+      isEnabled,
+      visible,
+      canSelect,
+      canDrag,
+      isArranged);
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
@@ -716,20 +683,19 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
 }
 
 abstract class _GraphLinkData implements GraphLinkData {
-  const factory _GraphLinkData({
-    required final GraphId id,
-    final GraphNode? source,
-    final GraphNode? target,
-    final GraphLinkDirection direction,
-    final Offset logicalPosition,
-    final double weight,
-    final int stackOrder,
-    final bool isEnabled,
-    final bool visible,
-    final bool canSelect,
-    final bool canDrag,
-    final bool isArranged,
-  }) = _$GraphLinkDataImpl;
+  const factory _GraphLinkData(
+      {required final GraphId id,
+      final GraphNode? source,
+      final GraphNode? target,
+      final GraphLinkDirection direction,
+      final Offset logicalPosition,
+      final double weight,
+      final int stackOrder,
+      final bool isEnabled,
+      final bool visible,
+      final bool canSelect,
+      final bool canDrag,
+      final bool isArranged}) = _$GraphLinkDataImpl;
 
   @override
   GraphId get id;
@@ -802,18 +768,17 @@ abstract class $GraphDataCopyWith<$Res> {
   factory $GraphDataCopyWith(GraphData value, $Res Function(GraphData) then) =
       _$GraphDataCopyWithImpl<$Res, GraphData>;
   @useResult
-  $Res call({
-    GraphId id,
-    IMap<GraphId, GraphNode> nodes,
-    IMap<GraphId, GraphLink> links,
-    IList<GraphId> selectedNodeIds,
-    IList<GraphId> selectedLinkIds,
-    bool allowSelection,
-    bool allowMultiSelection,
-    bool needsLayout,
-    bool shouldAnimateLayout,
-    GraphViewGeometry? geometry,
-  });
+  $Res call(
+      {GraphId id,
+      IMap<GraphId, GraphNode> nodes,
+      IMap<GraphId, GraphLink> links,
+      IList<GraphId> selectedNodeIds,
+      IList<GraphId> selectedLinkIds,
+      bool allowSelection,
+      bool allowMultiSelection,
+      bool needsLayout,
+      bool shouldAnimateLayout,
+      GraphViewGeometry? geometry});
 
   $GraphIdCopyWith<$Res> get id;
   $GraphViewGeometryCopyWith<$Res>? get geometry;
@@ -845,50 +810,48 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
     Object? shouldAnimateLayout = null,
     Object? geometry = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                as GraphId,
-        nodes: null == nodes
-            ? _value.nodes
-            : nodes // ignore: cast_nullable_to_non_nullable
-                as IMap<GraphId, GraphNode>,
-        links: null == links
-            ? _value.links
-            : links // ignore: cast_nullable_to_non_nullable
-                as IMap<GraphId, GraphLink>,
-        selectedNodeIds: null == selectedNodeIds
-            ? _value.selectedNodeIds
-            : selectedNodeIds // ignore: cast_nullable_to_non_nullable
-                as IList<GraphId>,
-        selectedLinkIds: null == selectedLinkIds
-            ? _value.selectedLinkIds
-            : selectedLinkIds // ignore: cast_nullable_to_non_nullable
-                as IList<GraphId>,
-        allowSelection: null == allowSelection
-            ? _value.allowSelection
-            : allowSelection // ignore: cast_nullable_to_non_nullable
-                as bool,
-        allowMultiSelection: null == allowMultiSelection
-            ? _value.allowMultiSelection
-            : allowMultiSelection // ignore: cast_nullable_to_non_nullable
-                as bool,
-        needsLayout: null == needsLayout
-            ? _value.needsLayout
-            : needsLayout // ignore: cast_nullable_to_non_nullable
-                as bool,
-        shouldAnimateLayout: null == shouldAnimateLayout
-            ? _value.shouldAnimateLayout
-            : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
-                as bool,
-        geometry: freezed == geometry
-            ? _value.geometry
-            : geometry // ignore: cast_nullable_to_non_nullable
-                as GraphViewGeometry?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      nodes: null == nodes
+          ? _value.nodes
+          : nodes // ignore: cast_nullable_to_non_nullable
+              as IMap<GraphId, GraphNode>,
+      links: null == links
+          ? _value.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as IMap<GraphId, GraphLink>,
+      selectedNodeIds: null == selectedNodeIds
+          ? _value.selectedNodeIds
+          : selectedNodeIds // ignore: cast_nullable_to_non_nullable
+              as IList<GraphId>,
+      selectedLinkIds: null == selectedLinkIds
+          ? _value.selectedLinkIds
+          : selectedLinkIds // ignore: cast_nullable_to_non_nullable
+              as IList<GraphId>,
+      allowSelection: null == allowSelection
+          ? _value.allowSelection
+          : allowSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      allowMultiSelection: null == allowMultiSelection
+          ? _value.allowMultiSelection
+          : allowMultiSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      needsLayout: null == needsLayout
+          ? _value.needsLayout
+          : needsLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shouldAnimateLayout: null == shouldAnimateLayout
+          ? _value.shouldAnimateLayout
+          : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      geometry: freezed == geometry
+          ? _value.geometry
+          : geometry // ignore: cast_nullable_to_non_nullable
+              as GraphViewGeometry?,
+    ) as $Val);
   }
 
   /// Create a copy of GraphData
@@ -920,23 +883,21 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
 abstract class _$$GraphDataImplCopyWith<$Res>
     implements $GraphDataCopyWith<$Res> {
   factory _$$GraphDataImplCopyWith(
-    _$GraphDataImpl value,
-    $Res Function(_$GraphDataImpl) then,
-  ) = __$$GraphDataImplCopyWithImpl<$Res>;
+          _$GraphDataImpl value, $Res Function(_$GraphDataImpl) then) =
+      __$$GraphDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    GraphId id,
-    IMap<GraphId, GraphNode> nodes,
-    IMap<GraphId, GraphLink> links,
-    IList<GraphId> selectedNodeIds,
-    IList<GraphId> selectedLinkIds,
-    bool allowSelection,
-    bool allowMultiSelection,
-    bool needsLayout,
-    bool shouldAnimateLayout,
-    GraphViewGeometry? geometry,
-  });
+  $Res call(
+      {GraphId id,
+      IMap<GraphId, GraphNode> nodes,
+      IMap<GraphId, GraphLink> links,
+      IList<GraphId> selectedNodeIds,
+      IList<GraphId> selectedLinkIds,
+      bool allowSelection,
+      bool allowMultiSelection,
+      bool needsLayout,
+      bool shouldAnimateLayout,
+      GraphViewGeometry? geometry});
 
   @override
   $GraphIdCopyWith<$Res> get id;
@@ -949,9 +910,8 @@ class __$$GraphDataImplCopyWithImpl<$Res>
     extends _$GraphDataCopyWithImpl<$Res, _$GraphDataImpl>
     implements _$$GraphDataImplCopyWith<$Res> {
   __$$GraphDataImplCopyWithImpl(
-    _$GraphDataImpl _value,
-    $Res Function(_$GraphDataImpl) _then,
-  ) : super(_value, _then);
+      _$GraphDataImpl _value, $Res Function(_$GraphDataImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphData
   /// with the given fields replaced by the non-null parameter values.
@@ -969,68 +929,65 @@ class __$$GraphDataImplCopyWithImpl<$Res>
     Object? shouldAnimateLayout = null,
     Object? geometry = freezed,
   }) {
-    return _then(
-      _$GraphDataImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                as GraphId,
-        nodes: null == nodes
-            ? _value.nodes
-            : nodes // ignore: cast_nullable_to_non_nullable
-                as IMap<GraphId, GraphNode>,
-        links: null == links
-            ? _value.links
-            : links // ignore: cast_nullable_to_non_nullable
-                as IMap<GraphId, GraphLink>,
-        selectedNodeIds: null == selectedNodeIds
-            ? _value.selectedNodeIds
-            : selectedNodeIds // ignore: cast_nullable_to_non_nullable
-                as IList<GraphId>,
-        selectedLinkIds: null == selectedLinkIds
-            ? _value.selectedLinkIds
-            : selectedLinkIds // ignore: cast_nullable_to_non_nullable
-                as IList<GraphId>,
-        allowSelection: null == allowSelection
-            ? _value.allowSelection
-            : allowSelection // ignore: cast_nullable_to_non_nullable
-                as bool,
-        allowMultiSelection: null == allowMultiSelection
-            ? _value.allowMultiSelection
-            : allowMultiSelection // ignore: cast_nullable_to_non_nullable
-                as bool,
-        needsLayout: null == needsLayout
-            ? _value.needsLayout
-            : needsLayout // ignore: cast_nullable_to_non_nullable
-                as bool,
-        shouldAnimateLayout: null == shouldAnimateLayout
-            ? _value.shouldAnimateLayout
-            : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
-                as bool,
-        geometry: freezed == geometry
-            ? _value.geometry
-            : geometry // ignore: cast_nullable_to_non_nullable
-                as GraphViewGeometry?,
-      ),
-    );
+    return _then(_$GraphDataImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      nodes: null == nodes
+          ? _value.nodes
+          : nodes // ignore: cast_nullable_to_non_nullable
+              as IMap<GraphId, GraphNode>,
+      links: null == links
+          ? _value.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as IMap<GraphId, GraphLink>,
+      selectedNodeIds: null == selectedNodeIds
+          ? _value.selectedNodeIds
+          : selectedNodeIds // ignore: cast_nullable_to_non_nullable
+              as IList<GraphId>,
+      selectedLinkIds: null == selectedLinkIds
+          ? _value.selectedLinkIds
+          : selectedLinkIds // ignore: cast_nullable_to_non_nullable
+              as IList<GraphId>,
+      allowSelection: null == allowSelection
+          ? _value.allowSelection
+          : allowSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      allowMultiSelection: null == allowMultiSelection
+          ? _value.allowMultiSelection
+          : allowMultiSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      needsLayout: null == needsLayout
+          ? _value.needsLayout
+          : needsLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shouldAnimateLayout: null == shouldAnimateLayout
+          ? _value.shouldAnimateLayout
+          : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      geometry: freezed == geometry
+          ? _value.geometry
+          : geometry // ignore: cast_nullable_to_non_nullable
+              as GraphViewGeometry?,
+    ));
   }
 }
 
 /// @nodoc
 
 class _$GraphDataImpl implements _GraphData {
-  const _$GraphDataImpl({
-    required this.id,
-    this.nodes = const IMapConst({}),
-    this.links = const IMapConst({}),
-    this.selectedNodeIds = const IListConst([]),
-    this.selectedLinkIds = const IListConst([]),
-    this.allowSelection = true,
-    this.allowMultiSelection = false,
-    this.needsLayout = true,
-    this.shouldAnimateLayout = false,
-    this.geometry,
-  });
+  const _$GraphDataImpl(
+      {required this.id,
+      this.nodes = const IMapConst({}),
+      this.links = const IMapConst({}),
+      this.selectedNodeIds = const IListConst([]),
+      this.selectedLinkIds = const IListConst([]),
+      this.allowSelection = true,
+      this.allowMultiSelection = false,
+      this.needsLayout = true,
+      this.shouldAnimateLayout = false,
+      this.geometry});
 
   /// Unique identifier for this graph instance.
   @override
@@ -1087,14 +1044,10 @@ class _$GraphDataImpl implements _GraphData {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nodes, nodes) || other.nodes == nodes) &&
             (identical(other.links, links) || other.links == links) &&
-            const DeepCollectionEquality().equals(
-              other.selectedNodeIds,
-              selectedNodeIds,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other.selectedLinkIds,
-              selectedLinkIds,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other.selectedNodeIds, selectedNodeIds) &&
+            const DeepCollectionEquality()
+                .equals(other.selectedLinkIds, selectedLinkIds) &&
             (identical(other.allowSelection, allowSelection) ||
                 other.allowSelection == allowSelection) &&
             (identical(other.allowMultiSelection, allowMultiSelection) ||
@@ -1109,18 +1062,17 @@ class _$GraphDataImpl implements _GraphData {
 
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        id,
-        nodes,
-        links,
-        const DeepCollectionEquality().hash(selectedNodeIds),
-        const DeepCollectionEquality().hash(selectedLinkIds),
-        allowSelection,
-        allowMultiSelection,
-        needsLayout,
-        shouldAnimateLayout,
-        geometry,
-      );
+      runtimeType,
+      id,
+      nodes,
+      links,
+      const DeepCollectionEquality().hash(selectedNodeIds),
+      const DeepCollectionEquality().hash(selectedLinkIds),
+      allowSelection,
+      allowMultiSelection,
+      needsLayout,
+      shouldAnimateLayout,
+      geometry);
 
   /// Create a copy of GraphData
   /// with the given fields replaced by the non-null parameter values.
@@ -1132,18 +1084,17 @@ class _$GraphDataImpl implements _GraphData {
 }
 
 abstract class _GraphData implements GraphData {
-  const factory _GraphData({
-    required final GraphId id,
-    final IMap<GraphId, GraphNode> nodes,
-    final IMap<GraphId, GraphLink> links,
-    final IList<GraphId> selectedNodeIds,
-    final IList<GraphId> selectedLinkIds,
-    final bool allowSelection,
-    final bool allowMultiSelection,
-    final bool needsLayout,
-    final bool shouldAnimateLayout,
-    final GraphViewGeometry? geometry,
-  }) = _$GraphDataImpl;
+  const factory _GraphData(
+      {required final GraphId id,
+      final IMap<GraphId, GraphNode> nodes,
+      final IMap<GraphId, GraphLink> links,
+      final IList<GraphId> selectedNodeIds,
+      final IList<GraphId> selectedLinkIds,
+      final bool allowSelection,
+      final bool allowMultiSelection,
+      final bool needsLayout,
+      final bool shouldAnimateLayout,
+      final GraphViewGeometry? geometry}) = _$GraphDataImpl;
 
   /// Unique identifier for this graph instance.
   @override

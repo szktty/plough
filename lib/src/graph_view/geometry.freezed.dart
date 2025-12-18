@@ -12,8 +12,7 @@ part of 'geometry.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$GraphConnectionPoints {
@@ -32,10 +31,9 @@ mixin _$GraphConnectionPoints {
 
 /// @nodoc
 abstract class $GraphConnectionPointsCopyWith<$Res> {
-  factory $GraphConnectionPointsCopyWith(
-    GraphConnectionPoints value,
-    $Res Function(GraphConnectionPoints) then,
-  ) = _$GraphConnectionPointsCopyWithImpl<$Res, GraphConnectionPoints>;
+  factory $GraphConnectionPointsCopyWith(GraphConnectionPoints value,
+          $Res Function(GraphConnectionPoints) then) =
+      _$GraphConnectionPointsCopyWithImpl<$Res, GraphConnectionPoints>;
   @useResult
   $Res call({Offset incoming, Offset outgoing});
 }
@@ -55,19 +53,20 @@ class _$GraphConnectionPointsCopyWithImpl<$Res,
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? incoming = null, Object? outgoing = null}) {
-    return _then(
-      _value.copyWith(
-        incoming: null == incoming
-            ? _value.incoming
-            : incoming // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        outgoing: null == outgoing
-            ? _value.outgoing
-            : outgoing // ignore: cast_nullable_to_non_nullable
-                as Offset,
-      ) as $Val,
-    );
+  $Res call({
+    Object? incoming = null,
+    Object? outgoing = null,
+  }) {
+    return _then(_value.copyWith(
+      incoming: null == incoming
+          ? _value.incoming
+          : incoming // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      outgoing: null == outgoing
+          ? _value.outgoing
+          : outgoing // ignore: cast_nullable_to_non_nullable
+              as Offset,
+    ) as $Val);
   }
 }
 
@@ -75,9 +74,9 @@ class _$GraphConnectionPointsCopyWithImpl<$Res,
 abstract class _$$GraphConnectionPointsImplCopyWith<$Res>
     implements $GraphConnectionPointsCopyWith<$Res> {
   factory _$$GraphConnectionPointsImplCopyWith(
-    _$GraphConnectionPointsImpl value,
-    $Res Function(_$GraphConnectionPointsImpl) then,
-  ) = __$$GraphConnectionPointsImplCopyWithImpl<$Res>;
+          _$GraphConnectionPointsImpl value,
+          $Res Function(_$GraphConnectionPointsImpl) then) =
+      __$$GraphConnectionPointsImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({Offset incoming, Offset outgoing});
@@ -88,28 +87,28 @@ class __$$GraphConnectionPointsImplCopyWithImpl<$Res>
     extends _$GraphConnectionPointsCopyWithImpl<$Res,
         _$GraphConnectionPointsImpl>
     implements _$$GraphConnectionPointsImplCopyWith<$Res> {
-  __$$GraphConnectionPointsImplCopyWithImpl(
-    _$GraphConnectionPointsImpl _value,
-    $Res Function(_$GraphConnectionPointsImpl) _then,
-  ) : super(_value, _then);
+  __$$GraphConnectionPointsImplCopyWithImpl(_$GraphConnectionPointsImpl _value,
+      $Res Function(_$GraphConnectionPointsImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphConnectionPoints
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? incoming = null, Object? outgoing = null}) {
-    return _then(
-      _$GraphConnectionPointsImpl(
-        incoming: null == incoming
-            ? _value.incoming
-            : incoming // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        outgoing: null == outgoing
-            ? _value.outgoing
-            : outgoing // ignore: cast_nullable_to_non_nullable
-                as Offset,
-      ),
-    );
+  $Res call({
+    Object? incoming = null,
+    Object? outgoing = null,
+  }) {
+    return _then(_$GraphConnectionPointsImpl(
+      incoming: null == incoming
+          ? _value.incoming
+          : incoming // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      outgoing: null == outgoing
+          ? _value.outgoing
+          : outgoing // ignore: cast_nullable_to_non_nullable
+              as Offset,
+    ));
   }
 }
 
@@ -117,10 +116,9 @@ class __$$GraphConnectionPointsImplCopyWithImpl<$Res>
 
 class _$GraphConnectionPointsImpl extends _GraphConnectionPoints
     with DiagnosticableTreeMixin {
-  const _$GraphConnectionPointsImpl({
-    required this.incoming,
-    required this.outgoing,
-  }) : super._();
+  const _$GraphConnectionPointsImpl(
+      {required this.incoming, required this.outgoing})
+      : super._();
 
   /// The point where the link enters the target node.
   @override
@@ -165,17 +163,13 @@ class _$GraphConnectionPointsImpl extends _GraphConnectionPoints
   @pragma('vm:prefer-inline')
   _$$GraphConnectionPointsImplCopyWith<_$GraphConnectionPointsImpl>
       get copyWith => __$$GraphConnectionPointsImplCopyWithImpl<
-              _$GraphConnectionPointsImpl>(
-            this,
-            _$identity,
-          );
+          _$GraphConnectionPointsImpl>(this, _$identity);
 }
 
 abstract class _GraphConnectionPoints extends GraphConnectionPoints {
-  const factory _GraphConnectionPoints({
-    required final Offset incoming,
-    required final Offset outgoing,
-  }) = _$GraphConnectionPointsImpl;
+  const factory _GraphConnectionPoints(
+      {required final Offset incoming,
+      required final Offset outgoing}) = _$GraphConnectionPointsImpl;
   const _GraphConnectionPoints._() : super._();
 
   /// The point where the link enters the target node.
@@ -207,10 +201,9 @@ mixin _$GraphNodeViewGeometry {
 
 /// @nodoc
 abstract class $GraphNodeViewGeometryCopyWith<$Res> {
-  factory $GraphNodeViewGeometryCopyWith(
-    GraphNodeViewGeometry value,
-    $Res Function(GraphNodeViewGeometry) then,
-  ) = _$GraphNodeViewGeometryCopyWithImpl<$Res, GraphNodeViewGeometry>;
+  factory $GraphNodeViewGeometryCopyWith(GraphNodeViewGeometry value,
+          $Res Function(GraphNodeViewGeometry) then) =
+      _$GraphNodeViewGeometryCopyWithImpl<$Res, GraphNodeViewGeometry>;
   @useResult
   $Res call({Rect bounds});
 }
@@ -230,15 +223,15 @@ class _$GraphNodeViewGeometryCopyWithImpl<$Res,
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? bounds = null}) {
-    return _then(
-      _value.copyWith(
-        bounds: null == bounds
-            ? _value.bounds
-            : bounds // ignore: cast_nullable_to_non_nullable
-                as Rect,
-      ) as $Val,
-    );
+  $Res call({
+    Object? bounds = null,
+  }) {
+    return _then(_value.copyWith(
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+    ) as $Val);
   }
 }
 
@@ -246,9 +239,9 @@ class _$GraphNodeViewGeometryCopyWithImpl<$Res,
 abstract class _$$GraphNodeViewGeometryImplCopyWith<$Res>
     implements $GraphNodeViewGeometryCopyWith<$Res> {
   factory _$$GraphNodeViewGeometryImplCopyWith(
-    _$GraphNodeViewGeometryImpl value,
-    $Res Function(_$GraphNodeViewGeometryImpl) then,
-  ) = __$$GraphNodeViewGeometryImplCopyWithImpl<$Res>;
+          _$GraphNodeViewGeometryImpl value,
+          $Res Function(_$GraphNodeViewGeometryImpl) then) =
+      __$$GraphNodeViewGeometryImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({Rect bounds});
@@ -259,24 +252,23 @@ class __$$GraphNodeViewGeometryImplCopyWithImpl<$Res>
     extends _$GraphNodeViewGeometryCopyWithImpl<$Res,
         _$GraphNodeViewGeometryImpl>
     implements _$$GraphNodeViewGeometryImplCopyWith<$Res> {
-  __$$GraphNodeViewGeometryImplCopyWithImpl(
-    _$GraphNodeViewGeometryImpl _value,
-    $Res Function(_$GraphNodeViewGeometryImpl) _then,
-  ) : super(_value, _then);
+  __$$GraphNodeViewGeometryImplCopyWithImpl(_$GraphNodeViewGeometryImpl _value,
+      $Res Function(_$GraphNodeViewGeometryImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphNodeViewGeometry
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? bounds = null}) {
-    return _then(
-      _$GraphNodeViewGeometryImpl(
-        bounds: null == bounds
-            ? _value.bounds
-            : bounds // ignore: cast_nullable_to_non_nullable
-                as Rect,
-      ),
-    );
+  $Res call({
+    Object? bounds = null,
+  }) {
+    return _then(_$GraphNodeViewGeometryImpl(
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+    ));
   }
 }
 
@@ -321,10 +313,7 @@ class _$GraphNodeViewGeometryImpl
   @pragma('vm:prefer-inline')
   _$$GraphNodeViewGeometryImplCopyWith<_$GraphNodeViewGeometryImpl>
       get copyWith => __$$GraphNodeViewGeometryImplCopyWithImpl<
-              _$GraphNodeViewGeometryImpl>(
-            this,
-            _$identity,
-          );
+          _$GraphNodeViewGeometryImpl>(this, _$identity);
 }
 
 abstract class _GraphNodeViewGeometry implements GraphNodeViewGeometry {
@@ -358,17 +347,15 @@ mixin _$GraphLinkViewGeometry {
 
 /// @nodoc
 abstract class $GraphLinkViewGeometryCopyWith<$Res> {
-  factory $GraphLinkViewGeometryCopyWith(
-    GraphLinkViewGeometry value,
-    $Res Function(GraphLinkViewGeometry) then,
-  ) = _$GraphLinkViewGeometryCopyWithImpl<$Res, GraphLinkViewGeometry>;
+  factory $GraphLinkViewGeometryCopyWith(GraphLinkViewGeometry value,
+          $Res Function(GraphLinkViewGeometry) then) =
+      _$GraphLinkViewGeometryCopyWithImpl<$Res, GraphLinkViewGeometry>;
   @useResult
-  $Res call({
-    Rect bounds,
-    GraphConnectionGeometry connection,
-    double thickness,
-    double angle,
-  });
+  $Res call(
+      {Rect bounds,
+      GraphConnectionGeometry connection,
+      double thickness,
+      double angle});
 
   $GraphConnectionGeometryCopyWith<$Res> get connection;
 }
@@ -394,26 +381,24 @@ class _$GraphLinkViewGeometryCopyWithImpl<$Res,
     Object? thickness = null,
     Object? angle = null,
   }) {
-    return _then(
-      _value.copyWith(
-        bounds: null == bounds
-            ? _value.bounds
-            : bounds // ignore: cast_nullable_to_non_nullable
-                as Rect,
-        connection: null == connection
-            ? _value.connection
-            : connection // ignore: cast_nullable_to_non_nullable
-                as GraphConnectionGeometry,
-        thickness: null == thickness
-            ? _value.thickness
-            : thickness // ignore: cast_nullable_to_non_nullable
-                as double,
-        angle: null == angle
-            ? _value.angle
-            : angle // ignore: cast_nullable_to_non_nullable
-                as double,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+      connection: null == connection
+          ? _value.connection
+          : connection // ignore: cast_nullable_to_non_nullable
+              as GraphConnectionGeometry,
+      thickness: null == thickness
+          ? _value.thickness
+          : thickness // ignore: cast_nullable_to_non_nullable
+              as double,
+      angle: null == angle
+          ? _value.angle
+          : angle // ignore: cast_nullable_to_non_nullable
+              as double,
+    ) as $Val);
   }
 
   /// Create a copy of GraphLinkViewGeometry
@@ -431,17 +416,16 @@ class _$GraphLinkViewGeometryCopyWithImpl<$Res,
 abstract class _$$GraphLinkViewGeometryImplCopyWith<$Res>
     implements $GraphLinkViewGeometryCopyWith<$Res> {
   factory _$$GraphLinkViewGeometryImplCopyWith(
-    _$GraphLinkViewGeometryImpl value,
-    $Res Function(_$GraphLinkViewGeometryImpl) then,
-  ) = __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>;
+          _$GraphLinkViewGeometryImpl value,
+          $Res Function(_$GraphLinkViewGeometryImpl) then) =
+      __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    Rect bounds,
-    GraphConnectionGeometry connection,
-    double thickness,
-    double angle,
-  });
+  $Res call(
+      {Rect bounds,
+      GraphConnectionGeometry connection,
+      double thickness,
+      double angle});
 
   @override
   $GraphConnectionGeometryCopyWith<$Res> get connection;
@@ -452,10 +436,9 @@ class __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>
     extends _$GraphLinkViewGeometryCopyWithImpl<$Res,
         _$GraphLinkViewGeometryImpl>
     implements _$$GraphLinkViewGeometryImplCopyWith<$Res> {
-  __$$GraphLinkViewGeometryImplCopyWithImpl(
-    _$GraphLinkViewGeometryImpl _value,
-    $Res Function(_$GraphLinkViewGeometryImpl) _then,
-  ) : super(_value, _then);
+  __$$GraphLinkViewGeometryImplCopyWithImpl(_$GraphLinkViewGeometryImpl _value,
+      $Res Function(_$GraphLinkViewGeometryImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphLinkViewGeometry
   /// with the given fields replaced by the non-null parameter values.
@@ -467,26 +450,24 @@ class __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>
     Object? thickness = null,
     Object? angle = null,
   }) {
-    return _then(
-      _$GraphLinkViewGeometryImpl(
-        bounds: null == bounds
-            ? _value.bounds
-            : bounds // ignore: cast_nullable_to_non_nullable
-                as Rect,
-        connection: null == connection
-            ? _value.connection
-            : connection // ignore: cast_nullable_to_non_nullable
-                as GraphConnectionGeometry,
-        thickness: null == thickness
-            ? _value.thickness
-            : thickness // ignore: cast_nullable_to_non_nullable
-                as double,
-        angle: null == angle
-            ? _value.angle
-            : angle // ignore: cast_nullable_to_non_nullable
-                as double,
-      ),
-    );
+    return _then(_$GraphLinkViewGeometryImpl(
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+      connection: null == connection
+          ? _value.connection
+          : connection // ignore: cast_nullable_to_non_nullable
+              as GraphConnectionGeometry,
+      thickness: null == thickness
+          ? _value.thickness
+          : thickness // ignore: cast_nullable_to_non_nullable
+              as double,
+      angle: null == angle
+          ? _value.angle
+          : angle // ignore: cast_nullable_to_non_nullable
+              as double,
+    ));
   }
 }
 
@@ -494,12 +475,12 @@ class __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>
 
 class _$GraphLinkViewGeometryImpl extends _GraphLinkViewGeometry
     with DiagnosticableTreeMixin {
-  const _$GraphLinkViewGeometryImpl({
-    required this.bounds,
-    required this.connection,
-    required this.thickness,
-    required this.angle,
-  }) : super._();
+  const _$GraphLinkViewGeometryImpl(
+      {required this.bounds,
+      required this.connection,
+      required this.thickness,
+      required this.angle})
+      : super._();
 
   @override
   final Rect bounds;
@@ -550,19 +531,15 @@ class _$GraphLinkViewGeometryImpl extends _GraphLinkViewGeometry
   @pragma('vm:prefer-inline')
   _$$GraphLinkViewGeometryImplCopyWith<_$GraphLinkViewGeometryImpl>
       get copyWith => __$$GraphLinkViewGeometryImplCopyWithImpl<
-              _$GraphLinkViewGeometryImpl>(
-            this,
-            _$identity,
-          );
+          _$GraphLinkViewGeometryImpl>(this, _$identity);
 }
 
 abstract class _GraphLinkViewGeometry extends GraphLinkViewGeometry {
-  const factory _GraphLinkViewGeometry({
-    required final Rect bounds,
-    required final GraphConnectionGeometry connection,
-    required final double thickness,
-    required final double angle,
-  }) = _$GraphLinkViewGeometryImpl;
+  const factory _GraphLinkViewGeometry(
+      {required final Rect bounds,
+      required final GraphConnectionGeometry connection,
+      required final double thickness,
+      required final double angle}) = _$GraphLinkViewGeometryImpl;
   const _GraphLinkViewGeometry._() : super._();
 
   @override
@@ -603,16 +580,14 @@ mixin _$GraphConnectionGeometry {
 
 /// @nodoc
 abstract class $GraphConnectionGeometryCopyWith<$Res> {
-  factory $GraphConnectionGeometryCopyWith(
-    GraphConnectionGeometry value,
-    $Res Function(GraphConnectionGeometry) then,
-  ) = _$GraphConnectionGeometryCopyWithImpl<$Res, GraphConnectionGeometry>;
+  factory $GraphConnectionGeometryCopyWith(GraphConnectionGeometry value,
+          $Res Function(GraphConnectionGeometry) then) =
+      _$GraphConnectionGeometryCopyWithImpl<$Res, GraphConnectionGeometry>;
   @useResult
-  $Res call({
-    GraphNodeViewGeometry source,
-    GraphNodeViewGeometry target,
-    GraphConnectionPoints connectionPoints,
-  });
+  $Res call(
+      {GraphNodeViewGeometry source,
+      GraphNodeViewGeometry target,
+      GraphConnectionPoints connectionPoints});
 
   $GraphNodeViewGeometryCopyWith<$Res> get source;
   $GraphNodeViewGeometryCopyWith<$Res> get target;
@@ -639,22 +614,20 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
     Object? target = null,
     Object? connectionPoints = null,
   }) {
-    return _then(
-      _value.copyWith(
-        source: null == source
-            ? _value.source
-            : source // ignore: cast_nullable_to_non_nullable
-                as GraphNodeViewGeometry,
-        target: null == target
-            ? _value.target
-            : target // ignore: cast_nullable_to_non_nullable
-                as GraphNodeViewGeometry,
-        connectionPoints: null == connectionPoints
-            ? _value.connectionPoints
-            : connectionPoints // ignore: cast_nullable_to_non_nullable
-                as GraphConnectionPoints,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as GraphNodeViewGeometry,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as GraphNodeViewGeometry,
+      connectionPoints: null == connectionPoints
+          ? _value.connectionPoints
+          : connectionPoints // ignore: cast_nullable_to_non_nullable
+              as GraphConnectionPoints,
+    ) as $Val);
   }
 
   /// Create a copy of GraphConnectionGeometry
@@ -682,9 +655,8 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
   @override
   @pragma('vm:prefer-inline')
   $GraphConnectionPointsCopyWith<$Res> get connectionPoints {
-    return $GraphConnectionPointsCopyWith<$Res>(_value.connectionPoints, (
-      value,
-    ) {
+    return $GraphConnectionPointsCopyWith<$Res>(_value.connectionPoints,
+        (value) {
       return _then(_value.copyWith(connectionPoints: value) as $Val);
     });
   }
@@ -694,16 +666,15 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
 abstract class _$$GraphConnectionGeometryImplCopyWith<$Res>
     implements $GraphConnectionGeometryCopyWith<$Res> {
   factory _$$GraphConnectionGeometryImplCopyWith(
-    _$GraphConnectionGeometryImpl value,
-    $Res Function(_$GraphConnectionGeometryImpl) then,
-  ) = __$$GraphConnectionGeometryImplCopyWithImpl<$Res>;
+          _$GraphConnectionGeometryImpl value,
+          $Res Function(_$GraphConnectionGeometryImpl) then) =
+      __$$GraphConnectionGeometryImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    GraphNodeViewGeometry source,
-    GraphNodeViewGeometry target,
-    GraphConnectionPoints connectionPoints,
-  });
+  $Res call(
+      {GraphNodeViewGeometry source,
+      GraphNodeViewGeometry target,
+      GraphConnectionPoints connectionPoints});
 
   @override
   $GraphNodeViewGeometryCopyWith<$Res> get source;
@@ -719,9 +690,9 @@ class __$$GraphConnectionGeometryImplCopyWithImpl<$Res>
         _$GraphConnectionGeometryImpl>
     implements _$$GraphConnectionGeometryImplCopyWith<$Res> {
   __$$GraphConnectionGeometryImplCopyWithImpl(
-    _$GraphConnectionGeometryImpl _value,
-    $Res Function(_$GraphConnectionGeometryImpl) _then,
-  ) : super(_value, _then);
+      _$GraphConnectionGeometryImpl _value,
+      $Res Function(_$GraphConnectionGeometryImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphConnectionGeometry
   /// with the given fields replaced by the non-null parameter values.
@@ -732,22 +703,20 @@ class __$$GraphConnectionGeometryImplCopyWithImpl<$Res>
     Object? target = null,
     Object? connectionPoints = null,
   }) {
-    return _then(
-      _$GraphConnectionGeometryImpl(
-        source: null == source
-            ? _value.source
-            : source // ignore: cast_nullable_to_non_nullable
-                as GraphNodeViewGeometry,
-        target: null == target
-            ? _value.target
-            : target // ignore: cast_nullable_to_non_nullable
-                as GraphNodeViewGeometry,
-        connectionPoints: null == connectionPoints
-            ? _value.connectionPoints
-            : connectionPoints // ignore: cast_nullable_to_non_nullable
-                as GraphConnectionPoints,
-      ),
-    );
+    return _then(_$GraphConnectionGeometryImpl(
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as GraphNodeViewGeometry,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as GraphNodeViewGeometry,
+      connectionPoints: null == connectionPoints
+          ? _value.connectionPoints
+          : connectionPoints // ignore: cast_nullable_to_non_nullable
+              as GraphConnectionPoints,
+    ));
   }
 }
 
@@ -756,11 +725,10 @@ class __$$GraphConnectionGeometryImplCopyWithImpl<$Res>
 class _$GraphConnectionGeometryImpl
     with DiagnosticableTreeMixin
     implements _GraphConnectionGeometry {
-  const _$GraphConnectionGeometryImpl({
-    required this.source,
-    required this.target,
-    required this.connectionPoints,
-  });
+  const _$GraphConnectionGeometryImpl(
+      {required this.source,
+      required this.target,
+      required this.connectionPoints});
 
   /// The source node's layout geometry from which the link originates.
   @override
@@ -815,11 +783,11 @@ class _$GraphConnectionGeometryImpl
 }
 
 abstract class _GraphConnectionGeometry implements GraphConnectionGeometry {
-  const factory _GraphConnectionGeometry({
-    required final GraphNodeViewGeometry source,
-    required final GraphNodeViewGeometry target,
-    required final GraphConnectionPoints connectionPoints,
-  }) = _$GraphConnectionGeometryImpl;
+  const factory _GraphConnectionGeometry(
+          {required final GraphNodeViewGeometry source,
+          required final GraphNodeViewGeometry target,
+          required final GraphConnectionPoints connectionPoints}) =
+      _$GraphConnectionGeometryImpl;
 
   /// The source node's layout geometry from which the link originates.
   @override
@@ -856,9 +824,8 @@ mixin _$GraphViewGeometry {
 /// @nodoc
 abstract class $GraphViewGeometryCopyWith<$Res> {
   factory $GraphViewGeometryCopyWith(
-    GraphViewGeometry value,
-    $Res Function(GraphViewGeometry) then,
-  ) = _$GraphViewGeometryCopyWithImpl<$Res, GraphViewGeometry>;
+          GraphViewGeometry value, $Res Function(GraphViewGeometry) then) =
+      _$GraphViewGeometryCopyWithImpl<$Res, GraphViewGeometry>;
   @useResult
   $Res call({Offset position, Size size});
 }
@@ -877,29 +844,29 @@ class _$GraphViewGeometryCopyWithImpl<$Res, $Val extends GraphViewGeometry>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? position = null, Object? size = null}) {
-    return _then(
-      _value.copyWith(
-        position: null == position
-            ? _value.position
-            : position // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        size: null == size
-            ? _value.size
-            : size // ignore: cast_nullable_to_non_nullable
-                as Size,
-      ) as $Val,
-    );
+  $Res call({
+    Object? position = null,
+    Object? size = null,
+  }) {
+    return _then(_value.copyWith(
+      position: null == position
+          ? _value.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      size: null == size
+          ? _value.size
+          : size // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$GraphViewGeometryImplCopyWith<$Res>
     implements $GraphViewGeometryCopyWith<$Res> {
-  factory _$$GraphViewGeometryImplCopyWith(
-    _$GraphViewGeometryImpl value,
-    $Res Function(_$GraphViewGeometryImpl) then,
-  ) = __$$GraphViewGeometryImplCopyWithImpl<$Res>;
+  factory _$$GraphViewGeometryImplCopyWith(_$GraphViewGeometryImpl value,
+          $Res Function(_$GraphViewGeometryImpl) then) =
+      __$$GraphViewGeometryImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({Offset position, Size size});
@@ -909,28 +876,28 @@ abstract class _$$GraphViewGeometryImplCopyWith<$Res>
 class __$$GraphViewGeometryImplCopyWithImpl<$Res>
     extends _$GraphViewGeometryCopyWithImpl<$Res, _$GraphViewGeometryImpl>
     implements _$$GraphViewGeometryImplCopyWith<$Res> {
-  __$$GraphViewGeometryImplCopyWithImpl(
-    _$GraphViewGeometryImpl _value,
-    $Res Function(_$GraphViewGeometryImpl) _then,
-  ) : super(_value, _then);
+  __$$GraphViewGeometryImplCopyWithImpl(_$GraphViewGeometryImpl _value,
+      $Res Function(_$GraphViewGeometryImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphViewGeometry
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? position = null, Object? size = null}) {
-    return _then(
-      _$GraphViewGeometryImpl(
-        position: null == position
-            ? _value.position
-            : position // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        size: null == size
-            ? _value.size
-            : size // ignore: cast_nullable_to_non_nullable
-                as Size,
-      ),
-    );
+  $Res call({
+    Object? position = null,
+    Object? size = null,
+  }) {
+    return _then(_$GraphViewGeometryImpl(
+      position: null == position
+          ? _value.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      size: null == size
+          ? _value.size
+          : size // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ));
   }
 }
 
@@ -980,16 +947,13 @@ class _$GraphViewGeometryImpl
   @pragma('vm:prefer-inline')
   _$$GraphViewGeometryImplCopyWith<_$GraphViewGeometryImpl> get copyWith =>
       __$$GraphViewGeometryImplCopyWithImpl<_$GraphViewGeometryImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 }
 
 abstract class _GraphViewGeometry implements GraphViewGeometry {
-  const factory _GraphViewGeometry({
-    required final Offset position,
-    required final Size size,
-  }) = _$GraphViewGeometryImpl;
+  const factory _GraphViewGeometry(
+      {required final Offset position,
+      required final Size size}) = _$GraphViewGeometryImpl;
 
   @override
   Offset get position;
