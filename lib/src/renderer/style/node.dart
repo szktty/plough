@@ -78,13 +78,16 @@ class GraphDefaultNodeRendererStyle with _$GraphDefaultNodeRendererStyle {
     /// The shape of the node. Can be either circle or rectangle.
     @Default(GraphDefaultNodeRendererShape.circle)
     GraphDefaultNodeRendererShape shape,
+
+    /// The padding inside the node's border.
+    ///
+    /// This padding is applied between the node's border and its child content.
+    /// Defaults to 8 pixels on all sides.
+    @Default(EdgeInsets.all(8)) EdgeInsets padding,
   }) = _GraphDefaultNodeRendererStyle;
 }
 
 /// Shape options available for nodes in the default renderer.
 ///
 /// The shape affects both the node's visual appearance and its hit testing behavior.
-enum GraphDefaultNodeRendererShape {
-  circle,
-  rectangle,
-}
+enum GraphDefaultNodeRendererShape { circle, rectangle }

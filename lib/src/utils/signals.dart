@@ -1,39 +1,22 @@
 import 'package:flutter/widgets.dart';
-import 'package:signals_flutter/signals_flutter.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-mixin ListenableSignalStateMixin<T> implements Listenable {
-  Signal<T> get state;
-
-  ValueNotifier<T> get notifier => state as ValueNotifier<T>;
-
-  bool useOverrideState = false;
+@internal
+mixin ListenableValueNotifierStateMixin<T> implements Listenable {
+  ValueNotifier<T> get state;
 
   void setState(T value, {bool force = false}) {
-    if (useOverrideState) {
-      overrideState(value);
-    } else {
-      state.set(value, force: force);
-    }
-  }
-
-  void overrideState(T value) {
-    state.overrideWith(value);
-  }
-
-  void overrideStateWith(void Function() callback) {
-    useOverrideState = true;
-    callback();
-    useOverrideState = false;
+    state.value = value;
   }
 
   @override
   void addListener(VoidCallback listener) {
-    notifier.addListener(listener);
+    state.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    notifier.removeListener(listener);
+    state.removeListener(listener);
   }
 
   void disposeState() {

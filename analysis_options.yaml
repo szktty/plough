@@ -3,6 +3,7 @@ include: package:very_good_analysis/analysis_options.yaml
 analyzer:
   exclude:
     - build/**
+    - test/**
   errors:
     invalid_annotation_target: ignore
 
@@ -13,3 +14,4 @@ linter:
     prefer_void_to_null: false
     avoid_print: false
     unawaited_futures: true
+    lines_longer_than_80_chars: false

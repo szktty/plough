@@ -32,7 +32,7 @@ abstract interface class GraphEntityData {
 
   bool get canSelect;
 
-  bool get isSelected;
+  bool get canDrag;
 }
 
 /// The direction of a link between nodes.
@@ -63,23 +63,13 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
   const factory GraphNodeData({
     required GraphId id,
     @Default(Offset.zero) Offset logicalPosition,
-
-    /// The current animated position during transitions.
-    ///
-    /// Used to smoothly animate the node between positions when layout changes.
-    @Default(Offset.zero) Offset animatedPosition,
-
-    /// The position from which the current animation started.
-    @Default(Offset.zero) Offset animationStartPosition,
     @Default(1.0) double weight,
     @Default(-1) int stackOrder,
     @Default(true) bool isEnabled,
     @Default(true) bool visible,
     @Default(true) bool canSelect,
-    @Default(false) bool isSelected,
+    @Default(true) bool canDrag,
     @Default(false) bool isArranged,
-    @Default(false) bool isAnimating,
-    @Default(false) bool isAnimationCompleted,
   }) = _GraphNodeData;
 }
 
@@ -102,7 +92,8 @@ class GraphLinkData with _$GraphLinkData implements GraphEntityData {
     @Default(true) bool isEnabled,
     @Default(true) bool visible,
     @Default(true) bool canSelect,
-    @Default(false) bool isSelected,
+    @Default(true) bool canDrag,
+    @Default(false) bool isArranged,
   }) = _GraphLinkData;
 }
 
@@ -136,6 +127,7 @@ class GraphData with _$GraphData {
     /// Whether multiple elements can be selected simultaneously.
     @Default(false) bool allowMultiSelection,
     @Default(true) bool needsLayout,
+    @Default(false) bool shouldAnimateLayout,
     GraphViewGeometry? geometry,
   }) = _GraphData;
 }

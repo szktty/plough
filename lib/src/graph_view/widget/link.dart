@@ -7,7 +7,6 @@ import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/graph_view/graph_view.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A widget that renders connections between graph nodes.
 ///
@@ -63,26 +62,39 @@ class _GraphLinkViewState extends State<GraphLinkView> {
 
   @override
   void dispose() {
-    log.d('GraphLinkView: dispose');
+    logDebug(LogCategory.rendering, 'GraphLinkView: dispose');
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    log.d('GraphLinkView: ${link.id}: build');
+    logDebug(LogCategory.rendering, 'GraphLinkView: ${link.id}: build');
     final graphViewData = GraphViewData.of(context);
     final graphViewBehavior = graphViewData.behavior;
-    return Watch(
-      (context) {
-        log.d(
-          'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
-        );
+    logDebug(
+      LogCategory.rendering,
+      'GraphLinkView: ${link.id}: watch nodes ${link.source.id} -> ${link.target.id}',
+    );
 
+    // Listen to both source and target node position changes to update link
+    final sourceNode = link.source;
+    final targetNode = link.target;
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        sourceNode.positionListenable,
+        targetNode.positionListenable,
+        sourceNode.geometryState,
+        targetNode.geometryState,
+      ]),
+      builder: (context, _) {
         final sourceGeometry = link.source.geometry;
         final targetGeometry = link.target.geometry;
 
         if (sourceGeometry == null || targetGeometry == null) {
-          log.d('GraphLinkView: waiting to get node geometries...');
+          logDebug(
+            LogCategory.rendering,
+            'GraphLinkView: waiting to get node geometries...',
+          );
           return const SizedBox();
         }
 
@@ -93,12 +105,16 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           widget.targetView,
         );
         if (connPoints == null) {
-          log.d('GraphLinkView: waiting to calculate connection points...');
+          logDebug(
+            LogCategory.rendering,
+            'GraphLinkView: waiting to calculate connection points...',
+          );
           return const SizedBox();
         }
 
         if (!connPoints.incoming.isFinite || !connPoints.outgoing.isFinite) {
-          log.e(
+          logError(
+            LogCategory.rendering,
             'GraphLinkView: ${link.id}: connection points must be infinite',
           );
           return const SizedBox();
@@ -155,7 +171,8 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           thickness: thickness,
           angle: angle,
         );
-        link.overrideStateWith(() {
+        // Defer geometry update to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           link.geometry = viewGeometry;
         });
 
@@ -193,7 +210,8 @@ class _GraphLinkViewState extends State<GraphLinkView> {
           angle: 0,
         );
 
-        link.overrideStateWith(() {
+        // Defer geometry update to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           link.geometry = viewGeometry;
         });
 

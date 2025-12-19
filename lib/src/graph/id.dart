@@ -47,10 +47,8 @@ class GraphId with _$GraphId {
   const GraphId._();
 
   /// Creates an identifier with a new UUIDv7 value for the given type.
-  factory GraphId.unique(GraphIdType type) => GraphId(
-        type: type,
-        value: const UuidV7().generate(),
-      );
+  factory GraphId.unique(GraphIdType type) =>
+      GraphId(type: type, value: const UuidV7().generate());
 
   /// Creates an identifier from its JSON representation.
   factory GraphId.fromJson(Map<String, Object?> json) =>

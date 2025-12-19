@@ -7,30 +7,14 @@ import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/behavior.dart';
 import 'package:plough/src/graph_view/data.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/graph_view/hit_test.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/graph_view/widget/link.dart';
 import 'package:plough/src/graph_view/widget/node.dart';
 import 'package:plough/src/interactive/widget/interactive_overlay.dart';
 import 'package:plough/src/layout_strategy/base.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget.dart';
-import 'package:provider/provider.dart';
-import 'package:signals/signals_flutter.dart';
-
-/// Build state of the graph view.
-enum GraphViewBuildState {
-  /// Initial state, renders transparent for geometry calculation
-  initialize,
-
-  /// Executing layout algorithm
-  performLayout,
-
-  /// Ready for rendering
-  ready;
-
-  static GraphViewBuildState of(BuildContext context) {
-    return Provider.of<GraphViewBuildState>(context, listen: false);
-  }
-}
 
 /// The main widget for displaying a graph.
 ///
@@ -83,6 +67,12 @@ class GraphView extends StatefulWidget {
     this.nodeAnimationStartPosition,
     this.nodeAnimationDuration = const Duration(milliseconds: 500),
     this.nodeAnimationCurve = Curves.easeOutQuint,
+    this.gestureMode = GraphGestureMode.exclusive,
+    this.shouldConsumeGesture,
+    this.onBackgroundTapped,
+    this.onBackgroundPanStart,
+    this.onBackgroundPanUpdate,
+    this.onBackgroundPanEnd,
     super.key,
   });
 
@@ -113,6 +103,34 @@ class GraphView extends StatefulWidget {
   /// Easing curve for node movement animations.
   final Curve nodeAnimationCurve;
 
+  /// How gestures should be handled by the graph view.
+  ///
+  /// - [GraphGestureMode.exclusive]: Consume all gestures (default)
+  /// - [GraphGestureMode.nodeEdgeOnly]: Only consume gestures on nodes/edges
+  /// - [GraphGestureMode.transparent]: Pass all gestures to parent
+  /// - [GraphGestureMode.custom]: Use [shouldConsumeGesture] callback
+  final GraphGestureMode gestureMode;
+
+  /// Custom callback for determining gesture consumption.
+  ///
+  /// Only used when [gestureMode] is [GraphGestureMode.custom].
+  /// Return `true` to consume the gesture, `false` to pass it through.
+  final GraphGestureConsumptionCallback? shouldConsumeGesture;
+
+  /// Callback for background tap gestures.
+  ///
+  /// Only called when the gesture is not consumed by graph elements.
+  final GraphBackgroundGestureCallback? onBackgroundTapped;
+
+  /// Callback for background pan start gestures.
+  final GraphBackgroundGestureCallback? onBackgroundPanStart;
+
+  /// Callback for background pan update gestures.
+  final GraphBackgroundPanCallback? onBackgroundPanUpdate;
+
+  /// Callback for background pan end gestures.
+  final GraphBackgroundGestureCallback? onBackgroundPanEnd;
+
   @override
   State<GraphView> createState() => GraphViewState();
 }
@@ -128,12 +146,24 @@ class GraphView extends StatefulWidget {
 /// See also:
 /// * [GraphView], the stateful widget using this state
 /// * [GraphViewData], which holds view-specific data
-class GraphViewState extends State<GraphView> with SignalsMixin {
+class GraphViewState extends State<GraphView> {
   late GraphViewData _data;
 
   GraphImpl get _graph => widget.graph as GraphImpl;
 
-  final _buildState = signal(GraphViewBuildState.initialize);
+  final ValueNotifier<GraphViewBuildState> _buildState = ValueNotifier(
+    GraphViewBuildState.initialize,
+  );
+
+  void _setBuildState(GraphViewBuildState newState) {
+    if (_buildState.value != newState) {
+      logDebug(
+        LogCategory.state,
+        '🏗️ GraphView _buildState changed: ${_buildState.value} -> $newState',
+      );
+      _buildState.value = newState;
+    }
+  }
 
   GraphLayoutStrategy get _layoutStrategy => widget.layoutStrategy;
   GraphLayoutStrategy? _oldLayoutStrategy;
@@ -143,20 +173,28 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
   late GraphNodeViewBehavior _nodeViewBehavior;
   late GraphLinkViewBehavior _linkViewBehavior;
 
-  final _layoutKey = GlobalKey();
+  final GlobalKey _layoutKey = GlobalKey();
 
   final Map<GraphId, GlobalKey> _nodeKeys = {};
   final Map<GraphId, Widget> _nodeViews = {};
 
-  // TODO: Not used
+  // TODO(user): Not used
   final Map<GraphId, GlobalKey> _linkKeys = {};
 
   GraphId? _entityIdShowingTooltip;
+
+  bool _isGeometryUpdateScheduled = false;
 
   @override
   void initState() {
     super.initState();
     _initBehavior();
+  }
+
+  @override
+  void dispose() {
+    _buildState.dispose();
+    super.dispose();
   }
 
   void _initBehavior() {
@@ -173,17 +211,30 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
       nodeAnimationDuration: widget.nodeAnimationDuration,
       nodeAnimationCurve: widget.nodeAnimationCurve,
     );
-    _buildState.value = GraphViewBuildState.initialize;
+    _setBuildState(GraphViewBuildState.initialize);
     _nodeViews.clear();
   }
 
   @override
   void didUpdateWidget(covariant GraphView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.graph != oldWidget.graph ||
-        widget.layoutStrategy != oldWidget.layoutStrategy ||
-        widget.behavior != oldWidget.behavior) {
+    // Reinitialize only under stricter conditions
+    final needsReinit = widget.graph != oldWidget.graph ||
+        widget.layoutStrategy.runtimeType !=
+            oldWidget.layoutStrategy.runtimeType ||
+        !widget.behavior.isEquivalentTo(oldWidget.behavior);
+
+    if (needsReinit) {
+      logDebug(
+        LogCategory.state,
+        '🔄 GraphView didUpdateWidget: reinitializing behavior (reason: graph=${widget.graph != oldWidget.graph}, layout=${widget.layoutStrategy.runtimeType != oldWidget.layoutStrategy.runtimeType}, behaviorEquivalent=${!widget.behavior.isEquivalentTo(oldWidget.behavior)})',
+      );
       _initBehavior();
+    } else {
+      logDebug(
+        LogCategory.state,
+        '🔄 GraphView didUpdateWidget: skipping reinit (no significant changes)',
+      );
     }
   }
 
@@ -191,14 +242,17 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
     WidgetUtils.withSizedRenderBoxIfPresent(_layoutKey, (renderBox) {
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
-      _graph.geometry = GraphViewGeometry(
-        position: position,
-        size: size,
-      );
-      log
-        ..d('GraphView: update geometry')
-        ..d('    position: $position')
-        ..d('    size: $size');
+      final newGeometry = GraphViewGeometry(position: position, size: size);
+
+      // Only update if geometry actually changed
+      if (_graph.geometry == null ||
+          _graph.geometry!.position != position ||
+          _graph.geometry!.size != size) {
+        _graph.geometry = newGeometry;
+        logDebug(LogCategory.rendering, 'GraphView: update geometry');
+        logDebug(LogCategory.rendering, '    position: $position');
+        logDebug(LogCategory.rendering, '    size: $size');
+      }
     });
   }
 
@@ -217,12 +271,15 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
           renderBox.size.width,
           renderBox.size.height,
         );
-        node.geometry = GraphNodeViewGeometry(bounds: bounds);
-        log
-          ..d('GraphView: update node geometry')
-          ..d('    node: ${node.id}')
-          ..d('    position: $position')
-          ..d('    size: ${renderBox.size}');
+        final newGeometry = GraphNodeViewGeometry(bounds: bounds);
+        // Only update if geometry actually changed
+        if (node.geometry == null || node.geometry!.bounds != bounds) {
+          node.geometry = newGeometry;
+          logDebug(LogCategory.rendering, 'GraphView: update node geometry');
+          logDebug(LogCategory.rendering, '    node: ${node.id}');
+          logDebug(LogCategory.rendering, '    position: $position');
+          logDebug(LogCategory.rendering, '    size: ${renderBox.size}');
+        }
       });
     }
   }
@@ -236,15 +293,32 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
     required BuildContext context,
     required BoxConstraints constrains,
   }) {
-    log.d('GraphView: perform layout');
+    logDebug(LogCategory.layout, 'GraphView: perform layout');
 
     if (_graph.needsLayout ||
         _oldLayoutStrategy == null ||
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
-      if (widget.animationEnabled) {
+      // Enable animation only when explicitly requested AND widget allows it
+      final shouldAnimateLayout =
+          widget.animationEnabled && _graph.shouldAnimateLayout;
+
+      if (shouldAnimateLayout) {
+        logDebug(
+          LogCategory.layout,
+          'GraphView: Enabling animation - explicitly requested',
+        );
         _layoutStrategy.nodeAnimationStartPosition =
             _getNodeAnimationStartPosition(constrains);
+        // Reset animation states for all nodes
+        for (final node in _graph.nodes) {
+          (node as GraphNodeImpl).resetAnimationState();
+        }
+      } else {
+        logDebug(
+          LogCategory.layout,
+          'GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})',
+        );
       }
       _layoutStrategy.performLayout(
         _graph,
@@ -252,6 +326,16 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
       );
       _oldLayoutStrategy = _layoutStrategy;
       _graph.onLayoutFinished();
+    } else {
+      // Layout not performed, ensure nodes are not stuck in animating state
+      for (final node in _graph.nodes) {
+        final nodeImpl = node as GraphNodeImpl;
+        if (nodeImpl.isAnimating && !nodeImpl.isAnimationCompleted) {
+          // Force complete any lingering animations
+          nodeImpl.isAnimating = false;
+          nodeImpl.isAnimationCompleted = true;
+        }
+      }
     }
   }
 
@@ -259,79 +343,108 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Watch((context) {
-          late List<GraphEntity> elements;
-          if (_buildState.value == GraphViewBuildState.initialize) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                _updateGraphGeometry();
-                _updateNodeGeometry();
-                _buildState.value = GraphViewBuildState.performLayout;
-              });
-            });
-            elements = [..._graph.nodes];
-          } else if (_buildState.value == GraphViewBuildState.performLayout) {
-            _performLayout(context: context, constrains: constraints);
-            elements = [..._graph.nodes];
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                _updateGraphGeometry();
-                _buildState.value = GraphViewBuildState.ready;
-              });
-            });
-          } else {
-            elements = [..._graph.nodes, ..._graph.links];
-          }
+        return AnimatedBuilder(
+          animation: Listenable.merge([
+            _graph.layoutChangeListenable,
+            _buildState,
+          ]),
+          builder: (context, child) {
+            final timestamp = DateTime.now().millisecondsSinceEpoch;
+            logDebug(
+              LogCategory.rendering,
+              'AnimatedBuilder.builder called at $timestamp, buildState: ${_buildState.value}',
+            );
+            late List<GraphEntity> elements;
+            if (_buildState.value == GraphViewBuildState.initialize) {
+              if (!_isGeometryUpdateScheduled) {
+                _isGeometryUpdateScheduled = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    logDebug(
+                      LogCategory.rendering,
+                      'PostFrameCallback in initialize phase',
+                    );
+                    _updateGraphGeometry();
+                    _updateNodeGeometry();
+                    _setBuildState(GraphViewBuildState.performLayout);
+                    _isGeometryUpdateScheduled = false;
+                  }
+                });
+              }
+              elements = [..._graph.nodes];
+            } else if (_buildState.value == GraphViewBuildState.performLayout) {
+              _performLayout(context: context, constrains: constraints);
+              elements = [..._graph.nodes];
+              if (!_isGeometryUpdateScheduled) {
+                _isGeometryUpdateScheduled = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    logDebug(
+                      LogCategory.rendering,
+                      'PostFrameCallback in performLayout phase',
+                    );
+                    _updateGraphGeometry();
+                    _setBuildState(GraphViewBuildState.ready);
+                    _isGeometryUpdateScheduled = false;
+                  }
+                });
+              }
+            } else {
+              elements = [..._graph.nodes, ..._graph.links];
+            }
 
-          elements.sort((a, b) => a.stackOrder.compareTo(b.stackOrder));
+            elements.sort((a, b) => a.stackOrder.compareTo(b.stackOrder));
 
-          return KeyedSubtree(
-            key: ValueKey(_graph.hashCode),
-            child: _buildCommonProviders(
-              context,
-              constrains: constraints,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Stack(
-                      key: _layoutKey,
-                      children: elements.map((e) {
-                        if (e is GraphNodeImpl) {
-                          return _buildNodeView(context, constraints, e);
-                        } else if (e is GraphLinkImpl) {
-                          return _buildLinkView(context, e);
-                        } else {
-                          throw StateError('Unknown element: $e');
-                        }
-                      }).toList(),
+            return KeyedSubtree(
+              key: ValueKey(_graph.hashCode),
+              child: _buildCommonProviders(
+                context,
+                constrains: constraints,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Stack(
+                        key: _layoutKey,
+                        children: elements.map((e) {
+                          if (e is GraphNodeImpl) {
+                            return _buildNodeView(context, constraints, e);
+                          } else if (e is GraphLinkImpl) {
+                            return _buildLinkView(context, e);
+                          } else {
+                            throw StateError('Unknown element: $e');
+                          }
+                        }).toList(),
+                      ),
                     ),
-                  ),
-                  Positioned.fill(
-                    child: GraphInteractiveOverlay(
-                      graph: _graph,
-                      behavior: widget.behavior,
-                      viewportSize: constraints.biggest,
-                      nodeTooltipTriggerMode:
-                          _nodeViewBehavior.tooltipBehavior?.triggerMode,
-                      linkTooltipTriggerMode:
-                          _linkViewBehavior.tooltipBehavior?.triggerMode,
-                      onTooltipShow: (entity) {
-                        setState(() {
+                    Positioned.fill(
+                      child: GraphInteractiveOverlay(
+                        graph: _graph,
+                        behavior: widget.behavior,
+                        viewportSize: constraints.biggest,
+                        nodeTooltipTriggerMode:
+                            _nodeViewBehavior.tooltipBehavior?.triggerMode,
+                        linkTooltipTriggerMode:
+                            _linkViewBehavior.tooltipBehavior?.triggerMode,
+                        gestureMode: widget.gestureMode,
+                        shouldConsumeGesture: widget.shouldConsumeGesture,
+                        onBackgroundTapped: widget.onBackgroundTapped,
+                        onBackgroundPanStart: widget.onBackgroundPanStart,
+                        onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
+                        onBackgroundPanEnd: widget.onBackgroundPanEnd,
+                        onTooltipShow: (entity) {
                           _entityIdShowingTooltip = entity.id;
-                        });
-                      },
-                      onTooltipHide: (entity) {
-                        setState(() {
+                        },
+                        onTooltipHide: (entity) {
                           _entityIdShowingTooltip = null;
-                        });
-                      },
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
@@ -341,17 +454,25 @@ class GraphViewState extends State<GraphView> with SignalsMixin {
     required BoxConstraints constrains,
     required Widget child,
   }) {
-    return MultiProvider(
-      providers: [
-        Provider.value(value: _data),
-        Provider.value(value: _buildState.value),
-        Provider.value(value: widget.behavior),
-        Provider.value(value: _nodeViewBehavior),
-        Provider.value(value: _linkViewBehavior),
-        Provider.value(value: constrains),
-        ListenableProvider.value(value: _graph),
-      ],
-      child: child,
+    return AnimatedBuilder(
+      animation: _graph,
+      builder: (context, _) {
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        logDebug(
+          LogCategory.rendering,
+          '_buildCommonProviders AnimatedBuilder.builder called at $timestamp',
+        );
+        return GraphInheritedData(
+          data: _data,
+          buildState: _buildState.value,
+          behavior: widget.behavior,
+          nodeViewBehavior: _nodeViewBehavior,
+          linkViewBehavior: _linkViewBehavior,
+          constraints: constrains,
+          graph: _graph,
+          child: child,
+        );
+      },
     );
   }
 

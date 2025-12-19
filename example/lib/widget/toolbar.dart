@@ -1,4 +1,3 @@
-// lib/widget/toolbar.dart
 import 'package:example/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +25,7 @@ class MainPageToolbar extends StatelessWidget {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: state.selectedData.name,
+                      initialValue: state.selectedData.name,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -49,6 +48,11 @@ class MainPageToolbar extends StatelessWidget {
                     onPressed: state.reloadSampleDataList,
                     icon: const Icon(Icons.refresh),
                     tooltip: 'Reload',
+                  ),
+                  IconButton(
+                    onPressed: state.clearAllSelections,
+                    icon: const Icon(Icons.deselect),
+                    tooltip: 'Clear Selection',
                   ),
                 ],
               ),

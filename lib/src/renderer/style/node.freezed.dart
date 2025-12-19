@@ -79,6 +79,12 @@ mixin _$GraphDefaultNodeRendererStyle {
   /// The shape of the node. Can be either circle or rectangle.
   GraphDefaultNodeRendererShape get shape => throw _privateConstructorUsedError;
 
+  /// The padding inside the node's border.
+  ///
+  /// This padding is applied between the node's border and its child content.
+  /// Defaults to 8 pixels on all sides.
+  EdgeInsets get padding => throw _privateConstructorUsedError;
+
   /// Create a copy of GraphDefaultNodeRendererStyle
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -113,7 +119,8 @@ abstract class $GraphDefaultNodeRendererStyleCopyWith<$Res> {
       double selectedBorderWidth,
       double selectedHoverBorderWidth,
       double selectedUnhoverBorderWidth,
-      GraphDefaultNodeRendererShape shape});
+      GraphDefaultNodeRendererShape shape,
+      EdgeInsets padding});
 }
 
 /// @nodoc
@@ -151,6 +158,7 @@ class _$GraphDefaultNodeRendererStyleCopyWithImpl<$Res,
     Object? selectedHoverBorderWidth = null,
     Object? selectedUnhoverBorderWidth = null,
     Object? shape = null,
+    Object? padding = null,
   }) {
     return _then(_value.copyWith(
       color: null == color
@@ -229,6 +237,10 @@ class _$GraphDefaultNodeRendererStyleCopyWithImpl<$Res,
           ? _value.shape
           : shape // ignore: cast_nullable_to_non_nullable
               as GraphDefaultNodeRendererShape,
+      padding: null == padding
+          ? _value.padding
+          : padding // ignore: cast_nullable_to_non_nullable
+              as EdgeInsets,
     ) as $Val);
   }
 }
@@ -261,7 +273,8 @@ abstract class _$$GraphDefaultNodeRendererStyleImplCopyWith<$Res>
       double selectedBorderWidth,
       double selectedHoverBorderWidth,
       double selectedUnhoverBorderWidth,
-      GraphDefaultNodeRendererShape shape});
+      GraphDefaultNodeRendererShape shape,
+      EdgeInsets padding});
 }
 
 /// @nodoc
@@ -298,6 +311,7 @@ class __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>
     Object? selectedHoverBorderWidth = null,
     Object? selectedUnhoverBorderWidth = null,
     Object? shape = null,
+    Object? padding = null,
   }) {
     return _then(_$GraphDefaultNodeRendererStyleImpl(
       color: null == color
@@ -376,6 +390,10 @@ class __$$GraphDefaultNodeRendererStyleImplCopyWithImpl<$Res>
           ? _value.shape
           : shape // ignore: cast_nullable_to_non_nullable
               as GraphDefaultNodeRendererShape,
+      padding: null == padding
+          ? _value.padding
+          : padding // ignore: cast_nullable_to_non_nullable
+              as EdgeInsets,
     ));
   }
 }
@@ -403,7 +421,8 @@ class _$GraphDefaultNodeRendererStyleImpl
       this.selectedBorderWidth = 2,
       this.selectedHoverBorderWidth = 2,
       this.selectedUnhoverBorderWidth = 2,
-      this.shape = GraphDefaultNodeRendererShape.circle});
+      this.shape = GraphDefaultNodeRendererShape.circle,
+      this.padding = const EdgeInsets.all(8)});
 
   /// The background color of the node.
   @override
@@ -503,9 +522,17 @@ class _$GraphDefaultNodeRendererStyleImpl
   @JsonKey()
   final GraphDefaultNodeRendererShape shape;
 
+  /// The padding inside the node's border.
+  ///
+  /// This padding is applied between the node's border and its child content.
+  /// Defaults to 8 pixels on all sides.
+  @override
+  @JsonKey()
+  final EdgeInsets padding;
+
   @override
   String toString() {
-    return 'GraphDefaultNodeRendererStyle(color: $color, borderColor: $borderColor, labelColor: $labelColor, idColor: $idColor, hoverColor: $hoverColor, selectedHoverColor: $selectedHoverColor, selectedBorderColor: $selectedBorderColor, highlightColor: $highlightColor, radius: $radius, width: $width, height: $height, minWidth: $minWidth, minHeight: $minHeight, borderWidth: $borderWidth, hoverBorderWidth: $hoverBorderWidth, selectedBorderWidth: $selectedBorderWidth, selectedHoverBorderWidth: $selectedHoverBorderWidth, selectedUnhoverBorderWidth: $selectedUnhoverBorderWidth, shape: $shape)';
+    return 'GraphDefaultNodeRendererStyle(color: $color, borderColor: $borderColor, labelColor: $labelColor, idColor: $idColor, hoverColor: $hoverColor, selectedHoverColor: $selectedHoverColor, selectedBorderColor: $selectedBorderColor, highlightColor: $highlightColor, radius: $radius, width: $width, height: $height, minWidth: $minWidth, minHeight: $minHeight, borderWidth: $borderWidth, hoverBorderWidth: $hoverBorderWidth, selectedBorderWidth: $selectedBorderWidth, selectedHoverBorderWidth: $selectedHoverBorderWidth, selectedUnhoverBorderWidth: $selectedUnhoverBorderWidth, shape: $shape, padding: $padding)';
   }
 
   @override
@@ -547,7 +574,8 @@ class _$GraphDefaultNodeRendererStyleImpl
                     selectedUnhoverBorderWidth) ||
                 other.selectedUnhoverBorderWidth ==
                     selectedUnhoverBorderWidth) &&
-            (identical(other.shape, shape) || other.shape == shape));
+            (identical(other.shape, shape) || other.shape == shape) &&
+            (identical(other.padding, padding) || other.padding == padding));
   }
 
   @override
@@ -571,7 +599,8 @@ class _$GraphDefaultNodeRendererStyleImpl
         selectedBorderWidth,
         selectedHoverBorderWidth,
         selectedUnhoverBorderWidth,
-        shape
+        shape,
+        padding
       ]);
 
   /// Create a copy of GraphDefaultNodeRendererStyle
@@ -588,26 +617,26 @@ class _$GraphDefaultNodeRendererStyleImpl
 abstract class _GraphDefaultNodeRendererStyle
     implements GraphDefaultNodeRendererStyle {
   const factory _GraphDefaultNodeRendererStyle(
-          {final Color color,
-          final Color borderColor,
-          final Color labelColor,
-          final Color idColor,
-          final Color hoverColor,
-          final Color selectedHoverColor,
-          final Color selectedBorderColor,
-          final Color highlightColor,
-          final double? radius,
-          final double? width,
-          final double? height,
-          final double minWidth,
-          final double minHeight,
-          final double borderWidth,
-          final double hoverBorderWidth,
-          final double selectedBorderWidth,
-          final double selectedHoverBorderWidth,
-          final double selectedUnhoverBorderWidth,
-          final GraphDefaultNodeRendererShape shape}) =
-      _$GraphDefaultNodeRendererStyleImpl;
+      {final Color color,
+      final Color borderColor,
+      final Color labelColor,
+      final Color idColor,
+      final Color hoverColor,
+      final Color selectedHoverColor,
+      final Color selectedBorderColor,
+      final Color highlightColor,
+      final double? radius,
+      final double? width,
+      final double? height,
+      final double minWidth,
+      final double minHeight,
+      final double borderWidth,
+      final double hoverBorderWidth,
+      final double selectedBorderWidth,
+      final double selectedHoverBorderWidth,
+      final double selectedUnhoverBorderWidth,
+      final GraphDefaultNodeRendererShape shape,
+      final EdgeInsets padding}) = _$GraphDefaultNodeRendererStyleImpl;
 
   /// The background color of the node.
   @override
@@ -689,6 +718,13 @@ abstract class _GraphDefaultNodeRendererStyle
   /// The shape of the node. Can be either circle or rectangle.
   @override
   GraphDefaultNodeRendererShape get shape;
+
+  /// The padding inside the node's border.
+  ///
+  /// This padding is applied between the node's border and its child content.
+  /// Defaults to 8 pixels on all sides.
+  @override
+  EdgeInsets get padding;
 
   /// Create a copy of GraphDefaultNodeRendererStyle
   /// with the given fields replaced by the non-null parameter values.

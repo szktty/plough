@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
-import 'package:provider/provider.dart';
-import 'package:signals/signals.dart';
+import 'package:plough/src/utils/logger.dart';
 
 /// Core component of graph visualization that manages visual properties, animation states,
 /// and interaction behaviors. Extends [GraphEntity] with node-specific functionality.
@@ -21,9 +20,7 @@ abstract interface class GraphNode implements GraphEntity {
   /// If [id] is not provided, generates a unique identifier.
   factory GraphNode({GraphId? id, Map<String, Object>? properties}) {
     return GraphNodeImpl(
-      GraphNodeData(
-        id: id ?? GraphId.unique(GraphIdType.node),
-      ),
+      GraphNodeData(id: id ?? GraphId.unique(GraphIdType.node)),
       properties: properties,
     );
   }
@@ -47,8 +44,15 @@ abstract interface class GraphNode implements GraphEntity {
   ///
   /// Defines how the node is visually rendered.
   GraphShape? get shape;
+
+  /// Listenable for state changes that affect rendering but not layout.
+  ///
+  /// Used to trigger UI updates when visual properties like selection state
+  /// change.
+  Listenable get renderStateListenable;
 }
 
+@internal
 final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     with Diagnosticable
     implements GraphNode {
@@ -56,13 +60,61 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     this.properties = properties ?? const {};
   }
 
-  static GraphNodeImpl of(BuildContext context) =>
-      Provider.of(context, listen: false);
+  final ValueNotifier<GraphNodeViewGeometry?> _geometry = ValueNotifier(null);
+  final Map<GraphId, ValueNotifier<GraphConnectionGeometry?>>
+      _connectionGeometries = {};
+  final ValueNotifier<GraphShape?> _shape = ValueNotifier(null);
+  final ValueNotifier<Offset> _animatedPosition = ValueNotifier(Offset.zero);
+  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
+  final ValueNotifier<bool> _isAnimating = ValueNotifier(false);
+  final ValueNotifier<bool> _isAnimationCompleted = ValueNotifier(false);
+  final ValueNotifier<Offset> _animationStartPosition = ValueNotifier(
+    Offset.zero,
+  );
+  final ValueNotifier<Offset> _logicalPosition = ValueNotifier(Offset.zero);
+  final ValueNotifier<int> _stackOrder = ValueNotifier(-1);
 
-  final Signal<GraphNodeViewGeometry?> _geometry = Signal(null);
-  final Map<GraphId, Signal<GraphConnectionGeometry?>> _connectionGeometries =
-      {};
-  final Signal<GraphShape?> _shape = Signal(null);
+  /// Listenable that combines position and state ValueNotifiers
+  /// Note: _animatedPosition is excluded to avoid circular dependency during
+  /// animation
+  late final Listenable positionListenable = Listenable.merge([
+    _logicalPosition,
+    state, // for isArranged and other state changes
+  ]);
+
+  /// Listenable for state changes that affect rendering but not layout
+  late final Listenable _renderStateListenable = Listenable.merge([
+    _isSelected, // for selection state changes
+  ]);
+
+  /// Public accessor for render state listenable
+  @override
+  Listenable get renderStateListenable => _renderStateListenable;
+
+  /// Update state and notify changes
+  ///
+  /// Use for changes you want to reflect in the UI.
+  void updateWith({
+    double? weight,
+    Offset? logicalPosition,
+    bool? isEnabled,
+    bool? visible,
+    bool? canSelect,
+    bool? canDrag,
+    bool? isArranged,
+  }) {
+    setState(
+      state.value.copyWith(
+        weight: weight ?? state.value.weight,
+        logicalPosition: logicalPosition ?? state.value.logicalPosition,
+        isEnabled: isEnabled ?? state.value.isEnabled,
+        visible: visible ?? state.value.visible,
+        canSelect: canSelect ?? state.value.canSelect,
+        canDrag: canDrag ?? state.value.canDrag,
+        isArranged: isArranged ?? state.value.isArranged,
+      ),
+    );
+  }
 
   @override
   set weight(double weight) {
@@ -70,27 +122,41 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   }
 
   @override
+  int get stackOrder => _stackOrder.value;
+
+  @override
   set stackOrder(int stackOrder) {
-    setState(state.value.copyWith(stackOrder: stackOrder));
+    _stackOrder.value = stackOrder;
   }
+
+  @override
+  Offset get logicalPosition => _logicalPosition.value;
 
   @override
   set logicalPosition(Offset position) {
-    setState(state.value.copyWith(logicalPosition: position));
+    if (_logicalPosition.value != position) {
+      logDebug(
+        LogCategory.layout,
+        '📍 Node ${id.value.substring(0, 4)} position changed: ${_logicalPosition.value} -> $position',
+      );
+    }
+    _logicalPosition.value = position;
   }
 
   @override
-  Offset get animationStartPosition => state.value.animationStartPosition;
+  Offset get animationStartPosition => _animationStartPosition.value;
 
   set animationStartPosition(Offset position) {
-    setState(state.value.copyWith(animationStartPosition: position));
+    _animationStartPosition.value = position;
   }
 
+  ValueNotifier<Offset> get animatedPositionState => _animatedPosition;
+
   @override
-  Offset get animatedPosition => state.value.animatedPosition;
+  Offset get animatedPosition => _animatedPosition.value;
 
   set animatedPosition(Offset position) {
-    setState(state.value.copyWith(animatedPosition: position));
+    _animatedPosition.value = position;
   }
 
   @override
@@ -105,16 +171,25 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
 
   @override
   set canSelect(bool canSelect) {
-    setState(
-      state.value.copyWith(
-        canSelect: canSelect,
-        isSelected: canSelect && isSelected,
-      ),
-    );
+    setState(state.value.copyWith(canSelect: canSelect));
+    // If canSelect is disabled, also deselect the node
+    if (!canSelect && isSelected) {
+      _isSelected.value = false;
+    }
   }
 
+  @override
+  set canDrag(bool canDrag) {
+    setState(state.value.copyWith(canDrag: canDrag));
+  }
+
+  ValueNotifier<bool> get isSelectedState => _isSelected;
+
+  @override
+  bool get isSelected => _isSelected.value;
+
   set isSelected(bool isSelected) {
-    setState(state.value.copyWith(isSelected: isSelected));
+    _isSelected.value = isSelected;
   }
 
   bool get isArranged => state.value.isArranged;
@@ -123,19 +198,25 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     setState(state.value.copyWith(isArranged: isArranged));
   }
 
-  bool get isAnimating => state.value.isAnimating;
+  bool get isAnimating => _isAnimating.value;
 
   set isAnimating(bool isAnimating) {
-    setState(state.value.copyWith(isAnimating: isAnimating));
+    _isAnimating.value = isAnimating;
   }
 
-  bool get isAnimationCompleted => state.value.isAnimationCompleted;
+  bool get isAnimationCompleted => _isAnimationCompleted.value;
 
   set isAnimationCompleted(bool isAnimationCompleted) {
-    setState(state.value.copyWith(isAnimationCompleted: isAnimationCompleted));
+    _isAnimationCompleted.value = isAnimationCompleted;
   }
 
   bool get isAnimationReady => !isAnimating && !isAnimationCompleted;
+
+  /// Reset animation state for a new layout
+  void resetAnimationState() {
+    _isAnimating.value = false;
+    _isAnimationCompleted.value = false;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -179,7 +260,7 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
       ..add(DiagnosticsProperty('properties', this.properties));
   }
 
-  Signal<GraphNodeViewGeometry?> get geometryState => _geometry;
+  ValueNotifier<GraphNodeViewGeometry?> get geometryState => _geometry;
 
   @override
   GraphNodeViewGeometry? get geometry => _geometry.value;
@@ -189,21 +270,22 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     _geometry.value = geometry;
   }
 
-  Signal<GraphConnectionGeometry?> getConnectionGeometryState(
+  ValueNotifier<GraphConnectionGeometry?> getConnectionGeometryState(
     GraphNode target,
   ) =>
-      _connectionGeometries[target.id] ??= Signal(null);
+      _connectionGeometries[target.id] ??= ValueNotifier(null);
 
   GraphConnectionGeometry? getConnectionGeometry(GraphNode target) =>
       _connectionGeometries[target.id]?.value;
 
-  Signal<GraphConnectionGeometry?> setConnectionGeometry(
+  ValueNotifier<GraphConnectionGeometry?> setConnectionGeometry(
     GraphNode target,
     GraphConnectionGeometry? geometry,
   ) =>
-      (_connectionGeometries[target.id] ??= Signal(geometry))..value = geometry;
+      (_connectionGeometries[target.id] ??= ValueNotifier(geometry))
+        ..value = geometry;
 
-  Signal<GraphShape?> get shapeState => _shape;
+  ValueNotifier<GraphShape?> get shapeState => _shape;
 
   @override
   GraphShape? get shape => _shape.value;

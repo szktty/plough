@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/utils/signals.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// The fundamental interface defining a graph entity within the visualization system.
 ///
@@ -37,7 +36,7 @@ import 'package:signals/signals_flutter.dart';
 /// * [GraphLink], which implements this interface for graph edges.
 /// * [Graph], the container and manager for entities.
 /// * [GraphView], which provides the visual representation of entities.
-abstract class GraphEntity implements Listenable {
+abstract class GraphEntity {
   /// The owning [Graph] instance for this entity.
   ///
   /// Set automatically when the entity is added to a graph. Initially null.
@@ -101,6 +100,12 @@ abstract class GraphEntity implements Listenable {
   /// state changes should be made through the graph's selection methods.
   bool get isSelected;
 
+  /// Whether this entity can be dragged.
+  ///
+  /// When false, the entity cannot be dragged by the user.
+  bool get canDrag;
+  set canDrag(bool canDrag);
+
   /// Custom properties associated with this entity.
   ///
   /// A map that can store arbitrary application-specific data as [Object] values,
@@ -120,11 +125,11 @@ abstract class GraphEntity implements Listenable {
 }
 
 abstract class GraphEntityImpl<T extends GraphEntityData>
-    with ListenableSignalStateMixin<T>
+    with ListenableValueNotifierStateMixin<T>
     implements GraphEntity {
   @protected
   GraphEntityImpl(T value) {
-    state = signal(value);
+    state = ValueNotifier(value);
   }
 
   @override
@@ -132,7 +137,7 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
 
   Graph? _graph;
 
-  final MapSignal<String, Object> _map = mapSignal({});
+  final Map<String, Object> _map = <String, Object>{};
 
   void onAdded(Graph graph) {
     if (_graph != null) {
@@ -142,7 +147,7 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
   }
 
   @override
-  late final Signal<T> state;
+  late final ValueNotifier<T> state;
 
   @override
   GraphId get id => state.value.id;
@@ -166,14 +171,15 @@ abstract class GraphEntityImpl<T extends GraphEntityData>
   bool get canSelect => state.value.canSelect;
 
   @override
-  bool get isSelected => state.value.isSelected;
+  bool get canDrag => state.value.canDrag;
 
   @override
-  Map<String, Object> get properties => _map.value;
+  Map<String, Object> get properties => _map;
 
   @override
   set properties(Map<String, Object> values) {
-    _map.value = values;
+    _map.clear();
+    _map.addAll(values);
   }
 
   @override

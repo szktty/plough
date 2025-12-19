@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
+import 'package:plough/src/graph/node.dart';
 
 /// A physics-based layout strategy using a force-directed algorithm.
 ///
@@ -81,23 +82,28 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
   void performLayout(Graph graph, Size size) {
     super.performLayout(graph, size);
 
-    // 中心ノードの位置を取得
+    // Get center node position
     final centerNode =
         centerNodeId != null ? graph.getNode(centerNodeId!) : null;
     if (centerNode != null) {
       positionNode(centerNode, size.center(Offset.zero));
     }
 
-    // ノードの初期配置
+    // Initial node placement (skip already positioned nodes)
     final width = size.width - padding.left - padding.right;
     final height = size.height - padding.top - padding.bottom;
     for (final node in graph.nodes) {
+      // Skip initial placement for already positioned nodes
+      final nodeImpl = node as GraphNodeImpl;
+      if (nodeImpl.isArranged && node.logicalPosition != Offset.zero) {
+        continue;
+      }
       final dx = random.nextDouble() * width + padding.left;
       final dy = random.nextDouble() * height + padding.top;
       positionNode(node, Offset(dx, dy));
     }
 
-    // レイアウトの反復計算
+    // Iterative layout calculation
     var iteration = 0;
     var totalDisplacement = double.infinity;
 
@@ -105,7 +111,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       totalDisplacement = 0.0;
       final forces = {for (final node in graph.nodes) node: Offset.zero};
 
-      // クーロン力（反発力）の計算
+      // Calculate Coulomb force (repulsion)
       for (final node1 in graph.nodes) {
         for (final node2 in graph.nodes) {
           if (node1 == node2) continue;
@@ -114,7 +120,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
           final distance = delta.distance;
           if (distance == 0) continue;
 
-          // 反発力の計算 (クーロンの法則に基づく)
+          // Calculate repulsion force (based on Coulomb's law)
           final force = coulombConstant / (distance * distance);
           final directionScale = force / distance;
           forces[node1] = forces[node1]! -
@@ -124,7 +130,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         }
       }
 
-      // バネ力（引力）の計算
+      // Calculate spring force (attraction)
       for (final link in graph.links) {
         final source = link.source;
         final target = link.target;
@@ -132,7 +138,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         final distance = delta.distance;
         if (distance == 0) continue;
 
-        // バネ力の計算 (フックの法則に基づく)
+        // Calculate spring force (based on Hooke's law)
         final force = springConstant * (distance - springLength);
         final directionScale = force / distance;
         forces[source] = forces[source]! +
@@ -141,11 +147,11 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
             Offset(delta.dx * directionScale, delta.dy * directionScale);
       }
 
-      // ノードの位置を更新
+      // Update node positions
       for (final node in graph.nodes) {
         var force = forces[node]! * damping;
 
-        // 最大変位の制限
+        // Limit maximum displacement
         final displacement = force.distance;
         if (displacement > maxDisplacement) {
           force = Offset(
@@ -154,11 +160,21 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
           );
         }
 
-        // 新しい位置の計算と境界チェック
+        // Calculate new position and boundary check
         var newPosition = node.logicalPosition + force;
+
+        // Ensure clamp bounds are valid (min <= max)
+        final minX = padding.left;
+        final maxX = (size.width - padding.right).clamp(minX, double.infinity);
+        final minY = padding.top;
+        final maxY = (size.height - padding.bottom).clamp(
+          minY,
+          double.infinity,
+        );
+
         newPosition = Offset(
-          newPosition.dx.clamp(padding.left, size.width - padding.right),
-          newPosition.dy.clamp(padding.top, size.height - padding.bottom),
+          newPosition.dx.clamp(minX, maxX),
+          newPosition.dy.clamp(minY, maxY),
         );
 
         totalDisplacement += (newPosition - node.logicalPosition).distance;

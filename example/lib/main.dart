@@ -1,14 +1,9 @@
 import 'package:example/app_state.dart';
 import 'package:example/widget/main_page.dart';
 import 'package:flutter/material.dart';
-import 'package:plough/plough.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  Plough()
-      //..debugLogEnabled = true
-      //..debugViewEnabled = true
-      .debugSignalsEnabled = false;
   runApp(
     ChangeNotifierProvider(
       create: (_) => AppState(),

@@ -5,11 +5,10 @@ import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/data.dart';
-import 'package:plough/src/graph_view/widget/graph.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/tooltip/widget/container.dart';
 import 'package:plough/src/utils/widget.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A widget that renders a node in the graph.
 ///
@@ -55,7 +54,7 @@ final class GraphNodeView extends StatefulWidget with Diagnosticable {
   final bool showTooltip;
 
   /// Current build state of the graph view.
-  final Signal<GraphViewBuildState> buildState;
+  final ValueNotifier<GraphViewBuildState> buildState;
 
   @override
   State<GraphNodeView> createState() => GraphNodeViewState();
@@ -77,6 +76,8 @@ class GraphNodeViewState extends State<GraphNodeView>
   Animation<Offset>? _positionAnimation;
   bool _previousIsAnimating = false;
   bool _previousIsCompleted = false;
+  Offset? _lastAnimatedToPosition; // Track the last position we animated to
+  VoidCallback? _animationListener; // Store listener for disposal
 
   GraphNodeImpl get _node => widget.node;
 
@@ -105,27 +106,40 @@ class GraphNodeViewState extends State<GraphNodeView>
 
     _configureAnimationListener();
 
-    effect(() {
-      final _ = _graph?.id;
+    void updateAnimationListener() {
       if (_node.isArranged && _node.isAnimationReady) {
-        _updateAnimationPosition(begin: _node.animationStartPosition);
+        // Only animate if the position has actually changed
+        if (_node.logicalPosition != _node.animationStartPosition) {
+          _updateAnimationPosition(begin: _node.animationStartPosition);
+        }
       }
-    });
+    }
+
+    // Store listener reference for disposal
+    _animationListener = updateAnimationListener;
+    // Only listen to layout changes, not all graph changes
+    _graph?.layoutChangeListenable.addListener(_animationListener!);
   }
 
   void _configureAnimationListener() {
     _positionController!.addStatusListener((status) {
-      _node.useOverrideState = true;
-
       final newIsAnimating = status == AnimationStatus.forward ||
           status == AnimationStatus.reverse;
       final newIsCompleted = status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed;
 
       _updateAnimationState(newIsAnimating, newIsCompleted);
-
-      _node.useOverrideState = false;
     });
+  }
+
+  @override
+  void didUpdateWidget(GraphNodeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Reset tracked position if animation is disabled
+    if (!widget.animationEnabled && oldWidget.animationEnabled) {
+      _lastAnimatedToPosition = null;
+    }
   }
 
   void _updateAnimationState(bool newIsAnimating, bool newIsCompleted) {
@@ -146,13 +160,16 @@ class GraphNodeViewState extends State<GraphNodeView>
     }
   }
 
-  void _updateAnimationPosition({
-    required Offset begin,
-  }) {
-    _positionAnimation = Tween<Offset>(
-      begin: begin,
-      end: _node.logicalPosition,
-    ).animate(
+  void _updateAnimationPosition({required Offset begin}) {
+    // Only start a new animation if we're moving to a different position
+    if (_lastAnimatedToPosition == _node.logicalPosition) {
+      return;
+    }
+
+    _lastAnimatedToPosition = _node.logicalPosition;
+
+    _positionAnimation =
+        Tween<Offset>(begin: begin, end: _node.logicalPosition).animate(
       CurvedAnimation(
         parent: _positionController!,
         curve: widget.animationCurve,
@@ -166,6 +183,10 @@ class GraphNodeViewState extends State<GraphNodeView>
 
   @override
   void dispose() {
+    // Remove animation listener
+    if (_animationListener != null) {
+      _graph?.layoutChangeListenable.removeListener(_animationListener!);
+    }
     _positionController?.dispose();
     super.dispose();
   }
@@ -194,19 +215,30 @@ class GraphNodeViewState extends State<GraphNodeView>
   @override
   Widget build(BuildContext context) {
     final graphViewData = GraphViewData.of(context);
-    return Watch((context) {
-      final buildState = GraphViewBuildState.of(context);
+    return ValueListenableBuilder<GraphViewBuildState>(
+      valueListenable: widget.buildState,
+      builder: (context, buildState, _) {
+        return AnimatedBuilder(
+          animation: _node.positionListenable,
+          builder: (context, _) {
+            if (buildState == GraphViewBuildState.initialize) {
+              return _buildInitialPosition(context);
+            }
 
-      if (buildState == GraphViewBuildState.initialize) {
-        return _buildInitialPosition(context);
-      }
+            if (!_node.isArranged) {
+              return _buildPreArrangedPosition(context);
+            }
 
-      if (!_node.isArranged) {
-        return _buildPreArrangedPosition(context);
-      }
-
-      return _buildArrangedPosition(context, graphViewData);
-    });
+            return AnimatedBuilder(
+              animation: _node.renderStateListenable,
+              builder: (context, _) {
+                return _buildArrangedPosition(context, graphViewData);
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildInitialPosition(BuildContext context) {
@@ -214,11 +246,7 @@ class GraphNodeViewState extends State<GraphNodeView>
       _updateGeometry();
     });
 
-    return Positioned(
-      left: -10000,
-      top: -10000,
-      child: _buildNode(context),
-    );
+    return Positioned(left: -10000, top: -10000, child: _buildNode(context));
   }
 
   Widget _buildPreArrangedPosition(BuildContext context) {
@@ -237,7 +265,11 @@ class GraphNodeViewState extends State<GraphNodeView>
     final top = _node.logicalPosition.dy;
     final child = _buildTooltipContainer(context, graphViewData.graph, _node);
 
-    if (widget.animationEnabled && _node.isAnimating) {
+    // Only show animated position if animation is actually running
+    if (widget.animationEnabled &&
+        _node.isAnimating &&
+        _positionController != null &&
+        _positionController!.isAnimating) {
       return _buildAnimatedPosition(child);
     }
 
@@ -245,18 +277,17 @@ class GraphNodeViewState extends State<GraphNodeView>
       _updateGeometry();
     });
 
-    return Positioned(
-      left: left,
-      top: top,
-      child: child,
-    );
+    return Positioned(left: left, top: top, child: child);
   }
 
   Widget _buildAnimatedPosition(Widget child) {
     return AnimatedBuilder(
       animation: _positionAnimation!,
       builder: (context, _) {
-        _node.animatedPosition = _positionAnimation!.value;
+        // Defer animated position update to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _node.animatedPosition = _positionAnimation!.value;
+        });
         _updateNodeGeometryDuringAnimation();
 
         return Positioned(
@@ -275,14 +306,19 @@ class GraphNodeViewState extends State<GraphNodeView>
         _updateGeometry();
       });
     } else {
-      _node.geometry = GraphNodeViewGeometry(
-        bounds: Rect.fromLTWH(
-          _node.animatedPosition.dx,
-          _node.animatedPosition.dy,
-          _node.geometry!.bounds.width,
-          _node.geometry!.bounds.height,
-        ),
-      );
+      // Defer geometry update to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_node.geometry != null) {
+          _node.geometry = GraphNodeViewGeometry(
+            bounds: Rect.fromLTWH(
+              _node.animatedPosition.dx,
+              _node.animatedPosition.dy,
+              _node.geometry!.bounds.width,
+              _node.geometry!.bounds.height,
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -307,8 +343,6 @@ class GraphNodeViewState extends State<GraphNodeView>
     if (widget is GraphDefaultNodeRenderer) {
       _renderer = widget;
     }
-    return GraphPositionPlotter.wrapOr(
-      child: widget,
-    );
+    return GraphPositionPlotter.wrapOr(child: widget);
   }
 }

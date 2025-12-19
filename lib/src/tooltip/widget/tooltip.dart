@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:plough/src/graph/graph.dart';
-import 'package:signals/signals_flutter.dart';
 
 class GraphTooltip extends StatelessWidget {
   /// Widget for displaying node tooltips.
@@ -22,33 +21,25 @@ class GraphTooltip extends StatelessWidget {
   /// );
   /// ```
 
-  const GraphTooltip({
-    required this.node,
-    this.contentBuilder,
-    super.key,
-  });
+  const GraphTooltip({required this.node, this.contentBuilder, super.key});
 
   final GraphNode node;
   final Widget Function(BuildContext context, GraphNode node)? contentBuilder;
 
   @override
   Widget build(BuildContext context) {
-    return Watch(
-      (context) {
-        final content = contentBuilder?.call(context, node) ??
-            Text(
-              '${node['description']}',
-              style: const TextStyle(color: Colors.black),
-            );
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: content,
+    final content = contentBuilder?.call(context, node) ??
+        Text(
+          '${node['description']}',
+          style: const TextStyle(color: Colors.black),
         );
-      },
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: content,
     );
   }
 }

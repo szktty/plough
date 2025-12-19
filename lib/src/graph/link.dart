@@ -1,13 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
-import 'package:provider/provider.dart';
-import 'package:signals/signals.dart';
 
 /// Manages connections between graph nodes with support for directionality, routing,
 /// and visual styling. Extends [GraphEntity] with link-specific functionality.
@@ -67,6 +64,7 @@ abstract class GraphLink implements GraphEntity {
   GraphLinkViewGeometry? get geometry;
 }
 
+@internal
 class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     with Diagnosticable
     implements GraphLink {
@@ -74,11 +72,16 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     this.properties = properties ?? const {};
   }
 
-  @internal
-  static GraphLinkImpl of(BuildContext context) =>
-      Provider.of(context, listen: false);
+  final ValueNotifier<GraphLinkViewGeometry?> _geometry = ValueNotifier(null);
+  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
 
-  final Signal<GraphLinkViewGeometry?> _geometry = Signal(null);
+  /// Updates the state and notifies changes
+  ///
+  /// Used for changes to be reflected in the UI.
+  void updateWith() {
+    // No properties need batch notification
+    // keeping method for consistency with base pattern
+  }
 
   @override
   GraphNodeImpl get source => state.value.source! as GraphNodeImpl;
@@ -136,6 +139,20 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   @override
   set canSelect(bool canSelect) {
     setState(state.value.copyWith(canSelect: canSelect));
+  }
+
+  @override
+  set canDrag(bool canDrag) {
+    setState(state.value.copyWith(canDrag: canDrag));
+  }
+
+  ValueNotifier<bool> get isSelectedState => _isSelected;
+
+  @override
+  bool get isSelected => _isSelected.value;
+
+  set isSelected(bool isSelected) {
+    _isSelected.value = isSelected;
   }
 
   @override

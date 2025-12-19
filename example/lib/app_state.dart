@@ -21,4 +21,13 @@ class AppState extends ChangeNotifier {
     final current = _selectedData.name;
     selectSampleData(current);
   }
+
+  /// Clear all selected entities
+  void clearAllSelections() {
+    // Clear graph selection using individual entity updates
+    _selectedData.graph.clearSelection();
+
+    // Don't send AppState change notifications to avoid redrawing the entire graph
+    // Individual entity state changes are automatically propagated through Signals
+  }
 }

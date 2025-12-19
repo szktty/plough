@@ -4,13 +4,14 @@ import 'package:plough/src/graph/graph.dart';
 import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/graph_view/shape.dart';
+import 'package:plough/src/interactive/events.dart';
 import 'package:plough/src/renderer/style/node.dart';
 import 'package:plough/src/renderer/widget/link.dart';
 import 'package:plough/src/renderer/widget/node.dart';
 import 'package:plough/src/tooltip/behavior.dart';
 import 'package:plough/src/tooltip/widget/tooltip.dart';
-import 'package:provider/provider.dart';
 
 /// A function type for building node widgets.
 ///
@@ -70,9 +71,7 @@ class GraphNodeViewBehavior {
             return GraphDefaultNodeRenderer(
               node: node,
               style: nodeRendererStyle,
-              child: Center(
-                child: Text(s),
-              ),
+              child: Center(child: Text(s)),
             );
           },
       child: child,
@@ -115,10 +114,7 @@ typedef GraphLinkWidgetThicknessGetter = double Function(
 ///
 /// * [straight] - Direct straight line connection
 /// * [orthogonal] - Connection using horizontal and vertical line segments
-enum GraphLinkRouting {
-  straight,
-  orthogonal,
-}
+enum GraphLinkRouting { straight, orthogonal }
 
 /// Controls the visualization and interaction behavior of graph links.
 ///
@@ -181,11 +177,11 @@ class GraphLinkViewBehavior {
 /// This interface serves as the central coordinator between:
 /// - Visual representation through [GraphNodeViewBehavior] and [GraphLinkViewBehavior]
 /// - Geometric calculations via [GraphCircle] and [GraphRectangle] models
-/// - User interaction handling (selection, drag-drop, hover, tooltips)
+/// - User interaction handling via dispatched [GraphEvent]s.
 ///
 /// The interface provides two key customization points:
 /// - [createNodeViewBehavior] and [createLinkViewBehavior] for visual styling
-/// - Event handlers like [onNodeSelect], [onLinkDragMove] for interaction logic
+/// - Event handlers like [onTap], [onSelectionChange] for interaction logic
 ///
 /// For most use cases, extend [GraphViewDefaultBehavior] and override specific
 /// methods rather than implementing this interface directly.
@@ -195,11 +191,12 @@ class GraphLinkViewBehavior {
 /// * [GraphNodeViewBehavior], for node visualization control
 /// * [GraphLinkViewBehavior], for link visualization control
 /// * [GraphViewDefaultBehavior], for the standard implementation
+/// * [GraphEvent], for the base class of all interaction events
 abstract interface class GraphViewBehavior {
   /// Retrieves the [GraphViewBehavior] from the widget tree.
   @internal
   static GraphViewBehavior of(BuildContext context) =>
-      Provider.of(context, listen: false);
+      GraphInheritedData.read(context).behavior;
 
   /// Creates the behavior configuration for node rendering.
   ///
@@ -234,83 +231,51 @@ abstract interface class GraphViewBehavior {
   /// Used for hit testing in mouse interactions and event handling.
   bool hitTestLink(covariant GraphLink link, Offset position);
 
-  /// Called when nodes are selected or deselected.
-  void onNodeSelect(List<GraphNode> nodes, {required bool isSelected});
+  /// Called when entities are tapped (single or double).
+  void onTap(GraphTapEvent event);
 
-  /// Called when nodes are tapped.
-  void onNodeTap(List<GraphNode> nodes);
+  /// Called when entities are double-tapped.
+  void onDoubleTap(GraphTapEvent event);
 
-  /// Called when nodes are double-tapped.
-  void onNodeDoubleTap(List<GraphNode> nodes);
+  /// Called when the selection changes.
+  void onSelectionChange(GraphSelectionChangeEvent event);
 
-  /// Called when a drag operation starts on nodes.
-  void onNodeDragStart(List<GraphNode> nodes);
+  /// Called when a drag operation starts on entities.
+  void onDragStart(GraphDragStartEvent event);
 
-  /// Called during a drag operation on nodes.
-  void onNodeDragUpdate(List<GraphNode> nodes);
+  /// Called during a drag operation on entities.
+  /// Use [event.delta] for positional changes.
+  void onDragUpdate(GraphDragUpdateEvent event);
 
-  /// Called when a drag operation on nodes completes.
-  void onNodeDragEnd(List<GraphNode> nodes);
+  /// Called when a drag operation on entities completes.
+  void onDragEnd(GraphDragEndEvent event);
 
-  /// Called while nodes are being dragged.
-  void onNodeDragMove(List<GraphNode> nodes);
+  /// Called when the mouse pointer enters an entity's area.
+  void onHoverEnter(GraphHoverEvent event);
 
-  /// Called when the mouse enters a node's area.
-  void onNodeMouseEnter(GraphNode node);
+  /// Called when the mouse pointer moves within an entity's area.
+  void onHoverMove(GraphHoverEvent event);
 
-  /// Called when the mouse exits a node's area.
-  void onNodeMouseExit(GraphNode node);
+  /// Called when the mouse pointer leaves an entity's area.
+  void onHoverEnd(GraphHoverEndEvent event);
 
-  /// Called while the mouse is hovering over a node.
-  void onNodeMouseHover(GraphNode node);
+  /// Called when an entity's tooltip is shown.
+  void onTooltipShow(GraphTooltipShowEvent event);
 
-  /// Called when mouse hover over a node ends.
-  void onNodeHoverEnd(GraphNode node);
+  /// Called when an entity's tooltip is hidden.
+  void onTooltipHide(GraphTooltipHideEvent event);
 
-  /// Called when a node's tooltip is about to be shown.
-  void onNodeTooltipShow(GraphNode node);
-
-  /// Called when a node's tooltip is about to be hidden.
-  void onNodeTooltipHide(GraphNode node);
-
-  /// Called when links are selected or deselected.
-  void onLinkSelect(List<GraphLink> links, {required bool isSelected});
-
-  /// Called when links are tapped.
-  void onLinkTap(List<GraphLink> links);
-
-  /// Called when links are double-tapped.
-  void onLinkDoubleTap(List<GraphLink> links);
-
-  /// Called when a drag operation starts on links.
-  void onLinkDragStart(List<GraphLink> links);
-
-  /// Called during a drag operation on links.
-  void onLinkDragUpdate(List<GraphLink> links);
-
-  /// Called when a drag operation on links completes.
-  void onLinkDragEnd(List<GraphLink> links);
-
-  /// Called while links are being dragged.
-  void onLinkDragMove(List<GraphLink> links);
-
-  /// Called when the mouse enters a link's area.
-  void onLinkMouseEnter(GraphLink link);
-
-  /// Called when the mouse exits a link's area.
-  void onLinkMouseExit(GraphLink link);
-
-  /// Called while the mouse is hovering over a link.
-  void onLinkMouseHover(GraphLink link);
-
-  /// Called when mouse hover over a link ends.
-  void onLinkHoverEnd(GraphLink link);
-
-  /// Called when a link's tooltip is about to be shown.
-  void onLinkTooltipShow(GraphLink link);
-
-  /// Called when a link's tooltip is about to be hidden.
-  void onLinkTooltipHide(GraphLink link);
+  /// Compares this behavior with another for content equality.
+  ///
+  /// This method should return true if the behaviors would produce
+  /// the same visual result and interaction handling. It's used to
+  /// avoid unnecessary re-initialization during widget updates.
+  ///
+  /// The default implementation compares runtime types only.
+  /// Override this method to provide content-based comparison.
+  bool isEquivalentTo(GraphViewBehavior other) {
+    return runtimeType == other.runtimeType;
+  }
 }
 
 /// A default implementation of graph view behavior with standard visualization features.
@@ -322,12 +287,13 @@ abstract interface class GraphViewBehavior {
 /// The default behavior includes:
 /// - Standard node rendering with labels and tooltips
 /// - Link visualization with arrow indicators
-/// - Basic interaction handling like selection and drag operations
+/// - Basic interaction handling like selection and drag operations via event callbacks
 /// - Mouse hover effects
 ///
 /// To customize specific aspects, extend this class and override only the
-/// methods that need different behavior. The default implementation provides
-/// a solid foundation for most graph visualization needs.
+/// methods that need different behavior (e.g., override `onTap` to handle taps).
+/// The default implementation provides a solid foundation for most graph
+/// visualization needs.
 ///
 /// See also:
 ///
@@ -353,7 +319,7 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
 
   @override
   GraphLinkViewBehavior createLinkViewBehavior() {
-    const thickness = 30.0;
+    const thickness = 30.0; // Consider making this configurable
     return GraphLinkViewBehavior(
       builder: (
         context,
@@ -374,6 +340,8 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
         thickness: thickness,
       ),
       routing: linkRouting,
+      // Default tooltip behavior for links could be added here if desired
+      // tooltipBehavior: GraphTooltipBehavior(...)
     );
   }
 
@@ -401,8 +369,10 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
       source.geometry!.bounds.center,
       target.geometry!.bounds.center,
     );
-    final intersections =
-        source.shape!.getLineIntersections(source.geometry!.bounds, line);
+    final intersections = source.shape!.getLineIntersections(
+      source.geometry!.bounds,
+      line,
+    );
     if (intersections.isEmpty) {
       return null;
     }
@@ -412,7 +382,21 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
   @override
   bool hitTestNode(GraphNodeImpl node, Offset position) {
     final geometry = node.geometry;
-    if (geometry == null || !node.visible || node.isAnimating) return false;
+    if (geometry == null || !node.visible) return false;
+
+    // Enable hit testing even during animation
+    // Use current animation position during animation
+    if (node.isAnimating) {
+      final animatedPosition = node.animatedPosition;
+      final bounds = Rect.fromLTWH(
+        animatedPosition.dx,
+        animatedPosition.dy,
+        geometry.bounds.width,
+        geometry.bounds.height,
+      );
+      return bounds.contains(position);
+    }
+
     return geometry.bounds.contains(position);
   }
 
@@ -423,81 +407,45 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
     return geometry.containsPoint(position);
   }
 
-  @override
-  void onNodeSelect(List<GraphNode> nodes, {required bool isSelected}) {}
+  // Default implementations for the new event handlers are empty.
+  // Users extending this class will override the methods they need.
 
   @override
-  void onNodeTap(List<GraphNode> nodes) {}
+  void onTap(GraphTapEvent event) {}
 
   @override
-  void onNodeDoubleTap(List<GraphNode> nodes) {}
+  void onDoubleTap(GraphTapEvent event) {}
 
   @override
-  void onNodeDragEnd(List<GraphNode> nodes) {}
+  void onSelectionChange(GraphSelectionChangeEvent event) {}
 
   @override
-  void onNodeDragStart(List<GraphNode> nodes) {}
+  void onDragStart(GraphDragStartEvent event) {}
 
   @override
-  void onNodeDragUpdate(List<GraphNode> nodes) {}
+  void onDragUpdate(GraphDragUpdateEvent event) {}
 
   @override
-  void onNodeDragMove(List<GraphNode> nodes) {}
+  void onDragEnd(GraphDragEndEvent event) {}
 
   @override
-  void onNodeMouseEnter(GraphNode node) {}
+  void onHoverEnter(GraphHoverEvent event) {}
 
   @override
-  void onNodeMouseExit(GraphNode node) {}
+  void onHoverMove(GraphHoverEvent event) {}
 
   @override
-  void onNodeMouseHover(GraphNode node) {}
+  void onHoverEnd(GraphHoverEndEvent event) {}
 
   @override
-  void onNodeHoverEnd(GraphNode node) {}
+  void onTooltipShow(GraphTooltipShowEvent event) {}
 
   @override
-  void onNodeTooltipShow(GraphNode node) {}
+  void onTooltipHide(GraphTooltipHideEvent event) {}
 
   @override
-  void onNodeTooltipHide(GraphNode node) {}
-
-  @override
-  void onLinkSelect(List<GraphLink> links, {required bool isSelected}) {}
-
-  @override
-  void onLinkTap(List<GraphLink> links) {}
-
-  @override
-  void onLinkDoubleTap(List<GraphLink> links) {}
-
-  @override
-  void onLinkDragEnd(List<GraphLink> links) {}
-
-  @override
-  void onLinkDragStart(List<GraphLink> links) {}
-
-  @override
-  void onLinkDragUpdate(List<GraphLink> links) {}
-
-  @override
-  void onLinkDragMove(List<GraphLink> links) {}
-
-  @override
-  void onLinkMouseEnter(GraphLink link) {}
-
-  @override
-  void onLinkMouseExit(GraphLink link) {}
-
-  @override
-  void onLinkMouseHover(GraphLink link) {}
-
-  @override
-  void onLinkHoverEnd(GraphLink link) {}
-
-  @override
-  void onLinkTooltipShow(GraphLink link) {}
-
-  @override
-  void onLinkTooltipHide(GraphLink link) {}
+  bool isEquivalentTo(GraphViewBehavior other) {
+    if (other is! GraphViewDefaultBehavior) return false;
+    return linkRouting == other.linkRouting;
+  }
 }

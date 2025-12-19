@@ -117,9 +117,7 @@ abstract base class GraphLayoutStrategy {
 
   /// Gets the predefined position for a node, if any exists.
   GraphNodeLayoutPosition? getNodePosition(GraphNode node) {
-    return nodePositions.firstWhereOrNull(
-      (element) => element.id == node.id,
-    );
+    return nodePositions.firstWhereOrNull((element) => element.id == node.id);
   }
 
   /// Checks if a node's position should remain fixed during layout.
@@ -138,18 +136,19 @@ abstract base class GraphLayoutStrategy {
   /// Used by subclasses to implement [shouldRelayout].
   bool baseEquals(covariant GraphLayoutStrategy oldStrategy) {
     return padding == oldStrategy.padding &&
-        const IterableEquality<GraphNodeLayoutPosition>()
-            .equals(nodePositions, oldStrategy.nodePositions);
+        const IterableEquality<GraphNodeLayoutPosition>().equals(
+          nodePositions,
+          oldStrategy.nodePositions,
+        );
   }
 
   /// Calculates and applies node positions based on the layout algorithm.
   ///
   /// Override this method in subclasses to implement specific layout behavior.
   void performLayout(Graph graph, Size size) {
-    log
-      ..d('$runtimeType: perform layout')
-      ..d('    size: $size')
-      ..d('    seed: $seed');
+    logDebug(LogCategory.layout, '$runtimeType: perform layout');
+    logDebug(LogCategory.layout, '    size: $size');
+    logDebug(LogCategory.layout, '    seed: $seed');
 
     // node positions
     for (final nodePosition in nodePositions) {
@@ -160,9 +159,7 @@ abstract base class GraphLayoutStrategy {
     }
 
     for (final node in graph.nodes.cast<GraphNodeImpl>()) {
-      node.overrideStateWith(() {
-        node.animationStartPosition = _nodeAnimationStartPosition;
-      });
+      node.animationStartPosition = _nodeAnimationStartPosition;
     }
   }
 
@@ -175,9 +172,7 @@ abstract base class GraphLayoutStrategy {
     }
 
     final impl = node as GraphNodeImpl;
-    impl.overrideStateWith(() {
-      impl.logicalPosition = position;
-    });
+    impl.logicalPosition = position;
   }
 }
 

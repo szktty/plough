@@ -122,10 +122,7 @@ base class GraphManualLayoutStrategy extends GraphLayoutStrategy {
       }
     }
 
-    return Offset(
-      (maxX + minX) / 2,
-      (maxY + minY) / 2,
-    );
+    return Offset((maxX + minX) / 2, (maxY + minY) / 2);
   }
 
   Offset _calculateAbsolutePosition(
@@ -146,16 +143,24 @@ base class GraphManualLayoutStrategy extends GraphLayoutStrategy {
       GraphLayoutPositionOrigin.topLeft => Offset.zero,
       GraphLayoutPositionOrigin.topCenter => Offset(containerSize.width / 2, 0),
       GraphLayoutPositionOrigin.topRight => Offset(containerSize.width, 0),
-      GraphLayoutPositionOrigin.centerLeft =>
-        Offset(0, containerSize.height / 2),
+      GraphLayoutPositionOrigin.centerLeft => Offset(
+          0,
+          containerSize.height / 2,
+        ),
       GraphLayoutPositionOrigin.center => containerSize.center(Offset.zero),
-      GraphLayoutPositionOrigin.centerRight =>
-        Offset(containerSize.width, containerSize.height / 2),
+      GraphLayoutPositionOrigin.centerRight => Offset(
+          containerSize.width,
+          containerSize.height / 2,
+        ),
       GraphLayoutPositionOrigin.bottomLeft => Offset(0, containerSize.height),
-      GraphLayoutPositionOrigin.bottomCenter =>
-        Offset(containerSize.width / 2, containerSize.height),
-      GraphLayoutPositionOrigin.bottomRight =>
-        Offset(containerSize.width, containerSize.height),
+      GraphLayoutPositionOrigin.bottomCenter => Offset(
+          containerSize.width / 2,
+          containerSize.height,
+        ),
+      GraphLayoutPositionOrigin.bottomRight => Offset(
+          containerSize.width,
+          containerSize.height,
+        ),
       GraphLayoutPositionOrigin.alignCenter => throw StateError('unreachable'),
     };
 

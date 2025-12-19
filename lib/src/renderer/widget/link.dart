@@ -99,11 +99,7 @@ class GraphDefaultLinkRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        painter: _createPainter(),
-      ),
-    );
+    return RepaintBoundary(child: CustomPaint(painter: _createPainter()));
   }
 
   CustomPainter _createPainter() {
@@ -280,8 +276,10 @@ class _OrthogonalLinkRendererPainter extends _BaseLinkRendererPainter {
     Offset incoming,
     Offset outgoing,
   ) {
-    final lastSegmentDirection =
-        _calculateLastSegmentDirection(incoming, outgoing);
+    final lastSegmentDirection = _calculateLastSegmentDirection(
+      incoming,
+      outgoing,
+    );
 
     switch (renderer.link.direction) {
       case GraphLinkDirection.outgoing:

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph_view/graph_view.dart';
-import 'package:signals/signals_flutter.dart';
 
 part 'geometry.freezed.dart';
 
@@ -51,9 +50,8 @@ class GraphConnectionPoints with _$GraphConnectionPoints {
 @freezed
 class GraphNodeViewGeometry with _$GraphNodeViewGeometry {
   /// Creates node geometry with the specified [bounds] rectangle.
-  const factory GraphNodeViewGeometry({
-    required Rect bounds,
-  }) = _GraphNodeViewGeometry;
+  const factory GraphNodeViewGeometry({required Rect bounds}) =
+      _GraphNodeViewGeometry;
 }
 
 /// Combines spatial information needed to render and interact with links.
@@ -88,10 +86,7 @@ class GraphLinkViewGeometry with _$GraphLinkViewGeometry {
     final rotatedDx = dx * math.cos(angle) - dy * math.sin(angle);
     final rotatedDy = dx * math.sin(angle) + dy * math.cos(angle);
 
-    return Offset(
-      center.dx + rotatedDx,
-      center.dy + rotatedDy,
-    );
+    return Offset(center.dx + rotatedDx, center.dy + rotatedDy);
   }
 }
 
@@ -119,8 +114,9 @@ class GraphConnectionGeometry with _$GraphConnectionGeometry {
   ///
   /// Returns null if no connection geometry is available in the current context.
   static GraphConnectionGeometry? of(BuildContext context) {
-    return SignalProvider.of<FlutterSignal<GraphConnectionGeometry?>>(context)
-        ?.value;
+    // Note: This method needs to be updated to work with the new state management approach
+    // It previously used signals but now should use InheritedWidget or Provider pattern
+    return null; // TODO: Implement proper context-based retrieval
   }
 }
 
@@ -139,6 +135,8 @@ class GraphViewGeometry with _$GraphViewGeometry {
   }) = _GraphViewGeometry;
 
   static GraphViewGeometry? of(BuildContext context) {
-    return SignalProvider.of<FlutterSignal<GraphViewGeometry?>>(context)?.value;
+    // Note: This method needs to be updated to work with the new state management approach
+    // It previously used signals but now should use InheritedWidget or Provider pattern
+    return null; // TODO: Implement proper context-based retrieval
   }
 }

@@ -2,11 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/shape.dart';
 
-/// 円形のノードを表示するウィジェット。
+/// Widget that displays a circular node.
 ///
-/// * [node]: 対象のノード
-/// * [radius]: 円の半径（オプション）
-/// * [child]: 円の中に表示する子ウィジェット
+/// * [node]: Target node
+/// * [radius]: Circle radius (optional)
+/// * [child]: Child widget to display inside the circle
 class GraphCircleNodeView extends StatelessWidget {
   const GraphCircleNodeView({
     required this.node,
@@ -26,10 +26,10 @@ class GraphCircleNodeView extends StatelessWidget {
   }
 }
 
-/// 矩形のノードを表示するウィジェット。
+/// Widget that displays a rectangular node.
 ///
-/// * [node]: 対象のノード
-/// * [child]: 矩形の中に表示する子ウィジェット
+/// * [node]: Target node
+/// * [child]: Child widget to display inside the rectangle
 class GraphRectangleNodeView extends StatelessWidget {
   const GraphRectangleNodeView({
     required this.node,

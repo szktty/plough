@@ -1,13 +1,12 @@
-import 'dart:ui';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/link.dart';
+import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
-import 'package:signals/signals.dart';
 
+@internal
 enum GraphEntityType {
   node,
   link;
@@ -17,20 +16,27 @@ enum GraphEntityType {
   bool get isLink => this == GraphEntityType.link;
 }
 
+@internal
 abstract base class GraphStateManager<T> with Diagnosticable {
-  GraphStateManager({
-    required this.gestureManager,
-  });
+  GraphStateManager({required this.gestureManager});
 
   final GraphGestureManager gestureManager;
 
   GraphViewBehavior get behavior => gestureManager.viewBehavior;
 
-  final MapSignal<GraphId, T> _states = <GraphId, T>{}.toSignal();
+  final Map<GraphId, T> _states = <GraphId, T>{};
+
+  GraphId? _lastActiveEntityId;
 
   List<T> get states => _states.values.toList();
 
   GraphEntityType get entityType;
+
+  /// IDs of the entities currently being managed by this state manager.
+  List<GraphId> get activeEntityIds => _states.keys.toList();
+
+  /// The ID of the last entity for which state was set.
+  GraphId? get lastActiveEntityId => _lastActiveEntityId;
 
   static const double defaultDragThreshold = 8;
 
@@ -63,18 +69,71 @@ abstract base class GraphStateManager<T> with Diagnosticable {
 
   bool get isActive => activeCount > 0;
 
-  T? getState(GraphId entityId) => _states[entityId];
+  T? getState(GraphId entityId) {
+    return _states[entityId];
+  }
 
   void setState(GraphId entityId, T state) {
+    final hadState = _states.containsKey(entityId);
     _states[entityId] = state;
+    _lastActiveEntityId = entityId; // Update last active ID
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'SET_STATE',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hadState': hadState,
+        'entityType': entityType.name,
+        'statesCount': _states.length,
+      },
+    );
   }
 
   void removeState(GraphId entityId) {
+    final hadState = _states.containsKey(entityId);
     _states.remove(entityId);
+    // Optionally, clear _lastActiveEntityId if it matches entityId
+    if (_lastActiveEntityId == entityId) {
+      // Set to null or find the new last? Setting to null is simpler.
+      _lastActiveEntityId = null;
+    }
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'REMOVE_STATE',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hadState': hadState,
+        'entityType': entityType.name,
+        'statesCount': _states.length,
+      },
+    );
+  }
+
+  /// Silent state removal that does not trigger rebuilds
+  void removeStateSilently(GraphId entityId) {
+    final hadState = _states.containsKey(entityId);
+    _states.remove(entityId);
+    if (_lastActiveEntityId == entityId) {
+      _lastActiveEntityId = null;
+    }
+    logGestureDebug(
+      GestureDebugEventType.tapDebugState,
+      'StateManager',
+      'REMOVE_STATE_SILENTLY',
+      data: {
+        'entityId': entityId.value.substring(0, 8),
+        'hadState': hadState,
+        'entityType': entityType.name,
+        'statesCount': _states.length,
+      },
+    );
   }
 
   void clearAllStates() {
     _states.clear();
+    _lastActiveEntityId = null; // Clear last active ID
   }
 
   void cancel(GraphId entityId);
@@ -128,13 +187,38 @@ abstract base class GraphStateManager<T> with Diagnosticable {
   void setPosition(GraphId entityId, Offset position) {
     switch (entityType) {
       case GraphEntityType.node:
-        gestureManager.graph.getNode(entityId)!.logicalPosition = position;
+        final node = gestureManager.graph.getNode(entityId) as GraphNodeImpl?;
+        if (node != null) {
+          // Update position directly via ValueNotifier for immediate UI updates
+          node.logicalPosition = position;
+
+          // Update node geometry during drag
+          // (deferred to avoid setState during build)
+          if (node.geometry != null) {
+            final currentGeometry = node.geometry!;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (node.geometry != null) {
+                node.geometry = GraphNodeViewGeometry(
+                  bounds: Rect.fromLTWH(
+                    position.dx,
+                    position.dy,
+                    currentGeometry.bounds.width,
+                    currentGeometry.bounds.height,
+                  ),
+                );
+              }
+            });
+          }
+        }
       case GraphEntityType.link:
         // not supported
         break;
     }
   }
 
+  // Methods previously calling GraphViewBehavior callbacks are now obsolete.
+  // Event dispatching is handled by GraphGestureManager.
+  /*
   void onTap(List<GraphId> entityIds) {
     switch (entityType) {
       case GraphEntityType.node:
@@ -217,7 +301,7 @@ abstract base class GraphStateManager<T> with Diagnosticable {
   }
 
   void onHoverEnd(GraphId entityId) {
-    gestureManager.endHover(entityId);
+    // gestureManager.endHover(entityId); // This logic might be needed in GestureManager
     switch (entityType) {
       case GraphEntityType.node:
         behavior.onNodeHoverEnd(getNode(entityId)!);
@@ -251,4 +335,5 @@ abstract base class GraphStateManager<T> with Diagnosticable {
         gestureManager.onTooltipHide?.call(link);
     }
   }
+  */
 }

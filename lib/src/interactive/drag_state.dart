@@ -1,109 +1,154 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/graph/id.dart';
+import 'package:plough/plough.dart'; // Import GraphNode etc.
+// Import GraphEntity
+// Import GraphId
+import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/interactive/state_manager.dart';
+import 'package:plough/src/utils/logger.dart';
 
-part 'drag_state.freezed.dart';
+// Internal state for tracking a single dragged entity
+class _DragState {
+  _DragState({
+    required this.entityId,
+    required this.startPosition, // Global position where drag gesture started
+    required this.initialLogicalPosition, // Node's logical position at drag start
+  }) {
+    currentLogicalPosition = initialLogicalPosition;
+  }
 
-/// Data object that holds the state of drag operations.
-///
-/// Tracks drag initiation information with [dragStartDetails] and [dragStartPosition],
-/// and maintains drag updates with [dragUpdateDetails].
-@freezed
-class GraphDragData with _$GraphDragData {
-  /// Creates drag state data with optional drag details and positions.
-  const factory GraphDragData({
-    DragStartDetails? dragStartDetails,
-    Offset? dragStartPosition,
-    DragUpdateDetails? dragUpdateDetails,
-  }) = _GraphDragData;
+  final GraphId entityId;
+  final Offset startPosition;
+  final Offset initialLogicalPosition;
+  late Offset currentLogicalPosition;
+  bool cancelled = false;
 }
 
-/// グラフ要素のドラッグ操作の状態を管理します。
-///
-/// ドラッグ操作の開始、更新、終了を処理し、複数の要素の同時ドラッグをサポートします。
-/// 以下の主要な機能を提供します：
-///
-/// * [handlePanStart], ドラッグ操作の開始を処理
-/// * [handlePanUpdate], ドラッグ中の位置更新を処理
-/// * [handlePanEnd], ドラッグ操作の終了を処理
-/// * [handlePointerDown], タッチ/マウスの押下を処理
-/// * [handlePointerMove], ポインターの移動を処理
-///
-/// 使用例：
-/// ```dart
-/// final manager = GraphNodeDragStateManager(gestureManager: myGestureManager);
-/// manager.handlePointerDown(entityId, pointerEvent);
-/// ```
-abstract base class GraphDragStateManager
-    extends GraphStateManager<GraphDragData> {
-  GraphDragStateManager({
-    required super.gestureManager,
-  });
+/// Base class for managing drag interactions for graph entities.
+@internal
+abstract base class GraphEntityDragStateManager<E extends GraphEntity>
+    extends GraphStateManager<_DragState> {
+  GraphEntityDragStateManager({required super.gestureManager});
 
-  late Offset? _lastPointerPosition;
+  // --- Public API for GraphGestureManager ---
 
-  GraphId? lastDraggedEntityId;
+  /// IDs of the entities currently being dragged.
+  List<GraphId> get draggedEntityIds => super.activeEntityIds;
 
-  void handlePanStart(GraphId entityId, DragStartDetails details) {
-    for (final targetId in targets) {
-      final position = getPosition(entityId);
-      if (position == null) {
-        continue;
-      }
-      setState(
-        targetId,
-        GraphDragData(
-          dragStartDetails: details,
-          dragStartPosition: position,
-        ),
-      );
+  /// The ID of the last entity that was added to the drag state.
+  GraphId? get lastDraggedEntityId => super.lastActiveEntityId;
+
+  /// Checks if a specific entity is currently being dragged.
+  bool isDragging(GraphId entityId) => hasState(entityId);
+
+  /// Checks if the entity can be dragged based on its properties.
+  bool canDrag(GraphId entityId) {
+    return gestureManager.getEntity(entityId)?.canDrag ?? false;
+  }
+
+  /// Cancels all ongoing drag operations.
+
+  /// Cancels all ongoing drag operations.
+  void cancelAll() {
+    final statesToCancel = List<_DragState>.from(states);
+    for (final state in statesToCancel) {
+      final dragState = state;
+      cancel(dragState.entityId);
+    }
+    if (isActive) {
+      logWarning(LogCategory.drag, 'Drag states remained after cancelAll');
+      clearAllStates();
     }
   }
 
-  void handlePanUpdate(GraphId entityId, DragUpdateDetails details) {
-    onDragUpdate(targets.toList());
-  }
+  // --- Gesture Handling Logic ---
 
-  void handlePanEnd(GraphId entityId, DragEndDetails details) {
-    final targetIds = targets;
+  void handlePanStart(List<GraphId> entityIds, DragStartDetails details) {
+    if (entityIds.isEmpty || isActive) return;
     clearAllStates();
-    lastDraggedEntityId = entityId;
-    onDragEnd(targetIds);
-  }
-
-  void handlePointerDown(GraphId entityId, PointerDownEvent event) {
-    // ドラッグ対象のエンティティを決定する
-    final targetIds = [
-      entityId,
-      ...gestureManager.graph.nodes.where((e) => e.isSelected).map((e) => e.id),
-    ];
-    for (final targetId in targetIds) {
-      setState(targetId, GraphDragData(dragStartPosition: event.position));
-    }
-    _lastPointerPosition = event.position;
-  }
-
-  void handlePointerMove(PointerMoveEvent event) {
-    final targetIds = targets;
-    if (targetIds.isEmpty) return;
-
-    for (final entityId in targetIds) {
-      final position = getPosition(entityId);
-      if (position == null) {
-        continue;
+    for (final entityId in entityIds) {
+      final entity = gestureManager.getEntity(entityId);
+      if (entity is GraphNode && canDrag(entityId)) {
+        // Stop any ongoing animation before starting drag
+        (entity as GraphNodeImpl).isAnimating = false;
+        // Use canDrag check
+        setState(
+          entityId,
+          _DragState(
+            entityId: entityId,
+            startPosition: details.globalPosition,
+            initialLogicalPosition: entity.logicalPosition,
+          ),
+        );
+      } else {
+        logWarning(
+          LogCategory.drag,
+          'Attempted to start drag on non-draggable entity: $entityId',
+        );
       }
-      final newPosition = position + event.position - _lastPointerPosition!;
-      _lastPointerPosition = event.position;
-      setPosition(entityId, newPosition);
     }
-
-    onDragMove(targetIds);
   }
+
+  List<GraphId> handlePanUpdate(DragUpdateDetails details) {
+    if (!isActive) return [];
+    final updatedIds = <GraphId>[];
+    final startState = states.firstOrNull;
+    if (startState == null) return [];
+    final dragGlobalStart = startState.startPosition;
+    final delta = details.globalPosition - dragGlobalStart;
+    final currentStates = List<_DragState>.from(states);
+
+    for (final state in currentStates) {
+      final dragState = state;
+      if (dragState.cancelled) continue;
+      final newLogicalPosition = dragState.initialLogicalPosition + delta;
+      dragState.currentLogicalPosition = newLogicalPosition;
+      final entity = gestureManager.getEntity(dragState.entityId);
+      if (entity is GraphNode) {
+        // Stop any ongoing animation during drag
+        (entity as GraphNodeImpl).isAnimating = false;
+        setPosition(entity.id, newLogicalPosition);
+        updatedIds.add(dragState.entityId);
+      } else {
+        logWarning(
+          LogCategory.drag,
+          'Dragged entity ${dragState.entityId} not found or not a Node during update.',
+        );
+        cancel(dragState.entityId);
+      }
+    }
+    return updatedIds;
+  }
+
+  List<GraphId> handlePanEnd(DragEndDetails details) {
+    if (!isActive) return [];
+    final endedDragIds = <GraphId>[];
+    final statesToEnd = List<_DragState>.from(states);
+    for (final state in statesToEnd) {
+      final dragState = state;
+      if (!dragState.cancelled) {
+        endedDragIds.add(dragState.entityId);
+      }
+      // Remove state regardless of cancelled status at the end of the pan
+      // removeState(dragState.entityId); // Do this in clearAllStates
+    }
+    clearAllStates(); // Ensure all states are cleared on PanEnd
+    return endedDragIds;
+  }
+
+  void handlePointerMove(PointerMoveEvent event) {}
+  void handlePointerDown(GraphId entityId, PointerDownEvent event) {}
 
   void handlePointerUp(GraphId entityId, PointerUpEvent event) {
-    cancel(entityId);
+    final state = getState(entityId);
+    if (state != null) {
+      // Check if state exists before warning/cancelling
+      logWarning(
+        LogCategory.drag,
+        'Drag state still exists on PointerUp for $entityId. Cancelling.',
+      );
+      cancel(entityId); // cancel will call removeState
+    }
   }
 
   void handlePointerCancel(GraphId entityId, PointerCancelEvent event) {
@@ -112,45 +157,56 @@ abstract base class GraphDragStateManager
 
   @override
   void cancel(GraphId entityId) {
-    clearAllStates();
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(IntProperty('active drag states', activeCount))
-      ..add(
-        IterableProperty(
-          'dragging entities',
-          targets,
-        ),
-      );
+    final state = getState(entityId);
+    if (state != null && !state.cancelled) {
+      state.cancelled = true;
+      removeState(entityId);
+      logDebug(LogCategory.drag, 'Cancelled drag for $entityId');
+    }
   }
 }
 
-/// ノード要素のドラッグ状態を管理します。
-///
-/// ノード固有のドラッグ挙動を実装し、親クラスの機能を継承します。
-base class GraphNodeDragStateManager extends GraphDragStateManager {
-  /// Creates a drag state manager for node elements.
-  GraphNodeDragStateManager({
-    required super.gestureManager,
-  });
-
+@internal
+final class GraphNodeDragStateManager
+    extends GraphEntityDragStateManager<GraphNode> {
+  GraphNodeDragStateManager({required super.gestureManager});
   @override
   GraphEntityType get entityType => GraphEntityType.node;
 }
 
-/// リンク要素のドラッグ状態を管理します。
-///
-/// リンク固有のドラッグ挙動を実装し、親クラスの機能を継承します。
-base class GraphLinkDragStateManager extends GraphDragStateManager {
-  /// Creates a drag state manager for link elements.
-  GraphLinkDragStateManager({
-    required super.gestureManager,
-  });
-
+@internal
+final class GraphLinkDragStateManager
+    extends GraphEntityDragStateManager<GraphLink> {
+  GraphLinkDragStateManager({required super.gestureManager});
   @override
   GraphEntityType get entityType => GraphEntityType.link;
+  @override
+  bool canDrag(GraphId entityId) => false;
+  @override
+  void handlePanStart(List<GraphId> entityIds, DragStartDetails details) {
+    logWarning(
+      LogCategory.drag,
+      'Attempted to drag links: $entityIds. Link dragging not supported.',
+    );
+  }
+
+  @override
+  List<GraphId> handlePanUpdate(DragUpdateDetails details) => [];
+  @override
+  List<GraphId> handlePanEnd(DragEndDetails details) => [];
+  @override
+  void handlePointerDown(GraphId entityId, PointerDownEvent event) {}
+  @override
+  void handlePointerUp(GraphId entityId, PointerUpEvent event) {}
+  @override
+  void handlePointerCancel(GraphId entityId, PointerCancelEvent event) {}
+  @override
+  void cancel(GraphId entityId) {
+    removeState(entityId);
+  }
+
+  @override
+  void cancelAll() {
+    clearAllStates();
+  }
 }

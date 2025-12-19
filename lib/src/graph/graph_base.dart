@@ -1,15 +1,14 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_data.dart';
 import 'package:plough/src/graph/link.dart';
 import 'package:plough/src/graph/node.dart';
 import 'package:plough/src/graph_view/geometry.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
+import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/signals.dart';
-import 'package:provider/provider.dart';
-import 'package:signals/signals_flutter.dart';
 
 /// A core data structure that provides the foundation for graph visualization through [GraphView].
 ///
@@ -164,10 +163,18 @@ abstract class Graph implements Listenable {
   /// Throws [ArgumentError] if no link with [id] exists.
   void toggleSelectLink(GraphId id);
 
+  /// Clears all selections in the graph.
+  ///
+  /// Deselects all currently selected nodes and links.
+  void clearSelection();
+
   /// Marks the graph as needing a layout recalculation.
   ///
   /// This triggers [GraphView] to recalculate node positions during its next update cycle.
-  void markNeedsLayout();
+  ///
+  /// [shouldAnimate] determines whether the layout change should be animated.
+  /// Defaults to false to avoid unnecessary animations on every rebuild.
+  void markNeedsLayout({bool shouldAnimate = false});
 
   /// Brings the node with the given [id] to the front of the display stack.
   ///
@@ -197,20 +204,35 @@ abstract class Graph implements Listenable {
 }
 
 class GraphImpl
-    with Diagnosticable, ListenableSignalStateMixin<GraphData>
+    with Diagnosticable, ListenableValueNotifierStateMixin<GraphData>
     implements Graph {
   GraphImpl() {
-    state = signal(GraphData(id: GraphId.unique(GraphIdType.graph)));
+    state = ValueNotifier(GraphData(id: GraphId.unique(GraphIdType.graph)));
   }
 
   @internal
   static GraphImpl of(BuildContext context) =>
-      Provider.of(context, listen: false);
+      GraphInheritedData.read(context).graph;
 
   @override
-  late final Signal<GraphData> state;
+  late final ValueNotifier<GraphData> state;
 
   final Map<GraphId, List<GraphLinkData>> _nodeDependencies = {};
+
+  /// Notifier for layout-related changes only (excludes selection changes)
+  final ValueNotifier<int> _layoutChangeNotifier = ValueNotifier(0);
+
+  /// Getter for layout-specific listenable
+  Listenable get layoutChangeListenable => _layoutChangeNotifier;
+
+  /// Notify layout-related changes
+  void _notifyLayoutChange() {
+    logDebug(
+      LogCategory.layout,
+      '📐 Graph._notifyLayoutChange() called - value: ${_layoutChangeNotifier.value} -> ${_layoutChangeNotifier.value + 1}',
+    );
+    _layoutChangeNotifier.value++;
+  }
 
   void _checkEntityExists(GraphId id) {
     if (!state.value.nodes.containsKey(id) &&
@@ -232,6 +254,7 @@ class GraphImpl
   void addNode(GraphNodeImpl node) {
     node.onAdded(this);
     setState(state.value.copyWith(nodes: state.value.nodes.add(node.id, node)));
+    _notifyLayoutChange();
   }
 
   @override
@@ -267,12 +290,15 @@ class GraphImpl
     }
     _nodeDependencies.remove(id);
     state.value = state.value.copyWith(nodes: state.value.nodes.remove(id));
+    _notifyLayoutChange();
   }
 
   @override
   void addLink(GraphLinkImpl link) {
-    state.value =
-        state.value.copyWith(links: state.value.links.add(link.id, link));
+    state.value = state.value.copyWith(
+      links: state.value.links.add(link.id, link),
+    );
+    _notifyLayoutChange();
   }
 
   @override
@@ -315,8 +341,9 @@ class GraphImpl
     if (!state.value.links.containsKey(id)) {
       throw ArgumentError('link not found: $id');
     }
-    _nodeDependencies
-        .removeWhere((key, value) => state.value.links.containsKey(key));
+    _nodeDependencies.removeWhere(
+      (key, value) => state.value.links.containsKey(key),
+    );
     state.value = state.value.copyWith(links: state.value.links.remove(id));
   }
 
@@ -366,26 +393,46 @@ class GraphImpl
       return;
     }
 
-    node.isSelected = true;
+    if (state.value.selectedNodeIds.length == 1 &&
+        state.value.selectedNodeIds.contains(id)) {
+      return;
+    }
+
+    var hasChanged = false;
+
     bringToFront(id);
 
     if (!state.value.allowMultiSelection) {
-      state.value = state.value.copyWith(selectedNodeIds: IList([node.id]));
-      for (final otherNode in nodes.cast<GraphNodeImpl>()) {
-        if (otherNode.id != node.id) {
-          otherNode.isSelected = false;
+      final currentSelectedNodes = state.value.selectedNodeIds.toList();
+      final updatedNodeIds = IList([node.id]);
+
+      for (final currentId in currentSelectedNodes) {
+        if (currentId != id) {
+          (getNodeOrThrow(currentId) as GraphNodeImpl).isSelected = false;
+          hasChanged = true;
         }
       }
+
+      node.isSelected = true;
+      hasChanged = true;
+
+      if (hasChanged) {
+        state.value = state.value.copyWith(selectedNodeIds: updatedNodeIds);
+      }
     } else {
-      state.value = state.value
-          .copyWith(selectedNodeIds: state.value.selectedNodeIds.add(node.id));
+      node.isSelected = true;
+      state.value = state.value.copyWith(
+        selectedNodeIds: state.value.selectedNodeIds.add(node.id),
+      );
     }
   }
 
   @override
   void deselectNode(GraphId id) {
     final node = getNodeOrThrow(id) as GraphNodeImpl;
+
     node.isSelected = false;
+
     if (!state.value.allowMultiSelection) {
       state.value = state.value.copyWith(selectedNodeIds: const IListConst([]));
     } else {
@@ -408,17 +455,46 @@ class GraphImpl
   @override
   void selectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
+
+    if (state.value.selectedLinkIds.length == 1 &&
+        state.value.selectedLinkIds.contains(id)) {
+      return;
+    }
+
+    var hasChanged = false;
+
     if (!state.value.allowMultiSelection) {
-      state.value = state.value.copyWith(selectedLinkIds: IList([link.id]));
+      final currentSelectedLinks = state.value.selectedLinkIds.toList();
+      final updatedLinkIds = IList([link.id]);
+
+      for (final currentId in currentSelectedLinks) {
+        if (currentId != id) {
+          final otherLink = getLinkOrThrow(currentId) as GraphLinkImpl;
+          otherLink.isSelected = false;
+          hasChanged = true;
+        }
+      }
+
+      link.isSelected = true;
+      hasChanged = true;
+
+      if (hasChanged) {
+        state.value = state.value.copyWith(selectedLinkIds: updatedLinkIds);
+      }
     } else {
-      state.value = state.value
-          .copyWith(selectedLinkIds: state.value.selectedLinkIds.add(link.id));
+      link.isSelected = true;
+      state.value = state.value.copyWith(
+        selectedLinkIds: state.value.selectedLinkIds.add(link.id),
+      );
     }
   }
 
   @override
   void deselectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
+
+    link.isSelected = false;
+
     if (!state.value.allowMultiSelection) {
       state.value = state.value.copyWith(selectedLinkIds: const IListConst([]));
     } else {
@@ -439,8 +515,40 @@ class GraphImpl
   }
 
   @override
-  void markNeedsLayout() {
-    state.value = state.value.copyWith(needsLayout: true);
+  void clearSelection() {
+    // Save IDs of currently selected nodes and links
+    final selectedNodeIds = state.value.selectedNodeIds.toList();
+    final selectedLinkIds = state.value.selectedLinkIds.toList();
+
+    // Deselect all selected nodes (individual state update, reflected in UI)
+    for (final nodeId in selectedNodeIds) {
+      final node = getNodeOrThrow(nodeId) as GraphNodeImpl;
+      node.isSelected = false;
+    }
+
+    // Deselect all selected links (individual state update, reflected in UI)
+    for (final linkId in selectedLinkIds) {
+      final link = getLinkOrThrow(linkId) as GraphLinkImpl;
+      link.isSelected = false;
+    }
+
+    // Clear graph selection state
+    setState(
+      state.value.copyWith(
+        selectedNodeIds: const IListConst([]),
+        selectedLinkIds: const IListConst([]),
+      ),
+      force: true,
+    );
+  }
+
+  @override
+  void markNeedsLayout({bool shouldAnimate = false}) {
+    state.value = state.value.copyWith(
+      needsLayout: true,
+      shouldAnimateLayout: shouldAnimate,
+    );
+    _notifyLayoutChange();
   }
 
   @override
@@ -467,10 +575,10 @@ class GraphImpl
       }
       return GraphOrderManager(this, ids);
     } else {
-      return GraphOrderManager(
-        this,
-        [...state.value.nodes.keys, ...state.value.links.keys],
-      );
+      return GraphOrderManager(this, [
+        ...state.value.nodes.keys,
+        ...state.value.links.keys,
+      ]);
     }
   }
 
@@ -484,7 +592,10 @@ class GraphImpl
     } else {
       return GraphOrderManager(
         this,
-        [...state.value.nodes.keys, ...state.value.links.keys],
+        [
+          ...state.value.nodes.keys,
+          ...state.value.links.keys,
+        ],
         sync: true,
       );
     }
@@ -531,12 +642,19 @@ class GraphImpl
 extension GraphInternal on GraphImpl {
   bool get needsLayout => state.value.needsLayout;
 
+  bool get shouldAnimateLayout => state.value.shouldAnimateLayout;
+
   void onLayoutFinished() {
-    state.overrideWith(state.value.copyWith(needsLayout: false));
-    //state.value = state.value.copyWith(needsLayout: false);
+    setState(
+      state.value.copyWith(needsLayout: false, shouldAnimateLayout: false),
+      force: true,
+    );
 
     for (final node in nodes.cast<GraphNodeImpl>()) {
       node.isArranged = true;
     }
+
+    // Notify layout change after setting isArranged to trigger animations
+    _notifyLayoutChange();
   }
 }

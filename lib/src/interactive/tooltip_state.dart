@@ -1,218 +1,187 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/graph/id.dart';
+import 'package:plough/plough.dart';
 import 'package:plough/src/interactive/state_manager.dart';
-import 'package:plough/src/tooltip/behavior.dart';
+import 'package:plough/src/utils/logger.dart';
 
-part 'tooltip_state.freezed.dart';
-
-/// Data object that holds the state of tooltip visibility.
-///
-/// Tracks time of show requests with [showRequestTime] and
-/// time of hide requests with [hideRequestTime].
-@freezed
-class GraphTooltipData with _$GraphTooltipData {
-  /// Creates tooltip state data with optional show/hide request times.
-  const factory GraphTooltipData({
-    DateTime? showRequestTime,
-    DateTime? hideRequestTime,
-  }) = _GraphTooltipData;
+// Internal state for tooltip
+class _TooltipState {
+  _TooltipState(this.entityId);
+  final GraphId entityId;
+  Timer? showTimer;
+  Timer? hideTimer;
+  bool isVisible = false;
 }
 
-/// グラフ要素のツールチップ表示状態を管理します。
+/// Manages tooltip display state for graph elements.
 ///
-/// ツールチップの表示/非表示、遷移のタイミングを制御します。
-/// 主要な機能：
+/// Controls tooltip show/hide and transition timing.
+/// Main features:
 ///
-/// * [handleMouseHover], マウスホバーによる表示を処理
-/// * [handleMouseExit], マウスホバーの終了を処理
-/// * [show], ツールチップを表示
-/// * [toggle], ツールチップの表示/非表示を切り替え
+/// * [handleMouseHover], processes display by mouse hover
+/// * [handleMouseExit], processes end of mouse hover
+/// * [show], displays tooltip
+/// * [toggle], toggles tooltip show/hide
 ///
-/// 使用例：
+/// Usage example:
 /// ```dart
 /// final manager = GraphNodeTooltipStateManager(
 ///   gestureManager: myGestureManager,
 ///   triggerMode: GraphTooltipTriggerMode.hover,
 /// );
 /// ```
-abstract base class GraphTooltipStateManager
-    extends GraphStateManager<GraphTooltipData> {
-  GraphTooltipStateManager({
+@internal
+abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
+    extends GraphStateManager<_TooltipState> {
+  GraphEntityTooltipStateManager({
     required super.gestureManager,
     this.triggerMode,
-    // TODO: Should be configurable in GraphView
     this.showDelay = const Duration(milliseconds: 500),
     this.hideDelay = const Duration(milliseconds: 200),
   });
 
+  final GraphTooltipTriggerMode? triggerMode;
   final Duration showDelay;
   final Duration hideDelay;
-
-  final GraphTooltipTriggerMode? triggerMode;
 
   bool get isShowing => _currentShowId != null;
 
   GraphId? _currentShowId;
-  GraphId? _pendingShowId;
 
-  bool get _hasPendingShow => _pendingShowId != null;
+  // --- Public API ---
+  bool isTooltipVisible(GraphId entityId) =>
+      getState(entityId)?.isVisible ?? false;
 
-  Offset? _lastPointerPosition;
-
-  void handleMouseHover(GraphId entityId, PointerHoverEvent event) {
-    if (gestureManager.isDragging ||
-        gestureManager.lastDraggedEntityId == entityId ||
-        getState(entityId) != null ||
-        triggerMode != GraphTooltipTriggerMode.hover ||
-        (_hasPendingShow && _pendingShowId == entityId)) {
-      return;
+  void cancelAll() {
+    final statesToCancel = List<_TooltipState>.from(states);
+    for (final state in statesToCancel) {
+      final tooltipState = state;
+      cancel(tooltipState.entityId);
     }
-
-    _lastPointerPosition = event.localPosition;
-    final state = GraphTooltipData(showRequestTime: DateTime.now());
-    setState(entityId, state);
-
-    _pendingShowId = entityId;
-
-    SchedulerBinding.instance.scheduleFrame();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _processPendingShow(entityId);
-    });
   }
 
-  void _processPendingShow(GraphId entityId) {
-    if (!_hasPendingShow || _pendingShowId != entityId) return;
-
-    final state = getState(entityId);
-    if (state == null) return;
-
-    final now = DateTime.now();
-    final requestTime = state.showRequestTime;
-    if (requestTime == null) return;
-
-    final elapsed = now.difference(requestTime);
-    if (elapsed < showDelay) {
-      // まだ表示までの時間が経過していない場合は再スケジュール
-      SchedulerBinding.instance.scheduleFrame();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _processPendingShow(entityId);
-      });
-      return;
-    }
-
-    // ホバー開始時のエンティティと現在のポインター位置にあるエンティティが異なる場合
-    if (_lastPointerPosition != null) {
-      final current = gestureManager.findNodeAt(_lastPointerPosition!) ??
-          gestureManager.findLinkAt(_lastPointerPosition!);
-      if (current?.id != entityId) {
-        _clearPendingShow();
-        return;
-      }
-    }
-
-    show(entityId);
-  }
+  // --- Internal Logic & Handlers ---
 
   void show(GraphId entityId) {
-    final state = getState(entityId);
-    if (state == null) return;
-
-    setState(
-      entityId,
-      state.copyWith(showRequestTime: null, hideRequestTime: null),
-    );
-    onTooltipShow(entityId);
-
-    _currentShowId = entityId;
-    _clearPendingShow();
-  }
-
-  void _clearPendingShow() {
-    _pendingShowId = null;
-  }
-
-  void handleMouseExit(PointerHoverEvent event) {
-    _lastPointerPosition = event.localPosition;
-    if (_currentShowId == null) return;
-
-    final entityId = _currentShowId!;
-    final state = getState(entityId);
-    if (state == null) return;
-
-    setState(
-      entityId,
-      state.copyWith(
-        hideRequestTime: DateTime.now(),
-      ),
-    );
-
-    SchedulerBinding.instance.scheduleFrame();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _processHide(entityId);
-    });
-  }
-
-  void _processHide(GraphId entityId) {
-    final state = getState(entityId);
-    if (state == null) return;
-
-    final now = DateTime.now();
-    final requestTime = state.hideRequestTime;
-    if (requestTime == null) return;
-
-    final elapsed = now.difference(requestTime);
-    if (elapsed < hideDelay) {
-      // まだ非表示までの時間が経過していない場合は再スケジュール
-      SchedulerBinding.instance.scheduleFrame();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _processHide(entityId);
-      });
-      return;
-    }
-
-    cancel(entityId);
-  }
-
-  void handleTap(GraphId entityId) {
-    switch (triggerMode) {
-      case GraphTooltipTriggerMode.hover:
-        removeState(entityId);
-      case GraphTooltipTriggerMode.tap:
-        toggle(entityId);
-      default:
+    if (triggerMode == null) return;
+    final state = getState(entityId) ?? _createState(entityId);
+    state.hideTimer?.cancel();
+    if (!state.isVisible && state.showTimer == null) {
+      if (showDelay == Duration.zero) {
+        _showNow(entityId, state);
+      } else {
+        state.showTimer = Timer(showDelay, () => _showNow(entityId, state));
+      }
     }
   }
 
-  void toggle(GraphId entityId) {
-    final state = getState(entityId);
-    if (state == null) {
-      setState(entityId, const GraphTooltipData());
-      onTooltipShow(entityId);
-    } else {
-      cancel(entityId);
+  void _showNow(GraphId entityId, _TooltipState state) {
+    state.showTimer = null;
+    if (!state.isVisible) {
+      state.isVisible = true;
+      final details = gestureManager.lastPointerDetails ??
+          PointerEventDetails.fromLastKnownPosition(
+            Offset.zero,
+            Offset.zero,
+            PointerDeviceKind.unknown,
+          );
+      final currentTriggerMode = triggerMode ?? GraphTooltipTriggerMode.hover;
+      gestureManager.viewBehavior.onTooltipShow(
+        GraphTooltipShowEvent(
+          entityId: entityId,
+          details: details,
+          triggerMode: currentTriggerMode,
+        ),
+      );
+      logDebug(LogCategory.gesture, 'Tooltip shown for $entityId');
     }
   }
 
   @override
   void cancel(GraphId entityId) {
-    _currentShowId = null;
-    _clearPendingShow();
-    clearAllStates();
-    onTooltipHide(entityId);
+    final state = getState(entityId);
+    if (state != null) {
+      state.showTimer?.cancel();
+      state.showTimer = null;
+      state.hideTimer?.cancel();
+      state.hideTimer = null;
+      if (state.isVisible) {
+        state.isVisible = false;
+        final details = gestureManager.lastPointerDetails;
+        gestureManager.viewBehavior.onTooltipHide(
+          GraphTooltipHideEvent(entityId: entityId, details: details),
+        );
+        logDebug(LogCategory.gesture, 'Tooltip hidden for $entityId');
+      }
+      removeState(entityId);
+    }
+  }
+
+  void handleMouseHover(GraphId entityId, PointerHoverEvent event) {
+    if (triggerMode == GraphTooltipTriggerMode.hover ||
+        triggerMode == GraphTooltipTriggerMode.hoverStay) {
+      show(entityId);
+    }
+  }
+
+  void handleMouseExit(GraphId entityId, PointerHoverEvent event) {
+    final state = getState(entityId);
+    if (state != null) {
+      state.showTimer?.cancel();
+      state.showTimer = null;
+      if (state.isVisible &&
+          triggerMode != GraphTooltipTriggerMode.hoverStay &&
+          state.hideTimer == null) {
+        if (hideDelay == Duration.zero) {
+          cancel(entityId);
+        } else {
+          state.hideTimer = Timer(hideDelay, () => cancel(entityId));
+        }
+      } else if (!state.isVisible) {
+        removeState(entityId);
+      }
+    }
+  }
+
+  void handleTap(GraphId entityId) {
+    if (triggerMode == GraphTooltipTriggerMode.tap ||
+        triggerMode == GraphTooltipTriggerMode.longPress ||
+        triggerMode == GraphTooltipTriggerMode.doubleTap) {
+      toggle(entityId);
+    } else if (triggerMode == GraphTooltipTriggerMode.hoverStay) {
+      cancel(entityId);
+    }
+  }
+
+  _TooltipState _createState(GraphId entityId) {
+    final newState = _TooltipState(entityId);
+    setState(entityId, newState);
+    return newState;
+  }
+
+  void toggle(GraphId entityId) {
+    final state = getState(entityId);
+    if (state?.isVisible ?? false) {
+      cancel(entityId);
+    } else {
+      final newState = getState(entityId) ?? _createState(entityId);
+      _showNow(entityId, newState);
+    }
   }
 }
 
-/// ノード要素のツールチップ状態を管理します。
+/// Manages tooltip state for node elements.
 ///
-/// ノード固有のツールチップの表示動作を制御します。
-base class GraphNodeTooltipStateManager extends GraphTooltipStateManager {
+/// Controls node-specific tooltip display behavior.
+@internal
+final class GraphNodeTooltipStateManager
+    extends GraphEntityTooltipStateManager<GraphNode> {
   /// Creates a tooltip state manager for node elements.
   GraphNodeTooltipStateManager({
     required super.gestureManager,
-    super.triggerMode,
+    required super.triggerMode,
     super.showDelay,
     super.hideDelay,
   });
@@ -221,14 +190,16 @@ base class GraphNodeTooltipStateManager extends GraphTooltipStateManager {
   GraphEntityType get entityType => GraphEntityType.node;
 }
 
-/// リンク要素のツールチップ状態を管理します。
+/// Manages tooltip state for link elements.
 ///
-/// リンク固有のツールチップの表示動作を制御します。
-base class GraphLinkTooltipStateManager extends GraphTooltipStateManager {
+/// Controls link-specific tooltip display behavior.
+@internal
+final class GraphLinkTooltipStateManager
+    extends GraphEntityTooltipStateManager<GraphLink> {
   /// Creates a tooltip state manager for link elements.
   GraphLinkTooltipStateManager({
     required super.gestureManager,
-    super.triggerMode,
+    required super.triggerMode,
     super.showDelay,
     super.hideDelay,
   });

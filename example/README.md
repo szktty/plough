@@ -1,17 +1,18 @@
-# Plough Examples
+# Plough Example
 
-This project contains example applications demonstrating the features of the Plough graph visualization library.
+A simple example application demonstrating the basic features of the Plough graph visualization library.
 
-## Running the Examples
+## Running the Example
 
 1. Clone the repository
-2. Run `flutter pub get`
-3. Run `flutter run`
+2. Navigate to the example directory: `cd example`
+3. Run `flutter pub get`
+4. Run `flutter run`
 
-## Examples Included
+## Features Demonstrated
 
-* Basic Graph: Simple graph with default settings
-* Custom Nodes: Graph with customized node appearance
-* Custom Links: Graph with customized link appearance
-* Layout Examples: Demonstration of different layout algorithms
-* Interactive Features: Examples of interaction behaviors
+* Basic graph visualization with nodes and links
+* Interactive node dragging and selection
+* Multiple layout algorithms (Force-directed, Tree, Random, Manual)
+* Customizable node and link appearance
+* Dynamic graph manipulation (add/remove nodes and links)

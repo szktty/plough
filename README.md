@@ -12,10 +12,9 @@ Plough is a library for creating interactive network graph visualizations in Flu
 - 🎨 Customizable graph appearance and behavior: nodes and links are widgets, requiring no special rendering implementation.
 - 🎬 Smooth animation of nodes from initial to final positions during first render.
 
-## Documentation for AI assistant
+## Documentation for LLMs
 
-To use AI assistance with this library, load `prompt/user_guide.xml` into the AI assistant.
-`user_guide.xml` contains structured documentation in XML format, including the contents of this README, to help the AI assistant understand the library's functionality.
+To use LLMs with this library, load `llms-full.txt` into the LLMs.
 
 ## Installation
 Add to pubspec.yaml:
@@ -153,9 +152,19 @@ Methods that users can define. See API reference for details.
 - `createNodeViewBehavior()`: Defines node display method. Returns node appearance and tooltip settings
 - `createLinkViewBehavior()`: Defines link display method. Returns link appearance and connection settings
 - `getConnectionPoints()`: Calculates connection points for links between nodes
-- `onNodeSelect()`: Defines handling when a node is selected
-- `onNodeTap()`: Defines handling when a node is tapped
-- `onNodeDragStart()`, `onNodeDragUpdate()`, `onNodeDragEnd()`: Define handling for node drag operations
+- `hitTestNode()`: Tests if a node contains a given position.
+- `hitTestLink()`: Tests if a link contains a given position.
+- 🖱️ Event Handlers: Handle various user interactions by overriding methods that receive specific `GraphEvent` objects (defined in `lib/src/interactive/events.dart`).
+  - `onTap(GraphTapEvent event)`: Handles single or double taps on entities.
+  - `onSelectionChange(GraphSelectionChangeEvent event)`: Handles changes in entity selection.
+  - `onDragStart(GraphDragStartEvent event)`: Handles the start of a drag operation on entities.
+  - `onDragUpdate(GraphDragUpdateEvent event)`: Handles updates during a drag operation.
+  - `onDragEnd(GraphDragEndEvent event)`: Handles the end of a drag operation.
+  - `onHoverEnter(GraphHoverEvent event)`: Handles the pointer entering an entity's area.
+  - `onHoverMove(GraphHoverEvent event)`: Handles the pointer moving within an entity's area.
+  - `onHoverEnd(GraphHoverEndEvent event)`: Handles the pointer leaving an entity's area.
+  - `onTooltipShow(GraphTooltipShowEvent event)`: Handles when an entity's tooltip is shown.
+  - `onTooltipHide(GraphTooltipHideEvent event)`: Handles when an entity's tooltip is hidden.
 
 ### Default Renderers
 

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
-import 'package:provider/provider.dart';
+import 'package:plough/src/graph_view/inherited_data.dart';
 
 part 'data.freezed.dart';
 
@@ -15,6 +15,7 @@ part 'data.freezed.dart';
 /// * Animation - Controls node movement animations with [animationEnabled] and related properties
 ///
 /// The state is immutable and changes are managed through the provider pattern.
+@internal
 @freezed
 class GraphViewData with _$GraphViewData {
   /// Creates an immutable view configuration.
@@ -54,6 +55,6 @@ class GraphViewData with _$GraphViewData {
   /// Returns the immutable configuration instance without subscribing to changes.
   @internal
   static GraphViewData of(BuildContext context) {
-    return Provider.of<GraphViewData>(context, listen: false);
+    return GraphInheritedData.read(context).data;
   }
 }

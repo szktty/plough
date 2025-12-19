@@ -7,7 +7,7 @@ import 'package:plough/plough.dart';
 SampleData manualSample() {
   final graph = Graph();
 
-  // 北斗七星を表すノードとリンク
+  // Nodes and links representing the Big Dipper
   final dubhe =
       GraphNode(properties: {'label': 'Dubhe', 'description': 'Dubhe'});
   final merak =
@@ -66,20 +66,19 @@ SampleData manualSample() {
     ..addNodes([dubhe, merak, phecda, megrez, alioth, mizar, alkaid])
     ..addLinks(links);
 
-  // node positions
-  // 北斗七星の形に配置
-  // 基本レイアウトを定義
+  // Node positions
+  // Arranged in the shape of the Big Dipper
   const scale = 120.0;
   final basePositions = {
-    dubhe.id: const Offset(0, 0), // デューブ（α星）
-    merak.id: const Offset(-1, 0), // メラク（β星）
-    phecda.id: const Offset(-0.8, 1.2), // フェクダ（γ星）
-    megrez.id: const Offset(0, 1), // メグレズ（δ星）
-    alioth.id: const Offset(0.2, 2.2), // アリオト（ε星）
-    mizar.id: const Offset(0.5, 3), // ミザール（ζ星）
-    alkaid.id: const Offset(1, 3.8), // アルカイド（η星）
+    dubhe.id: const Offset(0, 0), // Dubhe (α star)
+    merak.id: const Offset(-1, 0), // Merak (β star)
+    phecda.id: const Offset(-0.8, 1.2), // Phecda (γ star)
+    megrez.id: const Offset(0, 1), // Megrez (δ star)
+    alioth.id: const Offset(0.2, 2.2), // Alioth (ε star)
+    mizar.id: const Offset(0.5, 3), // Mizar (ζ star)
+    alkaid.id: const Offset(1, 3.8), // Alkaid (η star)
   };
-  // スケール変換を適用
+  // Apply scale transformation
   final nodePositions = GraphNodeLayoutPosition.fromMap(
     Map.fromEntries(
       basePositions.entries.map(
@@ -195,10 +194,10 @@ class _GlowingDotEffectState extends State<GlowingDotEffect>
         return Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: widget.color.withOpacity(0.3 * _animation.value),
+            color: widget.color.withValues(alpha: 0.3 * _animation.value),
             boxShadow: [
               BoxShadow(
-                color: widget.color.withOpacity(0.5 * _animation.value),
+                color: widget.color.withValues(alpha: 0.5 * _animation.value),
                 blurRadius: widget.blurRadius,
                 spreadRadius: widget.spreadRadius * _animation.value,
               ),
