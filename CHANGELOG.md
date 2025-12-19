@@ -1,5 +1,7 @@
 ## develop
 
+## 0.7.0
+
 - [CHANGE] Removed `Listenable` from `GraphEntity` to prevent direct observation of individual entity state changes.
 - [CHANGE] Removed `apps` directory as the `workbench` application has been migrated to an independent repository.
 - [CHANGE] Increased `touchSlop` tolerance for more forgiving tap detection.

@@ -49,20 +49,15 @@ abstract base class GraphEntityTooltipStateManager<E extends GraphEntity>
   bool get isShowing => _currentShowId != null;
 
   GraphId? _currentShowId;
-  GraphId? _pendingShowId;
-
-  bool get _hasPendingShow => _pendingShowId != null;
-
-  Offset? _lastPointerPosition;
 
   // --- Public API ---
   bool isTooltipVisible(GraphId entityId) =>
       getState(entityId)?.isVisible ?? false;
 
   void cancelAll() {
-    final statesToCancel = List.from(states);
+    final statesToCancel = List<_TooltipState>.from(states);
     for (final state in statesToCancel) {
-      final tooltipState = state as _TooltipState;
+      final tooltipState = state;
       cancel(tooltipState.entityId);
     }
   }

@@ -110,9 +110,9 @@ abstract base class GraphEntityTapStateManager<E extends GraphEntity>
 
   /// Cancels all ongoing tap recognitions.
   void cancelAll() {
-    final statesToCancel = List.from(states);
+    final statesToCancel = List<_TapState>.from(states);
     for (final state in statesToCancel) {
-      final tapState = state as _TapState;
+      final tapState = state;
       cancel(tapState.entityId);
     }
   }

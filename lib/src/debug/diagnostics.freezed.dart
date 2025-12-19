@@ -12,8 +12,7 @@ part of 'diagnostics.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 GraphDiagnostics _$GraphDiagnosticsFromJson(Map<String, dynamic> json) {
   return _GraphDiagnostics.fromJson(json);
@@ -40,17 +39,15 @@ mixin _$GraphDiagnostics {
 /// @nodoc
 abstract class $GraphDiagnosticsCopyWith<$Res> {
   factory $GraphDiagnosticsCopyWith(
-    GraphDiagnostics value,
-    $Res Function(GraphDiagnostics) then,
-  ) = _$GraphDiagnosticsCopyWithImpl<$Res, GraphDiagnostics>;
+          GraphDiagnostics value, $Res Function(GraphDiagnostics) then) =
+      _$GraphDiagnosticsCopyWithImpl<$Res, GraphDiagnostics>;
   @useResult
-  $Res call({
-    GraphSnapshot snapshot,
-    List<GestureEvent> gestureHistory,
-    List<RenderEvent> renderHistory,
-    List<StateChange> stateChanges,
-    PerformanceMetrics performance,
-  });
+  $Res call(
+      {GraphSnapshot snapshot,
+      List<GestureEvent> gestureHistory,
+      List<RenderEvent> renderHistory,
+      List<StateChange> stateChanges,
+      PerformanceMetrics performance});
 
   $GraphSnapshotCopyWith<$Res> get snapshot;
   $PerformanceMetricsCopyWith<$Res> get performance;
@@ -77,30 +74,28 @@ class _$GraphDiagnosticsCopyWithImpl<$Res, $Val extends GraphDiagnostics>
     Object? stateChanges = null,
     Object? performance = null,
   }) {
-    return _then(
-      _value.copyWith(
-        snapshot: null == snapshot
-            ? _value.snapshot
-            : snapshot // ignore: cast_nullable_to_non_nullable
-                as GraphSnapshot,
-        gestureHistory: null == gestureHistory
-            ? _value.gestureHistory
-            : gestureHistory // ignore: cast_nullable_to_non_nullable
-                as List<GestureEvent>,
-        renderHistory: null == renderHistory
-            ? _value.renderHistory
-            : renderHistory // ignore: cast_nullable_to_non_nullable
-                as List<RenderEvent>,
-        stateChanges: null == stateChanges
-            ? _value.stateChanges
-            : stateChanges // ignore: cast_nullable_to_non_nullable
-                as List<StateChange>,
-        performance: null == performance
-            ? _value.performance
-            : performance // ignore: cast_nullable_to_non_nullable
-                as PerformanceMetrics,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      snapshot: null == snapshot
+          ? _value.snapshot
+          : snapshot // ignore: cast_nullable_to_non_nullable
+              as GraphSnapshot,
+      gestureHistory: null == gestureHistory
+          ? _value.gestureHistory
+          : gestureHistory // ignore: cast_nullable_to_non_nullable
+              as List<GestureEvent>,
+      renderHistory: null == renderHistory
+          ? _value.renderHistory
+          : renderHistory // ignore: cast_nullable_to_non_nullable
+              as List<RenderEvent>,
+      stateChanges: null == stateChanges
+          ? _value.stateChanges
+          : stateChanges // ignore: cast_nullable_to_non_nullable
+              as List<StateChange>,
+      performance: null == performance
+          ? _value.performance
+          : performance // ignore: cast_nullable_to_non_nullable
+              as PerformanceMetrics,
+    ) as $Val);
   }
 
   /// Create a copy of GraphDiagnostics
@@ -127,19 +122,17 @@ class _$GraphDiagnosticsCopyWithImpl<$Res, $Val extends GraphDiagnostics>
 /// @nodoc
 abstract class _$$GraphDiagnosticsImplCopyWith<$Res>
     implements $GraphDiagnosticsCopyWith<$Res> {
-  factory _$$GraphDiagnosticsImplCopyWith(
-    _$GraphDiagnosticsImpl value,
-    $Res Function(_$GraphDiagnosticsImpl) then,
-  ) = __$$GraphDiagnosticsImplCopyWithImpl<$Res>;
+  factory _$$GraphDiagnosticsImplCopyWith(_$GraphDiagnosticsImpl value,
+          $Res Function(_$GraphDiagnosticsImpl) then) =
+      __$$GraphDiagnosticsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    GraphSnapshot snapshot,
-    List<GestureEvent> gestureHistory,
-    List<RenderEvent> renderHistory,
-    List<StateChange> stateChanges,
-    PerformanceMetrics performance,
-  });
+  $Res call(
+      {GraphSnapshot snapshot,
+      List<GestureEvent> gestureHistory,
+      List<RenderEvent> renderHistory,
+      List<StateChange> stateChanges,
+      PerformanceMetrics performance});
 
   @override
   $GraphSnapshotCopyWith<$Res> get snapshot;
@@ -151,10 +144,9 @@ abstract class _$$GraphDiagnosticsImplCopyWith<$Res>
 class __$$GraphDiagnosticsImplCopyWithImpl<$Res>
     extends _$GraphDiagnosticsCopyWithImpl<$Res, _$GraphDiagnosticsImpl>
     implements _$$GraphDiagnosticsImplCopyWith<$Res> {
-  __$$GraphDiagnosticsImplCopyWithImpl(
-    _$GraphDiagnosticsImpl _value,
-    $Res Function(_$GraphDiagnosticsImpl) _then,
-  ) : super(_value, _then);
+  __$$GraphDiagnosticsImplCopyWithImpl(_$GraphDiagnosticsImpl _value,
+      $Res Function(_$GraphDiagnosticsImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphDiagnostics
   /// with the given fields replaced by the non-null parameter values.
@@ -167,30 +159,28 @@ class __$$GraphDiagnosticsImplCopyWithImpl<$Res>
     Object? stateChanges = null,
     Object? performance = null,
   }) {
-    return _then(
-      _$GraphDiagnosticsImpl(
-        snapshot: null == snapshot
-            ? _value.snapshot
-            : snapshot // ignore: cast_nullable_to_non_nullable
-                as GraphSnapshot,
-        gestureHistory: null == gestureHistory
-            ? _value._gestureHistory
-            : gestureHistory // ignore: cast_nullable_to_non_nullable
-                as List<GestureEvent>,
-        renderHistory: null == renderHistory
-            ? _value._renderHistory
-            : renderHistory // ignore: cast_nullable_to_non_nullable
-                as List<RenderEvent>,
-        stateChanges: null == stateChanges
-            ? _value._stateChanges
-            : stateChanges // ignore: cast_nullable_to_non_nullable
-                as List<StateChange>,
-        performance: null == performance
-            ? _value.performance
-            : performance // ignore: cast_nullable_to_non_nullable
-                as PerformanceMetrics,
-      ),
-    );
+    return _then(_$GraphDiagnosticsImpl(
+      snapshot: null == snapshot
+          ? _value.snapshot
+          : snapshot // ignore: cast_nullable_to_non_nullable
+              as GraphSnapshot,
+      gestureHistory: null == gestureHistory
+          ? _value._gestureHistory
+          : gestureHistory // ignore: cast_nullable_to_non_nullable
+              as List<GestureEvent>,
+      renderHistory: null == renderHistory
+          ? _value._renderHistory
+          : renderHistory // ignore: cast_nullable_to_non_nullable
+              as List<RenderEvent>,
+      stateChanges: null == stateChanges
+          ? _value._stateChanges
+          : stateChanges // ignore: cast_nullable_to_non_nullable
+              as List<StateChange>,
+      performance: null == performance
+          ? _value.performance
+          : performance // ignore: cast_nullable_to_non_nullable
+              as PerformanceMetrics,
+    ));
   }
 }
 
@@ -199,13 +189,13 @@ class __$$GraphDiagnosticsImplCopyWithImpl<$Res>
 class _$GraphDiagnosticsImpl
     with DiagnosticableTreeMixin
     implements _GraphDiagnostics {
-  const _$GraphDiagnosticsImpl({
-    required this.snapshot,
-    required final List<GestureEvent> gestureHistory,
-    required final List<RenderEvent> renderHistory,
-    required final List<StateChange> stateChanges,
-    required this.performance,
-  })  : _gestureHistory = gestureHistory,
+  const _$GraphDiagnosticsImpl(
+      {required this.snapshot,
+      required final List<GestureEvent> gestureHistory,
+      required final List<RenderEvent> renderHistory,
+      required final List<StateChange> stateChanges,
+      required this.performance})
+      : _gestureHistory = gestureHistory,
         _renderHistory = renderHistory,
         _stateChanges = stateChanges;
 
@@ -265,18 +255,12 @@ class _$GraphDiagnosticsImpl
             other is _$GraphDiagnosticsImpl &&
             (identical(other.snapshot, snapshot) ||
                 other.snapshot == snapshot) &&
-            const DeepCollectionEquality().equals(
-              other._gestureHistory,
-              _gestureHistory,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._renderHistory,
-              _renderHistory,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._stateChanges,
-              _stateChanges,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._gestureHistory, _gestureHistory) &&
+            const DeepCollectionEquality()
+                .equals(other._renderHistory, _renderHistory) &&
+            const DeepCollectionEquality()
+                .equals(other._stateChanges, _stateChanges) &&
             (identical(other.performance, performance) ||
                 other.performance == performance));
   }
@@ -284,13 +268,12 @@ class _$GraphDiagnosticsImpl
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        snapshot,
-        const DeepCollectionEquality().hash(_gestureHistory),
-        const DeepCollectionEquality().hash(_renderHistory),
-        const DeepCollectionEquality().hash(_stateChanges),
-        performance,
-      );
+      runtimeType,
+      snapshot,
+      const DeepCollectionEquality().hash(_gestureHistory),
+      const DeepCollectionEquality().hash(_renderHistory),
+      const DeepCollectionEquality().hash(_stateChanges),
+      performance);
 
   /// Create a copy of GraphDiagnostics
   /// with the given fields replaced by the non-null parameter values.
@@ -299,24 +282,23 @@ class _$GraphDiagnosticsImpl
   @pragma('vm:prefer-inline')
   _$$GraphDiagnosticsImplCopyWith<_$GraphDiagnosticsImpl> get copyWith =>
       __$$GraphDiagnosticsImplCopyWithImpl<_$GraphDiagnosticsImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GraphDiagnosticsImplToJson(this);
+    return _$$GraphDiagnosticsImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _GraphDiagnostics implements GraphDiagnostics {
-  const factory _GraphDiagnostics({
-    required final GraphSnapshot snapshot,
-    required final List<GestureEvent> gestureHistory,
-    required final List<RenderEvent> renderHistory,
-    required final List<StateChange> stateChanges,
-    required final PerformanceMetrics performance,
-  }) = _$GraphDiagnosticsImpl;
+  const factory _GraphDiagnostics(
+      {required final GraphSnapshot snapshot,
+      required final List<GestureEvent> gestureHistory,
+      required final List<RenderEvent> renderHistory,
+      required final List<StateChange> stateChanges,
+      required final PerformanceMetrics performance}) = _$GraphDiagnosticsImpl;
 
   factory _GraphDiagnostics.fromJson(Map<String, dynamic> json) =
       _$GraphDiagnosticsImpl.fromJson;
@@ -369,20 +351,18 @@ mixin _$GraphSnapshot {
 /// @nodoc
 abstract class $GraphSnapshotCopyWith<$Res> {
   factory $GraphSnapshotCopyWith(
-    GraphSnapshot value,
-    $Res Function(GraphSnapshot) then,
-  ) = _$GraphSnapshotCopyWithImpl<$Res, GraphSnapshot>;
+          GraphSnapshot value, $Res Function(GraphSnapshot) then) =
+      _$GraphSnapshotCopyWithImpl<$Res, GraphSnapshot>;
   @useResult
-  $Res call({
-    DateTime timestamp,
-    int nodeCount,
-    int linkCount,
-    Map<String, NodePosition> nodePositions,
-    LayoutMetrics layoutMetrics,
-    GestureState currentGesture,
-    String? selectedNodeId,
-    List<String>? draggedNodeIds,
-  });
+  $Res call(
+      {DateTime timestamp,
+      int nodeCount,
+      int linkCount,
+      Map<String, NodePosition> nodePositions,
+      LayoutMetrics layoutMetrics,
+      GestureState currentGesture,
+      String? selectedNodeId,
+      List<String>? draggedNodeIds});
 
   $LayoutMetricsCopyWith<$Res> get layoutMetrics;
   $GestureStateCopyWith<$Res> get currentGesture;
@@ -412,42 +392,40 @@ class _$GraphSnapshotCopyWithImpl<$Res, $Val extends GraphSnapshot>
     Object? selectedNodeId = freezed,
     Object? draggedNodeIds = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        nodeCount: null == nodeCount
-            ? _value.nodeCount
-            : nodeCount // ignore: cast_nullable_to_non_nullable
-                as int,
-        linkCount: null == linkCount
-            ? _value.linkCount
-            : linkCount // ignore: cast_nullable_to_non_nullable
-                as int,
-        nodePositions: null == nodePositions
-            ? _value.nodePositions
-            : nodePositions // ignore: cast_nullable_to_non_nullable
-                as Map<String, NodePosition>,
-        layoutMetrics: null == layoutMetrics
-            ? _value.layoutMetrics
-            : layoutMetrics // ignore: cast_nullable_to_non_nullable
-                as LayoutMetrics,
-        currentGesture: null == currentGesture
-            ? _value.currentGesture
-            : currentGesture // ignore: cast_nullable_to_non_nullable
-                as GestureState,
-        selectedNodeId: freezed == selectedNodeId
-            ? _value.selectedNodeId
-            : selectedNodeId // ignore: cast_nullable_to_non_nullable
-                as String?,
-        draggedNodeIds: freezed == draggedNodeIds
-            ? _value.draggedNodeIds
-            : draggedNodeIds // ignore: cast_nullable_to_non_nullable
-                as List<String>?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      nodeCount: null == nodeCount
+          ? _value.nodeCount
+          : nodeCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      linkCount: null == linkCount
+          ? _value.linkCount
+          : linkCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      nodePositions: null == nodePositions
+          ? _value.nodePositions
+          : nodePositions // ignore: cast_nullable_to_non_nullable
+              as Map<String, NodePosition>,
+      layoutMetrics: null == layoutMetrics
+          ? _value.layoutMetrics
+          : layoutMetrics // ignore: cast_nullable_to_non_nullable
+              as LayoutMetrics,
+      currentGesture: null == currentGesture
+          ? _value.currentGesture
+          : currentGesture // ignore: cast_nullable_to_non_nullable
+              as GestureState,
+      selectedNodeId: freezed == selectedNodeId
+          ? _value.selectedNodeId
+          : selectedNodeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      draggedNodeIds: freezed == draggedNodeIds
+          ? _value.draggedNodeIds
+          : draggedNodeIds // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+    ) as $Val);
   }
 
   /// Create a copy of GraphSnapshot
@@ -475,21 +453,19 @@ class _$GraphSnapshotCopyWithImpl<$Res, $Val extends GraphSnapshot>
 abstract class _$$GraphSnapshotImplCopyWith<$Res>
     implements $GraphSnapshotCopyWith<$Res> {
   factory _$$GraphSnapshotImplCopyWith(
-    _$GraphSnapshotImpl value,
-    $Res Function(_$GraphSnapshotImpl) then,
-  ) = __$$GraphSnapshotImplCopyWithImpl<$Res>;
+          _$GraphSnapshotImpl value, $Res Function(_$GraphSnapshotImpl) then) =
+      __$$GraphSnapshotImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    DateTime timestamp,
-    int nodeCount,
-    int linkCount,
-    Map<String, NodePosition> nodePositions,
-    LayoutMetrics layoutMetrics,
-    GestureState currentGesture,
-    String? selectedNodeId,
-    List<String>? draggedNodeIds,
-  });
+  $Res call(
+      {DateTime timestamp,
+      int nodeCount,
+      int linkCount,
+      Map<String, NodePosition> nodePositions,
+      LayoutMetrics layoutMetrics,
+      GestureState currentGesture,
+      String? selectedNodeId,
+      List<String>? draggedNodeIds});
 
   @override
   $LayoutMetricsCopyWith<$Res> get layoutMetrics;
@@ -502,9 +478,8 @@ class __$$GraphSnapshotImplCopyWithImpl<$Res>
     extends _$GraphSnapshotCopyWithImpl<$Res, _$GraphSnapshotImpl>
     implements _$$GraphSnapshotImplCopyWith<$Res> {
   __$$GraphSnapshotImplCopyWithImpl(
-    _$GraphSnapshotImpl _value,
-    $Res Function(_$GraphSnapshotImpl) _then,
-  ) : super(_value, _then);
+      _$GraphSnapshotImpl _value, $Res Function(_$GraphSnapshotImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GraphSnapshot
   /// with the given fields replaced by the non-null parameter values.
@@ -520,42 +495,40 @@ class __$$GraphSnapshotImplCopyWithImpl<$Res>
     Object? selectedNodeId = freezed,
     Object? draggedNodeIds = freezed,
   }) {
-    return _then(
-      _$GraphSnapshotImpl(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        nodeCount: null == nodeCount
-            ? _value.nodeCount
-            : nodeCount // ignore: cast_nullable_to_non_nullable
-                as int,
-        linkCount: null == linkCount
-            ? _value.linkCount
-            : linkCount // ignore: cast_nullable_to_non_nullable
-                as int,
-        nodePositions: null == nodePositions
-            ? _value._nodePositions
-            : nodePositions // ignore: cast_nullable_to_non_nullable
-                as Map<String, NodePosition>,
-        layoutMetrics: null == layoutMetrics
-            ? _value.layoutMetrics
-            : layoutMetrics // ignore: cast_nullable_to_non_nullable
-                as LayoutMetrics,
-        currentGesture: null == currentGesture
-            ? _value.currentGesture
-            : currentGesture // ignore: cast_nullable_to_non_nullable
-                as GestureState,
-        selectedNodeId: freezed == selectedNodeId
-            ? _value.selectedNodeId
-            : selectedNodeId // ignore: cast_nullable_to_non_nullable
-                as String?,
-        draggedNodeIds: freezed == draggedNodeIds
-            ? _value._draggedNodeIds
-            : draggedNodeIds // ignore: cast_nullable_to_non_nullable
-                as List<String>?,
-      ),
-    );
+    return _then(_$GraphSnapshotImpl(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      nodeCount: null == nodeCount
+          ? _value.nodeCount
+          : nodeCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      linkCount: null == linkCount
+          ? _value.linkCount
+          : linkCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      nodePositions: null == nodePositions
+          ? _value._nodePositions
+          : nodePositions // ignore: cast_nullable_to_non_nullable
+              as Map<String, NodePosition>,
+      layoutMetrics: null == layoutMetrics
+          ? _value.layoutMetrics
+          : layoutMetrics // ignore: cast_nullable_to_non_nullable
+              as LayoutMetrics,
+      currentGesture: null == currentGesture
+          ? _value.currentGesture
+          : currentGesture // ignore: cast_nullable_to_non_nullable
+              as GestureState,
+      selectedNodeId: freezed == selectedNodeId
+          ? _value.selectedNodeId
+          : selectedNodeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      draggedNodeIds: freezed == draggedNodeIds
+          ? _value._draggedNodeIds
+          : draggedNodeIds // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+    ));
   }
 }
 
@@ -564,16 +537,16 @@ class __$$GraphSnapshotImplCopyWithImpl<$Res>
 class _$GraphSnapshotImpl
     with DiagnosticableTreeMixin
     implements _GraphSnapshot {
-  const _$GraphSnapshotImpl({
-    required this.timestamp,
-    required this.nodeCount,
-    required this.linkCount,
-    required final Map<String, NodePosition> nodePositions,
-    required this.layoutMetrics,
-    required this.currentGesture,
-    this.selectedNodeId,
-    final List<String>? draggedNodeIds,
-  })  : _nodePositions = nodePositions,
+  const _$GraphSnapshotImpl(
+      {required this.timestamp,
+      required this.nodeCount,
+      required this.linkCount,
+      required final Map<String, NodePosition> nodePositions,
+      required this.layoutMetrics,
+      required this.currentGesture,
+      this.selectedNodeId,
+      final List<String>? draggedNodeIds})
+      : _nodePositions = nodePositions,
         _draggedNodeIds = draggedNodeIds;
 
   factory _$GraphSnapshotImpl.fromJson(Map<String, dynamic> json) =>
@@ -640,35 +613,30 @@ class _$GraphSnapshotImpl
                 other.nodeCount == nodeCount) &&
             (identical(other.linkCount, linkCount) ||
                 other.linkCount == linkCount) &&
-            const DeepCollectionEquality().equals(
-              other._nodePositions,
-              _nodePositions,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._nodePositions, _nodePositions) &&
             (identical(other.layoutMetrics, layoutMetrics) ||
                 other.layoutMetrics == layoutMetrics) &&
             (identical(other.currentGesture, currentGesture) ||
                 other.currentGesture == currentGesture) &&
             (identical(other.selectedNodeId, selectedNodeId) ||
                 other.selectedNodeId == selectedNodeId) &&
-            const DeepCollectionEquality().equals(
-              other._draggedNodeIds,
-              _draggedNodeIds,
-            ));
+            const DeepCollectionEquality()
+                .equals(other._draggedNodeIds, _draggedNodeIds));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        timestamp,
-        nodeCount,
-        linkCount,
-        const DeepCollectionEquality().hash(_nodePositions),
-        layoutMetrics,
-        currentGesture,
-        selectedNodeId,
-        const DeepCollectionEquality().hash(_draggedNodeIds),
-      );
+      runtimeType,
+      timestamp,
+      nodeCount,
+      linkCount,
+      const DeepCollectionEquality().hash(_nodePositions),
+      layoutMetrics,
+      currentGesture,
+      selectedNodeId,
+      const DeepCollectionEquality().hash(_draggedNodeIds));
 
   /// Create a copy of GraphSnapshot
   /// with the given fields replaced by the non-null parameter values.
@@ -680,21 +648,22 @@ class _$GraphSnapshotImpl
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GraphSnapshotImplToJson(this);
+    return _$$GraphSnapshotImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _GraphSnapshot implements GraphSnapshot {
-  const factory _GraphSnapshot({
-    required final DateTime timestamp,
-    required final int nodeCount,
-    required final int linkCount,
-    required final Map<String, NodePosition> nodePositions,
-    required final LayoutMetrics layoutMetrics,
-    required final GestureState currentGesture,
-    final String? selectedNodeId,
-    final List<String>? draggedNodeIds,
-  }) = _$GraphSnapshotImpl;
+  const factory _GraphSnapshot(
+      {required final DateTime timestamp,
+      required final int nodeCount,
+      required final int linkCount,
+      required final Map<String, NodePosition> nodePositions,
+      required final LayoutMetrics layoutMetrics,
+      required final GestureState currentGesture,
+      final String? selectedNodeId,
+      final List<String>? draggedNodeIds}) = _$GraphSnapshotImpl;
 
   factory _GraphSnapshot.fromJson(Map<String, dynamic> json) =
       _$GraphSnapshotImpl.fromJson;
@@ -749,17 +718,11 @@ mixin _$NodePosition {
 /// @nodoc
 abstract class $NodePositionCopyWith<$Res> {
   factory $NodePositionCopyWith(
-    NodePosition value,
-    $Res Function(NodePosition) then,
-  ) = _$NodePositionCopyWithImpl<$Res, NodePosition>;
+          NodePosition value, $Res Function(NodePosition) then) =
+      _$NodePositionCopyWithImpl<$Res, NodePosition>;
   @useResult
-  $Res call({
-    String nodeId,
-    double x,
-    double y,
-    bool isFixed,
-    bool? isAnimating,
-  });
+  $Res call(
+      {String nodeId, double x, double y, bool isFixed, bool? isAnimating});
 }
 
 /// @nodoc
@@ -783,30 +746,28 @@ class _$NodePositionCopyWithImpl<$Res, $Val extends NodePosition>
     Object? isFixed = null,
     Object? isAnimating = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        nodeId: null == nodeId
-            ? _value.nodeId
-            : nodeId // ignore: cast_nullable_to_non_nullable
-                as String,
-        x: null == x
-            ? _value.x
-            : x // ignore: cast_nullable_to_non_nullable
-                as double,
-        y: null == y
-            ? _value.y
-            : y // ignore: cast_nullable_to_non_nullable
-                as double,
-        isFixed: null == isFixed
-            ? _value.isFixed
-            : isFixed // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isAnimating: freezed == isAnimating
-            ? _value.isAnimating
-            : isAnimating // ignore: cast_nullable_to_non_nullable
-                as bool?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      nodeId: null == nodeId
+          ? _value.nodeId
+          : nodeId // ignore: cast_nullable_to_non_nullable
+              as String,
+      x: null == x
+          ? _value.x
+          : x // ignore: cast_nullable_to_non_nullable
+              as double,
+      y: null == y
+          ? _value.y
+          : y // ignore: cast_nullable_to_non_nullable
+              as double,
+      isFixed: null == isFixed
+          ? _value.isFixed
+          : isFixed // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnimating: freezed == isAnimating
+          ? _value.isAnimating
+          : isAnimating // ignore: cast_nullable_to_non_nullable
+              as bool?,
+    ) as $Val);
   }
 }
 
@@ -814,18 +775,12 @@ class _$NodePositionCopyWithImpl<$Res, $Val extends NodePosition>
 abstract class _$$NodePositionImplCopyWith<$Res>
     implements $NodePositionCopyWith<$Res> {
   factory _$$NodePositionImplCopyWith(
-    _$NodePositionImpl value,
-    $Res Function(_$NodePositionImpl) then,
-  ) = __$$NodePositionImplCopyWithImpl<$Res>;
+          _$NodePositionImpl value, $Res Function(_$NodePositionImpl) then) =
+      __$$NodePositionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String nodeId,
-    double x,
-    double y,
-    bool isFixed,
-    bool? isAnimating,
-  });
+  $Res call(
+      {String nodeId, double x, double y, bool isFixed, bool? isAnimating});
 }
 
 /// @nodoc
@@ -833,9 +788,8 @@ class __$$NodePositionImplCopyWithImpl<$Res>
     extends _$NodePositionCopyWithImpl<$Res, _$NodePositionImpl>
     implements _$$NodePositionImplCopyWith<$Res> {
   __$$NodePositionImplCopyWithImpl(
-    _$NodePositionImpl _value,
-    $Res Function(_$NodePositionImpl) _then,
-  ) : super(_value, _then);
+      _$NodePositionImpl _value, $Res Function(_$NodePositionImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of NodePosition
   /// with the given fields replaced by the non-null parameter values.
@@ -848,43 +802,40 @@ class __$$NodePositionImplCopyWithImpl<$Res>
     Object? isFixed = null,
     Object? isAnimating = freezed,
   }) {
-    return _then(
-      _$NodePositionImpl(
-        nodeId: null == nodeId
-            ? _value.nodeId
-            : nodeId // ignore: cast_nullable_to_non_nullable
-                as String,
-        x: null == x
-            ? _value.x
-            : x // ignore: cast_nullable_to_non_nullable
-                as double,
-        y: null == y
-            ? _value.y
-            : y // ignore: cast_nullable_to_non_nullable
-                as double,
-        isFixed: null == isFixed
-            ? _value.isFixed
-            : isFixed // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isAnimating: freezed == isAnimating
-            ? _value.isAnimating
-            : isAnimating // ignore: cast_nullable_to_non_nullable
-                as bool?,
-      ),
-    );
+    return _then(_$NodePositionImpl(
+      nodeId: null == nodeId
+          ? _value.nodeId
+          : nodeId // ignore: cast_nullable_to_non_nullable
+              as String,
+      x: null == x
+          ? _value.x
+          : x // ignore: cast_nullable_to_non_nullable
+              as double,
+      y: null == y
+          ? _value.y
+          : y // ignore: cast_nullable_to_non_nullable
+              as double,
+      isFixed: null == isFixed
+          ? _value.isFixed
+          : isFixed // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnimating: freezed == isAnimating
+          ? _value.isAnimating
+          : isAnimating // ignore: cast_nullable_to_non_nullable
+              as bool?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$NodePositionImpl with DiagnosticableTreeMixin implements _NodePosition {
-  const _$NodePositionImpl({
-    required this.nodeId,
-    required this.x,
-    required this.y,
-    required this.isFixed,
-    this.isAnimating,
-  });
+  const _$NodePositionImpl(
+      {required this.nodeId,
+      required this.x,
+      required this.y,
+      required this.isFixed,
+      this.isAnimating});
 
   factory _$NodePositionImpl.fromJson(Map<String, dynamic> json) =>
       _$$NodePositionImplFromJson(json);
@@ -945,18 +896,19 @@ class _$NodePositionImpl with DiagnosticableTreeMixin implements _NodePosition {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$NodePositionImplToJson(this);
+    return _$$NodePositionImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _NodePosition implements NodePosition {
-  const factory _NodePosition({
-    required final String nodeId,
-    required final double x,
-    required final double y,
-    required final bool isFixed,
-    final bool? isAnimating,
-  }) = _$NodePositionImpl;
+  const factory _NodePosition(
+      {required final String nodeId,
+      required final double x,
+      required final double y,
+      required final bool isFixed,
+      final bool? isAnimating}) = _$NodePositionImpl;
 
   factory _NodePosition.fromJson(Map<String, dynamic> json) =
       _$NodePositionImpl.fromJson;
@@ -1006,17 +958,15 @@ mixin _$LayoutMetrics {
 /// @nodoc
 abstract class $LayoutMetricsCopyWith<$Res> {
   factory $LayoutMetricsCopyWith(
-    LayoutMetrics value,
-    $Res Function(LayoutMetrics) then,
-  ) = _$LayoutMetricsCopyWithImpl<$Res, LayoutMetrics>;
+          LayoutMetrics value, $Res Function(LayoutMetrics) then) =
+      _$LayoutMetricsCopyWithImpl<$Res, LayoutMetrics>;
   @useResult
-  $Res call({
-    String strategy,
-    Duration lastCalculationTime,
-    int iterationCount,
-    double totalEnergy,
-    @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson) Size graphBounds,
-  });
+  $Res call(
+      {String strategy,
+      Duration lastCalculationTime,
+      int iterationCount,
+      double totalEnergy,
+      @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson) Size graphBounds});
 }
 
 /// @nodoc
@@ -1040,30 +990,28 @@ class _$LayoutMetricsCopyWithImpl<$Res, $Val extends LayoutMetrics>
     Object? totalEnergy = null,
     Object? graphBounds = null,
   }) {
-    return _then(
-      _value.copyWith(
-        strategy: null == strategy
-            ? _value.strategy
-            : strategy // ignore: cast_nullable_to_non_nullable
-                as String,
-        lastCalculationTime: null == lastCalculationTime
-            ? _value.lastCalculationTime
-            : lastCalculationTime // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        iterationCount: null == iterationCount
-            ? _value.iterationCount
-            : iterationCount // ignore: cast_nullable_to_non_nullable
-                as int,
-        totalEnergy: null == totalEnergy
-            ? _value.totalEnergy
-            : totalEnergy // ignore: cast_nullable_to_non_nullable
-                as double,
-        graphBounds: null == graphBounds
-            ? _value.graphBounds
-            : graphBounds // ignore: cast_nullable_to_non_nullable
-                as Size,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      strategy: null == strategy
+          ? _value.strategy
+          : strategy // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastCalculationTime: null == lastCalculationTime
+          ? _value.lastCalculationTime
+          : lastCalculationTime // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      iterationCount: null == iterationCount
+          ? _value.iterationCount
+          : iterationCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalEnergy: null == totalEnergy
+          ? _value.totalEnergy
+          : totalEnergy // ignore: cast_nullable_to_non_nullable
+              as double,
+      graphBounds: null == graphBounds
+          ? _value.graphBounds
+          : graphBounds // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ) as $Val);
   }
 }
 
@@ -1071,18 +1019,16 @@ class _$LayoutMetricsCopyWithImpl<$Res, $Val extends LayoutMetrics>
 abstract class _$$LayoutMetricsImplCopyWith<$Res>
     implements $LayoutMetricsCopyWith<$Res> {
   factory _$$LayoutMetricsImplCopyWith(
-    _$LayoutMetricsImpl value,
-    $Res Function(_$LayoutMetricsImpl) then,
-  ) = __$$LayoutMetricsImplCopyWithImpl<$Res>;
+          _$LayoutMetricsImpl value, $Res Function(_$LayoutMetricsImpl) then) =
+      __$$LayoutMetricsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String strategy,
-    Duration lastCalculationTime,
-    int iterationCount,
-    double totalEnergy,
-    @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson) Size graphBounds,
-  });
+  $Res call(
+      {String strategy,
+      Duration lastCalculationTime,
+      int iterationCount,
+      double totalEnergy,
+      @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson) Size graphBounds});
 }
 
 /// @nodoc
@@ -1090,9 +1036,8 @@ class __$$LayoutMetricsImplCopyWithImpl<$Res>
     extends _$LayoutMetricsCopyWithImpl<$Res, _$LayoutMetricsImpl>
     implements _$$LayoutMetricsImplCopyWith<$Res> {
   __$$LayoutMetricsImplCopyWithImpl(
-    _$LayoutMetricsImpl _value,
-    $Res Function(_$LayoutMetricsImpl) _then,
-  ) : super(_value, _then);
+      _$LayoutMetricsImpl _value, $Res Function(_$LayoutMetricsImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of LayoutMetrics
   /// with the given fields replaced by the non-null parameter values.
@@ -1105,30 +1050,28 @@ class __$$LayoutMetricsImplCopyWithImpl<$Res>
     Object? totalEnergy = null,
     Object? graphBounds = null,
   }) {
-    return _then(
-      _$LayoutMetricsImpl(
-        strategy: null == strategy
-            ? _value.strategy
-            : strategy // ignore: cast_nullable_to_non_nullable
-                as String,
-        lastCalculationTime: null == lastCalculationTime
-            ? _value.lastCalculationTime
-            : lastCalculationTime // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        iterationCount: null == iterationCount
-            ? _value.iterationCount
-            : iterationCount // ignore: cast_nullable_to_non_nullable
-                as int,
-        totalEnergy: null == totalEnergy
-            ? _value.totalEnergy
-            : totalEnergy // ignore: cast_nullable_to_non_nullable
-                as double,
-        graphBounds: null == graphBounds
-            ? _value.graphBounds
-            : graphBounds // ignore: cast_nullable_to_non_nullable
-                as Size,
-      ),
-    );
+    return _then(_$LayoutMetricsImpl(
+      strategy: null == strategy
+          ? _value.strategy
+          : strategy // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastCalculationTime: null == lastCalculationTime
+          ? _value.lastCalculationTime
+          : lastCalculationTime // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      iterationCount: null == iterationCount
+          ? _value.iterationCount
+          : iterationCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalEnergy: null == totalEnergy
+          ? _value.totalEnergy
+          : totalEnergy // ignore: cast_nullable_to_non_nullable
+              as double,
+      graphBounds: null == graphBounds
+          ? _value.graphBounds
+          : graphBounds // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ));
   }
 }
 
@@ -1137,14 +1080,13 @@ class __$$LayoutMetricsImplCopyWithImpl<$Res>
 class _$LayoutMetricsImpl
     with DiagnosticableTreeMixin
     implements _LayoutMetrics {
-  const _$LayoutMetricsImpl({
-    required this.strategy,
-    required this.lastCalculationTime,
-    required this.iterationCount,
-    required this.totalEnergy,
-    @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson)
-    required this.graphBounds,
-  });
+  const _$LayoutMetricsImpl(
+      {required this.strategy,
+      required this.lastCalculationTime,
+      required this.iterationCount,
+      required this.totalEnergy,
+      @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson)
+      required this.graphBounds});
 
   factory _$LayoutMetricsImpl.fromJson(Map<String, dynamic> json) =>
       _$$LayoutMetricsImplFromJson(json);
@@ -1197,14 +1139,8 @@ class _$LayoutMetricsImpl
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-        runtimeType,
-        strategy,
-        lastCalculationTime,
-        iterationCount,
-        totalEnergy,
-        graphBounds,
-      );
+  int get hashCode => Object.hash(runtimeType, strategy, lastCalculationTime,
+      iterationCount, totalEnergy, graphBounds);
 
   /// Create a copy of LayoutMetrics
   /// with the given fields replaced by the non-null parameter values.
@@ -1216,19 +1152,20 @@ class _$LayoutMetricsImpl
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LayoutMetricsImplToJson(this);
+    return _$$LayoutMetricsImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _LayoutMetrics implements LayoutMetrics {
-  const factory _LayoutMetrics({
-    required final String strategy,
-    required final Duration lastCalculationTime,
-    required final int iterationCount,
-    required final double totalEnergy,
-    @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson)
-    required final Size graphBounds,
-  }) = _$LayoutMetricsImpl;
+  const factory _LayoutMetrics(
+      {required final String strategy,
+      required final Duration lastCalculationTime,
+      required final int iterationCount,
+      required final double totalEnergy,
+      @JsonKey(fromJson: sizeFromJson, toJson: sizeToJson)
+      required final Size graphBounds}) = _$LayoutMetricsImpl;
 
   factory _LayoutMetrics.fromJson(Map<String, dynamic> json) =
       _$LayoutMetricsImpl.fromJson;
@@ -1279,18 +1216,16 @@ mixin _$GestureState {
 /// @nodoc
 abstract class $GestureStateCopyWith<$Res> {
   factory $GestureStateCopyWith(
-    GestureState value,
-    $Res Function(GestureState) then,
-  ) = _$GestureStateCopyWithImpl<$Res, GestureState>;
+          GestureState value, $Res Function(GestureState) then) =
+      _$GestureStateCopyWithImpl<$Res, GestureState>;
   @useResult
-  $Res call({
-    bool isPanning,
-    bool isDragging,
-    bool isSelecting,
-    @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
-    Offset? currentPosition,
-    String? hoveredNodeId,
-  });
+  $Res call(
+      {bool isPanning,
+      bool isDragging,
+      bool isSelecting,
+      @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
+      Offset? currentPosition,
+      String? hoveredNodeId});
 }
 
 /// @nodoc
@@ -1314,30 +1249,28 @@ class _$GestureStateCopyWithImpl<$Res, $Val extends GestureState>
     Object? currentPosition = freezed,
     Object? hoveredNodeId = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        isPanning: null == isPanning
-            ? _value.isPanning
-            : isPanning // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isDragging: null == isDragging
-            ? _value.isDragging
-            : isDragging // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isSelecting: null == isSelecting
-            ? _value.isSelecting
-            : isSelecting // ignore: cast_nullable_to_non_nullable
-                as bool,
-        currentPosition: freezed == currentPosition
-            ? _value.currentPosition
-            : currentPosition // ignore: cast_nullable_to_non_nullable
-                as Offset?,
-        hoveredNodeId: freezed == hoveredNodeId
-            ? _value.hoveredNodeId
-            : hoveredNodeId // ignore: cast_nullable_to_non_nullable
-                as String?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      isPanning: null == isPanning
+          ? _value.isPanning
+          : isPanning // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isDragging: null == isDragging
+          ? _value.isDragging
+          : isDragging // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isSelecting: null == isSelecting
+          ? _value.isSelecting
+          : isSelecting // ignore: cast_nullable_to_non_nullable
+              as bool,
+      currentPosition: freezed == currentPosition
+          ? _value.currentPosition
+          : currentPosition // ignore: cast_nullable_to_non_nullable
+              as Offset?,
+      hoveredNodeId: freezed == hoveredNodeId
+          ? _value.hoveredNodeId
+          : hoveredNodeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
@@ -1345,19 +1278,17 @@ class _$GestureStateCopyWithImpl<$Res, $Val extends GestureState>
 abstract class _$$GestureStateImplCopyWith<$Res>
     implements $GestureStateCopyWith<$Res> {
   factory _$$GestureStateImplCopyWith(
-    _$GestureStateImpl value,
-    $Res Function(_$GestureStateImpl) then,
-  ) = __$$GestureStateImplCopyWithImpl<$Res>;
+          _$GestureStateImpl value, $Res Function(_$GestureStateImpl) then) =
+      __$$GestureStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    bool isPanning,
-    bool isDragging,
-    bool isSelecting,
-    @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
-    Offset? currentPosition,
-    String? hoveredNodeId,
-  });
+  $Res call(
+      {bool isPanning,
+      bool isDragging,
+      bool isSelecting,
+      @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
+      Offset? currentPosition,
+      String? hoveredNodeId});
 }
 
 /// @nodoc
@@ -1365,9 +1296,8 @@ class __$$GestureStateImplCopyWithImpl<$Res>
     extends _$GestureStateCopyWithImpl<$Res, _$GestureStateImpl>
     implements _$$GestureStateImplCopyWith<$Res> {
   __$$GestureStateImplCopyWithImpl(
-    _$GestureStateImpl _value,
-    $Res Function(_$GestureStateImpl) _then,
-  ) : super(_value, _then);
+      _$GestureStateImpl _value, $Res Function(_$GestureStateImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GestureState
   /// with the given fields replaced by the non-null parameter values.
@@ -1380,44 +1310,41 @@ class __$$GestureStateImplCopyWithImpl<$Res>
     Object? currentPosition = freezed,
     Object? hoveredNodeId = freezed,
   }) {
-    return _then(
-      _$GestureStateImpl(
-        isPanning: null == isPanning
-            ? _value.isPanning
-            : isPanning // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isDragging: null == isDragging
-            ? _value.isDragging
-            : isDragging // ignore: cast_nullable_to_non_nullable
-                as bool,
-        isSelecting: null == isSelecting
-            ? _value.isSelecting
-            : isSelecting // ignore: cast_nullable_to_non_nullable
-                as bool,
-        currentPosition: freezed == currentPosition
-            ? _value.currentPosition
-            : currentPosition // ignore: cast_nullable_to_non_nullable
-                as Offset?,
-        hoveredNodeId: freezed == hoveredNodeId
-            ? _value.hoveredNodeId
-            : hoveredNodeId // ignore: cast_nullable_to_non_nullable
-                as String?,
-      ),
-    );
+    return _then(_$GestureStateImpl(
+      isPanning: null == isPanning
+          ? _value.isPanning
+          : isPanning // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isDragging: null == isDragging
+          ? _value.isDragging
+          : isDragging // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isSelecting: null == isSelecting
+          ? _value.isSelecting
+          : isSelecting // ignore: cast_nullable_to_non_nullable
+              as bool,
+      currentPosition: freezed == currentPosition
+          ? _value.currentPosition
+          : currentPosition // ignore: cast_nullable_to_non_nullable
+              as Offset?,
+      hoveredNodeId: freezed == hoveredNodeId
+          ? _value.hoveredNodeId
+          : hoveredNodeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$GestureStateImpl with DiagnosticableTreeMixin implements _GestureState {
-  const _$GestureStateImpl({
-    required this.isPanning,
-    required this.isDragging,
-    required this.isSelecting,
-    @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
-    this.currentPosition,
-    this.hoveredNodeId,
-  });
+  const _$GestureStateImpl(
+      {required this.isPanning,
+      required this.isDragging,
+      required this.isSelecting,
+      @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
+      this.currentPosition,
+      this.hoveredNodeId});
 
   factory _$GestureStateImpl.fromJson(Map<String, dynamic> json) =>
       _$$GestureStateImplFromJson(json);
@@ -1470,14 +1397,8 @@ class _$GestureStateImpl with DiagnosticableTreeMixin implements _GestureState {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-        runtimeType,
-        isPanning,
-        isDragging,
-        isSelecting,
-        currentPosition,
-        hoveredNodeId,
-      );
+  int get hashCode => Object.hash(runtimeType, isPanning, isDragging,
+      isSelecting, currentPosition, hoveredNodeId);
 
   /// Create a copy of GestureState
   /// with the given fields replaced by the non-null parameter values.
@@ -1489,19 +1410,20 @@ class _$GestureStateImpl with DiagnosticableTreeMixin implements _GestureState {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GestureStateImplToJson(this);
+    return _$$GestureStateImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _GestureState implements GestureState {
-  const factory _GestureState({
-    required final bool isPanning,
-    required final bool isDragging,
-    required final bool isSelecting,
-    @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
-    final Offset? currentPosition,
-    final String? hoveredNodeId,
-  }) = _$GestureStateImpl;
+  const factory _GestureState(
+      {required final bool isPanning,
+      required final bool isDragging,
+      required final bool isSelecting,
+      @JsonKey(fromJson: nullableOffsetFromJson, toJson: nullableOffsetToJson)
+      final Offset? currentPosition,
+      final String? hoveredNodeId}) = _$GestureStateImpl;
 
   factory _GestureState.fromJson(Map<String, dynamic> json) =
       _$GestureStateImpl.fromJson;
@@ -1555,20 +1477,18 @@ mixin _$GestureEvent {
 /// @nodoc
 abstract class $GestureEventCopyWith<$Res> {
   factory $GestureEventCopyWith(
-    GestureEvent value,
-    $Res Function(GestureEvent) then,
-  ) = _$GestureEventCopyWithImpl<$Res, GestureEvent>;
+          GestureEvent value, $Res Function(GestureEvent) then) =
+      _$GestureEventCopyWithImpl<$Res, GestureEvent>;
   @useResult
-  $Res call({
-    DateTime timestamp,
-    GestureEventType type,
-    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson) Offset position,
-    bool wasConsumed,
-    String callbackInvoked,
-    String? targetNodeId,
-    String? targetLinkId,
-    Map<String, dynamic>? metadata,
-  });
+  $Res call(
+      {DateTime timestamp,
+      GestureEventType type,
+      @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson) Offset position,
+      bool wasConsumed,
+      String callbackInvoked,
+      String? targetNodeId,
+      String? targetLinkId,
+      Map<String, dynamic>? metadata});
 }
 
 /// @nodoc
@@ -1595,42 +1515,40 @@ class _$GestureEventCopyWithImpl<$Res, $Val extends GestureEvent>
     Object? targetLinkId = freezed,
     Object? metadata = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                as GestureEventType,
-        position: null == position
-            ? _value.position
-            : position // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        wasConsumed: null == wasConsumed
-            ? _value.wasConsumed
-            : wasConsumed // ignore: cast_nullable_to_non_nullable
-                as bool,
-        callbackInvoked: null == callbackInvoked
-            ? _value.callbackInvoked
-            : callbackInvoked // ignore: cast_nullable_to_non_nullable
-                as String,
-        targetNodeId: freezed == targetNodeId
-            ? _value.targetNodeId
-            : targetNodeId // ignore: cast_nullable_to_non_nullable
-                as String?,
-        targetLinkId: freezed == targetLinkId
-            ? _value.targetLinkId
-            : targetLinkId // ignore: cast_nullable_to_non_nullable
-                as String?,
-        metadata: freezed == metadata
-            ? _value.metadata
-            : metadata // ignore: cast_nullable_to_non_nullable
-                as Map<String, dynamic>?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as GestureEventType,
+      position: null == position
+          ? _value.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      wasConsumed: null == wasConsumed
+          ? _value.wasConsumed
+          : wasConsumed // ignore: cast_nullable_to_non_nullable
+              as bool,
+      callbackInvoked: null == callbackInvoked
+          ? _value.callbackInvoked
+          : callbackInvoked // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetNodeId: freezed == targetNodeId
+          ? _value.targetNodeId
+          : targetNodeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      targetLinkId: freezed == targetLinkId
+          ? _value.targetLinkId
+          : targetLinkId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      metadata: freezed == metadata
+          ? _value.metadata
+          : metadata // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ) as $Val);
   }
 }
 
@@ -1638,21 +1556,19 @@ class _$GestureEventCopyWithImpl<$Res, $Val extends GestureEvent>
 abstract class _$$GestureEventImplCopyWith<$Res>
     implements $GestureEventCopyWith<$Res> {
   factory _$$GestureEventImplCopyWith(
-    _$GestureEventImpl value,
-    $Res Function(_$GestureEventImpl) then,
-  ) = __$$GestureEventImplCopyWithImpl<$Res>;
+          _$GestureEventImpl value, $Res Function(_$GestureEventImpl) then) =
+      __$$GestureEventImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    DateTime timestamp,
-    GestureEventType type,
-    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson) Offset position,
-    bool wasConsumed,
-    String callbackInvoked,
-    String? targetNodeId,
-    String? targetLinkId,
-    Map<String, dynamic>? metadata,
-  });
+  $Res call(
+      {DateTime timestamp,
+      GestureEventType type,
+      @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson) Offset position,
+      bool wasConsumed,
+      String callbackInvoked,
+      String? targetNodeId,
+      String? targetLinkId,
+      Map<String, dynamic>? metadata});
 }
 
 /// @nodoc
@@ -1660,9 +1576,8 @@ class __$$GestureEventImplCopyWithImpl<$Res>
     extends _$GestureEventCopyWithImpl<$Res, _$GestureEventImpl>
     implements _$$GestureEventImplCopyWith<$Res> {
   __$$GestureEventImplCopyWithImpl(
-    _$GestureEventImpl _value,
-    $Res Function(_$GestureEventImpl) _then,
-  ) : super(_value, _then);
+      _$GestureEventImpl _value, $Res Function(_$GestureEventImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of GestureEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -1678,59 +1593,57 @@ class __$$GestureEventImplCopyWithImpl<$Res>
     Object? targetLinkId = freezed,
     Object? metadata = freezed,
   }) {
-    return _then(
-      _$GestureEventImpl(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                as GestureEventType,
-        position: null == position
-            ? _value.position
-            : position // ignore: cast_nullable_to_non_nullable
-                as Offset,
-        wasConsumed: null == wasConsumed
-            ? _value.wasConsumed
-            : wasConsumed // ignore: cast_nullable_to_non_nullable
-                as bool,
-        callbackInvoked: null == callbackInvoked
-            ? _value.callbackInvoked
-            : callbackInvoked // ignore: cast_nullable_to_non_nullable
-                as String,
-        targetNodeId: freezed == targetNodeId
-            ? _value.targetNodeId
-            : targetNodeId // ignore: cast_nullable_to_non_nullable
-                as String?,
-        targetLinkId: freezed == targetLinkId
-            ? _value.targetLinkId
-            : targetLinkId // ignore: cast_nullable_to_non_nullable
-                as String?,
-        metadata: freezed == metadata
-            ? _value._metadata
-            : metadata // ignore: cast_nullable_to_non_nullable
-                as Map<String, dynamic>?,
-      ),
-    );
+    return _then(_$GestureEventImpl(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as GestureEventType,
+      position: null == position
+          ? _value.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      wasConsumed: null == wasConsumed
+          ? _value.wasConsumed
+          : wasConsumed // ignore: cast_nullable_to_non_nullable
+              as bool,
+      callbackInvoked: null == callbackInvoked
+          ? _value.callbackInvoked
+          : callbackInvoked // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetNodeId: freezed == targetNodeId
+          ? _value.targetNodeId
+          : targetNodeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      targetLinkId: freezed == targetLinkId
+          ? _value.targetLinkId
+          : targetLinkId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      metadata: freezed == metadata
+          ? _value._metadata
+          : metadata // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$GestureEventImpl with DiagnosticableTreeMixin implements _GestureEvent {
-  const _$GestureEventImpl({
-    required this.timestamp,
-    required this.type,
-    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
-    required this.position,
-    required this.wasConsumed,
-    required this.callbackInvoked,
-    this.targetNodeId,
-    this.targetLinkId,
-    final Map<String, dynamic>? metadata,
-  }) : _metadata = metadata;
+  const _$GestureEventImpl(
+      {required this.timestamp,
+      required this.type,
+      @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
+      required this.position,
+      required this.wasConsumed,
+      required this.callbackInvoked,
+      this.targetNodeId,
+      this.targetLinkId,
+      final Map<String, dynamic>? metadata})
+      : _metadata = metadata;
 
   factory _$GestureEventImpl.fromJson(Map<String, dynamic> json) =>
       _$$GestureEventImplFromJson(json);
@@ -1804,16 +1717,15 @@ class _$GestureEventImpl with DiagnosticableTreeMixin implements _GestureEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        timestamp,
-        type,
-        position,
-        wasConsumed,
-        callbackInvoked,
-        targetNodeId,
-        targetLinkId,
-        const DeepCollectionEquality().hash(_metadata),
-      );
+      runtimeType,
+      timestamp,
+      type,
+      position,
+      wasConsumed,
+      callbackInvoked,
+      targetNodeId,
+      targetLinkId,
+      const DeepCollectionEquality().hash(_metadata));
 
   /// Create a copy of GestureEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -1825,19 +1737,23 @@ class _$GestureEventImpl with DiagnosticableTreeMixin implements _GestureEvent {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GestureEventImplToJson(this);
+    return _$$GestureEventImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _GestureEvent implements GestureEvent {
-  const factory _GestureEvent({
-    required final DateTime timestamp,
-    required final GestureEventType type,
-    @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
-    required final Offset position,
-    required final bool wasConsumed,
-    required final String callbackInvoked,
-  }) = _$GestureEventImpl;
+  const factory _GestureEvent(
+      {required final DateTime timestamp,
+      required final GestureEventType type,
+      @JsonKey(fromJson: offsetFromJson, toJson: offsetToJson)
+      required final Offset position,
+      required final bool wasConsumed,
+      required final String callbackInvoked,
+      final String? targetNodeId,
+      final String? targetLinkId,
+      final Map<String, dynamic>? metadata}) = _$GestureEventImpl;
 
   factory _GestureEvent.fromJson(Map<String, dynamic> json) =
       _$GestureEventImpl.fromJson;
@@ -1894,18 +1810,16 @@ mixin _$RenderEvent {
 /// @nodoc
 abstract class $RenderEventCopyWith<$Res> {
   factory $RenderEventCopyWith(
-    RenderEvent value,
-    $Res Function(RenderEvent) then,
-  ) = _$RenderEventCopyWithImpl<$Res, RenderEvent>;
+          RenderEvent value, $Res Function(RenderEvent) then) =
+      _$RenderEventCopyWithImpl<$Res, RenderEvent>;
   @useResult
-  $Res call({
-    DateTime timestamp,
-    RenderPhase phase,
-    Duration duration,
-    int affectedNodes,
-    String trigger,
-    String? stackTrace,
-  });
+  $Res call(
+      {DateTime timestamp,
+      RenderPhase phase,
+      Duration duration,
+      int affectedNodes,
+      String trigger,
+      String? stackTrace});
 }
 
 /// @nodoc
@@ -1930,34 +1844,32 @@ class _$RenderEventCopyWithImpl<$Res, $Val extends RenderEvent>
     Object? trigger = null,
     Object? stackTrace = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        phase: null == phase
-            ? _value.phase
-            : phase // ignore: cast_nullable_to_non_nullable
-                as RenderPhase,
-        duration: null == duration
-            ? _value.duration
-            : duration // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        affectedNodes: null == affectedNodes
-            ? _value.affectedNodes
-            : affectedNodes // ignore: cast_nullable_to_non_nullable
-                as int,
-        trigger: null == trigger
-            ? _value.trigger
-            : trigger // ignore: cast_nullable_to_non_nullable
-                as String,
-        stackTrace: freezed == stackTrace
-            ? _value.stackTrace
-            : stackTrace // ignore: cast_nullable_to_non_nullable
-                as String?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      phase: null == phase
+          ? _value.phase
+          : phase // ignore: cast_nullable_to_non_nullable
+              as RenderPhase,
+      duration: null == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      affectedNodes: null == affectedNodes
+          ? _value.affectedNodes
+          : affectedNodes // ignore: cast_nullable_to_non_nullable
+              as int,
+      trigger: null == trigger
+          ? _value.trigger
+          : trigger // ignore: cast_nullable_to_non_nullable
+              as String,
+      stackTrace: freezed == stackTrace
+          ? _value.stackTrace
+          : stackTrace // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
@@ -1965,19 +1877,17 @@ class _$RenderEventCopyWithImpl<$Res, $Val extends RenderEvent>
 abstract class _$$RenderEventImplCopyWith<$Res>
     implements $RenderEventCopyWith<$Res> {
   factory _$$RenderEventImplCopyWith(
-    _$RenderEventImpl value,
-    $Res Function(_$RenderEventImpl) then,
-  ) = __$$RenderEventImplCopyWithImpl<$Res>;
+          _$RenderEventImpl value, $Res Function(_$RenderEventImpl) then) =
+      __$$RenderEventImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    DateTime timestamp,
-    RenderPhase phase,
-    Duration duration,
-    int affectedNodes,
-    String trigger,
-    String? stackTrace,
-  });
+  $Res call(
+      {DateTime timestamp,
+      RenderPhase phase,
+      Duration duration,
+      int affectedNodes,
+      String trigger,
+      String? stackTrace});
 }
 
 /// @nodoc
@@ -1985,9 +1895,8 @@ class __$$RenderEventImplCopyWithImpl<$Res>
     extends _$RenderEventCopyWithImpl<$Res, _$RenderEventImpl>
     implements _$$RenderEventImplCopyWith<$Res> {
   __$$RenderEventImplCopyWithImpl(
-    _$RenderEventImpl _value,
-    $Res Function(_$RenderEventImpl) _then,
-  ) : super(_value, _then);
+      _$RenderEventImpl _value, $Res Function(_$RenderEventImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of RenderEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -2001,48 +1910,45 @@ class __$$RenderEventImplCopyWithImpl<$Res>
     Object? trigger = null,
     Object? stackTrace = freezed,
   }) {
-    return _then(
-      _$RenderEventImpl(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        phase: null == phase
-            ? _value.phase
-            : phase // ignore: cast_nullable_to_non_nullable
-                as RenderPhase,
-        duration: null == duration
-            ? _value.duration
-            : duration // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        affectedNodes: null == affectedNodes
-            ? _value.affectedNodes
-            : affectedNodes // ignore: cast_nullable_to_non_nullable
-                as int,
-        trigger: null == trigger
-            ? _value.trigger
-            : trigger // ignore: cast_nullable_to_non_nullable
-                as String,
-        stackTrace: freezed == stackTrace
-            ? _value.stackTrace
-            : stackTrace // ignore: cast_nullable_to_non_nullable
-                as String?,
-      ),
-    );
+    return _then(_$RenderEventImpl(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      phase: null == phase
+          ? _value.phase
+          : phase // ignore: cast_nullable_to_non_nullable
+              as RenderPhase,
+      duration: null == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      affectedNodes: null == affectedNodes
+          ? _value.affectedNodes
+          : affectedNodes // ignore: cast_nullable_to_non_nullable
+              as int,
+      trigger: null == trigger
+          ? _value.trigger
+          : trigger // ignore: cast_nullable_to_non_nullable
+              as String,
+      stackTrace: freezed == stackTrace
+          ? _value.stackTrace
+          : stackTrace // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$RenderEventImpl with DiagnosticableTreeMixin implements _RenderEvent {
-  const _$RenderEventImpl({
-    required this.timestamp,
-    required this.phase,
-    required this.duration,
-    required this.affectedNodes,
-    required this.trigger,
-    this.stackTrace,
-  });
+  const _$RenderEventImpl(
+      {required this.timestamp,
+      required this.phase,
+      required this.duration,
+      required this.affectedNodes,
+      required this.trigger,
+      this.stackTrace});
 
   factory _$RenderEventImpl.fromJson(Map<String, dynamic> json) =>
       _$$RenderEventImplFromJson(json);
@@ -2097,15 +2003,8 @@ class _$RenderEventImpl with DiagnosticableTreeMixin implements _RenderEvent {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-        runtimeType,
-        timestamp,
-        phase,
-        duration,
-        affectedNodes,
-        trigger,
-        stackTrace,
-      );
+  int get hashCode => Object.hash(runtimeType, timestamp, phase, duration,
+      affectedNodes, trigger, stackTrace);
 
   /// Create a copy of RenderEvent
   /// with the given fields replaced by the non-null parameter values.
@@ -2117,19 +2016,20 @@ class _$RenderEventImpl with DiagnosticableTreeMixin implements _RenderEvent {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$RenderEventImplToJson(this);
+    return _$$RenderEventImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _RenderEvent implements RenderEvent {
-  const factory _RenderEvent({
-    required final DateTime timestamp,
-    required final RenderPhase phase,
-    required final Duration duration,
-    required final int affectedNodes,
-    required final String trigger,
-    final String? stackTrace,
-  }) = _$RenderEventImpl;
+  const factory _RenderEvent(
+      {required final DateTime timestamp,
+      required final RenderPhase phase,
+      required final Duration duration,
+      required final int affectedNodes,
+      required final String trigger,
+      final String? stackTrace}) = _$RenderEventImpl;
 
   factory _RenderEvent.fromJson(Map<String, dynamic> json) =
       _$RenderEventImpl.fromJson;
@@ -2182,19 +2082,17 @@ mixin _$StateChange {
 /// @nodoc
 abstract class $StateChangeCopyWith<$Res> {
   factory $StateChangeCopyWith(
-    StateChange value,
-    $Res Function(StateChange) then,
-  ) = _$StateChangeCopyWithImpl<$Res, StateChange>;
+          StateChange value, $Res Function(StateChange) then) =
+      _$StateChangeCopyWithImpl<$Res, StateChange>;
   @useResult
-  $Res call({
-    DateTime timestamp,
-    StateChangeType type,
-    String target,
-    String source,
-    Map<String, dynamic>? oldValue,
-    Map<String, dynamic>? newValue,
-    String? stackTrace,
-  });
+  $Res call(
+      {DateTime timestamp,
+      StateChangeType type,
+      String target,
+      String source,
+      Map<String, dynamic>? oldValue,
+      Map<String, dynamic>? newValue,
+      String? stackTrace});
 }
 
 /// @nodoc
@@ -2220,38 +2118,36 @@ class _$StateChangeCopyWithImpl<$Res, $Val extends StateChange>
     Object? newValue = freezed,
     Object? stackTrace = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                as StateChangeType,
-        target: null == target
-            ? _value.target
-            : target // ignore: cast_nullable_to_non_nullable
-                as String,
-        source: null == source
-            ? _value.source
-            : source // ignore: cast_nullable_to_non_nullable
-                as String,
-        oldValue: freezed == oldValue
-            ? _value.oldValue
-            : oldValue // ignore: cast_nullable_to_non_nullable
-                as Map<String, dynamic>?,
-        newValue: freezed == newValue
-            ? _value.newValue
-            : newValue // ignore: cast_nullable_to_non_nullable
-                as Map<String, dynamic>?,
-        stackTrace: freezed == stackTrace
-            ? _value.stackTrace
-            : stackTrace // ignore: cast_nullable_to_non_nullable
-                as String?,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as StateChangeType,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      oldValue: freezed == oldValue
+          ? _value.oldValue
+          : oldValue // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+      newValue: freezed == newValue
+          ? _value.newValue
+          : newValue // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+      stackTrace: freezed == stackTrace
+          ? _value.stackTrace
+          : stackTrace // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
@@ -2259,20 +2155,18 @@ class _$StateChangeCopyWithImpl<$Res, $Val extends StateChange>
 abstract class _$$StateChangeImplCopyWith<$Res>
     implements $StateChangeCopyWith<$Res> {
   factory _$$StateChangeImplCopyWith(
-    _$StateChangeImpl value,
-    $Res Function(_$StateChangeImpl) then,
-  ) = __$$StateChangeImplCopyWithImpl<$Res>;
+          _$StateChangeImpl value, $Res Function(_$StateChangeImpl) then) =
+      __$$StateChangeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    DateTime timestamp,
-    StateChangeType type,
-    String target,
-    String source,
-    Map<String, dynamic>? oldValue,
-    Map<String, dynamic>? newValue,
-    String? stackTrace,
-  });
+  $Res call(
+      {DateTime timestamp,
+      StateChangeType type,
+      String target,
+      String source,
+      Map<String, dynamic>? oldValue,
+      Map<String, dynamic>? newValue,
+      String? stackTrace});
 }
 
 /// @nodoc
@@ -2280,9 +2174,8 @@ class __$$StateChangeImplCopyWithImpl<$Res>
     extends _$StateChangeCopyWithImpl<$Res, _$StateChangeImpl>
     implements _$$StateChangeImplCopyWith<$Res> {
   __$$StateChangeImplCopyWithImpl(
-    _$StateChangeImpl _value,
-    $Res Function(_$StateChangeImpl) _then,
-  ) : super(_value, _then);
+      _$StateChangeImpl _value, $Res Function(_$StateChangeImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of StateChange
   /// with the given fields replaced by the non-null parameter values.
@@ -2297,53 +2190,51 @@ class __$$StateChangeImplCopyWithImpl<$Res>
     Object? newValue = freezed,
     Object? stackTrace = freezed,
   }) {
-    return _then(
-      _$StateChangeImpl(
-        timestamp: null == timestamp
-            ? _value.timestamp
-            : timestamp // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                as StateChangeType,
-        target: null == target
-            ? _value.target
-            : target // ignore: cast_nullable_to_non_nullable
-                as String,
-        source: null == source
-            ? _value.source
-            : source // ignore: cast_nullable_to_non_nullable
-                as String,
-        oldValue: freezed == oldValue
-            ? _value._oldValue
-            : oldValue // ignore: cast_nullable_to_non_nullable
-                as Map<String, dynamic>?,
-        newValue: freezed == newValue
-            ? _value._newValue
-            : newValue // ignore: cast_nullable_to_non_nullable
-                as Map<String, dynamic>?,
-        stackTrace: freezed == stackTrace
-            ? _value.stackTrace
-            : stackTrace // ignore: cast_nullable_to_non_nullable
-                as String?,
-      ),
-    );
+    return _then(_$StateChangeImpl(
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as StateChangeType,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      oldValue: freezed == oldValue
+          ? _value._oldValue
+          : oldValue // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+      newValue: freezed == newValue
+          ? _value._newValue
+          : newValue // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
+      stackTrace: freezed == stackTrace
+          ? _value.stackTrace
+          : stackTrace // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$StateChangeImpl with DiagnosticableTreeMixin implements _StateChange {
-  const _$StateChangeImpl({
-    required this.timestamp,
-    required this.type,
-    required this.target,
-    required this.source,
-    final Map<String, dynamic>? oldValue,
-    final Map<String, dynamic>? newValue,
-    this.stackTrace,
-  })  : _oldValue = oldValue,
+  const _$StateChangeImpl(
+      {required this.timestamp,
+      required this.type,
+      required this.target,
+      required this.source,
+      final Map<String, dynamic>? oldValue,
+      final Map<String, dynamic>? newValue,
+      this.stackTrace})
+      : _oldValue = oldValue,
         _newValue = newValue;
 
   factory _$StateChangeImpl.fromJson(Map<String, dynamic> json) =>
@@ -2418,15 +2309,14 @@ class _$StateChangeImpl with DiagnosticableTreeMixin implements _StateChange {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        timestamp,
-        type,
-        target,
-        source,
-        const DeepCollectionEquality().hash(_oldValue),
-        const DeepCollectionEquality().hash(_newValue),
-        stackTrace,
-      );
+      runtimeType,
+      timestamp,
+      type,
+      target,
+      source,
+      const DeepCollectionEquality().hash(_oldValue),
+      const DeepCollectionEquality().hash(_newValue),
+      stackTrace);
 
   /// Create a copy of StateChange
   /// with the given fields replaced by the non-null parameter values.
@@ -2438,20 +2328,21 @@ class _$StateChangeImpl with DiagnosticableTreeMixin implements _StateChange {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$StateChangeImplToJson(this);
+    return _$$StateChangeImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _StateChange implements StateChange {
-  const factory _StateChange({
-    required final DateTime timestamp,
-    required final StateChangeType type,
-    required final String target,
-    required final String source,
-    final Map<String, dynamic>? oldValue,
-    final Map<String, dynamic>? newValue,
-    final String? stackTrace,
-  }) = _$StateChangeImpl;
+  const factory _StateChange(
+      {required final DateTime timestamp,
+      required final StateChangeType type,
+      required final String target,
+      required final String source,
+      final Map<String, dynamic>? oldValue,
+      final Map<String, dynamic>? newValue,
+      final String? stackTrace}) = _$StateChangeImpl;
 
   factory _StateChange.fromJson(Map<String, dynamic> json) =
       _$StateChangeImpl.fromJson;
@@ -2507,20 +2398,18 @@ mixin _$PerformanceMetrics {
 /// @nodoc
 abstract class $PerformanceMetricsCopyWith<$Res> {
   factory $PerformanceMetricsCopyWith(
-    PerformanceMetrics value,
-    $Res Function(PerformanceMetrics) then,
-  ) = _$PerformanceMetricsCopyWithImpl<$Res, PerformanceMetrics>;
+          PerformanceMetrics value, $Res Function(PerformanceMetrics) then) =
+      _$PerformanceMetricsCopyWithImpl<$Res, PerformanceMetrics>;
   @useResult
-  $Res call({
-    double averageFps,
-    double currentFps,
-    int droppedFrames,
-    Duration averageFrameTime,
-    Duration worstFrameTime,
-    int memoryUsageMB,
-    DateTime measurementStart,
-    DateTime measurementEnd,
-  });
+  $Res call(
+      {double averageFps,
+      double currentFps,
+      int droppedFrames,
+      Duration averageFrameTime,
+      Duration worstFrameTime,
+      int memoryUsageMB,
+      DateTime measurementStart,
+      DateTime measurementEnd});
 }
 
 /// @nodoc
@@ -2547,74 +2436,69 @@ class _$PerformanceMetricsCopyWithImpl<$Res, $Val extends PerformanceMetrics>
     Object? measurementStart = null,
     Object? measurementEnd = null,
   }) {
-    return _then(
-      _value.copyWith(
-        averageFps: null == averageFps
-            ? _value.averageFps
-            : averageFps // ignore: cast_nullable_to_non_nullable
-                as double,
-        currentFps: null == currentFps
-            ? _value.currentFps
-            : currentFps // ignore: cast_nullable_to_non_nullable
-                as double,
-        droppedFrames: null == droppedFrames
-            ? _value.droppedFrames
-            : droppedFrames // ignore: cast_nullable_to_non_nullable
-                as int,
-        averageFrameTime: null == averageFrameTime
-            ? _value.averageFrameTime
-            : averageFrameTime // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        worstFrameTime: null == worstFrameTime
-            ? _value.worstFrameTime
-            : worstFrameTime // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        memoryUsageMB: null == memoryUsageMB
-            ? _value.memoryUsageMB
-            : memoryUsageMB // ignore: cast_nullable_to_non_nullable
-                as int,
-        measurementStart: null == measurementStart
-            ? _value.measurementStart
-            : measurementStart // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        measurementEnd: null == measurementEnd
-            ? _value.measurementEnd
-            : measurementEnd // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-      ) as $Val,
-    );
+    return _then(_value.copyWith(
+      averageFps: null == averageFps
+          ? _value.averageFps
+          : averageFps // ignore: cast_nullable_to_non_nullable
+              as double,
+      currentFps: null == currentFps
+          ? _value.currentFps
+          : currentFps // ignore: cast_nullable_to_non_nullable
+              as double,
+      droppedFrames: null == droppedFrames
+          ? _value.droppedFrames
+          : droppedFrames // ignore: cast_nullable_to_non_nullable
+              as int,
+      averageFrameTime: null == averageFrameTime
+          ? _value.averageFrameTime
+          : averageFrameTime // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      worstFrameTime: null == worstFrameTime
+          ? _value.worstFrameTime
+          : worstFrameTime // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      memoryUsageMB: null == memoryUsageMB
+          ? _value.memoryUsageMB
+          : memoryUsageMB // ignore: cast_nullable_to_non_nullable
+              as int,
+      measurementStart: null == measurementStart
+          ? _value.measurementStart
+          : measurementStart // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      measurementEnd: null == measurementEnd
+          ? _value.measurementEnd
+          : measurementEnd // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$PerformanceMetricsImplCopyWith<$Res>
     implements $PerformanceMetricsCopyWith<$Res> {
-  factory _$$PerformanceMetricsImplCopyWith(
-    _$PerformanceMetricsImpl value,
-    $Res Function(_$PerformanceMetricsImpl) then,
-  ) = __$$PerformanceMetricsImplCopyWithImpl<$Res>;
+  factory _$$PerformanceMetricsImplCopyWith(_$PerformanceMetricsImpl value,
+          $Res Function(_$PerformanceMetricsImpl) then) =
+      __$$PerformanceMetricsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    double averageFps,
-    double currentFps,
-    int droppedFrames,
-    Duration averageFrameTime,
-    Duration worstFrameTime,
-    int memoryUsageMB,
-    DateTime measurementStart,
-    DateTime measurementEnd,
-  });
+  $Res call(
+      {double averageFps,
+      double currentFps,
+      int droppedFrames,
+      Duration averageFrameTime,
+      Duration worstFrameTime,
+      int memoryUsageMB,
+      DateTime measurementStart,
+      DateTime measurementEnd});
 }
 
 /// @nodoc
 class __$$PerformanceMetricsImplCopyWithImpl<$Res>
     extends _$PerformanceMetricsCopyWithImpl<$Res, _$PerformanceMetricsImpl>
     implements _$$PerformanceMetricsImplCopyWith<$Res> {
-  __$$PerformanceMetricsImplCopyWithImpl(
-    _$PerformanceMetricsImpl _value,
-    $Res Function(_$PerformanceMetricsImpl) _then,
-  ) : super(_value, _then);
+  __$$PerformanceMetricsImplCopyWithImpl(_$PerformanceMetricsImpl _value,
+      $Res Function(_$PerformanceMetricsImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of PerformanceMetrics
   /// with the given fields replaced by the non-null parameter values.
@@ -2630,42 +2514,40 @@ class __$$PerformanceMetricsImplCopyWithImpl<$Res>
     Object? measurementStart = null,
     Object? measurementEnd = null,
   }) {
-    return _then(
-      _$PerformanceMetricsImpl(
-        averageFps: null == averageFps
-            ? _value.averageFps
-            : averageFps // ignore: cast_nullable_to_non_nullable
-                as double,
-        currentFps: null == currentFps
-            ? _value.currentFps
-            : currentFps // ignore: cast_nullable_to_non_nullable
-                as double,
-        droppedFrames: null == droppedFrames
-            ? _value.droppedFrames
-            : droppedFrames // ignore: cast_nullable_to_non_nullable
-                as int,
-        averageFrameTime: null == averageFrameTime
-            ? _value.averageFrameTime
-            : averageFrameTime // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        worstFrameTime: null == worstFrameTime
-            ? _value.worstFrameTime
-            : worstFrameTime // ignore: cast_nullable_to_non_nullable
-                as Duration,
-        memoryUsageMB: null == memoryUsageMB
-            ? _value.memoryUsageMB
-            : memoryUsageMB // ignore: cast_nullable_to_non_nullable
-                as int,
-        measurementStart: null == measurementStart
-            ? _value.measurementStart
-            : measurementStart // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-        measurementEnd: null == measurementEnd
-            ? _value.measurementEnd
-            : measurementEnd // ignore: cast_nullable_to_non_nullable
-                as DateTime,
-      ),
-    );
+    return _then(_$PerformanceMetricsImpl(
+      averageFps: null == averageFps
+          ? _value.averageFps
+          : averageFps // ignore: cast_nullable_to_non_nullable
+              as double,
+      currentFps: null == currentFps
+          ? _value.currentFps
+          : currentFps // ignore: cast_nullable_to_non_nullable
+              as double,
+      droppedFrames: null == droppedFrames
+          ? _value.droppedFrames
+          : droppedFrames // ignore: cast_nullable_to_non_nullable
+              as int,
+      averageFrameTime: null == averageFrameTime
+          ? _value.averageFrameTime
+          : averageFrameTime // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      worstFrameTime: null == worstFrameTime
+          ? _value.worstFrameTime
+          : worstFrameTime // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      memoryUsageMB: null == memoryUsageMB
+          ? _value.memoryUsageMB
+          : memoryUsageMB // ignore: cast_nullable_to_non_nullable
+              as int,
+      measurementStart: null == measurementStart
+          ? _value.measurementStart
+          : measurementStart // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      measurementEnd: null == measurementEnd
+          ? _value.measurementEnd
+          : measurementEnd // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
@@ -2674,16 +2556,15 @@ class __$$PerformanceMetricsImplCopyWithImpl<$Res>
 class _$PerformanceMetricsImpl
     with DiagnosticableTreeMixin
     implements _PerformanceMetrics {
-  const _$PerformanceMetricsImpl({
-    required this.averageFps,
-    required this.currentFps,
-    required this.droppedFrames,
-    required this.averageFrameTime,
-    required this.worstFrameTime,
-    required this.memoryUsageMB,
-    required this.measurementStart,
-    required this.measurementEnd,
-  });
+  const _$PerformanceMetricsImpl(
+      {required this.averageFps,
+      required this.currentFps,
+      required this.droppedFrames,
+      required this.averageFrameTime,
+      required this.worstFrameTime,
+      required this.memoryUsageMB,
+      required this.measurementStart,
+      required this.measurementEnd});
 
   factory _$PerformanceMetricsImpl.fromJson(Map<String, dynamic> json) =>
       _$$PerformanceMetricsImplFromJson(json);
@@ -2751,16 +2632,15 @@ class _$PerformanceMetricsImpl
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        averageFps,
-        currentFps,
-        droppedFrames,
-        averageFrameTime,
-        worstFrameTime,
-        memoryUsageMB,
-        measurementStart,
-        measurementEnd,
-      );
+      runtimeType,
+      averageFps,
+      currentFps,
+      droppedFrames,
+      averageFrameTime,
+      worstFrameTime,
+      memoryUsageMB,
+      measurementStart,
+      measurementEnd);
 
   /// Create a copy of PerformanceMetrics
   /// with the given fields replaced by the non-null parameter values.
@@ -2769,27 +2649,26 @@ class _$PerformanceMetricsImpl
   @pragma('vm:prefer-inline')
   _$$PerformanceMetricsImplCopyWith<_$PerformanceMetricsImpl> get copyWith =>
       __$$PerformanceMetricsImplCopyWithImpl<_$PerformanceMetricsImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PerformanceMetricsImplToJson(this);
+    return _$$PerformanceMetricsImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _PerformanceMetrics implements PerformanceMetrics {
-  const factory _PerformanceMetrics({
-    required final double averageFps,
-    required final double currentFps,
-    required final int droppedFrames,
-    required final Duration averageFrameTime,
-    required final Duration worstFrameTime,
-    required final int memoryUsageMB,
-    required final DateTime measurementStart,
-    required final DateTime measurementEnd,
-  }) = _$PerformanceMetricsImpl;
+  const factory _PerformanceMetrics(
+      {required final double averageFps,
+      required final double currentFps,
+      required final int droppedFrames,
+      required final Duration averageFrameTime,
+      required final Duration worstFrameTime,
+      required final int memoryUsageMB,
+      required final DateTime measurementStart,
+      required final DateTime measurementEnd}) = _$PerformanceMetricsImpl;
 
   factory _PerformanceMetrics.fromJson(Map<String, dynamic> json) =
       _$PerformanceMetricsImpl.fromJson;
