@@ -1,5 +1,7 @@
 ## develop
 
+- [FIX] Fixed `nodeAnimationStartPosition` being ignored during initial layout, causing nodes to animate from top-left corner instead of the specified position.
+
 ## 0.7.0
 
 - [CHANGE] Removed `Listenable` from `GraphEntity` to prevent direct observation of individual entity state changes.

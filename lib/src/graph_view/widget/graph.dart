@@ -299,6 +299,11 @@ class GraphViewState extends State<GraphView> {
         _oldLayoutStrategy == null ||
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
+      // Always set the animation start position so that if animation occurs,
+      // it starts from the correct position (not Offset.zero)
+      _layoutStrategy.nodeAnimationStartPosition =
+          _getNodeAnimationStartPosition(constrains);
+
       // Enable animation only when explicitly requested AND widget allows it
       final shouldAnimateLayout =
           widget.animationEnabled && _graph.shouldAnimateLayout;
@@ -308,8 +313,6 @@ class GraphViewState extends State<GraphView> {
           LogCategory.layout,
           'GraphView: Enabling animation - explicitly requested',
         );
-        _layoutStrategy.nodeAnimationStartPosition =
-            _getNodeAnimationStartPosition(constrains);
         // Reset animation states for all nodes
         for (final node in _graph.nodes) {
           (node as GraphNodeImpl).resetAnimationState();
