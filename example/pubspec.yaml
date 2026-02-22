@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   google_fonts: ^6.2.1
   grouped_list: ^6.0.0
   platform: ^3.1.6
@@ -25,9 +25,9 @@ dev_dependencies:
 
   flutter_lints: ^4.0.0
   build_runner: ^2.4.12
-  freezed: ^2.5.7
+  freezed: ^3.2.5
   json_serializable: ^6.8.0
-  analyzer: ^7.4.4
+  analyzer: ^10.0.1
   mockito: ^5.4.4
 
 flutter:

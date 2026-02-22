@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,135 +9,93 @@ part of 'link.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$GraphDefaultLinkRendererStyle {
   /// The color of the arrow at the end of the link.
-  Color get arrowColor => throw _privateConstructorUsedError;
+  Color get arrowColor;
 
   /// The color of the link line.
-  Color get borderColor => throw _privateConstructorUsedError;
+  Color get borderColor;
 
   /// The color of the link's label text.
-  Color get labelColor => throw _privateConstructorUsedError;
+  Color get labelColor;
 
   /// The color of the link when hovered.
-  Color get hoverColor => throw _privateConstructorUsedError;
+  Color get hoverColor;
 
   /// The color when the link is both selected and hovered.
-  Color get selectedHoverColor => throw _privateConstructorUsedError;
+  Color get selectedHoverColor;
 
   /// The color when the selection ends.
-  Color get selectedUnhoverColor => throw _privateConstructorUsedError;
+  Color get selectedUnhoverColor;
 
   /// The color for emphasized links.
-  Color get highlightColor => throw _privateConstructorUsedError;
+  Color get highlightColor;
 
   /// The size of the arrow at the end of the link.
   ///
   /// Width and height can be set independently.
-  Size get arrowSize => throw _privateConstructorUsedError;
+  Size get arrowSize;
 
   /// Create a copy of GraphDefaultLinkRendererStyle
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $GraphDefaultLinkRendererStyleCopyWith<GraphDefaultLinkRendererStyle>
-      get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $GraphDefaultLinkRendererStyleCopyWith<$Res> {
-  factory $GraphDefaultLinkRendererStyleCopyWith(
-          GraphDefaultLinkRendererStyle value,
-          $Res Function(GraphDefaultLinkRendererStyle) then) =
-      _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
-          GraphDefaultLinkRendererStyle>;
-  @useResult
-  $Res call(
-      {Color arrowColor,
-      Color borderColor,
-      Color labelColor,
-      Color hoverColor,
-      Color selectedHoverColor,
-      Color selectedUnhoverColor,
-      Color highlightColor,
-      Size arrowSize});
-}
-
-/// @nodoc
-class _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
-        $Val extends GraphDefaultLinkRendererStyle>
-    implements $GraphDefaultLinkRendererStyleCopyWith<$Res> {
-  _$GraphDefaultLinkRendererStyleCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of GraphDefaultLinkRendererStyle
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  $GraphDefaultLinkRendererStyleCopyWith<GraphDefaultLinkRendererStyle>
+      get copyWith => _$GraphDefaultLinkRendererStyleCopyWithImpl<
+              GraphDefaultLinkRendererStyle>(
+          this as GraphDefaultLinkRendererStyle, _$identity);
+
   @override
-  $Res call({
-    Object? arrowColor = null,
-    Object? borderColor = null,
-    Object? labelColor = null,
-    Object? hoverColor = null,
-    Object? selectedHoverColor = null,
-    Object? selectedUnhoverColor = null,
-    Object? highlightColor = null,
-    Object? arrowSize = null,
-  }) {
-    return _then(_value.copyWith(
-      arrowColor: null == arrowColor
-          ? _value.arrowColor
-          : arrowColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      borderColor: null == borderColor
-          ? _value.borderColor
-          : borderColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      labelColor: null == labelColor
-          ? _value.labelColor
-          : labelColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      hoverColor: null == hoverColor
-          ? _value.hoverColor
-          : hoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      selectedHoverColor: null == selectedHoverColor
-          ? _value.selectedHoverColor
-          : selectedHoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      selectedUnhoverColor: null == selectedUnhoverColor
-          ? _value.selectedUnhoverColor
-          : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      highlightColor: null == highlightColor
-          ? _value.highlightColor
-          : highlightColor // ignore: cast_nullable_to_non_nullable
-              as Color,
-      arrowSize: null == arrowSize
-          ? _value.arrowSize
-          : arrowSize // ignore: cast_nullable_to_non_nullable
-              as Size,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GraphDefaultLinkRendererStyle &&
+            (identical(other.arrowColor, arrowColor) ||
+                other.arrowColor == arrowColor) &&
+            (identical(other.borderColor, borderColor) ||
+                other.borderColor == borderColor) &&
+            (identical(other.labelColor, labelColor) ||
+                other.labelColor == labelColor) &&
+            (identical(other.hoverColor, hoverColor) ||
+                other.hoverColor == hoverColor) &&
+            (identical(other.selectedHoverColor, selectedHoverColor) ||
+                other.selectedHoverColor == selectedHoverColor) &&
+            (identical(other.selectedUnhoverColor, selectedUnhoverColor) ||
+                other.selectedUnhoverColor == selectedUnhoverColor) &&
+            (identical(other.highlightColor, highlightColor) ||
+                other.highlightColor == highlightColor) &&
+            (identical(other.arrowSize, arrowSize) ||
+                other.arrowSize == arrowSize));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      arrowColor,
+      borderColor,
+      labelColor,
+      hoverColor,
+      selectedHoverColor,
+      selectedUnhoverColor,
+      highlightColor,
+      arrowSize);
+
+  @override
+  String toString() {
+    return 'GraphDefaultLinkRendererStyle(arrowColor: $arrowColor, borderColor: $borderColor, labelColor: $labelColor, hoverColor: $hoverColor, selectedHoverColor: $selectedHoverColor, selectedUnhoverColor: $selectedUnhoverColor, highlightColor: $highlightColor, arrowSize: $arrowSize)';
   }
 }
 
 /// @nodoc
-abstract class _$$GraphDefaultLinkRendererStyleImplCopyWith<$Res>
-    implements $GraphDefaultLinkRendererStyleCopyWith<$Res> {
-  factory _$$GraphDefaultLinkRendererStyleImplCopyWith(
-          _$GraphDefaultLinkRendererStyleImpl value,
-          $Res Function(_$GraphDefaultLinkRendererStyleImpl) then) =
-      __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $GraphDefaultLinkRendererStyleCopyWith<$Res> {
+  factory $GraphDefaultLinkRendererStyleCopyWith(
+          GraphDefaultLinkRendererStyle value,
+          $Res Function(GraphDefaultLinkRendererStyle) _then) =
+      _$GraphDefaultLinkRendererStyleCopyWithImpl;
   @useResult
   $Res call(
       {Color arrowColor,
@@ -151,14 +109,12 @@ abstract class _$$GraphDefaultLinkRendererStyleImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>
-    extends _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res,
-        _$GraphDefaultLinkRendererStyleImpl>
-    implements _$$GraphDefaultLinkRendererStyleImplCopyWith<$Res> {
-  __$$GraphDefaultLinkRendererStyleImplCopyWithImpl(
-      _$GraphDefaultLinkRendererStyleImpl _value,
-      $Res Function(_$GraphDefaultLinkRendererStyleImpl) _then)
-      : super(_value, _then);
+class _$GraphDefaultLinkRendererStyleCopyWithImpl<$Res>
+    implements $GraphDefaultLinkRendererStyleCopyWith<$Res> {
+  _$GraphDefaultLinkRendererStyleCopyWithImpl(this._self, this._then);
+
+  final GraphDefaultLinkRendererStyle _self;
+  final $Res Function(GraphDefaultLinkRendererStyle) _then;
 
   /// Create a copy of GraphDefaultLinkRendererStyle
   /// with the given fields replaced by the non-null parameter values.
@@ -174,48 +130,256 @@ class __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<$Res>
     Object? highlightColor = null,
     Object? arrowSize = null,
   }) {
-    return _then(_$GraphDefaultLinkRendererStyleImpl(
+    return _then(_self.copyWith(
       arrowColor: null == arrowColor
-          ? _value.arrowColor
+          ? _self.arrowColor
           : arrowColor // ignore: cast_nullable_to_non_nullable
               as Color,
       borderColor: null == borderColor
-          ? _value.borderColor
+          ? _self.borderColor
           : borderColor // ignore: cast_nullable_to_non_nullable
               as Color,
       labelColor: null == labelColor
-          ? _value.labelColor
+          ? _self.labelColor
           : labelColor // ignore: cast_nullable_to_non_nullable
               as Color,
       hoverColor: null == hoverColor
-          ? _value.hoverColor
+          ? _self.hoverColor
           : hoverColor // ignore: cast_nullable_to_non_nullable
               as Color,
       selectedHoverColor: null == selectedHoverColor
-          ? _value.selectedHoverColor
+          ? _self.selectedHoverColor
           : selectedHoverColor // ignore: cast_nullable_to_non_nullable
               as Color,
       selectedUnhoverColor: null == selectedUnhoverColor
-          ? _value.selectedUnhoverColor
+          ? _self.selectedUnhoverColor
           : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
               as Color,
       highlightColor: null == highlightColor
-          ? _value.highlightColor
+          ? _self.highlightColor
           : highlightColor // ignore: cast_nullable_to_non_nullable
               as Color,
       arrowSize: null == arrowSize
-          ? _value.arrowSize
+          ? _self.arrowSize
           : arrowSize // ignore: cast_nullable_to_non_nullable
               as Size,
     ));
   }
 }
 
+/// Adds pattern-matching-related methods to [GraphDefaultLinkRendererStyle].
+extension GraphDefaultLinkRendererStylePatterns
+    on GraphDefaultLinkRendererStyle {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphDefaultLinkRendererStyle value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphDefaultLinkRendererStyle() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphDefaultLinkRendererStyle value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphDefaultLinkRendererStyle():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphDefaultLinkRendererStyle value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphDefaultLinkRendererStyle() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            Color arrowColor,
+            Color borderColor,
+            Color labelColor,
+            Color hoverColor,
+            Color selectedHoverColor,
+            Color selectedUnhoverColor,
+            Color highlightColor,
+            Size arrowSize)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphDefaultLinkRendererStyle() when $default != null:
+        return $default(
+            _that.arrowColor,
+            _that.borderColor,
+            _that.labelColor,
+            _that.hoverColor,
+            _that.selectedHoverColor,
+            _that.selectedUnhoverColor,
+            _that.highlightColor,
+            _that.arrowSize);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            Color arrowColor,
+            Color borderColor,
+            Color labelColor,
+            Color hoverColor,
+            Color selectedHoverColor,
+            Color selectedUnhoverColor,
+            Color highlightColor,
+            Size arrowSize)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphDefaultLinkRendererStyle():
+        return $default(
+            _that.arrowColor,
+            _that.borderColor,
+            _that.labelColor,
+            _that.hoverColor,
+            _that.selectedHoverColor,
+            _that.selectedUnhoverColor,
+            _that.highlightColor,
+            _that.arrowSize);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            Color arrowColor,
+            Color borderColor,
+            Color labelColor,
+            Color hoverColor,
+            Color selectedHoverColor,
+            Color selectedUnhoverColor,
+            Color highlightColor,
+            Size arrowSize)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphDefaultLinkRendererStyle() when $default != null:
+        return $default(
+            _that.arrowColor,
+            _that.borderColor,
+            _that.labelColor,
+            _that.hoverColor,
+            _that.selectedHoverColor,
+            _that.selectedUnhoverColor,
+            _that.highlightColor,
+            _that.arrowSize);
+      case _:
+        return null;
+    }
+  }
+}
+
 /// @nodoc
 
-class _$GraphDefaultLinkRendererStyleImpl
-    implements _GraphDefaultLinkRendererStyle {
-  const _$GraphDefaultLinkRendererStyleImpl(
+class _GraphDefaultLinkRendererStyle implements GraphDefaultLinkRendererStyle {
+  const _GraphDefaultLinkRendererStyle(
       {this.arrowColor = Colors.black,
       this.borderColor = Colors.black,
       this.labelColor = Colors.black,
@@ -267,16 +431,20 @@ class _$GraphDefaultLinkRendererStyleImpl
   @JsonKey()
   final Size arrowSize;
 
+  /// Create a copy of GraphDefaultLinkRendererStyle
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'GraphDefaultLinkRendererStyle(arrowColor: $arrowColor, borderColor: $borderColor, labelColor: $labelColor, hoverColor: $hoverColor, selectedHoverColor: $selectedHoverColor, selectedUnhoverColor: $selectedUnhoverColor, highlightColor: $highlightColor, arrowSize: $arrowSize)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphDefaultLinkRendererStyleCopyWith<_GraphDefaultLinkRendererStyle>
+      get copyWith => __$GraphDefaultLinkRendererStyleCopyWithImpl<
+          _GraphDefaultLinkRendererStyle>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphDefaultLinkRendererStyleImpl &&
+            other is _GraphDefaultLinkRendererStyle &&
             (identical(other.arrowColor, arrowColor) ||
                 other.arrowColor == arrowColor) &&
             (identical(other.borderColor, borderColor) ||
@@ -307,68 +475,89 @@ class _$GraphDefaultLinkRendererStyleImpl
       highlightColor,
       arrowSize);
 
+  @override
+  String toString() {
+    return 'GraphDefaultLinkRendererStyle(arrowColor: $arrowColor, borderColor: $borderColor, labelColor: $labelColor, hoverColor: $hoverColor, selectedHoverColor: $selectedHoverColor, selectedUnhoverColor: $selectedUnhoverColor, highlightColor: $highlightColor, arrowSize: $arrowSize)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$GraphDefaultLinkRendererStyleCopyWith<$Res>
+    implements $GraphDefaultLinkRendererStyleCopyWith<$Res> {
+  factory _$GraphDefaultLinkRendererStyleCopyWith(
+          _GraphDefaultLinkRendererStyle value,
+          $Res Function(_GraphDefaultLinkRendererStyle) _then) =
+      __$GraphDefaultLinkRendererStyleCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {Color arrowColor,
+      Color borderColor,
+      Color labelColor,
+      Color hoverColor,
+      Color selectedHoverColor,
+      Color selectedUnhoverColor,
+      Color highlightColor,
+      Size arrowSize});
+}
+
+/// @nodoc
+class __$GraphDefaultLinkRendererStyleCopyWithImpl<$Res>
+    implements _$GraphDefaultLinkRendererStyleCopyWith<$Res> {
+  __$GraphDefaultLinkRendererStyleCopyWithImpl(this._self, this._then);
+
+  final _GraphDefaultLinkRendererStyle _self;
+  final $Res Function(_GraphDefaultLinkRendererStyle) _then;
+
   /// Create a copy of GraphDefaultLinkRendererStyle
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$GraphDefaultLinkRendererStyleImplCopyWith<
-          _$GraphDefaultLinkRendererStyleImpl>
-      get copyWith => __$$GraphDefaultLinkRendererStyleImplCopyWithImpl<
-          _$GraphDefaultLinkRendererStyleImpl>(this, _$identity);
+  $Res call({
+    Object? arrowColor = null,
+    Object? borderColor = null,
+    Object? labelColor = null,
+    Object? hoverColor = null,
+    Object? selectedHoverColor = null,
+    Object? selectedUnhoverColor = null,
+    Object? highlightColor = null,
+    Object? arrowSize = null,
+  }) {
+    return _then(_GraphDefaultLinkRendererStyle(
+      arrowColor: null == arrowColor
+          ? _self.arrowColor
+          : arrowColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      borderColor: null == borderColor
+          ? _self.borderColor
+          : borderColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      labelColor: null == labelColor
+          ? _self.labelColor
+          : labelColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      hoverColor: null == hoverColor
+          ? _self.hoverColor
+          : hoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      selectedHoverColor: null == selectedHoverColor
+          ? _self.selectedHoverColor
+          : selectedHoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      selectedUnhoverColor: null == selectedUnhoverColor
+          ? _self.selectedUnhoverColor
+          : selectedUnhoverColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      highlightColor: null == highlightColor
+          ? _self.highlightColor
+          : highlightColor // ignore: cast_nullable_to_non_nullable
+              as Color,
+      arrowSize: null == arrowSize
+          ? _self.arrowSize
+          : arrowSize // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ));
+  }
 }
 
-abstract class _GraphDefaultLinkRendererStyle
-    implements GraphDefaultLinkRendererStyle {
-  const factory _GraphDefaultLinkRendererStyle(
-      {final Color arrowColor,
-      final Color borderColor,
-      final Color labelColor,
-      final Color hoverColor,
-      final Color selectedHoverColor,
-      final Color selectedUnhoverColor,
-      final Color highlightColor,
-      final Size arrowSize}) = _$GraphDefaultLinkRendererStyleImpl;
-
-  /// The color of the arrow at the end of the link.
-  @override
-  Color get arrowColor;
-
-  /// The color of the link line.
-  @override
-  Color get borderColor;
-
-  /// The color of the link's label text.
-  @override
-  Color get labelColor;
-
-  /// The color of the link when hovered.
-  @override
-  Color get hoverColor;
-
-  /// The color when the link is both selected and hovered.
-  @override
-  Color get selectedHoverColor;
-
-  /// The color when the selection ends.
-  @override
-  Color get selectedUnhoverColor;
-
-  /// The color for emphasized links.
-  @override
-  Color get highlightColor;
-
-  /// The size of the arrow at the end of the link.
-  ///
-  /// Width and height can be set independently.
-  @override
-  Size get arrowSize;
-
-  /// Create a copy of GraphDefaultLinkRendererStyle
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphDefaultLinkRendererStyleImplCopyWith<
-          _$GraphDefaultLinkRendererStyleImpl>
-      get copyWith => throw _privateConstructorUsedError;
-}
+// dart format on

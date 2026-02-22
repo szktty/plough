@@ -6,14 +6,12 @@ part of 'id.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GraphIdImpl _$$GraphIdImplFromJson(Map<String, dynamic> json) =>
-    _$GraphIdImpl(
+_GraphId _$GraphIdFromJson(Map<String, dynamic> json) => _GraphId(
       type: $enumDecode(_$GraphIdTypeEnumMap, json['type']),
       value: json['value'] as String,
     );
 
-Map<String, dynamic> _$$GraphIdImplToJson(_$GraphIdImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$GraphIdToJson(_GraphId instance) => <String, dynamic>{
       'type': _$GraphIdTypeEnumMap[instance.type]!,
       'value': instance.value,
     };

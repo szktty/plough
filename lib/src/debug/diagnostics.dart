@@ -39,7 +39,7 @@ Offset? nullableOffsetFromJson(Map<String, dynamic>? json) {
 
 /// Graph diagnostic data
 @freezed
-class GraphDiagnostics with _$GraphDiagnostics {
+abstract class GraphDiagnostics with _$GraphDiagnostics {
   const factory GraphDiagnostics({
     required GraphSnapshot snapshot,
     required List<GestureEvent> gestureHistory,
@@ -54,7 +54,7 @@ class GraphDiagnostics with _$GraphDiagnostics {
 
 /// Current state snapshot of the graph
 @freezed
-class GraphSnapshot with _$GraphSnapshot {
+abstract class GraphSnapshot with _$GraphSnapshot {
   const factory GraphSnapshot({
     required DateTime timestamp,
     required int nodeCount,
@@ -72,7 +72,7 @@ class GraphSnapshot with _$GraphSnapshot {
 
 /// Node position information
 @freezed
-class NodePosition with _$NodePosition {
+abstract class NodePosition with _$NodePosition {
   const factory NodePosition({
     required String nodeId,
     required double x,
@@ -87,7 +87,7 @@ class NodePosition with _$NodePosition {
 
 /// Layout metrics
 @freezed
-class LayoutMetrics with _$LayoutMetrics {
+abstract class LayoutMetrics with _$LayoutMetrics {
   const factory LayoutMetrics({
     required String strategy,
     required Duration lastCalculationTime,
@@ -103,7 +103,7 @@ class LayoutMetrics with _$LayoutMetrics {
 
 /// Current gesture state
 @freezed
-class GestureState with _$GestureState {
+abstract class GestureState with _$GestureState {
   const factory GestureState({
     required bool isPanning,
     required bool isDragging,
@@ -119,7 +119,7 @@ class GestureState with _$GestureState {
 
 /// Gesture event
 @freezed
-class GestureEvent with _$GestureEvent {
+abstract class GestureEvent with _$GestureEvent {
   const factory GestureEvent({
     required DateTime timestamp,
     required GestureEventType type,
@@ -152,7 +152,7 @@ enum GestureEventType {
 
 /// Render event
 @freezed
-class RenderEvent with _$RenderEvent {
+abstract class RenderEvent with _$RenderEvent {
   const factory RenderEvent({
     required DateTime timestamp,
     required RenderPhase phase,
@@ -171,7 +171,7 @@ enum RenderPhase { layout, paint, composite, build, postFrameCallback }
 
 /// State change event
 @freezed
-class StateChange with _$StateChange {
+abstract class StateChange with _$StateChange {
   const factory StateChange({
     required DateTime timestamp,
     required StateChangeType type,
@@ -200,7 +200,7 @@ enum StateChangeType {
 
 /// Performance metrics
 @freezed
-class PerformanceMetrics with _$PerformanceMetrics {
+abstract class PerformanceMetrics with _$PerformanceMetrics {
   const factory PerformanceMetrics({
     required double averageFps,
     required double currentFps,

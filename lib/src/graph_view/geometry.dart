@@ -15,7 +15,7 @@ part 'geometry.freezed.dart';
 /// * [GraphConnectionGeometry], which uses these points for link rendering
 /// * [GraphShape], which calculates these intersection points
 @freezed
-class GraphConnectionPoints with _$GraphConnectionPoints {
+abstract class GraphConnectionPoints with _$GraphConnectionPoints {
   /// Creates a connection points configuration.
   const factory GraphConnectionPoints({
     /// The point where the link enters the target node.
@@ -48,7 +48,7 @@ class GraphConnectionPoints with _$GraphConnectionPoints {
 /// * [GraphLinkViewGeometry], which uses this information for link routing
 /// * [GraphViewBehavior], which uses this for hit testing and interactions
 @freezed
-class GraphNodeViewGeometry with _$GraphNodeViewGeometry {
+abstract class GraphNodeViewGeometry with _$GraphNodeViewGeometry {
   /// Creates node geometry with the specified [bounds] rectangle.
   const factory GraphNodeViewGeometry({required Rect bounds}) =
       _GraphNodeViewGeometry;
@@ -61,7 +61,7 @@ class GraphNodeViewGeometry with _$GraphNodeViewGeometry {
 /// * [GraphConnectionGeometry], which defines node connection details
 /// * [GraphViewBehavior], which uses this for hit testing and interactions
 @freezed
-class GraphLinkViewGeometry with _$GraphLinkViewGeometry {
+abstract class GraphLinkViewGeometry with _$GraphLinkViewGeometry {
   /// Creates link geometry with the specified layout parameters.
   const factory GraphLinkViewGeometry({
     required Rect bounds,
@@ -97,7 +97,7 @@ class GraphLinkViewGeometry with _$GraphLinkViewGeometry {
 /// * [GraphLinkViewGeometry], which uses this for link rendering
 /// * [GraphViewBehavior], which calculates connection points
 @freezed
-class GraphConnectionGeometry with _$GraphConnectionGeometry {
+abstract class GraphConnectionGeometry with _$GraphConnectionGeometry {
   /// Creates connection geometry between two nodes.
   const factory GraphConnectionGeometry({
     /// The source node's layout geometry from which the link originates.
@@ -127,7 +127,7 @@ class GraphConnectionGeometry with _$GraphConnectionGeometry {
 /// * [GraphView], which manages this geometry
 /// * [GraphViewBehavior], which uses this for coordinate transformations
 @freezed
-class GraphViewGeometry with _$GraphViewGeometry {
+abstract class GraphViewGeometry with _$GraphViewGeometry {
   /// Creates view geometry with the specified [position] and [size].
   const factory GraphViewGeometry({
     required Offset position,

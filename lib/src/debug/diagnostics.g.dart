@@ -6,9 +6,8 @@ part of 'diagnostics.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GraphDiagnosticsImpl _$$GraphDiagnosticsImplFromJson(
-        Map<String, dynamic> json) =>
-    _$GraphDiagnosticsImpl(
+_GraphDiagnostics _$GraphDiagnosticsFromJson(Map<String, dynamic> json) =>
+    _GraphDiagnostics(
       snapshot:
           GraphSnapshot.fromJson(json['snapshot'] as Map<String, dynamic>),
       gestureHistory: (json['gestureHistory'] as List<dynamic>)
@@ -24,8 +23,7 @@ _$GraphDiagnosticsImpl _$$GraphDiagnosticsImplFromJson(
           json['performance'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$GraphDiagnosticsImplToJson(
-        _$GraphDiagnosticsImpl instance) =>
+Map<String, dynamic> _$GraphDiagnosticsToJson(_GraphDiagnostics instance) =>
     <String, dynamic>{
       'snapshot': instance.snapshot,
       'gestureHistory': instance.gestureHistory,
@@ -34,8 +32,8 @@ Map<String, dynamic> _$$GraphDiagnosticsImplToJson(
       'performance': instance.performance,
     };
 
-_$GraphSnapshotImpl _$$GraphSnapshotImplFromJson(Map<String, dynamic> json) =>
-    _$GraphSnapshotImpl(
+_GraphSnapshot _$GraphSnapshotFromJson(Map<String, dynamic> json) =>
+    _GraphSnapshot(
       timestamp: DateTime.parse(json['timestamp'] as String),
       nodeCount: (json['nodeCount'] as num).toInt(),
       linkCount: (json['linkCount'] as num).toInt(),
@@ -52,7 +50,7 @@ _$GraphSnapshotImpl _$$GraphSnapshotImplFromJson(Map<String, dynamic> json) =>
           .toList(),
     );
 
-Map<String, dynamic> _$$GraphSnapshotImplToJson(_$GraphSnapshotImpl instance) =>
+Map<String, dynamic> _$GraphSnapshotToJson(_GraphSnapshot instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp.toIso8601String(),
       'nodeCount': instance.nodeCount,
@@ -64,8 +62,8 @@ Map<String, dynamic> _$$GraphSnapshotImplToJson(_$GraphSnapshotImpl instance) =>
       'draggedNodeIds': instance.draggedNodeIds,
     };
 
-_$NodePositionImpl _$$NodePositionImplFromJson(Map<String, dynamic> json) =>
-    _$NodePositionImpl(
+_NodePosition _$NodePositionFromJson(Map<String, dynamic> json) =>
+    _NodePosition(
       nodeId: json['nodeId'] as String,
       x: (json['x'] as num).toDouble(),
       y: (json['y'] as num).toDouble(),
@@ -73,7 +71,7 @@ _$NodePositionImpl _$$NodePositionImplFromJson(Map<String, dynamic> json) =>
       isAnimating: json['isAnimating'] as bool?,
     );
 
-Map<String, dynamic> _$$NodePositionImplToJson(_$NodePositionImpl instance) =>
+Map<String, dynamic> _$NodePositionToJson(_NodePosition instance) =>
     <String, dynamic>{
       'nodeId': instance.nodeId,
       'x': instance.x,
@@ -82,8 +80,8 @@ Map<String, dynamic> _$$NodePositionImplToJson(_$NodePositionImpl instance) =>
       'isAnimating': instance.isAnimating,
     };
 
-_$LayoutMetricsImpl _$$LayoutMetricsImplFromJson(Map<String, dynamic> json) =>
-    _$LayoutMetricsImpl(
+_LayoutMetrics _$LayoutMetricsFromJson(Map<String, dynamic> json) =>
+    _LayoutMetrics(
       strategy: json['strategy'] as String,
       lastCalculationTime:
           Duration(microseconds: (json['lastCalculationTime'] as num).toInt()),
@@ -92,7 +90,7 @@ _$LayoutMetricsImpl _$$LayoutMetricsImplFromJson(Map<String, dynamic> json) =>
       graphBounds: sizeFromJson(json['graphBounds'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$LayoutMetricsImplToJson(_$LayoutMetricsImpl instance) =>
+Map<String, dynamic> _$LayoutMetricsToJson(_LayoutMetrics instance) =>
     <String, dynamic>{
       'strategy': instance.strategy,
       'lastCalculationTime': instance.lastCalculationTime.inMicroseconds,
@@ -101,8 +99,8 @@ Map<String, dynamic> _$$LayoutMetricsImplToJson(_$LayoutMetricsImpl instance) =>
       'graphBounds': sizeToJson(instance.graphBounds),
     };
 
-_$GestureStateImpl _$$GestureStateImplFromJson(Map<String, dynamic> json) =>
-    _$GestureStateImpl(
+_GestureState _$GestureStateFromJson(Map<String, dynamic> json) =>
+    _GestureState(
       isPanning: json['isPanning'] as bool,
       isDragging: json['isDragging'] as bool,
       isSelecting: json['isSelecting'] as bool,
@@ -111,7 +109,7 @@ _$GestureStateImpl _$$GestureStateImplFromJson(Map<String, dynamic> json) =>
       hoveredNodeId: json['hoveredNodeId'] as String?,
     );
 
-Map<String, dynamic> _$$GestureStateImplToJson(_$GestureStateImpl instance) =>
+Map<String, dynamic> _$GestureStateToJson(_GestureState instance) =>
     <String, dynamic>{
       'isPanning': instance.isPanning,
       'isDragging': instance.isDragging,
@@ -120,8 +118,8 @@ Map<String, dynamic> _$$GestureStateImplToJson(_$GestureStateImpl instance) =>
       'hoveredNodeId': instance.hoveredNodeId,
     };
 
-_$GestureEventImpl _$$GestureEventImplFromJson(Map<String, dynamic> json) =>
-    _$GestureEventImpl(
+_GestureEvent _$GestureEventFromJson(Map<String, dynamic> json) =>
+    _GestureEvent(
       timestamp: DateTime.parse(json['timestamp'] as String),
       type: $enumDecode(_$GestureEventTypeEnumMap, json['type']),
       position: offsetFromJson(json['position'] as Map<String, dynamic>),
@@ -132,7 +130,7 @@ _$GestureEventImpl _$$GestureEventImplFromJson(Map<String, dynamic> json) =>
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
 
-Map<String, dynamic> _$$GestureEventImplToJson(_$GestureEventImpl instance) =>
+Map<String, dynamic> _$GestureEventToJson(_GestureEvent instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp.toIso8601String(),
       'type': _$GestureEventTypeEnumMap[instance.type]!,
@@ -157,8 +155,7 @@ const _$GestureEventTypeEnumMap = {
   GestureEventType.scale: 'scale',
 };
 
-_$RenderEventImpl _$$RenderEventImplFromJson(Map<String, dynamic> json) =>
-    _$RenderEventImpl(
+_RenderEvent _$RenderEventFromJson(Map<String, dynamic> json) => _RenderEvent(
       timestamp: DateTime.parse(json['timestamp'] as String),
       phase: $enumDecode(_$RenderPhaseEnumMap, json['phase']),
       duration: Duration(microseconds: (json['duration'] as num).toInt()),
@@ -167,7 +164,7 @@ _$RenderEventImpl _$$RenderEventImplFromJson(Map<String, dynamic> json) =>
       stackTrace: json['stackTrace'] as String?,
     );
 
-Map<String, dynamic> _$$RenderEventImplToJson(_$RenderEventImpl instance) =>
+Map<String, dynamic> _$RenderEventToJson(_RenderEvent instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp.toIso8601String(),
       'phase': _$RenderPhaseEnumMap[instance.phase]!,
@@ -185,8 +182,7 @@ const _$RenderPhaseEnumMap = {
   RenderPhase.postFrameCallback: 'postFrameCallback',
 };
 
-_$StateChangeImpl _$$StateChangeImplFromJson(Map<String, dynamic> json) =>
-    _$StateChangeImpl(
+_StateChange _$StateChangeFromJson(Map<String, dynamic> json) => _StateChange(
       timestamp: DateTime.parse(json['timestamp'] as String),
       type: $enumDecode(_$StateChangeTypeEnumMap, json['type']),
       target: json['target'] as String,
@@ -196,7 +192,7 @@ _$StateChangeImpl _$$StateChangeImplFromJson(Map<String, dynamic> json) =>
       stackTrace: json['stackTrace'] as String?,
     );
 
-Map<String, dynamic> _$$StateChangeImplToJson(_$StateChangeImpl instance) =>
+Map<String, dynamic> _$StateChangeToJson(_StateChange instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp.toIso8601String(),
       'type': _$StateChangeTypeEnumMap[instance.type]!,
@@ -218,9 +214,8 @@ const _$StateChangeTypeEnumMap = {
   StateChangeType.animation: 'animation',
 };
 
-_$PerformanceMetricsImpl _$$PerformanceMetricsImplFromJson(
-        Map<String, dynamic> json) =>
-    _$PerformanceMetricsImpl(
+_PerformanceMetrics _$PerformanceMetricsFromJson(Map<String, dynamic> json) =>
+    _PerformanceMetrics(
       averageFps: (json['averageFps'] as num).toDouble(),
       currentFps: (json['currentFps'] as num).toDouble(),
       droppedFrames: (json['droppedFrames'] as num).toInt(),
@@ -233,8 +228,7 @@ _$PerformanceMetricsImpl _$$PerformanceMetricsImplFromJson(
       measurementEnd: DateTime.parse(json['measurementEnd'] as String),
     );
 
-Map<String, dynamic> _$$PerformanceMetricsImplToJson(
-        _$PerformanceMetricsImpl instance) =>
+Map<String, dynamic> _$PerformanceMetricsToJson(_PerformanceMetrics instance) =>
     <String, dynamic>{
       'averageFps': instance.averageFps,
       'currentFps': instance.currentFps,

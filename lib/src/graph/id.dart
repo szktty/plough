@@ -34,7 +34,7 @@ enum GraphIdType {
 /// * Node IDs appear as `<N:xxxxxx>`
 /// * Link IDs appear as `<L:xxxxxx>`
 @Freezed(toStringOverride: false)
-class GraphId with _$GraphId {
+abstract class GraphId with _$GraphId {
   /// Creates an identifier with the specified type and value.
   const factory GraphId({
     /// The category of graph element this ID represents (graph, node, or link).

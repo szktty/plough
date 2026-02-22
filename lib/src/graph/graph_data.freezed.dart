@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,35 +9,65 @@ part of 'graph_data.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$GraphNodeData {
-  GraphId get id => throw _privateConstructorUsedError;
-  Offset get logicalPosition => throw _privateConstructorUsedError;
-  double get weight => throw _privateConstructorUsedError;
-  int get stackOrder => throw _privateConstructorUsedError;
-  bool get isEnabled => throw _privateConstructorUsedError;
-  bool get visible => throw _privateConstructorUsedError;
-  bool get canSelect => throw _privateConstructorUsedError;
-  bool get canDrag => throw _privateConstructorUsedError;
-  bool get isArranged => throw _privateConstructorUsedError;
+  GraphId get id;
+  Offset get logicalPosition;
+  double get weight;
+  int get stackOrder;
+  bool get isEnabled;
+  bool get visible;
+  bool get canSelect;
+  bool get canDrag;
+  bool get isArranged;
 
   /// Create a copy of GraphNodeData
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
   $GraphNodeDataCopyWith<GraphNodeData> get copyWith =>
-      throw _privateConstructorUsedError;
+      _$GraphNodeDataCopyWithImpl<GraphNodeData>(
+          this as GraphNodeData, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GraphNodeData &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.logicalPosition, logicalPosition) ||
+                other.logicalPosition == logicalPosition) &&
+            (identical(other.weight, weight) || other.weight == weight) &&
+            (identical(other.stackOrder, stackOrder) ||
+                other.stackOrder == stackOrder) &&
+            (identical(other.isEnabled, isEnabled) ||
+                other.isEnabled == isEnabled) &&
+            (identical(other.visible, visible) || other.visible == visible) &&
+            (identical(other.canSelect, canSelect) ||
+                other.canSelect == canSelect) &&
+            (identical(other.canDrag, canDrag) || other.canDrag == canDrag) &&
+            (identical(other.isArranged, isArranged) ||
+                other.isArranged == isArranged));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, id, logicalPosition, weight,
+      stackOrder, isEnabled, visible, canSelect, canDrag, isArranged);
+
+  @override
+  String toString() {
+    return 'GraphNodeData(id: $id, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isArranged: $isArranged)';
+  }
 }
 
 /// @nodoc
-abstract class $GraphNodeDataCopyWith<$Res> {
+abstract mixin class $GraphNodeDataCopyWith<$Res> {
   factory $GraphNodeDataCopyWith(
-          GraphNodeData value, $Res Function(GraphNodeData) then) =
-      _$GraphNodeDataCopyWithImpl<$Res, GraphNodeData>;
+          GraphNodeData value, $Res Function(GraphNodeData) _then) =
+      _$GraphNodeDataCopyWithImpl;
   @useResult
   $Res call(
       {GraphId id,
@@ -54,14 +84,12 @@ abstract class $GraphNodeDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
+class _$GraphNodeDataCopyWithImpl<$Res>
     implements $GraphNodeDataCopyWith<$Res> {
-  _$GraphNodeDataCopyWithImpl(this._value, this._then);
+  _$GraphNodeDataCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GraphNodeData _self;
+  final $Res Function(GraphNodeData) _then;
 
   /// Create a copy of GraphNodeData
   /// with the given fields replaced by the non-null parameter values.
@@ -78,44 +106,44 @@ class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
     Object? canDrag = null,
     Object? isArranged = null,
   }) {
-    return _then(_value.copyWith(
+    return _then(_self.copyWith(
       id: null == id
-          ? _value.id
+          ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as GraphId,
       logicalPosition: null == logicalPosition
-          ? _value.logicalPosition
+          ? _self.logicalPosition
           : logicalPosition // ignore: cast_nullable_to_non_nullable
               as Offset,
       weight: null == weight
-          ? _value.weight
+          ? _self.weight
           : weight // ignore: cast_nullable_to_non_nullable
               as double,
       stackOrder: null == stackOrder
-          ? _value.stackOrder
+          ? _self.stackOrder
           : stackOrder // ignore: cast_nullable_to_non_nullable
               as int,
       isEnabled: null == isEnabled
-          ? _value.isEnabled
+          ? _self.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
               as bool,
       visible: null == visible
-          ? _value.visible
+          ? _self.visible
           : visible // ignore: cast_nullable_to_non_nullable
               as bool,
       canSelect: null == canSelect
-          ? _value.canSelect
+          ? _self.canSelect
           : canSelect // ignore: cast_nullable_to_non_nullable
               as bool,
       canDrag: null == canDrag
-          ? _value.canDrag
+          ? _self.canDrag
           : canDrag // ignore: cast_nullable_to_non_nullable
               as bool,
       isArranged: null == isArranged
-          ? _value.isArranged
+          ? _self.isArranged
           : isArranged // ignore: cast_nullable_to_non_nullable
               as bool,
-    ) as $Val);
+    ));
   }
 
   /// Create a copy of GraphNodeData
@@ -123,103 +151,230 @@ class _$GraphNodeDataCopyWithImpl<$Res, $Val extends GraphNodeData>
   @override
   @pragma('vm:prefer-inline')
   $GraphIdCopyWith<$Res> get id {
-    return $GraphIdCopyWith<$Res>(_value.id, (value) {
-      return _then(_value.copyWith(id: value) as $Val);
+    return $GraphIdCopyWith<$Res>(_self.id, (value) {
+      return _then(_self.copyWith(id: value));
     });
   }
 }
 
-/// @nodoc
-abstract class _$$GraphNodeDataImplCopyWith<$Res>
-    implements $GraphNodeDataCopyWith<$Res> {
-  factory _$$GraphNodeDataImplCopyWith(
-          _$GraphNodeDataImpl value, $Res Function(_$GraphNodeDataImpl) then) =
-      __$$GraphNodeDataImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {GraphId id,
-      Offset logicalPosition,
-      double weight,
-      int stackOrder,
-      bool isEnabled,
-      bool visible,
-      bool canSelect,
-      bool canDrag,
-      bool isArranged});
+/// Adds pattern-matching-related methods to [GraphNodeData].
+extension GraphNodeDataPatterns on GraphNodeData {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-  @override
-  $GraphIdCopyWith<$Res> get id;
-}
-
-/// @nodoc
-class __$$GraphNodeDataImplCopyWithImpl<$Res>
-    extends _$GraphNodeDataCopyWithImpl<$Res, _$GraphNodeDataImpl>
-    implements _$$GraphNodeDataImplCopyWith<$Res> {
-  __$$GraphNodeDataImplCopyWithImpl(
-      _$GraphNodeDataImpl _value, $Res Function(_$GraphNodeDataImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphNodeData
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? logicalPosition = null,
-    Object? weight = null,
-    Object? stackOrder = null,
-    Object? isEnabled = null,
-    Object? visible = null,
-    Object? canSelect = null,
-    Object? canDrag = null,
-    Object? isArranged = null,
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphNodeData value)? $default, {
+    required TResult orElse(),
   }) {
-    return _then(_$GraphNodeDataImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as GraphId,
-      logicalPosition: null == logicalPosition
-          ? _value.logicalPosition
-          : logicalPosition // ignore: cast_nullable_to_non_nullable
-              as Offset,
-      weight: null == weight
-          ? _value.weight
-          : weight // ignore: cast_nullable_to_non_nullable
-              as double,
-      stackOrder: null == stackOrder
-          ? _value.stackOrder
-          : stackOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      isEnabled: null == isEnabled
-          ? _value.isEnabled
-          : isEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      visible: null == visible
-          ? _value.visible
-          : visible // ignore: cast_nullable_to_non_nullable
-              as bool,
-      canSelect: null == canSelect
-          ? _value.canSelect
-          : canSelect // ignore: cast_nullable_to_non_nullable
-              as bool,
-      canDrag: null == canDrag
-          ? _value.canDrag
-          : canDrag // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isArranged: null == isArranged
-          ? _value.isArranged
-          : isArranged // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeData() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphNodeData value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeData():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphNodeData value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeData() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            GraphId id,
+            Offset logicalPosition,
+            double weight,
+            int stackOrder,
+            bool isEnabled,
+            bool visible,
+            bool canSelect,
+            bool canDrag,
+            bool isArranged)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeData() when $default != null:
+        return $default(
+            _that.id,
+            _that.logicalPosition,
+            _that.weight,
+            _that.stackOrder,
+            _that.isEnabled,
+            _that.visible,
+            _that.canSelect,
+            _that.canDrag,
+            _that.isArranged);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            GraphId id,
+            Offset logicalPosition,
+            double weight,
+            int stackOrder,
+            bool isEnabled,
+            bool visible,
+            bool canSelect,
+            bool canDrag,
+            bool isArranged)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeData():
+        return $default(
+            _that.id,
+            _that.logicalPosition,
+            _that.weight,
+            _that.stackOrder,
+            _that.isEnabled,
+            _that.visible,
+            _that.canSelect,
+            _that.canDrag,
+            _that.isArranged);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            GraphId id,
+            Offset logicalPosition,
+            double weight,
+            int stackOrder,
+            bool isEnabled,
+            bool visible,
+            bool canSelect,
+            bool canDrag,
+            bool isArranged)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeData() when $default != null:
+        return $default(
+            _that.id,
+            _that.logicalPosition,
+            _that.weight,
+            _that.stackOrder,
+            _that.isEnabled,
+            _that.visible,
+            _that.canSelect,
+            _that.canDrag,
+            _that.isArranged);
+      case _:
+        return null;
+    }
   }
 }
 
 /// @nodoc
 
-class _$GraphNodeDataImpl implements _GraphNodeData {
-  const _$GraphNodeDataImpl(
+class _GraphNodeData implements GraphNodeData {
+  const _GraphNodeData(
       {required this.id,
       this.logicalPosition = Offset.zero,
       this.weight = 1.0,
@@ -257,16 +412,19 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
   @JsonKey()
   final bool isArranged;
 
+  /// Create a copy of GraphNodeData
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'GraphNodeData(id: $id, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isArranged: $isArranged)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphNodeDataCopyWith<_GraphNodeData> get copyWith =>
+      __$GraphNodeDataCopyWithImpl<_GraphNodeData>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphNodeDataImpl &&
+            other is _GraphNodeData &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.logicalPosition, logicalPosition) ||
                 other.logicalPosition == logicalPosition) &&
@@ -287,81 +445,184 @@ class _$GraphNodeDataImpl implements _GraphNodeData {
   int get hashCode => Object.hash(runtimeType, id, logicalPosition, weight,
       stackOrder, isEnabled, visible, canSelect, canDrag, isArranged);
 
-  /// Create a copy of GraphNodeData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$GraphNodeDataImplCopyWith<_$GraphNodeDataImpl> get copyWith =>
-      __$$GraphNodeDataImplCopyWithImpl<_$GraphNodeDataImpl>(this, _$identity);
+  String toString() {
+    return 'GraphNodeData(id: $id, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isArranged: $isArranged)';
+  }
 }
 
-abstract class _GraphNodeData implements GraphNodeData {
-  const factory _GraphNodeData(
-      {required final GraphId id,
-      final Offset logicalPosition,
-      final double weight,
-      final int stackOrder,
-      final bool isEnabled,
-      final bool visible,
-      final bool canSelect,
-      final bool canDrag,
-      final bool isArranged}) = _$GraphNodeDataImpl;
+/// @nodoc
+abstract mixin class _$GraphNodeDataCopyWith<$Res>
+    implements $GraphNodeDataCopyWith<$Res> {
+  factory _$GraphNodeDataCopyWith(
+          _GraphNodeData value, $Res Function(_GraphNodeData) _then) =
+      __$GraphNodeDataCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {GraphId id,
+      Offset logicalPosition,
+      double weight,
+      int stackOrder,
+      bool isEnabled,
+      bool visible,
+      bool canSelect,
+      bool canDrag,
+      bool isArranged});
 
   @override
-  GraphId get id;
-  @override
-  Offset get logicalPosition;
-  @override
-  double get weight;
-  @override
-  int get stackOrder;
-  @override
-  bool get isEnabled;
-  @override
-  bool get visible;
-  @override
-  bool get canSelect;
-  @override
-  bool get canDrag;
-  @override
-  bool get isArranged;
+  $GraphIdCopyWith<$Res> get id;
+}
+
+/// @nodoc
+class __$GraphNodeDataCopyWithImpl<$Res>
+    implements _$GraphNodeDataCopyWith<$Res> {
+  __$GraphNodeDataCopyWithImpl(this._self, this._then);
+
+  final _GraphNodeData _self;
+  final $Res Function(_GraphNodeData) _then;
 
   /// Create a copy of GraphNodeData
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphNodeDataImplCopyWith<_$GraphNodeDataImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = null,
+    Object? logicalPosition = null,
+    Object? weight = null,
+    Object? stackOrder = null,
+    Object? isEnabled = null,
+    Object? visible = null,
+    Object? canSelect = null,
+    Object? canDrag = null,
+    Object? isArranged = null,
+  }) {
+    return _then(_GraphNodeData(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      logicalPosition: null == logicalPosition
+          ? _self.logicalPosition
+          : logicalPosition // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      weight: null == weight
+          ? _self.weight
+          : weight // ignore: cast_nullable_to_non_nullable
+              as double,
+      stackOrder: null == stackOrder
+          ? _self.stackOrder
+          : stackOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      isEnabled: null == isEnabled
+          ? _self.isEnabled
+          : isEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      visible: null == visible
+          ? _self.visible
+          : visible // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canSelect: null == canSelect
+          ? _self.canSelect
+          : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _self.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _self.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+
+  /// Create a copy of GraphNodeData
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphIdCopyWith<$Res> get id {
+    return $GraphIdCopyWith<$Res>(_self.id, (value) {
+      return _then(_self.copyWith(id: value));
+    });
+  }
 }
 
 /// @nodoc
 mixin _$GraphLinkData {
-  GraphId get id => throw _privateConstructorUsedError;
-  GraphNode? get source => throw _privateConstructorUsedError;
-  GraphNode? get target => throw _privateConstructorUsedError;
-  GraphLinkDirection get direction => throw _privateConstructorUsedError;
-  Offset get logicalPosition => throw _privateConstructorUsedError;
-  double get weight => throw _privateConstructorUsedError;
-  int get stackOrder => throw _privateConstructorUsedError;
-  bool get isEnabled => throw _privateConstructorUsedError;
-  bool get visible => throw _privateConstructorUsedError;
-  bool get canSelect => throw _privateConstructorUsedError;
-  bool get canDrag => throw _privateConstructorUsedError;
-  bool get isArranged => throw _privateConstructorUsedError;
+  GraphId get id;
+  GraphNode? get source;
+  GraphNode? get target;
+  GraphLinkDirection get direction;
+  Offset get logicalPosition;
+  double get weight;
+  int get stackOrder;
+  bool get isEnabled;
+  bool get visible;
+  bool get canSelect;
+  bool get canDrag;
+  bool get isArranged;
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
   $GraphLinkDataCopyWith<GraphLinkData> get copyWith =>
-      throw _privateConstructorUsedError;
+      _$GraphLinkDataCopyWithImpl<GraphLinkData>(
+          this as GraphLinkData, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GraphLinkData &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.source, source) || other.source == source) &&
+            (identical(other.target, target) || other.target == target) &&
+            (identical(other.direction, direction) ||
+                other.direction == direction) &&
+            (identical(other.logicalPosition, logicalPosition) ||
+                other.logicalPosition == logicalPosition) &&
+            (identical(other.weight, weight) || other.weight == weight) &&
+            (identical(other.stackOrder, stackOrder) ||
+                other.stackOrder == stackOrder) &&
+            (identical(other.isEnabled, isEnabled) ||
+                other.isEnabled == isEnabled) &&
+            (identical(other.visible, visible) || other.visible == visible) &&
+            (identical(other.canSelect, canSelect) ||
+                other.canSelect == canSelect) &&
+            (identical(other.canDrag, canDrag) || other.canDrag == canDrag) &&
+            (identical(other.isArranged, isArranged) ||
+                other.isArranged == isArranged));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      source,
+      target,
+      direction,
+      logicalPosition,
+      weight,
+      stackOrder,
+      isEnabled,
+      visible,
+      canSelect,
+      canDrag,
+      isArranged);
+
+  @override
+  String toString() {
+    return 'GraphLinkData(id: $id, source: $source, target: $target, direction: $direction, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isArranged: $isArranged)';
+  }
 }
 
 /// @nodoc
-abstract class $GraphLinkDataCopyWith<$Res> {
+abstract mixin class $GraphLinkDataCopyWith<$Res> {
   factory $GraphLinkDataCopyWith(
-          GraphLinkData value, $Res Function(GraphLinkData) then) =
-      _$GraphLinkDataCopyWithImpl<$Res, GraphLinkData>;
+          GraphLinkData value, $Res Function(GraphLinkData) _then) =
+      _$GraphLinkDataCopyWithImpl;
   @useResult
   $Res call(
       {GraphId id,
@@ -381,14 +642,12 @@ abstract class $GraphLinkDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
+class _$GraphLinkDataCopyWithImpl<$Res>
     implements $GraphLinkDataCopyWith<$Res> {
-  _$GraphLinkDataCopyWithImpl(this._value, this._then);
+  _$GraphLinkDataCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GraphLinkData _self;
+  final $Res Function(GraphLinkData) _then;
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
@@ -408,56 +667,56 @@ class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
     Object? canDrag = null,
     Object? isArranged = null,
   }) {
-    return _then(_value.copyWith(
+    return _then(_self.copyWith(
       id: null == id
-          ? _value.id
+          ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as GraphId,
       source: freezed == source
-          ? _value.source
+          ? _self.source
           : source // ignore: cast_nullable_to_non_nullable
               as GraphNode?,
       target: freezed == target
-          ? _value.target
+          ? _self.target
           : target // ignore: cast_nullable_to_non_nullable
               as GraphNode?,
       direction: null == direction
-          ? _value.direction
+          ? _self.direction
           : direction // ignore: cast_nullable_to_non_nullable
               as GraphLinkDirection,
       logicalPosition: null == logicalPosition
-          ? _value.logicalPosition
+          ? _self.logicalPosition
           : logicalPosition // ignore: cast_nullable_to_non_nullable
               as Offset,
       weight: null == weight
-          ? _value.weight
+          ? _self.weight
           : weight // ignore: cast_nullable_to_non_nullable
               as double,
       stackOrder: null == stackOrder
-          ? _value.stackOrder
+          ? _self.stackOrder
           : stackOrder // ignore: cast_nullable_to_non_nullable
               as int,
       isEnabled: null == isEnabled
-          ? _value.isEnabled
+          ? _self.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
               as bool,
       visible: null == visible
-          ? _value.visible
+          ? _self.visible
           : visible // ignore: cast_nullable_to_non_nullable
               as bool,
       canSelect: null == canSelect
-          ? _value.canSelect
+          ? _self.canSelect
           : canSelect // ignore: cast_nullable_to_non_nullable
               as bool,
       canDrag: null == canDrag
-          ? _value.canDrag
+          ? _self.canDrag
           : canDrag // ignore: cast_nullable_to_non_nullable
               as bool,
       isArranged: null == isArranged
-          ? _value.isArranged
+          ? _self.isArranged
           : isArranged // ignore: cast_nullable_to_non_nullable
               as bool,
-    ) as $Val);
+    ));
   }
 
   /// Create a copy of GraphLinkData
@@ -465,121 +724,248 @@ class _$GraphLinkDataCopyWithImpl<$Res, $Val extends GraphLinkData>
   @override
   @pragma('vm:prefer-inline')
   $GraphIdCopyWith<$Res> get id {
-    return $GraphIdCopyWith<$Res>(_value.id, (value) {
-      return _then(_value.copyWith(id: value) as $Val);
+    return $GraphIdCopyWith<$Res>(_self.id, (value) {
+      return _then(_self.copyWith(id: value));
     });
   }
 }
 
-/// @nodoc
-abstract class _$$GraphLinkDataImplCopyWith<$Res>
-    implements $GraphLinkDataCopyWith<$Res> {
-  factory _$$GraphLinkDataImplCopyWith(
-          _$GraphLinkDataImpl value, $Res Function(_$GraphLinkDataImpl) then) =
-      __$$GraphLinkDataImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {GraphId id,
-      GraphNode? source,
-      GraphNode? target,
-      GraphLinkDirection direction,
-      Offset logicalPosition,
-      double weight,
-      int stackOrder,
-      bool isEnabled,
-      bool visible,
-      bool canSelect,
-      bool canDrag,
-      bool isArranged});
+/// Adds pattern-matching-related methods to [GraphLinkData].
+extension GraphLinkDataPatterns on GraphLinkData {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-  @override
-  $GraphIdCopyWith<$Res> get id;
-}
-
-/// @nodoc
-class __$$GraphLinkDataImplCopyWithImpl<$Res>
-    extends _$GraphLinkDataCopyWithImpl<$Res, _$GraphLinkDataImpl>
-    implements _$$GraphLinkDataImplCopyWith<$Res> {
-  __$$GraphLinkDataImplCopyWithImpl(
-      _$GraphLinkDataImpl _value, $Res Function(_$GraphLinkDataImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphLinkData
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? source = freezed,
-    Object? target = freezed,
-    Object? direction = null,
-    Object? logicalPosition = null,
-    Object? weight = null,
-    Object? stackOrder = null,
-    Object? isEnabled = null,
-    Object? visible = null,
-    Object? canSelect = null,
-    Object? canDrag = null,
-    Object? isArranged = null,
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphLinkData value)? $default, {
+    required TResult orElse(),
   }) {
-    return _then(_$GraphLinkDataImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as GraphId,
-      source: freezed == source
-          ? _value.source
-          : source // ignore: cast_nullable_to_non_nullable
-              as GraphNode?,
-      target: freezed == target
-          ? _value.target
-          : target // ignore: cast_nullable_to_non_nullable
-              as GraphNode?,
-      direction: null == direction
-          ? _value.direction
-          : direction // ignore: cast_nullable_to_non_nullable
-              as GraphLinkDirection,
-      logicalPosition: null == logicalPosition
-          ? _value.logicalPosition
-          : logicalPosition // ignore: cast_nullable_to_non_nullable
-              as Offset,
-      weight: null == weight
-          ? _value.weight
-          : weight // ignore: cast_nullable_to_non_nullable
-              as double,
-      stackOrder: null == stackOrder
-          ? _value.stackOrder
-          : stackOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      isEnabled: null == isEnabled
-          ? _value.isEnabled
-          : isEnabled // ignore: cast_nullable_to_non_nullable
-              as bool,
-      visible: null == visible
-          ? _value.visible
-          : visible // ignore: cast_nullable_to_non_nullable
-              as bool,
-      canSelect: null == canSelect
-          ? _value.canSelect
-          : canSelect // ignore: cast_nullable_to_non_nullable
-              as bool,
-      canDrag: null == canDrag
-          ? _value.canDrag
-          : canDrag // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isArranged: null == isArranged
-          ? _value.isArranged
-          : isArranged // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkData() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphLinkData value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkData():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphLinkData value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkData() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            GraphId id,
+            GraphNode? source,
+            GraphNode? target,
+            GraphLinkDirection direction,
+            Offset logicalPosition,
+            double weight,
+            int stackOrder,
+            bool isEnabled,
+            bool visible,
+            bool canSelect,
+            bool canDrag,
+            bool isArranged)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkData() when $default != null:
+        return $default(
+            _that.id,
+            _that.source,
+            _that.target,
+            _that.direction,
+            _that.logicalPosition,
+            _that.weight,
+            _that.stackOrder,
+            _that.isEnabled,
+            _that.visible,
+            _that.canSelect,
+            _that.canDrag,
+            _that.isArranged);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            GraphId id,
+            GraphNode? source,
+            GraphNode? target,
+            GraphLinkDirection direction,
+            Offset logicalPosition,
+            double weight,
+            int stackOrder,
+            bool isEnabled,
+            bool visible,
+            bool canSelect,
+            bool canDrag,
+            bool isArranged)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkData():
+        return $default(
+            _that.id,
+            _that.source,
+            _that.target,
+            _that.direction,
+            _that.logicalPosition,
+            _that.weight,
+            _that.stackOrder,
+            _that.isEnabled,
+            _that.visible,
+            _that.canSelect,
+            _that.canDrag,
+            _that.isArranged);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            GraphId id,
+            GraphNode? source,
+            GraphNode? target,
+            GraphLinkDirection direction,
+            Offset logicalPosition,
+            double weight,
+            int stackOrder,
+            bool isEnabled,
+            bool visible,
+            bool canSelect,
+            bool canDrag,
+            bool isArranged)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkData() when $default != null:
+        return $default(
+            _that.id,
+            _that.source,
+            _that.target,
+            _that.direction,
+            _that.logicalPosition,
+            _that.weight,
+            _that.stackOrder,
+            _that.isEnabled,
+            _that.visible,
+            _that.canSelect,
+            _that.canDrag,
+            _that.isArranged);
+      case _:
+        return null;
+    }
   }
 }
 
 /// @nodoc
 
-class _$GraphLinkDataImpl implements _GraphLinkData {
-  const _$GraphLinkDataImpl(
+class _GraphLinkData implements GraphLinkData {
+  const _GraphLinkData(
       {required this.id,
       this.source,
       this.target,
@@ -627,16 +1013,19 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
   @JsonKey()
   final bool isArranged;
 
+  /// Create a copy of GraphLinkData
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'GraphLinkData(id: $id, source: $source, target: $target, direction: $direction, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isArranged: $isArranged)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphLinkDataCopyWith<_GraphLinkData> get copyWith =>
+      __$GraphLinkDataCopyWithImpl<_GraphLinkData>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphLinkDataImpl &&
+            other is _GraphLinkData &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.source, source) || other.source == source) &&
             (identical(other.target, target) || other.target == target) &&
@@ -673,100 +1062,208 @@ class _$GraphLinkDataImpl implements _GraphLinkData {
       canDrag,
       isArranged);
 
-  /// Create a copy of GraphLinkData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$GraphLinkDataImplCopyWith<_$GraphLinkDataImpl> get copyWith =>
-      __$$GraphLinkDataImplCopyWithImpl<_$GraphLinkDataImpl>(this, _$identity);
+  String toString() {
+    return 'GraphLinkData(id: $id, source: $source, target: $target, direction: $direction, logicalPosition: $logicalPosition, weight: $weight, stackOrder: $stackOrder, isEnabled: $isEnabled, visible: $visible, canSelect: $canSelect, canDrag: $canDrag, isArranged: $isArranged)';
+  }
 }
 
-abstract class _GraphLinkData implements GraphLinkData {
-  const factory _GraphLinkData(
-      {required final GraphId id,
-      final GraphNode? source,
-      final GraphNode? target,
-      final GraphLinkDirection direction,
-      final Offset logicalPosition,
-      final double weight,
-      final int stackOrder,
-      final bool isEnabled,
-      final bool visible,
-      final bool canSelect,
-      final bool canDrag,
-      final bool isArranged}) = _$GraphLinkDataImpl;
+/// @nodoc
+abstract mixin class _$GraphLinkDataCopyWith<$Res>
+    implements $GraphLinkDataCopyWith<$Res> {
+  factory _$GraphLinkDataCopyWith(
+          _GraphLinkData value, $Res Function(_GraphLinkData) _then) =
+      __$GraphLinkDataCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {GraphId id,
+      GraphNode? source,
+      GraphNode? target,
+      GraphLinkDirection direction,
+      Offset logicalPosition,
+      double weight,
+      int stackOrder,
+      bool isEnabled,
+      bool visible,
+      bool canSelect,
+      bool canDrag,
+      bool isArranged});
 
   @override
-  GraphId get id;
-  @override
-  GraphNode? get source;
-  @override
-  GraphNode? get target;
-  @override
-  GraphLinkDirection get direction;
-  @override
-  Offset get logicalPosition;
-  @override
-  double get weight;
-  @override
-  int get stackOrder;
-  @override
-  bool get isEnabled;
-  @override
-  bool get visible;
-  @override
-  bool get canSelect;
-  @override
-  bool get canDrag;
-  @override
-  bool get isArranged;
+  $GraphIdCopyWith<$Res> get id;
+}
+
+/// @nodoc
+class __$GraphLinkDataCopyWithImpl<$Res>
+    implements _$GraphLinkDataCopyWith<$Res> {
+  __$GraphLinkDataCopyWithImpl(this._self, this._then);
+
+  final _GraphLinkData _self;
+  final $Res Function(_GraphLinkData) _then;
 
   /// Create a copy of GraphLinkData
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphLinkDataImplCopyWith<_$GraphLinkDataImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = null,
+    Object? source = freezed,
+    Object? target = freezed,
+    Object? direction = null,
+    Object? logicalPosition = null,
+    Object? weight = null,
+    Object? stackOrder = null,
+    Object? isEnabled = null,
+    Object? visible = null,
+    Object? canSelect = null,
+    Object? canDrag = null,
+    Object? isArranged = null,
+  }) {
+    return _then(_GraphLinkData(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      source: freezed == source
+          ? _self.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as GraphNode?,
+      target: freezed == target
+          ? _self.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as GraphNode?,
+      direction: null == direction
+          ? _self.direction
+          : direction // ignore: cast_nullable_to_non_nullable
+              as GraphLinkDirection,
+      logicalPosition: null == logicalPosition
+          ? _self.logicalPosition
+          : logicalPosition // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      weight: null == weight
+          ? _self.weight
+          : weight // ignore: cast_nullable_to_non_nullable
+              as double,
+      stackOrder: null == stackOrder
+          ? _self.stackOrder
+          : stackOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      isEnabled: null == isEnabled
+          ? _self.isEnabled
+          : isEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      visible: null == visible
+          ? _self.visible
+          : visible // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canSelect: null == canSelect
+          ? _self.canSelect
+          : canSelect // ignore: cast_nullable_to_non_nullable
+              as bool,
+      canDrag: null == canDrag
+          ? _self.canDrag
+          : canDrag // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isArranged: null == isArranged
+          ? _self.isArranged
+          : isArranged // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+
+  /// Create a copy of GraphLinkData
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphIdCopyWith<$Res> get id {
+    return $GraphIdCopyWith<$Res>(_self.id, (value) {
+      return _then(_self.copyWith(id: value));
+    });
+  }
 }
 
 /// @nodoc
 mixin _$GraphData {
   /// Unique identifier for this graph instance.
-  GraphId get id => throw _privateConstructorUsedError;
+  GraphId get id;
 
   /// Map of node IDs to their corresponding [GraphNode] instances.
-  IMap<GraphId, GraphNode> get nodes => throw _privateConstructorUsedError;
+  IMap<GraphId, GraphNode> get nodes;
 
   /// Map of link IDs to their corresponding [GraphLink] instances.
-  IMap<GraphId, GraphLink> get links => throw _privateConstructorUsedError;
+  IMap<GraphId, GraphLink> get links;
 
   /// List of IDs for currently selected nodes.
-  IList<GraphId> get selectedNodeIds => throw _privateConstructorUsedError;
+  IList<GraphId> get selectedNodeIds;
 
   /// List of IDs for currently selected links.
-  IList<GraphId> get selectedLinkIds => throw _privateConstructorUsedError;
+  IList<GraphId> get selectedLinkIds;
 
   /// Whether selection of graph elements is enabled.
-  bool get allowSelection => throw _privateConstructorUsedError;
+  bool get allowSelection;
 
   /// Whether multiple elements can be selected simultaneously.
-  bool get allowMultiSelection => throw _privateConstructorUsedError;
-  bool get needsLayout => throw _privateConstructorUsedError;
-  bool get shouldAnimateLayout => throw _privateConstructorUsedError;
-  GraphViewGeometry? get geometry => throw _privateConstructorUsedError;
+  bool get allowMultiSelection;
+  bool get needsLayout;
+  bool get shouldAnimateLayout;
+  GraphViewGeometry? get geometry;
 
   /// Create a copy of GraphData
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
   $GraphDataCopyWith<GraphData> get copyWith =>
-      throw _privateConstructorUsedError;
+      _$GraphDataCopyWithImpl<GraphData>(this as GraphData, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GraphData &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.nodes, nodes) || other.nodes == nodes) &&
+            (identical(other.links, links) || other.links == links) &&
+            const DeepCollectionEquality()
+                .equals(other.selectedNodeIds, selectedNodeIds) &&
+            const DeepCollectionEquality()
+                .equals(other.selectedLinkIds, selectedLinkIds) &&
+            (identical(other.allowSelection, allowSelection) ||
+                other.allowSelection == allowSelection) &&
+            (identical(other.allowMultiSelection, allowMultiSelection) ||
+                other.allowMultiSelection == allowMultiSelection) &&
+            (identical(other.needsLayout, needsLayout) ||
+                other.needsLayout == needsLayout) &&
+            (identical(other.shouldAnimateLayout, shouldAnimateLayout) ||
+                other.shouldAnimateLayout == shouldAnimateLayout) &&
+            (identical(other.geometry, geometry) ||
+                other.geometry == geometry));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      nodes,
+      links,
+      const DeepCollectionEquality().hash(selectedNodeIds),
+      const DeepCollectionEquality().hash(selectedLinkIds),
+      allowSelection,
+      allowMultiSelection,
+      needsLayout,
+      shouldAnimateLayout,
+      geometry);
+
+  @override
+  String toString() {
+    return 'GraphData(id: $id, nodes: $nodes, links: $links, selectedNodeIds: $selectedNodeIds, selectedLinkIds: $selectedLinkIds, allowSelection: $allowSelection, allowMultiSelection: $allowMultiSelection, needsLayout: $needsLayout, shouldAnimateLayout: $shouldAnimateLayout, geometry: $geometry)';
+  }
 }
 
 /// @nodoc
-abstract class $GraphDataCopyWith<$Res> {
-  factory $GraphDataCopyWith(GraphData value, $Res Function(GraphData) then) =
-      _$GraphDataCopyWithImpl<$Res, GraphData>;
+abstract mixin class $GraphDataCopyWith<$Res> {
+  factory $GraphDataCopyWith(GraphData value, $Res Function(GraphData) _then) =
+      _$GraphDataCopyWithImpl;
   @useResult
   $Res call(
       {GraphId id,
@@ -785,14 +1282,11 @@ abstract class $GraphDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
-    implements $GraphDataCopyWith<$Res> {
-  _$GraphDataCopyWithImpl(this._value, this._then);
+class _$GraphDataCopyWithImpl<$Res> implements $GraphDataCopyWith<$Res> {
+  _$GraphDataCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GraphData _self;
+  final $Res Function(GraphData) _then;
 
   /// Create a copy of GraphData
   /// with the given fields replaced by the non-null parameter values.
@@ -810,48 +1304,48 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
     Object? shouldAnimateLayout = null,
     Object? geometry = freezed,
   }) {
-    return _then(_value.copyWith(
+    return _then(_self.copyWith(
       id: null == id
-          ? _value.id
+          ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as GraphId,
       nodes: null == nodes
-          ? _value.nodes
+          ? _self.nodes
           : nodes // ignore: cast_nullable_to_non_nullable
               as IMap<GraphId, GraphNode>,
       links: null == links
-          ? _value.links
+          ? _self.links
           : links // ignore: cast_nullable_to_non_nullable
               as IMap<GraphId, GraphLink>,
       selectedNodeIds: null == selectedNodeIds
-          ? _value.selectedNodeIds
+          ? _self.selectedNodeIds
           : selectedNodeIds // ignore: cast_nullable_to_non_nullable
               as IList<GraphId>,
       selectedLinkIds: null == selectedLinkIds
-          ? _value.selectedLinkIds
+          ? _self.selectedLinkIds
           : selectedLinkIds // ignore: cast_nullable_to_non_nullable
               as IList<GraphId>,
       allowSelection: null == allowSelection
-          ? _value.allowSelection
+          ? _self.allowSelection
           : allowSelection // ignore: cast_nullable_to_non_nullable
               as bool,
       allowMultiSelection: null == allowMultiSelection
-          ? _value.allowMultiSelection
+          ? _self.allowMultiSelection
           : allowMultiSelection // ignore: cast_nullable_to_non_nullable
               as bool,
       needsLayout: null == needsLayout
-          ? _value.needsLayout
+          ? _self.needsLayout
           : needsLayout // ignore: cast_nullable_to_non_nullable
               as bool,
       shouldAnimateLayout: null == shouldAnimateLayout
-          ? _value.shouldAnimateLayout
+          ? _self.shouldAnimateLayout
           : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
               as bool,
       geometry: freezed == geometry
-          ? _value.geometry
+          ? _self.geometry
           : geometry // ignore: cast_nullable_to_non_nullable
               as GraphViewGeometry?,
-    ) as $Val);
+    ));
   }
 
   /// Create a copy of GraphData
@@ -859,8 +1353,8 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
   @override
   @pragma('vm:prefer-inline')
   $GraphIdCopyWith<$Res> get id {
-    return $GraphIdCopyWith<$Res>(_value.id, (value) {
-      return _then(_value.copyWith(id: value) as $Val);
+    return $GraphIdCopyWith<$Res>(_self.id, (value) {
+      return _then(_self.copyWith(id: value));
     });
   }
 
@@ -869,115 +1363,240 @@ class _$GraphDataCopyWithImpl<$Res, $Val extends GraphData>
   @override
   @pragma('vm:prefer-inline')
   $GraphViewGeometryCopyWith<$Res>? get geometry {
-    if (_value.geometry == null) {
+    if (_self.geometry == null) {
       return null;
     }
 
-    return $GraphViewGeometryCopyWith<$Res>(_value.geometry!, (value) {
-      return _then(_value.copyWith(geometry: value) as $Val);
+    return $GraphViewGeometryCopyWith<$Res>(_self.geometry!, (value) {
+      return _then(_self.copyWith(geometry: value));
     });
   }
 }
 
-/// @nodoc
-abstract class _$$GraphDataImplCopyWith<$Res>
-    implements $GraphDataCopyWith<$Res> {
-  factory _$$GraphDataImplCopyWith(
-          _$GraphDataImpl value, $Res Function(_$GraphDataImpl) then) =
-      __$$GraphDataImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {GraphId id,
-      IMap<GraphId, GraphNode> nodes,
-      IMap<GraphId, GraphLink> links,
-      IList<GraphId> selectedNodeIds,
-      IList<GraphId> selectedLinkIds,
-      bool allowSelection,
-      bool allowMultiSelection,
-      bool needsLayout,
-      bool shouldAnimateLayout,
-      GraphViewGeometry? geometry});
+/// Adds pattern-matching-related methods to [GraphData].
+extension GraphDataPatterns on GraphData {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-  @override
-  $GraphIdCopyWith<$Res> get id;
-  @override
-  $GraphViewGeometryCopyWith<$Res>? get geometry;
-}
-
-/// @nodoc
-class __$$GraphDataImplCopyWithImpl<$Res>
-    extends _$GraphDataCopyWithImpl<$Res, _$GraphDataImpl>
-    implements _$$GraphDataImplCopyWith<$Res> {
-  __$$GraphDataImplCopyWithImpl(
-      _$GraphDataImpl _value, $Res Function(_$GraphDataImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphData
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? nodes = null,
-    Object? links = null,
-    Object? selectedNodeIds = null,
-    Object? selectedLinkIds = null,
-    Object? allowSelection = null,
-    Object? allowMultiSelection = null,
-    Object? needsLayout = null,
-    Object? shouldAnimateLayout = null,
-    Object? geometry = freezed,
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphData value)? $default, {
+    required TResult orElse(),
   }) {
-    return _then(_$GraphDataImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as GraphId,
-      nodes: null == nodes
-          ? _value.nodes
-          : nodes // ignore: cast_nullable_to_non_nullable
-              as IMap<GraphId, GraphNode>,
-      links: null == links
-          ? _value.links
-          : links // ignore: cast_nullable_to_non_nullable
-              as IMap<GraphId, GraphLink>,
-      selectedNodeIds: null == selectedNodeIds
-          ? _value.selectedNodeIds
-          : selectedNodeIds // ignore: cast_nullable_to_non_nullable
-              as IList<GraphId>,
-      selectedLinkIds: null == selectedLinkIds
-          ? _value.selectedLinkIds
-          : selectedLinkIds // ignore: cast_nullable_to_non_nullable
-              as IList<GraphId>,
-      allowSelection: null == allowSelection
-          ? _value.allowSelection
-          : allowSelection // ignore: cast_nullable_to_non_nullable
-              as bool,
-      allowMultiSelection: null == allowMultiSelection
-          ? _value.allowMultiSelection
-          : allowMultiSelection // ignore: cast_nullable_to_non_nullable
-              as bool,
-      needsLayout: null == needsLayout
-          ? _value.needsLayout
-          : needsLayout // ignore: cast_nullable_to_non_nullable
-              as bool,
-      shouldAnimateLayout: null == shouldAnimateLayout
-          ? _value.shouldAnimateLayout
-          : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
-              as bool,
-      geometry: freezed == geometry
-          ? _value.geometry
-          : geometry // ignore: cast_nullable_to_non_nullable
-              as GraphViewGeometry?,
-    ));
+    final _that = this;
+    switch (_that) {
+      case _GraphData() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphData value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphData():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphData value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphData() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            GraphId id,
+            IMap<GraphId, GraphNode> nodes,
+            IMap<GraphId, GraphLink> links,
+            IList<GraphId> selectedNodeIds,
+            IList<GraphId> selectedLinkIds,
+            bool allowSelection,
+            bool allowMultiSelection,
+            bool needsLayout,
+            bool shouldAnimateLayout,
+            GraphViewGeometry? geometry)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphData() when $default != null:
+        return $default(
+            _that.id,
+            _that.nodes,
+            _that.links,
+            _that.selectedNodeIds,
+            _that.selectedLinkIds,
+            _that.allowSelection,
+            _that.allowMultiSelection,
+            _that.needsLayout,
+            _that.shouldAnimateLayout,
+            _that.geometry);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            GraphId id,
+            IMap<GraphId, GraphNode> nodes,
+            IMap<GraphId, GraphLink> links,
+            IList<GraphId> selectedNodeIds,
+            IList<GraphId> selectedLinkIds,
+            bool allowSelection,
+            bool allowMultiSelection,
+            bool needsLayout,
+            bool shouldAnimateLayout,
+            GraphViewGeometry? geometry)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphData():
+        return $default(
+            _that.id,
+            _that.nodes,
+            _that.links,
+            _that.selectedNodeIds,
+            _that.selectedLinkIds,
+            _that.allowSelection,
+            _that.allowMultiSelection,
+            _that.needsLayout,
+            _that.shouldAnimateLayout,
+            _that.geometry);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            GraphId id,
+            IMap<GraphId, GraphNode> nodes,
+            IMap<GraphId, GraphLink> links,
+            IList<GraphId> selectedNodeIds,
+            IList<GraphId> selectedLinkIds,
+            bool allowSelection,
+            bool allowMultiSelection,
+            bool needsLayout,
+            bool shouldAnimateLayout,
+            GraphViewGeometry? geometry)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphData() when $default != null:
+        return $default(
+            _that.id,
+            _that.nodes,
+            _that.links,
+            _that.selectedNodeIds,
+            _that.selectedLinkIds,
+            _that.allowSelection,
+            _that.allowMultiSelection,
+            _that.needsLayout,
+            _that.shouldAnimateLayout,
+            _that.geometry);
+      case _:
+        return null;
+    }
   }
 }
 
 /// @nodoc
 
-class _$GraphDataImpl implements _GraphData {
-  const _$GraphDataImpl(
+class _GraphData implements GraphData {
+  const _GraphData(
       {required this.id,
       this.nodes = const IMapConst({}),
       this.links = const IMapConst({}),
@@ -1031,16 +1650,19 @@ class _$GraphDataImpl implements _GraphData {
   @override
   final GraphViewGeometry? geometry;
 
+  /// Create a copy of GraphData
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'GraphData(id: $id, nodes: $nodes, links: $links, selectedNodeIds: $selectedNodeIds, selectedLinkIds: $selectedLinkIds, allowSelection: $allowSelection, allowMultiSelection: $allowMultiSelection, needsLayout: $needsLayout, shouldAnimateLayout: $shouldAnimateLayout, geometry: $geometry)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphDataCopyWith<_GraphData> get copyWith =>
+      __$GraphDataCopyWithImpl<_GraphData>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphDataImpl &&
+            other is _GraphData &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nodes, nodes) || other.nodes == nodes) &&
             (identical(other.links, links) || other.links == links) &&
@@ -1074,66 +1696,128 @@ class _$GraphDataImpl implements _GraphData {
       shouldAnimateLayout,
       geometry);
 
+  @override
+  String toString() {
+    return 'GraphData(id: $id, nodes: $nodes, links: $links, selectedNodeIds: $selectedNodeIds, selectedLinkIds: $selectedLinkIds, allowSelection: $allowSelection, allowMultiSelection: $allowMultiSelection, needsLayout: $needsLayout, shouldAnimateLayout: $shouldAnimateLayout, geometry: $geometry)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$GraphDataCopyWith<$Res>
+    implements $GraphDataCopyWith<$Res> {
+  factory _$GraphDataCopyWith(
+          _GraphData value, $Res Function(_GraphData) _then) =
+      __$GraphDataCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {GraphId id,
+      IMap<GraphId, GraphNode> nodes,
+      IMap<GraphId, GraphLink> links,
+      IList<GraphId> selectedNodeIds,
+      IList<GraphId> selectedLinkIds,
+      bool allowSelection,
+      bool allowMultiSelection,
+      bool needsLayout,
+      bool shouldAnimateLayout,
+      GraphViewGeometry? geometry});
+
+  @override
+  $GraphIdCopyWith<$Res> get id;
+  @override
+  $GraphViewGeometryCopyWith<$Res>? get geometry;
+}
+
+/// @nodoc
+class __$GraphDataCopyWithImpl<$Res> implements _$GraphDataCopyWith<$Res> {
+  __$GraphDataCopyWithImpl(this._self, this._then);
+
+  final _GraphData _self;
+  final $Res Function(_GraphData) _then;
+
   /// Create a copy of GraphData
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$GraphDataImplCopyWith<_$GraphDataImpl> get copyWith =>
-      __$$GraphDataImplCopyWithImpl<_$GraphDataImpl>(this, _$identity);
-}
-
-abstract class _GraphData implements GraphData {
-  const factory _GraphData(
-      {required final GraphId id,
-      final IMap<GraphId, GraphNode> nodes,
-      final IMap<GraphId, GraphLink> links,
-      final IList<GraphId> selectedNodeIds,
-      final IList<GraphId> selectedLinkIds,
-      final bool allowSelection,
-      final bool allowMultiSelection,
-      final bool needsLayout,
-      final bool shouldAnimateLayout,
-      final GraphViewGeometry? geometry}) = _$GraphDataImpl;
-
-  /// Unique identifier for this graph instance.
-  @override
-  GraphId get id;
-
-  /// Map of node IDs to their corresponding [GraphNode] instances.
-  @override
-  IMap<GraphId, GraphNode> get nodes;
-
-  /// Map of link IDs to their corresponding [GraphLink] instances.
-  @override
-  IMap<GraphId, GraphLink> get links;
-
-  /// List of IDs for currently selected nodes.
-  @override
-  IList<GraphId> get selectedNodeIds;
-
-  /// List of IDs for currently selected links.
-  @override
-  IList<GraphId> get selectedLinkIds;
-
-  /// Whether selection of graph elements is enabled.
-  @override
-  bool get allowSelection;
-
-  /// Whether multiple elements can be selected simultaneously.
-  @override
-  bool get allowMultiSelection;
-  @override
-  bool get needsLayout;
-  @override
-  bool get shouldAnimateLayout;
-  @override
-  GraphViewGeometry? get geometry;
+  $Res call({
+    Object? id = null,
+    Object? nodes = null,
+    Object? links = null,
+    Object? selectedNodeIds = null,
+    Object? selectedLinkIds = null,
+    Object? allowSelection = null,
+    Object? allowMultiSelection = null,
+    Object? needsLayout = null,
+    Object? shouldAnimateLayout = null,
+    Object? geometry = freezed,
+  }) {
+    return _then(_GraphData(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as GraphId,
+      nodes: null == nodes
+          ? _self.nodes
+          : nodes // ignore: cast_nullable_to_non_nullable
+              as IMap<GraphId, GraphNode>,
+      links: null == links
+          ? _self.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as IMap<GraphId, GraphLink>,
+      selectedNodeIds: null == selectedNodeIds
+          ? _self.selectedNodeIds
+          : selectedNodeIds // ignore: cast_nullable_to_non_nullable
+              as IList<GraphId>,
+      selectedLinkIds: null == selectedLinkIds
+          ? _self.selectedLinkIds
+          : selectedLinkIds // ignore: cast_nullable_to_non_nullable
+              as IList<GraphId>,
+      allowSelection: null == allowSelection
+          ? _self.allowSelection
+          : allowSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      allowMultiSelection: null == allowMultiSelection
+          ? _self.allowMultiSelection
+          : allowMultiSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      needsLayout: null == needsLayout
+          ? _self.needsLayout
+          : needsLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shouldAnimateLayout: null == shouldAnimateLayout
+          ? _self.shouldAnimateLayout
+          : shouldAnimateLayout // ignore: cast_nullable_to_non_nullable
+              as bool,
+      geometry: freezed == geometry
+          ? _self.geometry
+          : geometry // ignore: cast_nullable_to_non_nullable
+              as GraphViewGeometry?,
+    ));
+  }
 
   /// Create a copy of GraphData
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphDataImplCopyWith<_$GraphDataImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $GraphIdCopyWith<$Res> get id {
+    return $GraphIdCopyWith<$Res>(_self.id, (value) {
+      return _then(_self.copyWith(id: value));
+    });
+  }
+
+  /// Create a copy of GraphData
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphViewGeometryCopyWith<$Res>? get geometry {
+    if (_self.geometry == null) {
+      return null;
+    }
+
+    return $GraphViewGeometryCopyWith<$Res>(_self.geometry!, (value) {
+      return _then(_self.copyWith(geometry: value));
+    });
+  }
 }
+
+// dart format on
