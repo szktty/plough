@@ -11,7 +11,8 @@ part 'link.freezed.dart';
 ///
 /// * [GraphDefaultLinkRenderer], which uses this style configuration
 @freezed
-abstract class GraphDefaultLinkRendererStyle with _$GraphDefaultLinkRendererStyle {
+abstract class GraphDefaultLinkRendererStyle
+    with _$GraphDefaultLinkRendererStyle {
   /// Creates a style configuration with default values for all properties.
   const factory GraphDefaultLinkRendererStyle({
     /// The color of the arrow at the end of the link.
