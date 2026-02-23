@@ -1,6 +1,9 @@
 ## develop
 
+## 0.7.1
+
 - [FIX] Fixed `nodeAnimationStartPosition` being ignored during initial layout, causing nodes to animate from top-left corner instead of the specified position.
+- [CHANGE] Upgraded `freezed_annotation` to ^3.1.0 and `freezed` (dev) to ^3.2.5.
 
 ## 0.7.0
 
