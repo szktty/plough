@@ -12,7 +12,8 @@ part 'node.freezed.dart';
 /// * [GraphDefaultNodeRenderer], which uses this style configuration
 /// * [GraphDefaultNodeRendererShape], which defines available node shapes
 @freezed
-class GraphDefaultNodeRendererStyle with _$GraphDefaultNodeRendererStyle {
+abstract class GraphDefaultNodeRendererStyle
+    with _$GraphDefaultNodeRendererStyle {
   /// Creates a style configuration with default values for all properties.
   const factory GraphDefaultNodeRendererStyle({
     /// The background color of the node.

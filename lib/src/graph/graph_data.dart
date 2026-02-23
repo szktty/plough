@@ -58,7 +58,7 @@ enum GraphLinkDirection {
 /// including position, animation, and selection state.
 @internal
 @freezed
-class GraphNodeData with _$GraphNodeData implements GraphEntityData {
+abstract class GraphNodeData with _$GraphNodeData implements GraphEntityData {
   /// Creates node data with an id and optional state properties.
   const factory GraphNodeData({
     required GraphId id,
@@ -79,7 +79,7 @@ class GraphNodeData with _$GraphNodeData implements GraphEntityData {
 /// including its endpoints, direction, and visual properties.
 @internal
 @freezed
-class GraphLinkData with _$GraphLinkData implements GraphEntityData {
+abstract class GraphLinkData with _$GraphLinkData implements GraphEntityData {
   /// Creates link data with an id and optional properties.
   const factory GraphLinkData({
     required GraphId id,
@@ -103,7 +103,7 @@ class GraphLinkData with _$GraphLinkData implements GraphEntityData {
 /// using immutable collections for consistent state management.
 @internal
 @freezed
-class GraphData with _$GraphData {
+abstract class GraphData with _$GraphData {
   /// Creates graph data with an id and optional collections and states.
   const factory GraphData({
     /// Unique identifier for this graph instance.

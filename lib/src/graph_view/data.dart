@@ -17,7 +17,7 @@ part 'data.freezed.dart';
 /// The state is immutable and changes are managed through the provider pattern.
 @internal
 @freezed
-class GraphViewData with _$GraphViewData {
+abstract class GraphViewData with _$GraphViewData {
   /// Creates an immutable view configuration.
   ///
   /// All parameters are required to ensure view consistency.

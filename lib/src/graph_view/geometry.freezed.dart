@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,133 +9,27 @@ part of 'geometry.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
 
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
 /// @nodoc
-mixin _$GraphConnectionPoints {
+mixin _$GraphConnectionPoints implements DiagnosticableTreeMixin {
   /// The point where the link enters the target node.
-  Offset get incoming => throw _privateConstructorUsedError;
+  Offset get incoming;
 
   /// The point where the link exits the source node.
-  Offset get outgoing => throw _privateConstructorUsedError;
+  Offset get outgoing;
 
   /// Create a copy of GraphConnectionPoints
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
   $GraphConnectionPointsCopyWith<GraphConnectionPoints> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $GraphConnectionPointsCopyWith<$Res> {
-  factory $GraphConnectionPointsCopyWith(GraphConnectionPoints value,
-          $Res Function(GraphConnectionPoints) then) =
-      _$GraphConnectionPointsCopyWithImpl<$Res, GraphConnectionPoints>;
-  @useResult
-  $Res call({Offset incoming, Offset outgoing});
-}
-
-/// @nodoc
-class _$GraphConnectionPointsCopyWithImpl<$Res,
-        $Val extends GraphConnectionPoints>
-    implements $GraphConnectionPointsCopyWith<$Res> {
-  _$GraphConnectionPointsCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of GraphConnectionPoints
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? incoming = null,
-    Object? outgoing = null,
-  }) {
-    return _then(_value.copyWith(
-      incoming: null == incoming
-          ? _value.incoming
-          : incoming // ignore: cast_nullable_to_non_nullable
-              as Offset,
-      outgoing: null == outgoing
-          ? _value.outgoing
-          : outgoing // ignore: cast_nullable_to_non_nullable
-              as Offset,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$GraphConnectionPointsImplCopyWith<$Res>
-    implements $GraphConnectionPointsCopyWith<$Res> {
-  factory _$$GraphConnectionPointsImplCopyWith(
-          _$GraphConnectionPointsImpl value,
-          $Res Function(_$GraphConnectionPointsImpl) then) =
-      __$$GraphConnectionPointsImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({Offset incoming, Offset outgoing});
-}
-
-/// @nodoc
-class __$$GraphConnectionPointsImplCopyWithImpl<$Res>
-    extends _$GraphConnectionPointsCopyWithImpl<$Res,
-        _$GraphConnectionPointsImpl>
-    implements _$$GraphConnectionPointsImplCopyWith<$Res> {
-  __$$GraphConnectionPointsImplCopyWithImpl(_$GraphConnectionPointsImpl _value,
-      $Res Function(_$GraphConnectionPointsImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphConnectionPoints
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? incoming = null,
-    Object? outgoing = null,
-  }) {
-    return _then(_$GraphConnectionPointsImpl(
-      incoming: null == incoming
-          ? _value.incoming
-          : incoming // ignore: cast_nullable_to_non_nullable
-              as Offset,
-      outgoing: null == outgoing
-          ? _value.outgoing
-          : outgoing // ignore: cast_nullable_to_non_nullable
-              as Offset,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$GraphConnectionPointsImpl extends _GraphConnectionPoints
-    with DiagnosticableTreeMixin {
-  const _$GraphConnectionPointsImpl(
-      {required this.incoming, required this.outgoing})
-      : super._();
-
-  /// The point where the link enters the target node.
-  @override
-  final Offset incoming;
-
-  /// The point where the link exits the source node.
-  @override
-  final Offset outgoing;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'GraphConnectionPoints(incoming: $incoming, outgoing: $outgoing)';
-  }
+      _$GraphConnectionPointsCopyWithImpl<GraphConnectionPoints>(
+          this as GraphConnectionPoints, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'GraphConnectionPoints'))
       ..add(DiagnosticsProperty('incoming', incoming))
@@ -146,7 +40,7 @@ class _$GraphConnectionPointsImpl extends _GraphConnectionPoints
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphConnectionPointsImpl &&
+            other is GraphConnectionPoints &&
             (identical(other.incoming, incoming) ||
                 other.incoming == incoming) &&
             (identical(other.outgoing, outgoing) ||
@@ -156,140 +50,313 @@ class _$GraphConnectionPointsImpl extends _GraphConnectionPoints
   @override
   int get hashCode => Object.hash(runtimeType, incoming, outgoing);
 
-  /// Create a copy of GraphConnectionPoints
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$GraphConnectionPointsImplCopyWith<_$GraphConnectionPointsImpl>
-      get copyWith => __$$GraphConnectionPointsImplCopyWithImpl<
-          _$GraphConnectionPointsImpl>(this, _$identity);
-}
-
-abstract class _GraphConnectionPoints extends GraphConnectionPoints {
-  const factory _GraphConnectionPoints(
-      {required final Offset incoming,
-      required final Offset outgoing}) = _$GraphConnectionPointsImpl;
-  const _GraphConnectionPoints._() : super._();
-
-  /// The point where the link enters the target node.
-  @override
-  Offset get incoming;
-
-  /// The point where the link exits the source node.
-  @override
-  Offset get outgoing;
-
-  /// Create a copy of GraphConnectionPoints
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphConnectionPointsImplCopyWith<_$GraphConnectionPointsImpl>
-      get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-mixin _$GraphNodeViewGeometry {
-  Rect get bounds => throw _privateConstructorUsedError;
-
-  /// Create a copy of GraphNodeViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $GraphNodeViewGeometryCopyWith<GraphNodeViewGeometry> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $GraphNodeViewGeometryCopyWith<$Res> {
-  factory $GraphNodeViewGeometryCopyWith(GraphNodeViewGeometry value,
-          $Res Function(GraphNodeViewGeometry) then) =
-      _$GraphNodeViewGeometryCopyWithImpl<$Res, GraphNodeViewGeometry>;
-  @useResult
-  $Res call({Rect bounds});
-}
-
-/// @nodoc
-class _$GraphNodeViewGeometryCopyWithImpl<$Res,
-        $Val extends GraphNodeViewGeometry>
-    implements $GraphNodeViewGeometryCopyWith<$Res> {
-  _$GraphNodeViewGeometryCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of GraphNodeViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? bounds = null,
-  }) {
-    return _then(_value.copyWith(
-      bounds: null == bounds
-          ? _value.bounds
-          : bounds // ignore: cast_nullable_to_non_nullable
-              as Rect,
-    ) as $Val);
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphConnectionPoints(incoming: $incoming, outgoing: $outgoing)';
   }
 }
 
 /// @nodoc
-abstract class _$$GraphNodeViewGeometryImplCopyWith<$Res>
-    implements $GraphNodeViewGeometryCopyWith<$Res> {
-  factory _$$GraphNodeViewGeometryImplCopyWith(
-          _$GraphNodeViewGeometryImpl value,
-          $Res Function(_$GraphNodeViewGeometryImpl) then) =
-      __$$GraphNodeViewGeometryImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $GraphConnectionPointsCopyWith<$Res> {
+  factory $GraphConnectionPointsCopyWith(GraphConnectionPoints value,
+          $Res Function(GraphConnectionPoints) _then) =
+      _$GraphConnectionPointsCopyWithImpl;
   @useResult
-  $Res call({Rect bounds});
+  $Res call({Offset incoming, Offset outgoing});
 }
 
 /// @nodoc
-class __$$GraphNodeViewGeometryImplCopyWithImpl<$Res>
-    extends _$GraphNodeViewGeometryCopyWithImpl<$Res,
-        _$GraphNodeViewGeometryImpl>
-    implements _$$GraphNodeViewGeometryImplCopyWith<$Res> {
-  __$$GraphNodeViewGeometryImplCopyWithImpl(_$GraphNodeViewGeometryImpl _value,
-      $Res Function(_$GraphNodeViewGeometryImpl) _then)
-      : super(_value, _then);
+class _$GraphConnectionPointsCopyWithImpl<$Res>
+    implements $GraphConnectionPointsCopyWith<$Res> {
+  _$GraphConnectionPointsCopyWithImpl(this._self, this._then);
 
-  /// Create a copy of GraphNodeViewGeometry
+  final GraphConnectionPoints _self;
+  final $Res Function(GraphConnectionPoints) _then;
+
+  /// Create a copy of GraphConnectionPoints
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? bounds = null,
+    Object? incoming = null,
+    Object? outgoing = null,
   }) {
-    return _then(_$GraphNodeViewGeometryImpl(
-      bounds: null == bounds
-          ? _value.bounds
-          : bounds // ignore: cast_nullable_to_non_nullable
-              as Rect,
+    return _then(_self.copyWith(
+      incoming: null == incoming
+          ? _self.incoming
+          : incoming // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      outgoing: null == outgoing
+          ? _self.outgoing
+          : outgoing // ignore: cast_nullable_to_non_nullable
+              as Offset,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [GraphConnectionPoints].
+extension GraphConnectionPointsPatterns on GraphConnectionPoints {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphConnectionPoints value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionPoints() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphConnectionPoints value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionPoints():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphConnectionPoints value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionPoints() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(Offset incoming, Offset outgoing)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionPoints() when $default != null:
+        return $default(_that.incoming, _that.outgoing);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(Offset incoming, Offset outgoing) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionPoints():
+        return $default(_that.incoming, _that.outgoing);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(Offset incoming, Offset outgoing)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionPoints() when $default != null:
+        return $default(_that.incoming, _that.outgoing);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _GraphConnectionPoints extends GraphConnectionPoints
+    with DiagnosticableTreeMixin {
+  const _GraphConnectionPoints({required this.incoming, required this.outgoing})
+      : super._();
+
+  /// The point where the link enters the target node.
+  @override
+  final Offset incoming;
+
+  /// The point where the link exits the source node.
+  @override
+  final Offset outgoing;
+
+  /// Create a copy of GraphConnectionPoints
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphConnectionPointsCopyWith<_GraphConnectionPoints> get copyWith =>
+      __$GraphConnectionPointsCopyWithImpl<_GraphConnectionPoints>(
+          this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'GraphConnectionPoints'))
+      ..add(DiagnosticsProperty('incoming', incoming))
+      ..add(DiagnosticsProperty('outgoing', outgoing));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _GraphConnectionPoints &&
+            (identical(other.incoming, incoming) ||
+                other.incoming == incoming) &&
+            (identical(other.outgoing, outgoing) ||
+                other.outgoing == outgoing));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, incoming, outgoing);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphConnectionPoints(incoming: $incoming, outgoing: $outgoing)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$GraphConnectionPointsCopyWith<$Res>
+    implements $GraphConnectionPointsCopyWith<$Res> {
+  factory _$GraphConnectionPointsCopyWith(_GraphConnectionPoints value,
+          $Res Function(_GraphConnectionPoints) _then) =
+      __$GraphConnectionPointsCopyWithImpl;
+  @override
+  @useResult
+  $Res call({Offset incoming, Offset outgoing});
+}
+
+/// @nodoc
+class __$GraphConnectionPointsCopyWithImpl<$Res>
+    implements _$GraphConnectionPointsCopyWith<$Res> {
+  __$GraphConnectionPointsCopyWithImpl(this._self, this._then);
+
+  final _GraphConnectionPoints _self;
+  final $Res Function(_GraphConnectionPoints) _then;
+
+  /// Create a copy of GraphConnectionPoints
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? incoming = null,
+    Object? outgoing = null,
+  }) {
+    return _then(_GraphConnectionPoints(
+      incoming: null == incoming
+          ? _self.incoming
+          : incoming // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      outgoing: null == outgoing
+          ? _self.outgoing
+          : outgoing // ignore: cast_nullable_to_non_nullable
+              as Offset,
     ));
   }
 }
 
 /// @nodoc
+mixin _$GraphNodeViewGeometry implements DiagnosticableTreeMixin {
+  Rect get bounds;
 
-class _$GraphNodeViewGeometryImpl
-    with DiagnosticableTreeMixin
-    implements _GraphNodeViewGeometry {
-  const _$GraphNodeViewGeometryImpl({required this.bounds});
-
-  @override
-  final Rect bounds;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'GraphNodeViewGeometry(bounds: $bounds)';
-  }
+  /// Create a copy of GraphNodeViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $GraphNodeViewGeometryCopyWith<GraphNodeViewGeometry> get copyWith =>
+      _$GraphNodeViewGeometryCopyWithImpl<GraphNodeViewGeometry>(
+          this as GraphNodeViewGeometry, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'GraphNodeViewGeometry'))
       ..add(DiagnosticsProperty('bounds', bounds));
@@ -299,57 +366,340 @@ class _$GraphNodeViewGeometryImpl
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphNodeViewGeometryImpl &&
+            other is GraphNodeViewGeometry &&
             (identical(other.bounds, bounds) || other.bounds == bounds));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, bounds);
 
-  /// Create a copy of GraphNodeViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$GraphNodeViewGeometryImplCopyWith<_$GraphNodeViewGeometryImpl>
-      get copyWith => __$$GraphNodeViewGeometryImplCopyWithImpl<
-          _$GraphNodeViewGeometryImpl>(this, _$identity);
-}
-
-abstract class _GraphNodeViewGeometry implements GraphNodeViewGeometry {
-  const factory _GraphNodeViewGeometry({required final Rect bounds}) =
-      _$GraphNodeViewGeometryImpl;
-
-  @override
-  Rect get bounds;
-
-  /// Create a copy of GraphNodeViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphNodeViewGeometryImplCopyWith<_$GraphNodeViewGeometryImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphNodeViewGeometry(bounds: $bounds)';
+  }
 }
 
 /// @nodoc
-mixin _$GraphLinkViewGeometry {
-  Rect get bounds => throw _privateConstructorUsedError;
-  GraphConnectionGeometry get connection => throw _privateConstructorUsedError;
-  double get thickness => throw _privateConstructorUsedError;
-  double get angle => throw _privateConstructorUsedError;
+abstract mixin class $GraphNodeViewGeometryCopyWith<$Res> {
+  factory $GraphNodeViewGeometryCopyWith(GraphNodeViewGeometry value,
+          $Res Function(GraphNodeViewGeometry) _then) =
+      _$GraphNodeViewGeometryCopyWithImpl;
+  @useResult
+  $Res call({Rect bounds});
+}
+
+/// @nodoc
+class _$GraphNodeViewGeometryCopyWithImpl<$Res>
+    implements $GraphNodeViewGeometryCopyWith<$Res> {
+  _$GraphNodeViewGeometryCopyWithImpl(this._self, this._then);
+
+  final GraphNodeViewGeometry _self;
+  final $Res Function(GraphNodeViewGeometry) _then;
+
+  /// Create a copy of GraphNodeViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? bounds = null,
+  }) {
+    return _then(_self.copyWith(
+      bounds: null == bounds
+          ? _self.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [GraphNodeViewGeometry].
+extension GraphNodeViewGeometryPatterns on GraphNodeViewGeometry {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphNodeViewGeometry value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeViewGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphNodeViewGeometry value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeViewGeometry():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphNodeViewGeometry value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeViewGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(Rect bounds)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeViewGeometry() when $default != null:
+        return $default(_that.bounds);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(Rect bounds) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeViewGeometry():
+        return $default(_that.bounds);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(Rect bounds)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphNodeViewGeometry() when $default != null:
+        return $default(_that.bounds);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _GraphNodeViewGeometry
+    with DiagnosticableTreeMixin
+    implements GraphNodeViewGeometry {
+  const _GraphNodeViewGeometry({required this.bounds});
+
+  @override
+  final Rect bounds;
+
+  /// Create a copy of GraphNodeViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphNodeViewGeometryCopyWith<_GraphNodeViewGeometry> get copyWith =>
+      __$GraphNodeViewGeometryCopyWithImpl<_GraphNodeViewGeometry>(
+          this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'GraphNodeViewGeometry'))
+      ..add(DiagnosticsProperty('bounds', bounds));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _GraphNodeViewGeometry &&
+            (identical(other.bounds, bounds) || other.bounds == bounds));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, bounds);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphNodeViewGeometry(bounds: $bounds)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$GraphNodeViewGeometryCopyWith<$Res>
+    implements $GraphNodeViewGeometryCopyWith<$Res> {
+  factory _$GraphNodeViewGeometryCopyWith(_GraphNodeViewGeometry value,
+          $Res Function(_GraphNodeViewGeometry) _then) =
+      __$GraphNodeViewGeometryCopyWithImpl;
+  @override
+  @useResult
+  $Res call({Rect bounds});
+}
+
+/// @nodoc
+class __$GraphNodeViewGeometryCopyWithImpl<$Res>
+    implements _$GraphNodeViewGeometryCopyWith<$Res> {
+  __$GraphNodeViewGeometryCopyWithImpl(this._self, this._then);
+
+  final _GraphNodeViewGeometry _self;
+  final $Res Function(_GraphNodeViewGeometry) _then;
+
+  /// Create a copy of GraphNodeViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? bounds = null,
+  }) {
+    return _then(_GraphNodeViewGeometry(
+      bounds: null == bounds
+          ? _self.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$GraphLinkViewGeometry implements DiagnosticableTreeMixin {
+  Rect get bounds;
+  GraphConnectionGeometry get connection;
+  double get thickness;
+  double get angle;
 
   /// Create a copy of GraphLinkViewGeometry
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
   $GraphLinkViewGeometryCopyWith<GraphLinkViewGeometry> get copyWith =>
-      throw _privateConstructorUsedError;
+      _$GraphLinkViewGeometryCopyWithImpl<GraphLinkViewGeometry>(
+          this as GraphLinkViewGeometry, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'GraphLinkViewGeometry'))
+      ..add(DiagnosticsProperty('bounds', bounds))
+      ..add(DiagnosticsProperty('connection', connection))
+      ..add(DiagnosticsProperty('thickness', thickness))
+      ..add(DiagnosticsProperty('angle', angle));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GraphLinkViewGeometry &&
+            (identical(other.bounds, bounds) || other.bounds == bounds) &&
+            (identical(other.connection, connection) ||
+                other.connection == connection) &&
+            (identical(other.thickness, thickness) ||
+                other.thickness == thickness) &&
+            (identical(other.angle, angle) || other.angle == angle));
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, bounds, connection, thickness, angle);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphLinkViewGeometry(bounds: $bounds, connection: $connection, thickness: $thickness, angle: $angle)';
+  }
 }
 
 /// @nodoc
-abstract class $GraphLinkViewGeometryCopyWith<$Res> {
+abstract mixin class $GraphLinkViewGeometryCopyWith<$Res> {
   factory $GraphLinkViewGeometryCopyWith(GraphLinkViewGeometry value,
-          $Res Function(GraphLinkViewGeometry) then) =
-      _$GraphLinkViewGeometryCopyWithImpl<$Res, GraphLinkViewGeometry>;
+          $Res Function(GraphLinkViewGeometry) _then) =
+      _$GraphLinkViewGeometryCopyWithImpl;
   @useResult
   $Res call(
       {Rect bounds,
@@ -361,15 +711,12 @@ abstract class $GraphLinkViewGeometryCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GraphLinkViewGeometryCopyWithImpl<$Res,
-        $Val extends GraphLinkViewGeometry>
+class _$GraphLinkViewGeometryCopyWithImpl<$Res>
     implements $GraphLinkViewGeometryCopyWith<$Res> {
-  _$GraphLinkViewGeometryCopyWithImpl(this._value, this._then);
+  _$GraphLinkViewGeometryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GraphLinkViewGeometry _self;
+  final $Res Function(GraphLinkViewGeometry) _then;
 
   /// Create a copy of GraphLinkViewGeometry
   /// with the given fields replaced by the non-null parameter values.
@@ -381,24 +728,24 @@ class _$GraphLinkViewGeometryCopyWithImpl<$Res,
     Object? thickness = null,
     Object? angle = null,
   }) {
-    return _then(_value.copyWith(
+    return _then(_self.copyWith(
       bounds: null == bounds
-          ? _value.bounds
+          ? _self.bounds
           : bounds // ignore: cast_nullable_to_non_nullable
               as Rect,
       connection: null == connection
-          ? _value.connection
+          ? _self.connection
           : connection // ignore: cast_nullable_to_non_nullable
               as GraphConnectionGeometry,
       thickness: null == thickness
-          ? _value.thickness
+          ? _self.thickness
           : thickness // ignore: cast_nullable_to_non_nullable
               as double,
       angle: null == angle
-          ? _value.angle
+          ? _self.angle
           : angle // ignore: cast_nullable_to_non_nullable
               as double,
-    ) as $Val);
+    ));
   }
 
   /// Create a copy of GraphLinkViewGeometry
@@ -406,76 +753,183 @@ class _$GraphLinkViewGeometryCopyWithImpl<$Res,
   @override
   @pragma('vm:prefer-inline')
   $GraphConnectionGeometryCopyWith<$Res> get connection {
-    return $GraphConnectionGeometryCopyWith<$Res>(_value.connection, (value) {
-      return _then(_value.copyWith(connection: value) as $Val);
+    return $GraphConnectionGeometryCopyWith<$Res>(_self.connection, (value) {
+      return _then(_self.copyWith(connection: value));
     });
   }
 }
 
-/// @nodoc
-abstract class _$$GraphLinkViewGeometryImplCopyWith<$Res>
-    implements $GraphLinkViewGeometryCopyWith<$Res> {
-  factory _$$GraphLinkViewGeometryImplCopyWith(
-          _$GraphLinkViewGeometryImpl value,
-          $Res Function(_$GraphLinkViewGeometryImpl) then) =
-      __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {Rect bounds,
-      GraphConnectionGeometry connection,
-      double thickness,
-      double angle});
+/// Adds pattern-matching-related methods to [GraphLinkViewGeometry].
+extension GraphLinkViewGeometryPatterns on GraphLinkViewGeometry {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-  @override
-  $GraphConnectionGeometryCopyWith<$Res> get connection;
-}
-
-/// @nodoc
-class __$$GraphLinkViewGeometryImplCopyWithImpl<$Res>
-    extends _$GraphLinkViewGeometryCopyWithImpl<$Res,
-        _$GraphLinkViewGeometryImpl>
-    implements _$$GraphLinkViewGeometryImplCopyWith<$Res> {
-  __$$GraphLinkViewGeometryImplCopyWithImpl(_$GraphLinkViewGeometryImpl _value,
-      $Res Function(_$GraphLinkViewGeometryImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphLinkViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? bounds = null,
-    Object? connection = null,
-    Object? thickness = null,
-    Object? angle = null,
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphLinkViewGeometry value)? $default, {
+    required TResult orElse(),
   }) {
-    return _then(_$GraphLinkViewGeometryImpl(
-      bounds: null == bounds
-          ? _value.bounds
-          : bounds // ignore: cast_nullable_to_non_nullable
-              as Rect,
-      connection: null == connection
-          ? _value.connection
-          : connection // ignore: cast_nullable_to_non_nullable
-              as GraphConnectionGeometry,
-      thickness: null == thickness
-          ? _value.thickness
-          : thickness // ignore: cast_nullable_to_non_nullable
-              as double,
-      angle: null == angle
-          ? _value.angle
-          : angle // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkViewGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphLinkViewGeometry value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkViewGeometry():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphLinkViewGeometry value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkViewGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(Rect bounds, GraphConnectionGeometry connection,
+            double thickness, double angle)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkViewGeometry() when $default != null:
+        return $default(
+            _that.bounds, _that.connection, _that.thickness, _that.angle);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(Rect bounds, GraphConnectionGeometry connection,
+            double thickness, double angle)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkViewGeometry():
+        return $default(
+            _that.bounds, _that.connection, _that.thickness, _that.angle);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(Rect bounds, GraphConnectionGeometry connection,
+            double thickness, double angle)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphLinkViewGeometry() when $default != null:
+        return $default(
+            _that.bounds, _that.connection, _that.thickness, _that.angle);
+      case _:
+        return null;
+    }
   }
 }
 
 /// @nodoc
 
-class _$GraphLinkViewGeometryImpl extends _GraphLinkViewGeometry
+class _GraphLinkViewGeometry extends GraphLinkViewGeometry
     with DiagnosticableTreeMixin {
-  const _$GraphLinkViewGeometryImpl(
+  const _GraphLinkViewGeometry(
       {required this.bounds,
       required this.connection,
       required this.thickness,
@@ -491,14 +945,17 @@ class _$GraphLinkViewGeometryImpl extends _GraphLinkViewGeometry
   @override
   final double angle;
 
+  /// Create a copy of GraphLinkViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'GraphLinkViewGeometry(bounds: $bounds, connection: $connection, thickness: $thickness, angle: $angle)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphLinkViewGeometryCopyWith<_GraphLinkViewGeometry> get copyWith =>
+      __$GraphLinkViewGeometryCopyWithImpl<_GraphLinkViewGeometry>(
+          this, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'GraphLinkViewGeometry'))
       ..add(DiagnosticsProperty('bounds', bounds))
@@ -511,7 +968,7 @@ class _$GraphLinkViewGeometryImpl extends _GraphLinkViewGeometry
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphLinkViewGeometryImpl &&
+            other is _GraphLinkViewGeometry &&
             (identical(other.bounds, bounds) || other.bounds == bounds) &&
             (identical(other.connection, connection) ||
                 other.connection == connection) &&
@@ -524,65 +981,133 @@ class _$GraphLinkViewGeometryImpl extends _GraphLinkViewGeometry
   int get hashCode =>
       Object.hash(runtimeType, bounds, connection, thickness, angle);
 
-  /// Create a copy of GraphLinkViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$GraphLinkViewGeometryImplCopyWith<_$GraphLinkViewGeometryImpl>
-      get copyWith => __$$GraphLinkViewGeometryImplCopyWithImpl<
-          _$GraphLinkViewGeometryImpl>(this, _$identity);
-}
-
-abstract class _GraphLinkViewGeometry extends GraphLinkViewGeometry {
-  const factory _GraphLinkViewGeometry(
-      {required final Rect bounds,
-      required final GraphConnectionGeometry connection,
-      required final double thickness,
-      required final double angle}) = _$GraphLinkViewGeometryImpl;
-  const _GraphLinkViewGeometry._() : super._();
-
-  @override
-  Rect get bounds;
-  @override
-  GraphConnectionGeometry get connection;
-  @override
-  double get thickness;
-  @override
-  double get angle;
-
-  /// Create a copy of GraphLinkViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphLinkViewGeometryImplCopyWith<_$GraphLinkViewGeometryImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphLinkViewGeometry(bounds: $bounds, connection: $connection, thickness: $thickness, angle: $angle)';
+  }
 }
 
 /// @nodoc
-mixin _$GraphConnectionGeometry {
+abstract mixin class _$GraphLinkViewGeometryCopyWith<$Res>
+    implements $GraphLinkViewGeometryCopyWith<$Res> {
+  factory _$GraphLinkViewGeometryCopyWith(_GraphLinkViewGeometry value,
+          $Res Function(_GraphLinkViewGeometry) _then) =
+      __$GraphLinkViewGeometryCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {Rect bounds,
+      GraphConnectionGeometry connection,
+      double thickness,
+      double angle});
+
+  @override
+  $GraphConnectionGeometryCopyWith<$Res> get connection;
+}
+
+/// @nodoc
+class __$GraphLinkViewGeometryCopyWithImpl<$Res>
+    implements _$GraphLinkViewGeometryCopyWith<$Res> {
+  __$GraphLinkViewGeometryCopyWithImpl(this._self, this._then);
+
+  final _GraphLinkViewGeometry _self;
+  final $Res Function(_GraphLinkViewGeometry) _then;
+
+  /// Create a copy of GraphLinkViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? bounds = null,
+    Object? connection = null,
+    Object? thickness = null,
+    Object? angle = null,
+  }) {
+    return _then(_GraphLinkViewGeometry(
+      bounds: null == bounds
+          ? _self.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
+      connection: null == connection
+          ? _self.connection
+          : connection // ignore: cast_nullable_to_non_nullable
+              as GraphConnectionGeometry,
+      thickness: null == thickness
+          ? _self.thickness
+          : thickness // ignore: cast_nullable_to_non_nullable
+              as double,
+      angle: null == angle
+          ? _self.angle
+          : angle // ignore: cast_nullable_to_non_nullable
+              as double,
+    ));
+  }
+
+  /// Create a copy of GraphLinkViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphConnectionGeometryCopyWith<$Res> get connection {
+    return $GraphConnectionGeometryCopyWith<$Res>(_self.connection, (value) {
+      return _then(_self.copyWith(connection: value));
+    });
+  }
+}
+
+/// @nodoc
+mixin _$GraphConnectionGeometry implements DiagnosticableTreeMixin {
   /// The source node's layout geometry from which the link originates.
-  GraphNodeViewGeometry get source => throw _privateConstructorUsedError;
+  GraphNodeViewGeometry get source;
 
   /// The target node's layout geometry where the link terminates.
-  GraphNodeViewGeometry get target => throw _privateConstructorUsedError;
+  GraphNodeViewGeometry get target;
 
   /// The specific points where the link intersects with source and target nodes.
-  GraphConnectionPoints get connectionPoints =>
-      throw _privateConstructorUsedError;
+  GraphConnectionPoints get connectionPoints;
 
   /// Create a copy of GraphConnectionGeometry
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
   $GraphConnectionGeometryCopyWith<GraphConnectionGeometry> get copyWith =>
-      throw _privateConstructorUsedError;
+      _$GraphConnectionGeometryCopyWithImpl<GraphConnectionGeometry>(
+          this as GraphConnectionGeometry, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'GraphConnectionGeometry'))
+      ..add(DiagnosticsProperty('source', source))
+      ..add(DiagnosticsProperty('target', target))
+      ..add(DiagnosticsProperty('connectionPoints', connectionPoints));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GraphConnectionGeometry &&
+            (identical(other.source, source) || other.source == source) &&
+            (identical(other.target, target) || other.target == target) &&
+            (identical(other.connectionPoints, connectionPoints) ||
+                other.connectionPoints == connectionPoints));
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, source, target, connectionPoints);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphConnectionGeometry(source: $source, target: $target, connectionPoints: $connectionPoints)';
+  }
 }
 
 /// @nodoc
-abstract class $GraphConnectionGeometryCopyWith<$Res> {
+abstract mixin class $GraphConnectionGeometryCopyWith<$Res> {
   factory $GraphConnectionGeometryCopyWith(GraphConnectionGeometry value,
-          $Res Function(GraphConnectionGeometry) then) =
-      _$GraphConnectionGeometryCopyWithImpl<$Res, GraphConnectionGeometry>;
+          $Res Function(GraphConnectionGeometry) _then) =
+      _$GraphConnectionGeometryCopyWithImpl;
   @useResult
   $Res call(
       {GraphNodeViewGeometry source,
@@ -595,15 +1120,12 @@ abstract class $GraphConnectionGeometryCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GraphConnectionGeometryCopyWithImpl<$Res,
-        $Val extends GraphConnectionGeometry>
+class _$GraphConnectionGeometryCopyWithImpl<$Res>
     implements $GraphConnectionGeometryCopyWith<$Res> {
-  _$GraphConnectionGeometryCopyWithImpl(this._value, this._then);
+  _$GraphConnectionGeometryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GraphConnectionGeometry _self;
+  final $Res Function(GraphConnectionGeometry) _then;
 
   /// Create a copy of GraphConnectionGeometry
   /// with the given fields replaced by the non-null parameter values.
@@ -614,20 +1136,20 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
     Object? target = null,
     Object? connectionPoints = null,
   }) {
-    return _then(_value.copyWith(
+    return _then(_self.copyWith(
       source: null == source
-          ? _value.source
+          ? _self.source
           : source // ignore: cast_nullable_to_non_nullable
               as GraphNodeViewGeometry,
       target: null == target
-          ? _value.target
+          ? _self.target
           : target // ignore: cast_nullable_to_non_nullable
               as GraphNodeViewGeometry,
       connectionPoints: null == connectionPoints
-          ? _value.connectionPoints
+          ? _self.connectionPoints
           : connectionPoints // ignore: cast_nullable_to_non_nullable
               as GraphConnectionPoints,
-    ) as $Val);
+    ));
   }
 
   /// Create a copy of GraphConnectionGeometry
@@ -635,8 +1157,8 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
   @override
   @pragma('vm:prefer-inline')
   $GraphNodeViewGeometryCopyWith<$Res> get source {
-    return $GraphNodeViewGeometryCopyWith<$Res>(_value.source, (value) {
-      return _then(_value.copyWith(source: value) as $Val);
+    return $GraphNodeViewGeometryCopyWith<$Res>(_self.source, (value) {
+      return _then(_self.copyWith(source: value));
     });
   }
 
@@ -645,8 +1167,8 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
   @override
   @pragma('vm:prefer-inline')
   $GraphNodeViewGeometryCopyWith<$Res> get target {
-    return $GraphNodeViewGeometryCopyWith<$Res>(_value.target, (value) {
-      return _then(_value.copyWith(target: value) as $Val);
+    return $GraphNodeViewGeometryCopyWith<$Res>(_self.target, (value) {
+      return _then(_self.copyWith(target: value));
     });
   }
 
@@ -655,77 +1177,184 @@ class _$GraphConnectionGeometryCopyWithImpl<$Res,
   @override
   @pragma('vm:prefer-inline')
   $GraphConnectionPointsCopyWith<$Res> get connectionPoints {
-    return $GraphConnectionPointsCopyWith<$Res>(_value.connectionPoints,
+    return $GraphConnectionPointsCopyWith<$Res>(_self.connectionPoints,
         (value) {
-      return _then(_value.copyWith(connectionPoints: value) as $Val);
+      return _then(_self.copyWith(connectionPoints: value));
     });
   }
 }
 
-/// @nodoc
-abstract class _$$GraphConnectionGeometryImplCopyWith<$Res>
-    implements $GraphConnectionGeometryCopyWith<$Res> {
-  factory _$$GraphConnectionGeometryImplCopyWith(
-          _$GraphConnectionGeometryImpl value,
-          $Res Function(_$GraphConnectionGeometryImpl) then) =
-      __$$GraphConnectionGeometryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {GraphNodeViewGeometry source,
-      GraphNodeViewGeometry target,
-      GraphConnectionPoints connectionPoints});
+/// Adds pattern-matching-related methods to [GraphConnectionGeometry].
+extension GraphConnectionGeometryPatterns on GraphConnectionGeometry {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-  @override
-  $GraphNodeViewGeometryCopyWith<$Res> get source;
-  @override
-  $GraphNodeViewGeometryCopyWith<$Res> get target;
-  @override
-  $GraphConnectionPointsCopyWith<$Res> get connectionPoints;
-}
-
-/// @nodoc
-class __$$GraphConnectionGeometryImplCopyWithImpl<$Res>
-    extends _$GraphConnectionGeometryCopyWithImpl<$Res,
-        _$GraphConnectionGeometryImpl>
-    implements _$$GraphConnectionGeometryImplCopyWith<$Res> {
-  __$$GraphConnectionGeometryImplCopyWithImpl(
-      _$GraphConnectionGeometryImpl _value,
-      $Res Function(_$GraphConnectionGeometryImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphConnectionGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? source = null,
-    Object? target = null,
-    Object? connectionPoints = null,
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphConnectionGeometry value)? $default, {
+    required TResult orElse(),
   }) {
-    return _then(_$GraphConnectionGeometryImpl(
-      source: null == source
-          ? _value.source
-          : source // ignore: cast_nullable_to_non_nullable
-              as GraphNodeViewGeometry,
-      target: null == target
-          ? _value.target
-          : target // ignore: cast_nullable_to_non_nullable
-              as GraphNodeViewGeometry,
-      connectionPoints: null == connectionPoints
-          ? _value.connectionPoints
-          : connectionPoints // ignore: cast_nullable_to_non_nullable
-              as GraphConnectionPoints,
-    ));
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphConnectionGeometry value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionGeometry():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphConnectionGeometry value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(GraphNodeViewGeometry source, GraphNodeViewGeometry target,
+            GraphConnectionPoints connectionPoints)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionGeometry() when $default != null:
+        return $default(_that.source, _that.target, _that.connectionPoints);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(GraphNodeViewGeometry source, GraphNodeViewGeometry target,
+            GraphConnectionPoints connectionPoints)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionGeometry():
+        return $default(_that.source, _that.target, _that.connectionPoints);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            GraphNodeViewGeometry source,
+            GraphNodeViewGeometry target,
+            GraphConnectionPoints connectionPoints)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphConnectionGeometry() when $default != null:
+        return $default(_that.source, _that.target, _that.connectionPoints);
+      case _:
+        return null;
+    }
   }
 }
 
 /// @nodoc
 
-class _$GraphConnectionGeometryImpl
+class _GraphConnectionGeometry
     with DiagnosticableTreeMixin
-    implements _GraphConnectionGeometry {
-  const _$GraphConnectionGeometryImpl(
+    implements GraphConnectionGeometry {
+  const _GraphConnectionGeometry(
       {required this.source,
       required this.target,
       required this.connectionPoints});
@@ -742,14 +1371,17 @@ class _$GraphConnectionGeometryImpl
   @override
   final GraphConnectionPoints connectionPoints;
 
+  /// Create a copy of GraphConnectionGeometry
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'GraphConnectionGeometry(source: $source, target: $target, connectionPoints: $connectionPoints)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphConnectionGeometryCopyWith<_GraphConnectionGeometry> get copyWith =>
+      __$GraphConnectionGeometryCopyWithImpl<_GraphConnectionGeometry>(
+          this, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'GraphConnectionGeometry'))
       ..add(DiagnosticsProperty('source', source))
@@ -761,7 +1393,7 @@ class _$GraphConnectionGeometryImpl
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphConnectionGeometryImpl &&
+            other is _GraphConnectionGeometry &&
             (identical(other.source, source) || other.source == source) &&
             (identical(other.target, target) || other.target == target) &&
             (identical(other.connectionPoints, connectionPoints) ||
@@ -772,155 +1404,113 @@ class _$GraphConnectionGeometryImpl
   int get hashCode =>
       Object.hash(runtimeType, source, target, connectionPoints);
 
-  /// Create a copy of GraphConnectionGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$GraphConnectionGeometryImplCopyWith<_$GraphConnectionGeometryImpl>
-      get copyWith => __$$GraphConnectionGeometryImplCopyWithImpl<
-          _$GraphConnectionGeometryImpl>(this, _$identity);
-}
-
-abstract class _GraphConnectionGeometry implements GraphConnectionGeometry {
-  const factory _GraphConnectionGeometry(
-          {required final GraphNodeViewGeometry source,
-          required final GraphNodeViewGeometry target,
-          required final GraphConnectionPoints connectionPoints}) =
-      _$GraphConnectionGeometryImpl;
-
-  /// The source node's layout geometry from which the link originates.
-  @override
-  GraphNodeViewGeometry get source;
-
-  /// The target node's layout geometry where the link terminates.
-  @override
-  GraphNodeViewGeometry get target;
-
-  /// The specific points where the link intersects with source and target nodes.
-  @override
-  GraphConnectionPoints get connectionPoints;
-
-  /// Create a copy of GraphConnectionGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphConnectionGeometryImplCopyWith<_$GraphConnectionGeometryImpl>
-      get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-mixin _$GraphViewGeometry {
-  Offset get position => throw _privateConstructorUsedError;
-  Size get size => throw _privateConstructorUsedError;
-
-  /// Create a copy of GraphViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $GraphViewGeometryCopyWith<GraphViewGeometry> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $GraphViewGeometryCopyWith<$Res> {
-  factory $GraphViewGeometryCopyWith(
-          GraphViewGeometry value, $Res Function(GraphViewGeometry) then) =
-      _$GraphViewGeometryCopyWithImpl<$Res, GraphViewGeometry>;
-  @useResult
-  $Res call({Offset position, Size size});
-}
-
-/// @nodoc
-class _$GraphViewGeometryCopyWithImpl<$Res, $Val extends GraphViewGeometry>
-    implements $GraphViewGeometryCopyWith<$Res> {
-  _$GraphViewGeometryCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of GraphViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? position = null,
-    Object? size = null,
-  }) {
-    return _then(_value.copyWith(
-      position: null == position
-          ? _value.position
-          : position // ignore: cast_nullable_to_non_nullable
-              as Offset,
-      size: null == size
-          ? _value.size
-          : size // ignore: cast_nullable_to_non_nullable
-              as Size,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$GraphViewGeometryImplCopyWith<$Res>
-    implements $GraphViewGeometryCopyWith<$Res> {
-  factory _$$GraphViewGeometryImplCopyWith(_$GraphViewGeometryImpl value,
-          $Res Function(_$GraphViewGeometryImpl) then) =
-      __$$GraphViewGeometryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({Offset position, Size size});
-}
-
-/// @nodoc
-class __$$GraphViewGeometryImplCopyWithImpl<$Res>
-    extends _$GraphViewGeometryCopyWithImpl<$Res, _$GraphViewGeometryImpl>
-    implements _$$GraphViewGeometryImplCopyWith<$Res> {
-  __$$GraphViewGeometryImplCopyWithImpl(_$GraphViewGeometryImpl _value,
-      $Res Function(_$GraphViewGeometryImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of GraphViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? position = null,
-    Object? size = null,
-  }) {
-    return _then(_$GraphViewGeometryImpl(
-      position: null == position
-          ? _value.position
-          : position // ignore: cast_nullable_to_non_nullable
-              as Offset,
-      size: null == size
-          ? _value.size
-          : size // ignore: cast_nullable_to_non_nullable
-              as Size,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$GraphViewGeometryImpl
-    with DiagnosticableTreeMixin
-    implements _GraphViewGeometry {
-  const _$GraphViewGeometryImpl({required this.position, required this.size});
-
-  @override
-  final Offset position;
-  @override
-  final Size size;
-
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'GraphViewGeometry(position: $position, size: $size)';
+    return 'GraphConnectionGeometry(source: $source, target: $target, connectionPoints: $connectionPoints)';
   }
+}
+
+/// @nodoc
+abstract mixin class _$GraphConnectionGeometryCopyWith<$Res>
+    implements $GraphConnectionGeometryCopyWith<$Res> {
+  factory _$GraphConnectionGeometryCopyWith(_GraphConnectionGeometry value,
+          $Res Function(_GraphConnectionGeometry) _then) =
+      __$GraphConnectionGeometryCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {GraphNodeViewGeometry source,
+      GraphNodeViewGeometry target,
+      GraphConnectionPoints connectionPoints});
+
+  @override
+  $GraphNodeViewGeometryCopyWith<$Res> get source;
+  @override
+  $GraphNodeViewGeometryCopyWith<$Res> get target;
+  @override
+  $GraphConnectionPointsCopyWith<$Res> get connectionPoints;
+}
+
+/// @nodoc
+class __$GraphConnectionGeometryCopyWithImpl<$Res>
+    implements _$GraphConnectionGeometryCopyWith<$Res> {
+  __$GraphConnectionGeometryCopyWithImpl(this._self, this._then);
+
+  final _GraphConnectionGeometry _self;
+  final $Res Function(_GraphConnectionGeometry) _then;
+
+  /// Create a copy of GraphConnectionGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? source = null,
+    Object? target = null,
+    Object? connectionPoints = null,
+  }) {
+    return _then(_GraphConnectionGeometry(
+      source: null == source
+          ? _self.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as GraphNodeViewGeometry,
+      target: null == target
+          ? _self.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as GraphNodeViewGeometry,
+      connectionPoints: null == connectionPoints
+          ? _self.connectionPoints
+          : connectionPoints // ignore: cast_nullable_to_non_nullable
+              as GraphConnectionPoints,
+    ));
+  }
+
+  /// Create a copy of GraphConnectionGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphNodeViewGeometryCopyWith<$Res> get source {
+    return $GraphNodeViewGeometryCopyWith<$Res>(_self.source, (value) {
+      return _then(_self.copyWith(source: value));
+    });
+  }
+
+  /// Create a copy of GraphConnectionGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphNodeViewGeometryCopyWith<$Res> get target {
+    return $GraphNodeViewGeometryCopyWith<$Res>(_self.target, (value) {
+      return _then(_self.copyWith(target: value));
+    });
+  }
+
+  /// Create a copy of GraphConnectionGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GraphConnectionPointsCopyWith<$Res> get connectionPoints {
+    return $GraphConnectionPointsCopyWith<$Res>(_self.connectionPoints,
+        (value) {
+      return _then(_self.copyWith(connectionPoints: value));
+    });
+  }
+}
+
+/// @nodoc
+mixin _$GraphViewGeometry implements DiagnosticableTreeMixin {
+  Offset get position;
+  Size get size;
+
+  /// Create a copy of GraphViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $GraphViewGeometryCopyWith<GraphViewGeometry> get copyWith =>
+      _$GraphViewGeometryCopyWithImpl<GraphViewGeometry>(
+          this as GraphViewGeometry, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'GraphViewGeometry'))
       ..add(DiagnosticsProperty('position', position))
@@ -931,7 +1521,7 @@ class _$GraphViewGeometryImpl
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GraphViewGeometryImpl &&
+            other is GraphViewGeometry &&
             (identical(other.position, position) ||
                 other.position == position) &&
             (identical(other.size, size) || other.size == size));
@@ -940,30 +1530,292 @@ class _$GraphViewGeometryImpl
   @override
   int get hashCode => Object.hash(runtimeType, position, size);
 
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphViewGeometry(position: $position, size: $size)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $GraphViewGeometryCopyWith<$Res> {
+  factory $GraphViewGeometryCopyWith(
+          GraphViewGeometry value, $Res Function(GraphViewGeometry) _then) =
+      _$GraphViewGeometryCopyWithImpl;
+  @useResult
+  $Res call({Offset position, Size size});
+}
+
+/// @nodoc
+class _$GraphViewGeometryCopyWithImpl<$Res>
+    implements $GraphViewGeometryCopyWith<$Res> {
+  _$GraphViewGeometryCopyWithImpl(this._self, this._then);
+
+  final GraphViewGeometry _self;
+  final $Res Function(GraphViewGeometry) _then;
+
   /// Create a copy of GraphViewGeometry
   /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? position = null,
+    Object? size = null,
+  }) {
+    return _then(_self.copyWith(
+      position: null == position
+          ? _self.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      size: null == size
+          ? _self.size
+          : size // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [GraphViewGeometry].
+extension GraphViewGeometryPatterns on GraphViewGeometry {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_GraphViewGeometry value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphViewGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_GraphViewGeometry value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphViewGeometry():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_GraphViewGeometry value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphViewGeometry() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(Offset position, Size size)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _GraphViewGeometry() when $default != null:
+        return $default(_that.position, _that.size);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(Offset position, Size size) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphViewGeometry():
+        return $default(_that.position, _that.size);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(Offset position, Size size)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _GraphViewGeometry() when $default != null:
+        return $default(_that.position, _that.size);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _GraphViewGeometry
+    with DiagnosticableTreeMixin
+    implements GraphViewGeometry {
+  const _GraphViewGeometry({required this.position, required this.size});
+
+  @override
+  final Offset position;
+  @override
+  final Size size;
+
+  /// Create a copy of GraphViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
+  @override
   @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$GraphViewGeometryCopyWith<_GraphViewGeometry> get copyWith =>
+      __$GraphViewGeometryCopyWithImpl<_GraphViewGeometry>(this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'GraphViewGeometry'))
+      ..add(DiagnosticsProperty('position', position))
+      ..add(DiagnosticsProperty('size', size));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _GraphViewGeometry &&
+            (identical(other.position, position) ||
+                other.position == position) &&
+            (identical(other.size, size) || other.size == size));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, position, size);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'GraphViewGeometry(position: $position, size: $size)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$GraphViewGeometryCopyWith<$Res>
+    implements $GraphViewGeometryCopyWith<$Res> {
+  factory _$GraphViewGeometryCopyWith(
+          _GraphViewGeometry value, $Res Function(_GraphViewGeometry) _then) =
+      __$GraphViewGeometryCopyWithImpl;
+  @override
+  @useResult
+  $Res call({Offset position, Size size});
+}
+
+/// @nodoc
+class __$GraphViewGeometryCopyWithImpl<$Res>
+    implements _$GraphViewGeometryCopyWith<$Res> {
+  __$GraphViewGeometryCopyWithImpl(this._self, this._then);
+
+  final _GraphViewGeometry _self;
+  final $Res Function(_GraphViewGeometry) _then;
+
+  /// Create a copy of GraphViewGeometry
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  _$$GraphViewGeometryImplCopyWith<_$GraphViewGeometryImpl> get copyWith =>
-      __$$GraphViewGeometryImplCopyWithImpl<_$GraphViewGeometryImpl>(
-          this, _$identity);
+  $Res call({
+    Object? position = null,
+    Object? size = null,
+  }) {
+    return _then(_GraphViewGeometry(
+      position: null == position
+          ? _self.position
+          : position // ignore: cast_nullable_to_non_nullable
+              as Offset,
+      size: null == size
+          ? _self.size
+          : size // ignore: cast_nullable_to_non_nullable
+              as Size,
+    ));
+  }
 }
 
-abstract class _GraphViewGeometry implements GraphViewGeometry {
-  const factory _GraphViewGeometry(
-      {required final Offset position,
-      required final Size size}) = _$GraphViewGeometryImpl;
-
-  @override
-  Offset get position;
-  @override
-  Size get size;
-
-  /// Create a copy of GraphViewGeometry
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GraphViewGeometryImplCopyWith<_$GraphViewGeometryImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on
