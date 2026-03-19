@@ -215,28 +215,25 @@ class GraphNodeViewState extends State<GraphNodeView>
   @override
   Widget build(BuildContext context) {
     final graphViewData = GraphViewData.of(context);
-    return ValueListenableBuilder<GraphViewBuildState>(
-      valueListenable: widget.buildState,
-      builder: (context, buildState, _) {
-        return AnimatedBuilder(
-          animation: _node.positionListenable,
-          builder: (context, _) {
-            if (buildState == GraphViewBuildState.initialize) {
-              return _buildInitialPosition(context);
-            }
+    // Flatten three nested listeners into one to reduce widget tree depth.
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        widget.buildState,
+        _node.positionListenable,
+        _node.renderStateListenable,
+      ]),
+      builder: (context, _) {
+        final buildState = widget.buildState.value;
 
-            if (!_node.isArranged) {
-              return _buildPreArrangedPosition(context);
-            }
+        if (buildState == GraphViewBuildState.initialize) {
+          return _buildInitialPosition(context);
+        }
 
-            return AnimatedBuilder(
-              animation: _node.renderStateListenable,
-              builder: (context, _) {
-                return _buildArrangedPosition(context, graphViewData);
-              },
-            );
-          },
-        );
+        if (!_node.isArranged) {
+          return _buildPreArrangedPosition(context);
+        }
+
+        return _buildArrangedPosition(context, graphViewData);
       },
     );
   }

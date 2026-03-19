@@ -1,5 +1,16 @@
 ## develop
 
+## 0.8.0
+
+- [ADD] Smooth force-directed layout animation: nodes now visibly scatter from random positions and settle into place each time the graph is displayed, using a Ticker-driven incremental simulation instead of a single synchronous computation.
+- [ADD] `GraphForceDirectedLayoutStrategy.stepsPerFrame` parameter to control animation speed vs. smoothness (default: 3 iterations per frame).
+- [IMPROVE] Force-directed repulsion calculation upgraded from O(n²) to O(n log n) using a Barnes-Hut quadtree. New `barnesHutTheta` parameter (default: 0.5) controls approximation accuracy.
+- [IMPROVE] `getIncomingLinks` / `getOutgoingLinks` now O(1) via adjacency index maintained on `addLink` / `removeLink` / `removeNode`.
+- [IMPROVE] Stack-order sort result is cached and only recomputed when the order actually changes, eliminating a per-frame O(n log n) sort.
+- [IMPROVE] `GraphNodeView` flattened from three nested `AnimatedBuilder` wrappers to one, reducing widget tree depth per node.
+- [IMPROVE] Spatial grid index added to `GraphGestureManager` for fast node hit-testing; rebuilt after each layout change.
+- [ADD] Large-graph sample scenes (200 / 300 / 500 nodes) in the example app for performance testing.
+
 ## 0.7.1
 
 - [FIX] Fixed `nodeAnimationStartPosition` being ignored during initial layout, causing nodes to animate from top-left corner instead of the specified position.
