@@ -45,6 +45,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
     int? maxIterations,
     double? tolerance,
     double? barnesHutTheta,
+    int? stepsPerFrame,
     this.centerNodeId,
     super.seed,
     super.padding,
@@ -55,7 +56,8 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         maxDisplacement = maxDisplacement ?? 50.0,
         maxIterations = maxIterations ?? 500,
         tolerance = tolerance ?? 0.5,
-        barnesHutTheta = barnesHutTheta ?? 0.5;
+        barnesHutTheta = barnesHutTheta ?? 0.5,
+        stepsPerFrame = stepsPerFrame ?? 3;
 
   /// Natural length of springs between linked nodes.
   final double springLength;
@@ -85,8 +87,148 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
   /// Defaults to 0.5.
   final double barnesHutTheta;
 
+  /// Number of simulation iterations to run per rendered frame.
+  ///
+  /// Higher values make the layout converge faster but reduce animation
+  /// smoothness. Lower values produce a slower, more visible settling effect.
+  /// Defaults to 3.
+  final int stepsPerFrame;
+
   /// ID of the node to fix at the center of the layout area.
   final GraphId? centerNodeId;
+
+  // --- Incremental layout state ---
+  List<GraphNode>? _nodeList;
+  double _minX = 0;
+  double _maxX = 0;
+  double _minY = 0;
+  double _maxY = 0;
+  int _iteration = 0;
+  double _totalDisplacement = double.infinity;
+
+  @override
+  bool get supportsIncrementalLayout => true;
+
+  @override
+  void initIncrementalLayout(Graph graph, Size size) {
+    super.performLayout(graph, size);
+
+    final centerNode =
+        centerNodeId != null ? graph.getNode(centerNodeId!) : null;
+    if (centerNode != null) {
+      positionNode(centerNode, size.center(Offset.zero));
+    }
+
+    final width = size.width - padding.left - padding.right;
+    final height = size.height - padding.top - padding.bottom;
+    for (final node in graph.nodes) {
+      final nodeImpl = node as GraphNodeImpl;
+      if (nodeImpl.isArranged && node.logicalPosition != Offset.zero) {
+        continue;
+      }
+      final dx = random.nextDouble() * width + padding.left;
+      final dy = random.nextDouble() * height + padding.top;
+      positionNode(node, Offset(dx, dy));
+    }
+
+    _nodeList = graph.nodes.toList();
+    _minX = padding.left;
+    _maxX = (size.width - padding.right).clamp(_minX, double.infinity);
+    _minY = padding.top;
+    _maxY = (size.height - padding.bottom).clamp(_minY, double.infinity);
+    _iteration = 0;
+    _totalDisplacement = double.infinity;
+  }
+
+  @override
+  bool stepIncrementalLayout(Graph graph) {
+    final nodeList = _nodeList;
+    if (nodeList == null) return false;
+
+    // Run stepsPerFrame iterations in one frame to balance speed vs smoothness.
+    for (var step = 0; step < stepsPerFrame; step++) {
+      if (_iteration >= maxIterations || _totalDisplacement <= tolerance) {
+        return false;
+      }
+
+      _totalDisplacement = 0.0;
+      final forces = {for (final node in nodeList) node: Offset.zero};
+
+      final bodies = nodeList
+          .map(
+            (n) => QuadtreeBody(
+              id: n.id,
+              x: n.logicalPosition.dx,
+              y: n.logicalPosition.dy,
+              mass: n.weight,
+            ),
+          )
+          .toList();
+
+      var treeLeft = double.infinity;
+      var treeTop = double.infinity;
+      var treeRight = double.negativeInfinity;
+      var treeBottom = double.negativeInfinity;
+      for (final b in bodies) {
+        if (b.x < treeLeft) treeLeft = b.x;
+        if (b.y < treeTop) treeTop = b.y;
+        if (b.x > treeRight) treeRight = b.x;
+        if (b.y > treeBottom) treeBottom = b.y;
+      }
+      const margin = 1.0;
+      final treeBounds = Rect.fromLTRB(
+        treeLeft - margin,
+        treeTop - margin,
+        treeRight + margin,
+        treeBottom + margin,
+      );
+      final tree = QuadtreeNode.build(bodies, treeBounds);
+
+      for (var i = 0; i < nodeList.length; i++) {
+        final node = nodeList[i];
+        final body = bodies[i];
+        final repulsion =
+            tree.computeRepulsion(body, coulombConstant, barnesHutTheta);
+        forces[node] = forces[node]! + repulsion;
+      }
+
+      for (final link in graph.links) {
+        final source = link.source;
+        final target = link.target;
+        final delta = target.logicalPosition - source.logicalPosition;
+        final distance = delta.distance;
+        if (distance == 0) continue;
+        final force = springConstant * (distance - springLength);
+        final directionScale = force / distance;
+        forces[source] = forces[source]! +
+            Offset(delta.dx * directionScale, delta.dy * directionScale);
+        forces[target] = forces[target]! -
+            Offset(delta.dx * directionScale, delta.dy * directionScale);
+      }
+
+      for (final node in nodeList) {
+        var force = forces[node]! * damping;
+        final displacement = force.distance;
+        if (displacement > maxDisplacement) {
+          force = Offset(
+            force.dx * maxDisplacement / displacement,
+            force.dy * maxDisplacement / displacement,
+          );
+        }
+        var newPosition = node.logicalPosition + force;
+        newPosition = Offset(
+          newPosition.dx.clamp(_minX, _maxX),
+          newPosition.dy.clamp(_minY, _maxY),
+        );
+        _totalDisplacement += (newPosition - node.logicalPosition).distance;
+        positionNode(node, newPosition);
+      }
+
+      _iteration++;
+    }
+
+    return _iteration < maxIterations && _totalDisplacement > tolerance;
+  }
 
   @override
   void performLayout(Graph graph, Size size) {
@@ -229,6 +371,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         maxIterations != oldStrategy.maxIterations ||
         tolerance != oldStrategy.tolerance ||
         barnesHutTheta != oldStrategy.barnesHutTheta ||
+        stepsPerFrame != oldStrategy.stepsPerFrame ||
         padding != oldStrategy.padding;
   }
 }

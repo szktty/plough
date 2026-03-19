@@ -240,6 +240,14 @@ class GraphImpl
     _layoutChangeNotifier.value++;
   }
 
+  /// Notify a single incremental layout step without full graph state update.
+  ///
+  /// Called each frame during streaming (incremental) layout so that
+  /// [GraphView] can repaint nodes at their intermediate positions.
+  void notifyLayoutStep() {
+    _layoutChangeNotifier.value++;
+  }
+
   void _checkEntityExists(GraphId id) {
     if (!state.value.nodes.containsKey(id) &&
         !state.value.links.containsKey(id)) {

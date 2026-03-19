@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/id.dart';
@@ -146,7 +147,8 @@ class GraphView extends StatefulWidget {
 /// See also:
 /// * [GraphView], the stateful widget using this state
 /// * [GraphViewData], which holds view-specific data
-class GraphViewState extends State<GraphView> {
+class GraphViewState extends State<GraphView>
+    with SingleTickerProviderStateMixin {
   late GraphViewData _data;
 
   GraphImpl get _graph => widget.graph as GraphImpl;
@@ -191,6 +193,48 @@ class GraphViewState extends State<GraphView> {
 
   bool _isGeometryUpdateScheduled = false;
 
+  // --- Incremental layout (streaming simulation) ---
+  Ticker? _layoutTicker;
+  bool _isIncrementalLayoutRunning = false;
+
+  void _startIncrementalLayout(BoxConstraints constraints) {
+    _stopIncrementalLayout();
+    _isIncrementalLayoutRunning = true;
+
+    final strategy = _layoutStrategy;
+    final size = Size(constraints.maxWidth, constraints.maxHeight);
+    strategy.initIncrementalLayout(_graph, size);
+
+    _layoutTicker = createTicker((_) {
+      if (!mounted) {
+        _stopIncrementalLayout();
+        return;
+      }
+      final hasMore = strategy.stepIncrementalLayout(_graph);
+      // Bump the layout notifier so AnimatedBuilder rebuilds this frame.
+      _graph.notifyLayoutStep();
+
+      if (!hasMore) {
+        _stopIncrementalLayout();
+        _graph.onLayoutFinished();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _updateGraphGeometry();
+            _setBuildState(GraphViewBuildState.ready);
+          }
+        });
+      }
+    })
+      ..start();
+  }
+
+  void _stopIncrementalLayout() {
+    _layoutTicker?.stop();
+    _layoutTicker?.dispose();
+    _layoutTicker = null;
+    _isIncrementalLayoutRunning = false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -199,11 +243,13 @@ class GraphViewState extends State<GraphView> {
 
   @override
   void dispose() {
+    _stopIncrementalLayout();
     _buildState.dispose();
     super.dispose();
   }
 
   void _initBehavior() {
+    _stopIncrementalLayout();
     _nodeViewBehavior = widget.behavior.createNodeViewBehavior();
     _linkViewBehavior = widget.behavior.createLinkViewBehavior();
     _data = GraphViewData(
@@ -307,42 +353,38 @@ class GraphViewState extends State<GraphView> {
         _oldLayoutStrategy == null ||
         !_layoutStrategy.isSameStrategy(_oldLayoutStrategy!) ||
         _layoutStrategy.shouldRelayout(_oldLayoutStrategy!)) {
-      // Always set the animation start position so that if animation occurs,
-      // it starts from the correct position (not Offset.zero)
       _layoutStrategy.nodeAnimationStartPosition =
           _getNodeAnimationStartPosition(constrains);
+      _oldLayoutStrategy = _layoutStrategy;
 
-      // Enable animation only when explicitly requested AND widget allows it
+      if (_layoutStrategy.supportsIncrementalLayout) {
+        // Hand off to the ticker-driven incremental path.
+        // _performLayout returns immediately; the ticker drives the simulation.
+        _startIncrementalLayout(constrains);
+        // Return early — buildState stays as performLayout until the ticker
+        // finishes and sets it to ready.
+        return;
+      }
+
+      // Non-incremental (instant) layout path.
       final shouldAnimateLayout =
           widget.animationEnabled && _graph.shouldAnimateLayout;
 
       if (shouldAnimateLayout) {
-        logDebug(
-          LogCategory.layout,
-          'GraphView: Enabling animation - explicitly requested',
-        );
-        // Reset animation states for all nodes
         for (final node in _graph.nodes) {
           (node as GraphNodeImpl).resetAnimationState();
         }
-      } else {
-        logDebug(
-          LogCategory.layout,
-          'GraphView: Skipping animation - not requested (widget.animationEnabled=${widget.animationEnabled}, graph.shouldAnimateLayout=${_graph.shouldAnimateLayout})',
-        );
       }
       _layoutStrategy.performLayout(
         _graph,
         Size(constrains.maxWidth, constrains.maxHeight),
       );
-      _oldLayoutStrategy = _layoutStrategy;
       _graph.onLayoutFinished();
     } else {
       // Layout not performed, ensure nodes are not stuck in animating state
       for (final node in _graph.nodes) {
         final nodeImpl = node as GraphNodeImpl;
         if (nodeImpl.isAnimating && !nodeImpl.isAnimationCompleted) {
-          // Force complete any lingering animations
           nodeImpl.isAnimating = false;
           nodeImpl.isAnimationCompleted = true;
         }
@@ -387,8 +429,14 @@ class GraphViewState extends State<GraphView> {
               elements = [..._graph.nodes];
             } else if (_buildState.value == GraphViewBuildState.performLayout) {
               _performLayout(context: context, constrains: constraints);
-              elements = [..._graph.nodes];
-              if (!_isGeometryUpdateScheduled) {
+              // During incremental layout show nodes and links so the simulation
+              // is visible as it converges.
+              elements = _isIncrementalLayoutRunning
+                  ? [..._graph.nodes, ..._graph.links]
+                  : [..._graph.nodes];
+              // When incremental layout is running, the ticker controls the
+              // transition to ready — don't schedule a competing postFrameCallback.
+              if (!_isIncrementalLayoutRunning && !_isGeometryUpdateScheduled) {
                 _isGeometryUpdateScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
@@ -517,12 +565,16 @@ class GraphViewState extends State<GraphView> {
   }
 
   Widget _buildLinkView(BuildContext context, GraphLinkImpl link) {
+    final sourceView = _nodeViews[link.source.id];
+    final targetView = _nodeViews[link.target.id];
+    // During incremental layout the node views may not have been built yet.
+    if (sourceView == null || targetView == null) return const SizedBox.shrink();
     final key = _linkKeys[link.id] ??= GlobalKey();
     return GraphLinkView(
       key: key,
       link: link,
-      sourceView: _nodeViews[link.source.id]!,
-      targetView: _nodeViews[link.target.id]!,
+      sourceView: sourceView,
+      targetView: targetView,
       behavior: _linkViewBehavior,
     );
   }
