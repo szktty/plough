@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
+import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
 
 /// Overlay widget that handles interactive operations for the graph.
@@ -62,6 +63,15 @@ class GraphInteractiveOverlay extends StatefulWidget {
 class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
   late final GraphGestureManager _gestureManager;
 
+  void _onLayoutChange() {
+    // Rebuild spatial index after layout or node movement settles.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _gestureManager.rebuildSpatialIndex();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -80,6 +90,15 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       onTooltipShow: widget.onTooltipShow,
       onTooltipHide: widget.onTooltipHide,
     );
+    (widget.graph as GraphImpl).layoutChangeListenable
+        .addListener(_onLayoutChange);
+  }
+
+  @override
+  void dispose() {
+    (widget.graph as GraphImpl).layoutChangeListenable
+        .removeListener(_onLayoutChange);
+    super.dispose();
   }
 
   void _handlePointerUp(PointerUpEvent event) {

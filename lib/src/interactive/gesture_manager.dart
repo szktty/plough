@@ -94,8 +94,16 @@ class GraphGestureManager {
 
   late final GraphOrderManager _orderManager;
 
+  /// Spatial grid for fast node hit-testing.
+  final _NodeSpatialGrid _nodeGrid = _NodeSpatialGrid(cellSize: 80);
+
   PointerEventDetails? _lastPointerDetails;
   PointerEventDetails? get lastPointerDetails => _lastPointerDetails;
+
+  /// Rebuild the spatial grid from current node geometries.
+  void rebuildSpatialIndex() {
+    _nodeGrid.rebuild(graph.nodes);
+  }
 
   // Debug accessors for internal state
   GraphNodeTapStateManager get nodeTapManager => _nodeTapManager;
@@ -159,6 +167,21 @@ class GraphGestureManager {
   }
 
   GraphNode? findNodeAt(Offset position) {
+    // Use spatial grid candidates when available; fall back to full scan.
+    final candidates = _nodeGrid.candidatesAt(position);
+    if (candidates.isNotEmpty) {
+      // Check candidates in frontmost-first order.
+      GraphNode? best;
+      for (final node in candidates) {
+        if (viewBehavior.hitTestNode(node, position)) {
+          if (best == null || node.stackOrder > best.stackOrder) {
+            best = node;
+          }
+        }
+      }
+      if (best != null) return best;
+    }
+    // Fall back to linear scan (catches nodes not yet in the grid).
     return _orderManager.frontmostWhereOrNull((entity) {
       if (entity is GraphNode) {
         return viewBehavior.hitTestNode(entity, position);
@@ -1519,5 +1542,53 @@ class GraphGestureManager {
     final distance = _calculateDistance(currentPosition, downPosition);
     // Use the same touch slop as tap state manager
     return distance <= kTouchSlop * 4;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Spatial grid for fast node hit-testing
+// ---------------------------------------------------------------------------
+
+/// A uniform spatial grid that maps screen cells to overlapping nodes.
+///
+/// Rebuilt whenever node positions change significantly (e.g., after layout or
+/// drag end). During a query, only nodes in the cell(s) near [position] are
+/// checked, reducing average hit-test complexity from O(n) to O(k) where k is
+/// the number of nodes per cell (typically < 5).
+class _NodeSpatialGrid {
+  _NodeSpatialGrid({required this.cellSize});
+
+  final double cellSize;
+
+  final Map<(int, int), List<GraphNode>> _cells = {};
+
+  (int, int) _cellKey(double x, double y) {
+    return (x ~/ cellSize, y ~/ cellSize);
+  }
+
+  /// Rebuild the grid from current node geometries.
+  void rebuild(Iterable<GraphNode> nodes) {
+    _cells.clear();
+    for (final node in nodes) {
+      final geometry = node.geometry;
+      if (geometry == null) continue;
+      final bounds = geometry.bounds;
+      // A node may span multiple cells; cover all overlapping cells.
+      final left = bounds.left ~/ cellSize;
+      final top = bounds.top ~/ cellSize;
+      final right = bounds.right ~/ cellSize;
+      final bottom = bounds.bottom ~/ cellSize;
+      for (var cx = left; cx <= right; cx++) {
+        for (var cy = top; cy <= bottom; cy++) {
+          _cells.putIfAbsent((cx, cy), () => []).add(node);
+        }
+      }
+    }
+  }
+
+  /// Returns nodes whose cells overlap [position].
+  List<GraphNode> candidatesAt(Offset position) {
+    final key = _cellKey(position.dx, position.dy);
+    return _cells[key] ?? const [];
   }
 }

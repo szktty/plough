@@ -163,6 +163,28 @@ abstract base class GraphLayoutStrategy {
     }
   }
 
+  /// Whether this strategy supports incremental (frame-by-frame) layout.
+  ///
+  /// When `true`, [GraphView] will call [initIncrementalLayout] once,
+  /// then [stepIncrementalLayout] each frame until it returns `false`.
+  /// This creates a smooth animation as nodes settle into their final positions.
+  ///
+  /// Override to return `true` and implement [initIncrementalLayout] and
+  /// [stepIncrementalLayout] in subclasses that support it.
+  bool get supportsIncrementalLayout => false;
+
+  /// Initialises the incremental layout state.
+  ///
+  /// Called once before the first [stepIncrementalLayout] call.
+  /// Subclasses that support incremental layout must override this.
+  void initIncrementalLayout(Graph graph, Size size) {}
+
+  /// Executes one frame's worth of layout computation.
+  ///
+  /// Returns `true` if more steps are needed, `false` when converged.
+  /// Subclasses that support incremental layout must override this.
+  bool stepIncrementalLayout(Graph graph) => false;
+
   /// Positions a node at the specified coordinates.
   ///
   /// Respects fixed node positions and handles state updates.
