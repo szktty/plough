@@ -147,8 +147,7 @@ class GraphView extends StatefulWidget {
 /// See also:
 /// * [GraphView], the stateful widget using this state
 /// * [GraphViewData], which holds view-specific data
-class GraphViewState extends State<GraphView>
-    with SingleTickerProviderStateMixin {
+class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
   late GraphViewData _data;
 
   GraphImpl get _graph => widget.graph as GraphImpl;
@@ -196,6 +195,22 @@ class GraphViewState extends State<GraphView>
   // --- Incremental layout (streaming simulation) ---
   Ticker? _layoutTicker;
   bool _isIncrementalLayoutRunning = false;
+  // Pending constraints for the next incremental layout start.
+  BoxConstraints? _pendingIncrementalConstraints;
+
+  /// Schedules incremental layout to start after the current build frame.
+  ///
+  /// Must NOT be called during build (would create a Ticker inside build).
+  void _scheduleIncrementalLayout(BoxConstraints constraints) {
+    _pendingIncrementalConstraints = constraints;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pending = _pendingIncrementalConstraints;
+      if (pending == null) return;
+      _pendingIncrementalConstraints = null;
+      _startIncrementalLayout(pending);
+    });
+  }
 
   void _startIncrementalLayout(BoxConstraints constraints) {
     _stopIncrementalLayout();
@@ -233,6 +248,7 @@ class GraphViewState extends State<GraphView>
     _layoutTicker?.dispose();
     _layoutTicker = null;
     _isIncrementalLayoutRunning = false;
+    _pendingIncrementalConstraints = null;
   }
 
   @override
@@ -358,9 +374,9 @@ class GraphViewState extends State<GraphView>
       _oldLayoutStrategy = _layoutStrategy;
 
       if (_layoutStrategy.supportsIncrementalLayout) {
-        // Hand off to the ticker-driven incremental path.
-        // _performLayout returns immediately; the ticker drives the simulation.
-        _startIncrementalLayout(constrains);
+        // Schedule start after the current build frame to avoid creating a
+        // Ticker inside a build callback (which is forbidden).
+        _scheduleIncrementalLayout(constrains);
         // Return early — buildState stays as performLayout until the ticker
         // finishes and sets it to ready.
         return;
