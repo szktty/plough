@@ -168,6 +168,12 @@ class GraphViewState extends State<GraphView> {
   GraphLayoutStrategy get _layoutStrategy => widget.layoutStrategy;
   GraphLayoutStrategy? _oldLayoutStrategy;
 
+  // Cache for sorted elements — rebuilt only when stackOrder changes.
+  List<GraphEntity>? _sortedElements;
+  bool _sortDirty = true;
+
+  void _markSortDirty() => _sortDirty = true;
+
   bool get _animationEnabled => widget.animationEnabled;
 
   late GraphNodeViewBehavior _nodeViewBehavior;
@@ -213,6 +219,8 @@ class GraphViewState extends State<GraphView> {
     );
     _setBuildState(GraphViewBuildState.initialize);
     _nodeViews.clear();
+    _sortedElements = null;
+    _sortDirty = true;
   }
 
   @override
@@ -352,6 +360,8 @@ class GraphViewState extends State<GraphView> {
             _buildState,
           ]),
           builder: (context, child) {
+            // Any layout change may have altered stackOrder.
+            _markSortDirty();
             final timestamp = DateTime.now().millisecondsSinceEpoch;
             logDebug(
               LogCategory.rendering,
@@ -396,7 +406,14 @@ class GraphViewState extends State<GraphView> {
               elements = [..._graph.nodes, ..._graph.links];
             }
 
-            elements.sort((a, b) => a.stackOrder.compareTo(b.stackOrder));
+            // Sort by stackOrder only when the order has changed.
+            if (_sortDirty || _sortedElements == null) {
+              elements.sort((a, b) => a.stackOrder.compareTo(b.stackOrder));
+              _sortedElements = elements;
+              _sortDirty = false;
+            } else {
+              elements = _sortedElements!;
+            }
 
             return KeyedSubtree(
               key: ValueKey(_graph.hashCode),

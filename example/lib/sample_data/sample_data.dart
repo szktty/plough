@@ -1,5 +1,6 @@
 import 'package:example/sample_data/base.dart';
 import 'package:example/sample_data/force_directed.dart';
+import 'package:example/sample_data/large_graph.dart';
 import 'package:example/sample_data/manual.dart';
 import 'package:example/sample_data/random.dart';
 import 'package:example/sample_data/tree.dart';
@@ -11,4 +12,8 @@ List<SampleData> createSampleDataList() => [
       treeSample(),
       randomSample(),
       manualSample(),
+      largeGraphSparse(),
+      largeGraphDense(),
+      largeGraphHubs(),
+      largeGraphScaleTest(),
     ];

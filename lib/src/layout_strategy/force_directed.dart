@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/node.dart';
+import 'package:plough/src/layout_strategy/quadtree.dart';
 
 /// A physics-based layout strategy using a force-directed algorithm.
 ///
@@ -43,6 +44,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
     double? maxDisplacement,
     int? maxIterations,
     double? tolerance,
+    double? barnesHutTheta,
     this.centerNodeId,
     super.seed,
     super.padding,
@@ -52,7 +54,8 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         coulombConstant = coulombConstant ?? 2000.0,
         maxDisplacement = maxDisplacement ?? 50.0,
         maxIterations = maxIterations ?? 500,
-        tolerance = tolerance ?? 0.5;
+        tolerance = tolerance ?? 0.5,
+        barnesHutTheta = barnesHutTheta ?? 0.5;
 
   /// Natural length of springs between linked nodes.
   final double springLength;
@@ -74,6 +77,13 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
 
   /// Convergence threshold for total node movement.
   final double tolerance;
+
+  /// Barnes-Hut approximation threshold (θ).
+  ///
+  /// A value of 0 disables the approximation (exact O(n²) computation).
+  /// Higher values trade accuracy for speed. Typical range: 0.3–0.8.
+  /// Defaults to 0.5.
+  final double barnesHutTheta;
 
   /// ID of the node to fix at the center of the layout area.
   final GraphId? centerNodeId;
@@ -107,27 +117,59 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
     var iteration = 0;
     var totalDisplacement = double.infinity;
 
+    final nodeList = graph.nodes.toList();
+
+    // Clamp bounds (computed once outside the loop).
+    final minX = padding.left;
+    final maxX = (size.width - padding.right).clamp(minX, double.infinity);
+    final minY = padding.top;
+    final maxY = (size.height - padding.bottom).clamp(minY, double.infinity);
+
     while (iteration < maxIterations && totalDisplacement > tolerance) {
       totalDisplacement = 0.0;
-      final forces = {for (final node in graph.nodes) node: Offset.zero};
+      final forces = {for (final node in nodeList) node: Offset.zero};
 
-      // Calculate Coulomb force (repulsion)
-      for (final node1 in graph.nodes) {
-        for (final node2 in graph.nodes) {
-          if (node1 == node2) continue;
+      // Calculate Coulomb force (repulsion) using Barnes-Hut quadtree.
+      // Build quadtree from current node positions.
+      final bodies = nodeList
+          .map(
+            (n) => QuadtreeBody(
+              id: n.id,
+              x: n.logicalPosition.dx,
+              y: n.logicalPosition.dy,
+              mass: n.weight,
+            ),
+          )
+          .toList();
 
-          final delta = node2.logicalPosition - node1.logicalPosition;
-          final distance = delta.distance;
-          if (distance == 0) continue;
+      // Compute bounding box for the quadtree.
+      var treeLeft = double.infinity;
+      var treeTop = double.infinity;
+      var treeRight = double.negativeInfinity;
+      var treeBottom = double.negativeInfinity;
+      for (final b in bodies) {
+        if (b.x < treeLeft) treeLeft = b.x;
+        if (b.y < treeTop) treeTop = b.y;
+        if (b.x > treeRight) treeRight = b.x;
+        if (b.y > treeBottom) treeBottom = b.y;
+      }
+      // Add a small margin to avoid degenerate zero-area bounds.
+      const margin = 1.0;
+      final treeBounds = Rect.fromLTRB(
+        treeLeft - margin,
+        treeTop - margin,
+        treeRight + margin,
+        treeBottom + margin,
+      );
 
-          // Calculate repulsion force (based on Coulomb's law)
-          final force = coulombConstant / (distance * distance);
-          final directionScale = force / distance;
-          forces[node1] = forces[node1]! -
-              Offset(delta.dx * directionScale, delta.dy * directionScale);
-          forces[node2] = forces[node2]! +
-              Offset(delta.dx * directionScale, delta.dy * directionScale);
-        }
+      final tree = QuadtreeNode.build(bodies, treeBounds);
+
+      for (var i = 0; i < nodeList.length; i++) {
+        final node = nodeList[i];
+        final body = bodies[i];
+        final repulsion =
+            tree.computeRepulsion(body, coulombConstant, barnesHutTheta);
+        forces[node] = forces[node]! + repulsion;
       }
 
       // Calculate spring force (attraction)
@@ -148,7 +190,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       }
 
       // Update node positions
-      for (final node in graph.nodes) {
+      for (final node in nodeList) {
         var force = forces[node]! * damping;
 
         // Limit maximum displacement
@@ -162,15 +204,6 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
 
         // Calculate new position and boundary check
         var newPosition = node.logicalPosition + force;
-
-        // Ensure clamp bounds are valid (min <= max)
-        final minX = padding.left;
-        final maxX = (size.width - padding.right).clamp(minX, double.infinity);
-        final minY = padding.top;
-        final maxY = (size.height - padding.bottom).clamp(
-          minY,
-          double.infinity,
-        );
 
         newPosition = Offset(
           newPosition.dx.clamp(minX, maxX),
@@ -195,6 +228,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
         maxDisplacement != oldStrategy.maxDisplacement ||
         maxIterations != oldStrategy.maxIterations ||
         tolerance != oldStrategy.tolerance ||
+        barnesHutTheta != oldStrategy.barnesHutTheta ||
         padding != oldStrategy.padding;
   }
 }

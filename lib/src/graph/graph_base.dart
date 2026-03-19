@@ -219,6 +219,12 @@ class GraphImpl
 
   final Map<GraphId, List<GraphLinkData>> _nodeDependencies = {};
 
+  /// Adjacency index: node id → links where this node is the target.
+  final Map<GraphId, List<GraphLink>> _incomingIndex = {};
+
+  /// Adjacency index: node id → links where this node is the source.
+  final Map<GraphId, List<GraphLink>> _outgoingIndex = {};
+
   /// Notifier for layout-related changes only (excludes selection changes)
   final ValueNotifier<int> _layoutChangeNotifier = ValueNotifier(0);
 
@@ -288,6 +294,17 @@ class GraphImpl
     if (!state.value.nodes.containsKey(id)) {
       throw ArgumentError('node not found: $id');
     }
+    // Remove all links connected to this node from the adjacency index.
+    final affectedLinks = [
+      ...(_incomingIndex[id] ?? []),
+      ...(_outgoingIndex[id] ?? []),
+    ];
+    for (final link in affectedLinks) {
+      _incomingIndex[link.target.id]?.remove(link);
+      _outgoingIndex[link.source.id]?.remove(link);
+    }
+    _incomingIndex.remove(id);
+    _outgoingIndex.remove(id);
     _nodeDependencies.remove(id);
     state.value = state.value.copyWith(nodes: state.value.nodes.remove(id));
     _notifyLayoutChange();
@@ -298,6 +315,8 @@ class GraphImpl
     state.value = state.value.copyWith(
       links: state.value.links.add(link.id, link),
     );
+    _incomingIndex.putIfAbsent(link.target.id, () => []).add(link);
+    _outgoingIndex.putIfAbsent(link.source.id, () => []).add(link);
     _notifyLayoutChange();
   }
 
@@ -324,16 +343,12 @@ class GraphImpl
 
   @override
   List<GraphLink> getIncomingLinks(GraphId id) {
-    return state.value.links.values
-        .where((link) => link.target.id == id)
-        .toList();
+    return List.unmodifiable(_incomingIndex[id] ?? const []);
   }
 
   @override
   List<GraphLink> getOutgoingLinks(GraphId id) {
-    return state.value.links.values
-        .where((link) => link.source.id == id)
-        .toList();
+    return List.unmodifiable(_outgoingIndex[id] ?? const []);
   }
 
   @override
@@ -341,6 +356,9 @@ class GraphImpl
     if (!state.value.links.containsKey(id)) {
       throw ArgumentError('link not found: $id');
     }
+    final link = state.value.links[id]!;
+    _incomingIndex[link.target.id]?.remove(link);
+    _outgoingIndex[link.source.id]?.remove(link);
     _nodeDependencies.removeWhere(
       (key, value) => state.value.links.containsKey(key),
     );
