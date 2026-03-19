@@ -584,7 +584,8 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
     final sourceView = _nodeViews[link.source.id];
     final targetView = _nodeViews[link.target.id];
     // During incremental layout the node views may not have been built yet.
-    if (sourceView == null || targetView == null) return const SizedBox.shrink();
+    if (sourceView == null || targetView == null)
+      return const SizedBox.shrink();
     final key = _linkKeys[link.id] ??= GlobalKey();
     return GraphLinkView(
       key: key,

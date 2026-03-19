@@ -90,13 +90,15 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       onTooltipShow: widget.onTooltipShow,
       onTooltipHide: widget.onTooltipHide,
     );
-    (widget.graph as GraphImpl).layoutChangeListenable
+    (widget.graph as GraphImpl)
+        .layoutChangeListenable
         .addListener(_onLayoutChange);
   }
 
   @override
   void dispose() {
-    (widget.graph as GraphImpl).layoutChangeListenable
+    (widget.graph as GraphImpl)
+        .layoutChangeListenable
         .removeListener(_onLayoutChange);
     super.dispose();
   }
