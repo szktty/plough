@@ -758,7 +758,7 @@ class GraphGestureManager {
         data: {
           'event_type': 'tap_debug_state',
           'phase': 'up',
-          'nodeTargetId': nodeTargetId.value ?? 'null',
+          'nodeTargetId': nodeTargetId.value,
           'state_exists': tapState != null,
           'state_completed': tapState?.completed ?? false,
           'state_cancelled': tapState?.cancelled ?? false,
@@ -799,7 +799,7 @@ class GraphGestureManager {
         message: 'TAP_STATE',
         metadata: {
           'event_type': 'tap_debug_state',
-          'nodeTargetId': nodeTargetId.value ?? 'null',
+          'nodeTargetId': nodeTargetId.value,
           'state_exists': tapState != null,
           'state_completed': tapState?.completed ?? false,
           'state_cancelled': tapState?.cancelled ?? false,
@@ -815,7 +815,7 @@ class GraphGestureManager {
 
       logDebug(
         LogCategory.tap,
-        'TAP DEBUG: nodeTargetId=${nodeTargetId.value.substring(0, 8) ?? 'null'}',
+        'TAP DEBUG: nodeTargetId=${nodeTargetId.value.substring(0, 8)}',
       );
       logDebug(LogCategory.tap, 'TAP DEBUG: state exists=${tapState != null}');
       logDebug(LogCategory.tap, 'TAP DEBUG: completed=${tapState?.completed}');

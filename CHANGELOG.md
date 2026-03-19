@@ -1,5 +1,7 @@
 ## develop
 
+## 0.8.0
+
 - [ADD] Smooth force-directed layout animation: nodes now visibly scatter from random positions and settle into place each time the graph is displayed, using a Ticker-driven incremental simulation instead of a single synchronous computation.
 - [ADD] `GraphForceDirectedLayoutStrategy.stepsPerFrame` parameter to control animation speed vs. smoothness (default: 3 iterations per frame).
 - [IMPROVE] Force-directed repulsion calculation upgraded from O(n²) to O(n log n) using a Barnes-Hut quadtree. New `barnesHutTheta` parameter (default: 0.5) controls approximation accuracy.
