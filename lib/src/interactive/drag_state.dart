@@ -11,16 +11,18 @@ import 'package:plough/src/utils/logger.dart';
 class _DragState {
   _DragState({
     required this.entityId,
-    required this.startPosition, // Global position where drag gesture started
     required this.initialLogicalPosition, // Node's logical position at drag start
   }) {
     currentLogicalPosition = initialLogicalPosition;
   }
 
   final GraphId entityId;
-  final Offset startPosition;
   final Offset initialLogicalPosition;
   late Offset currentLogicalPosition;
+  // Accumulated delta from details.delta across all pan updates.
+  // Using details.delta (frame-relative) avoids coordinate system mismatch
+  // when GraphView is inside a transformed InteractiveViewer.
+  Offset accumulatedDelta = Offset.zero;
   bool cancelled = false;
 }
 
@@ -71,12 +73,15 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
       if (entity is GraphNode && canDrag(entityId)) {
         // Stop any ongoing animation before starting drag
         (entity as GraphNodeImpl).isAnimating = false;
-        // Use canDrag check
+        // ignore: avoid_print
+        print('[DragDebug] PanStart: entityId=$entityId '
+            'initialLogical=${entity.logicalPosition} '
+            'localPosition=${details.localPosition} '
+            'globalPosition=${details.globalPosition}');
         setState(
           entityId,
           _DragState(
             entityId: entityId,
-            startPosition: details.globalPosition,
             initialLogicalPosition: entity.logicalPosition,
           ),
         );
@@ -92,17 +97,29 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
   List<GraphId> handlePanUpdate(DragUpdateDetails details) {
     if (!isActive) return [];
     final updatedIds = <GraphId>[];
-    final startState = states.firstOrNull;
-    if (startState == null) return [];
-    final dragGlobalStart = startState.startPosition;
-    final delta = details.globalPosition - dragGlobalStart;
     final currentStates = List<_DragState>.from(states);
 
     for (final state in currentStates) {
       final dragState = state;
       if (dragState.cancelled) continue;
-      final newLogicalPosition = dragState.initialLogicalPosition + delta;
+      // Accumulate frame-relative delta, optionally transformed to the graph's
+      // logical coordinate space via gestureManager.dragDeltaTransform.
+      // This is needed when GraphView is inside a transformed parent such as
+      // InteractiveViewer, where the raw delta is in screen space.
+      final rawDelta = details.delta;
+      final logicalDelta =
+          gestureManager.dragDeltaTransform?.call(rawDelta) ?? rawDelta;
+      dragState.accumulatedDelta += logicalDelta;
+      final newLogicalPosition =
+          dragState.initialLogicalPosition + dragState.accumulatedDelta;
       dragState.currentLogicalPosition = newLogicalPosition;
+      // ignore: avoid_print
+      print('[DragDebug] PanUpdate: rawDelta=$rawDelta '
+          'logicalDelta=$logicalDelta '
+          'localPos=${details.localPosition} '
+          'globalPos=${details.globalPosition} '
+          'accumulated=${dragState.accumulatedDelta} '
+          'newLogical=$newLogicalPosition');
       final entity = gestureManager.getEntity(dragState.entityId);
       if (entity is GraphNode) {
         // Stop any ongoing animation during drag

@@ -1,5 +1,11 @@
 ## develop
 
+- [ADD] `GraphViewport` widget: pan and pinch-to-zoom support built into plough, eliminating the need to wrap `GraphView` in Flutter's `InteractiveViewer`.
+- [ADD] `GraphViewportController`: `ValueNotifier<Matrix4>`-based controller with `pan()`, `zoomAt()`, `reset()`, and `animateTo()` for programmatic viewport control.
+- [ADD] `minScale` / `maxScale` parameters on both `GraphViewport` and `GraphViewportController` to clamp the zoom range.
+- [ADD] `enablePan` / `enableZoom` flags on `GraphViewport` to selectively disable gesture types.
+- [IMPROVE] Example app updated to use `GraphViewport` with `GraphGestureMode.nodeEdgeOnly`, plus a "Reset View" toolbar button.
+
 ## 0.8.0
 
 - [ADD] Smooth force-directed layout animation: nodes now visibly scatter from random positions and settle into place each time the graph is displayed, using a Ticker-driven incremental simulation instead of a single synchronous computation.

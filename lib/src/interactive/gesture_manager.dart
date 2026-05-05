@@ -39,6 +39,8 @@ class GraphGestureManager {
     this.onBackgroundPanEnd,
     this.onTooltipShow,
     this.onTooltipHide,
+    this.dragDeltaTransform,
+    this.globalToScene,
   }) {
     _orderManager = graph.getOrderManagerSync();
   }
@@ -56,6 +58,21 @@ class GraphGestureManager {
   final GraphBackgroundGestureCallback? onBackgroundPanEnd;
   final void Function(GraphEntity)? onTooltipShow;
   final void Function(GraphEntity)? onTooltipHide;
+
+  /// Optional transform applied to drag delta before updating node positions.
+  /// Use this when GraphView is inside a transformed parent (e.g. InteractiveViewer).
+  final Offset Function(Offset delta)? dragDeltaTransform;
+
+  /// Optional transform that converts a global screen position to the graph's
+  /// logical (scene) coordinate space.
+  ///
+  /// Use this when [GraphView] is inside a transformed parent such as
+  /// [InteractiveViewer].  Without this, hit-testing and pointer handling use
+  /// [PointerEvent.localPosition] which is in the gesture detector's local
+  /// frame — identical to scene space only when no parent transform is applied.
+  ///
+  /// Typically set to `transformationController.toScene`.
+  final Offset Function(Offset globalPosition)? globalToScene;
 
   late final GraphNodeTapStateManager _nodeTapManager =
       GraphNodeTapStateManager(
@@ -117,6 +134,17 @@ class GraphGestureManager {
       graph.getNode(entityId) ?? graph.getLink(entityId);
 
   bool get isDragging => _nodeDragManager.isActive || _linkDragManager.isActive;
+
+  /// Converts a local (gesture detector) position to graph scene (logical)
+  /// coordinates.  When [globalToScene] is provided (e.g. via
+  /// [TransformationController.toScene]), it is applied to the event's global
+  /// position.  Otherwise the local position is returned as-is.
+  Offset toScene(Offset localPosition, Offset globalPosition) {
+    if (globalToScene != null) {
+      return globalToScene!.call(globalPosition);
+    }
+    return localPosition;
+  }
 
   GraphId? get lastDraggedEntityId =>
       _nodeDragManager.lastDraggedEntityId ??
@@ -406,9 +434,10 @@ class GraphGestureManager {
   }
 
   void handlePointerDown(PointerDownEvent event) {
+    final scenePos = toScene(event.localPosition, event.position);
     logDebug(
       LogCategory.gesture,
-      'Starting handlePointerDown at ${event.localPosition}, mode: $gestureMode',
+      'Starting handlePointerDown at ${event.localPosition} (scene: $scenePos), mode: $gestureMode',
     );
 
     // Send structured gesture event to debug server
@@ -427,7 +456,7 @@ class GraphGestureManager {
     _nodeHoverManager.handlePointerDown(event);
     _linkHoverManager.handlePointerDown(event);
 
-    final node = findNodeAt(event.localPosition);
+    final node = findNodeAt(scenePos);
     if (node != null) {
       logDebug(
         LogCategory.gesture,
@@ -528,7 +557,7 @@ class GraphGestureManager {
       }
     }
 
-    final link = findLinkAt(event.localPosition);
+    final link = findLinkAt(scenePos);
     if (link != null) {
       logDebug(
         LogCategory.gesture,
@@ -576,8 +605,8 @@ class GraphGestureManager {
 
     // Only call background callback if no entity was found
     // Double-check to prevent race conditions
-    final reCheckNode = findNodeAt(event.localPosition);
-    final reCheckLink = findLinkAt(event.localPosition);
+    final reCheckNode = findNodeAt(scenePos);
+    final reCheckLink = findLinkAt(scenePos);
 
     if (node == null &&
         link == null &&
@@ -587,7 +616,7 @@ class GraphGestureManager {
         LogCategory.gesture,
         'True background area (double-checked), calling background callback',
       );
-      onBackgroundTapped?.call(event.localPosition);
+      onBackgroundTapped?.call(scenePos);
       deselectAll(details: _lastPointerDetails);
     } else {
       logDebug(
@@ -598,9 +627,10 @@ class GraphGestureManager {
   }
 
   void handlePointerUp(PointerUpEvent event) {
+    final scenePos = toScene(event.localPosition, event.position);
     logDebug(
       LogCategory.gesture,
-      'Starting handlePointerUp at ${event.localPosition}, mode: $gestureMode',
+      'Starting handlePointerUp at ${event.localPosition} (scene: $scenePos), mode: $gestureMode',
     );
     _lastPointerDetails = PointerEventDetails.fromPointerEvent(event);
     final details = _lastPointerDetails!;
@@ -622,7 +652,7 @@ class GraphGestureManager {
     var entityProcessed = false;
 
     // First try to get the node at the pointer up location
-    final nodeAtPosition = findNodeAt(event.localPosition);
+    final nodeAtPosition = findNodeAt(scenePos);
 
     // CRITICAL DEBUG: Check all tap states before determining nodeTargetId
     logDebug(
@@ -1002,6 +1032,7 @@ class GraphGestureManager {
   }
 
   void handlePanStart(DragStartDetails details) {
+    final scenePos = toScene(details.localPosition, details.globalPosition);
     logGestureDebug(
       GestureDebugEventType.gestureDecision,
       'GestureManager',
@@ -1017,7 +1048,7 @@ class GraphGestureManager {
 
     // New approach: Do not start dragging immediately on pan start, set to Pan Ready state
     // Prefer nodes over links if both are present
-    final node = findNodeAt(details.localPosition);
+    final node = findNodeAt(scenePos);
     if (node != null && node.canDrag) {
       // Set node to Pan Ready state (drag not started yet)
       _nodePanReadyManager.handlePanStart(node.id, details);
@@ -1049,7 +1080,7 @@ class GraphGestureManager {
       }
     }
 
-    final link = findLinkAt(details.localPosition);
+    final link = findLinkAt(scenePos);
     if (link != null && link.canDrag) {
       // Set link to Pan Ready state (drag not started yet)
       _linkPanReadyManager.handlePanStart(link.id, details);
@@ -1083,8 +1114,8 @@ class GraphGestureManager {
 
     // Only call background callback if no entity was found
     // Double-check to prevent race conditions
-    final reCheckNode = findNodeAt(details.localPosition);
-    final reCheckLink = findLinkAt(details.localPosition);
+    final reCheckNode = findNodeAt(scenePos);
+    final reCheckLink = findLinkAt(scenePos);
 
     if (node == null &&
         link == null &&
@@ -1094,7 +1125,7 @@ class GraphGestureManager {
         LogCategory.gesture,
         'handlePanStart: True background pan (double-checked), calling callback',
       );
-      onBackgroundPanStart?.call(details.localPosition);
+      onBackgroundPanStart?.call(scenePos);
     } else {
       logDebug(
         LogCategory.gesture,
@@ -1104,6 +1135,7 @@ class GraphGestureManager {
   }
 
   void handlePanUpdate(DragUpdateDetails details) {
+    final scenePos = toScene(details.localPosition, details.globalPosition);
     // DO NOT create a new PointerEventDetails from DragUpdateDetails
     // Use the last known details
     if (_lastPointerDetails == null) {
@@ -1169,7 +1201,7 @@ class GraphGestureManager {
     }
 
     // Priority 4: If not currently dragging and no ready states, check if movement cancels a pending tap
-    final node = findNodeAt(details.localPosition);
+    final node = findNodeAt(scenePos);
     if (node != null) {
       _nodeTapManager.handlePanUpdate(node.id, details);
       // In nodeEdgeOnly mode, we're handling a node, so don't call background callback
@@ -1181,7 +1213,7 @@ class GraphGestureManager {
         return;
       }
     }
-    final link = findLinkAt(details.localPosition);
+    final link = findLinkAt(scenePos);
     if (link != null) {
       _linkTapManager.handlePanUpdate(link.id, details);
       // In nodeEdgeOnly mode, we're handling a link, so don't call background callback
@@ -1195,15 +1227,15 @@ class GraphGestureManager {
     }
 
     // Check if this is a background pan update
-    if (!shouldConsumeGestureAt(details.localPosition)) {
-      onBackgroundPanUpdate?.call(details.localPosition, details.delta);
+    if (!shouldConsumeGestureAt(scenePos)) {
+      onBackgroundPanUpdate?.call(scenePos, details.delta);
       return;
     }
 
     // Only call background callback if no entity was found
     // Double-check to prevent race conditions
-    final reCheckNode = findNodeAt(details.localPosition);
-    final reCheckLink = findLinkAt(details.localPosition);
+    final reCheckNode = findNodeAt(scenePos);
+    final reCheckLink = findLinkAt(scenePos);
 
     if (node == null &&
         link == null &&
@@ -1213,7 +1245,7 @@ class GraphGestureManager {
         LogCategory.gesture,
         'handlePanUpdate: True background pan (double-checked), calling callback',
       );
-      onBackgroundPanUpdate?.call(details.localPosition, details.delta);
+      onBackgroundPanUpdate?.call(scenePos, details.delta);
     } else {
       logDebug(
         LogCategory.gesture,
@@ -1295,16 +1327,20 @@ class GraphGestureManager {
 
     // Background pan end - only call if appropriate for the gesture mode
     if (endPointerDetails != null) {
+      final endScenePos = toScene(
+        endPointerDetails.localPosition,
+        endPointerDetails.globalPosition,
+      );
       // In nodeEdgeOnly mode, only call if we're not over an entity
       if (gestureMode == GraphGestureMode.nodeEdgeOnly) {
-        final node = findNodeAt(endPointerDetails.localPosition);
-        final link = findLinkAt(endPointerDetails.localPosition);
+        final node = findNodeAt(endScenePos);
+        final link = findLinkAt(endScenePos);
         if (node == null && link == null) {
           logDebug(
             LogCategory.gesture,
             'handlePanEnd: Calling background callback (no entity at position)',
           );
-          onBackgroundPanEnd?.call(endPointerDetails.localPosition);
+          onBackgroundPanEnd?.call(endScenePos);
         } else {
           logDebug(
             LogCategory.gesture,
@@ -1316,13 +1352,14 @@ class GraphGestureManager {
           LogCategory.gesture,
           'handlePanEnd: Calling background callback (not nodeEdgeOnly mode)',
         );
-        onBackgroundPanEnd?.call(endPointerDetails.localPosition);
+        onBackgroundPanEnd?.call(endScenePos);
       }
     }
   }
 
   void handlePointerMove(PointerMoveEvent event) {
-    if (_nodeDragManager.isActive || findNodeAt(event.localPosition) != null) {
+    final scenePos = toScene(event.localPosition, event.position);
+    if (_nodeDragManager.isActive || findNodeAt(scenePos) != null) {
       _nodeDragManager.handlePointerMove(event);
 
       // Send real-time TAP_DEBUG_STATE during drag operations
@@ -1388,19 +1425,20 @@ class GraphGestureManager {
       return;
     }
 
-    if (_linkDragManager.isActive || findLinkAt(event.localPosition) != null) {
+    if (_linkDragManager.isActive || findLinkAt(scenePos) != null) {
       _linkDragManager.handlePointerMove(event);
     }
   }
 
   void handleMouseHover(PointerHoverEvent event) {
+    final scenePos = toScene(event.localPosition, event.position);
     _lastPointerDetails = PointerEventDetails.fromPointerEvent(event);
     final hoverDetails = _lastPointerDetails!;
 
     if (isDragging) return;
 
-    final node = findNodeAt(event.localPosition);
-    final link = findLinkAt(event.localPosition);
+    final node = findNodeAt(scenePos);
+    final link = findLinkAt(scenePos);
 
     final currentHoveredNodeId = _nodeHoverManager.hoveredEntityId;
     if (node != null) {

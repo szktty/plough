@@ -38,6 +38,8 @@ class GraphInteractiveOverlay extends StatefulWidget {
     this.onBackgroundPanEnd,
     this.onTooltipShow,
     this.onTooltipHide,
+    this.dragDeltaTransform,
+    this.globalToScene,
     super.key,
   });
 
@@ -54,6 +56,8 @@ class GraphInteractiveOverlay extends StatefulWidget {
   final GraphBackgroundGestureCallback? onBackgroundPanEnd;
   final void Function(GraphEntity)? onTooltipShow;
   final void Function(GraphEntity)? onTooltipHide;
+  final Offset Function(Offset delta)? dragDeltaTransform;
+  final Offset Function(Offset globalPosition)? globalToScene;
 
   @override
   State<GraphInteractiveOverlay> createState() =>
@@ -89,6 +93,8 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       onBackgroundPanEnd: widget.onBackgroundPanEnd,
       onTooltipShow: widget.onTooltipShow,
       onTooltipHide: widget.onTooltipHide,
+      dragDeltaTransform: widget.dragDeltaTransform,
+      globalToScene: widget.globalToScene,
     );
     (widget.graph as GraphImpl)
         .layoutChangeListenable
@@ -183,8 +189,27 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
           ..onUpdate = _handlePanUpdateConditional
           ..onEnd = _handlePanEndConditional;
       });
+    } else if (widget.gestureMode == GraphGestureMode.nodeEdgeOnly &&
+        widget.onBackgroundPanStart == null &&
+        widget.onBackgroundPanUpdate == null &&
+        widget.onBackgroundPanEnd == null) {
+      // In nodeEdgeOnly mode without background pan callbacks, only accept
+      // gestures on entities so that background drags fall through to a parent
+      // viewport widget (e.g. GraphViewport).
+      recognizers[_CustomPanGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<_CustomPanGestureRecognizer>(
+        () => _CustomPanGestureRecognizer(
+          shouldAcceptGesture: _shouldConsumeGestureAt,
+        ),
+        (recognizer) {
+          recognizer
+            ..onStart = _handlePanStartConditional
+            ..onUpdate = _handlePanUpdateConditional
+            ..onEnd = _handlePanEndConditional;
+        },
+      );
     } else {
-      // For other modes, use standard PanGestureRecognizer
+      // For exclusive mode, use standard PanGestureRecognizer.
       recognizers[PanGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
         PanGestureRecognizer.new,
@@ -214,8 +239,12 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     _gestureManager.handlePanEnd(details);
   }
 
-  bool _shouldConsumeGestureAt(Offset position) {
-    return _gestureManager.shouldConsumeGestureAt(position);
+  bool _shouldConsumeGestureAt(Offset localPosition, [Offset? globalPosition]) {
+    final scenePos = _gestureManager.toScene(
+      localPosition,
+      globalPosition ?? localPosition,
+    );
+    return _gestureManager.shouldConsumeGestureAt(scenePos);
   }
 }
 
@@ -223,12 +252,13 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
 class _CustomPanGestureRecognizer extends PanGestureRecognizer {
   _CustomPanGestureRecognizer({required this.shouldAcceptGesture});
 
-  final bool Function(Offset) shouldAcceptGesture;
+  final bool Function(Offset localPosition, Offset globalPosition)
+      shouldAcceptGesture;
 
   @override
   void addPointer(PointerDownEvent event) {
     // Only accept the gesture if shouldAcceptGesture returns true
-    if (shouldAcceptGesture(event.localPosition)) {
+    if (shouldAcceptGesture(event.localPosition, event.position)) {
       super.addPointer(event);
     } else {
       // Reject this pointer to let it pass through

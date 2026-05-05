@@ -13,6 +13,7 @@ Version: 0.1.0
 - 🖱️ **Interactive Operations**: Built-in support for drag-and-drop, selection, and other user interactions
 - 🎨 **Widget-based Customization**: Extensive customization options through Flutter widgets
 - 🎬 **Smooth Animations**: Fluid transitions and initial rendering animations
+- 🔍 **Built-in Pan & Zoom**: `GraphViewport` and `GraphViewportController` for first-class viewport support without external wrappers
 
 ## Core Concepts
 
@@ -105,6 +106,38 @@ GraphManualLayoutStrategy(
   nodePositions: positions,
   origin: GraphLayoutPositionOrigin.alignCenter,
 )
+```
+
+#### GraphViewport
+
+`GraphViewport` wraps `GraphView` (or any widget) with built-in pan and pinch-to-zoom support. It owns the transformation matrix internally, so all coordinate math inside `GraphView` — hit-testing, node dragging — remains correct at any pan/zoom level.
+
+```dart
+final _viewportController = GraphViewportController();
+
+GraphViewport(
+  controller: _viewportController,
+  minScale: 0.3,
+  maxScale: 5.0,
+  child: GraphView(
+    graph: graph,
+    behavior: behavior,
+    layoutStrategy: layoutStrategy,
+    // Let background gestures fall through to GraphViewport.
+    gestureMode: GraphGestureMode.nodeEdgeOnly,
+  ),
+)
+
+// Programmatic control:
+_viewportController.reset();
+_viewportController.pan(const Offset(100, 0));
+_viewportController.zoomAt(1.2, focalPoint: const Offset(400, 300));
+await _viewportController.animateTo(
+  vsync: this,
+  viewSize: context.size!,
+  sceneOffset: targetNode.logicalPosition,
+  targetScale: 1.5,
+);
 ```
 
 #### Behaviors
@@ -921,6 +954,43 @@ Key methods to override:
 - `createLinkViewBehavior()`: Customize link display
 - `onNodeTap(GraphNode node)`: Handle node tap events
 - `onNodeDragStart/Update/End()`: Handle node drag operations
+
+#### GraphViewport
+
+A widget that provides pan and pinch-to-zoom for its child. The `Transform` is applied inside plough, above `GraphView`, so all existing coordinate logic remains valid.
+
+##### Constructor
+
+*   `const GraphViewport({required Widget child, GraphViewportController? controller, double minScale = 0.1, double maxScale = 10.0, bool enablePan = true, bool enableZoom = true, Key? key})`: Creates a viewport widget.
+
+##### Properties
+
+*   `Widget child`: The widget to display inside the viewport, typically a `GraphView`.
+*   `GraphViewportController? controller`: Optional controller for programmatic control. An internal controller is created if null.
+*   `double minScale`: Minimum zoom scale (default: `0.1`).
+*   `double maxScale`: Maximum zoom scale (default: `10.0`).
+*   `bool enablePan`: Whether pan gestures are enabled (default: `true`).
+*   `bool enableZoom`: Whether pinch-to-zoom gestures are enabled (default: `true`).
+
+#### GraphViewportController
+
+`ValueNotifier<Matrix4>`-based controller for reading and programmatically setting the viewport transform.
+
+##### Constructor
+
+*   `GraphViewportController({double minScale = 0.1, double maxScale = 10.0})`: Creates a controller with an identity (no pan, no zoom) transform.
+
+##### Properties
+
+*   `double scale`: The current zoom scale.
+*   `Offset panOffset`: The current pan offset in screen pixels.
+
+##### Methods
+
+*   `void reset()`: Resets pan and zoom to the identity transform.
+*   `void pan(Offset delta)`: Pans the viewport by `delta` in screen pixels.
+*   `void zoomAt(double scaleDelta, {required Offset focalPoint})`: Zooms by `scaleDelta` (multiplier) around `focalPoint` (screen coordinates). Result is clamped to `[minScale, maxScale]`.
+*   `Future<void> animateTo({required TickerProvider vsync, required Size viewSize, Offset? sceneOffset, double? targetScale, Duration duration, Curve curve})`: Smoothly animates to a target scene position and/or scale.
 
 ### Layout Strategies
 

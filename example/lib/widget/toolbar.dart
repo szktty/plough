@@ -1,10 +1,13 @@
 import 'package:example/app_state.dart';
 import 'package:flutter/material.dart';
+import 'package:plough/plough.dart';
 import 'package:provider/provider.dart';
 
 // lib/widget/toolbar.dart
 class MainPageToolbar extends StatelessWidget {
-  const MainPageToolbar({super.key});
+  const MainPageToolbar({required this.viewportController, super.key});
+
+  final GraphViewportController viewportController;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +56,11 @@ class MainPageToolbar extends StatelessWidget {
                     onPressed: state.clearAllSelections,
                     icon: const Icon(Icons.deselect),
                     tooltip: 'Clear Selection',
+                  ),
+                  IconButton(
+                    onPressed: viewportController.reset,
+                    icon: const Icon(Icons.fit_screen),
+                    tooltip: 'Reset View',
                   ),
                 ],
               ),

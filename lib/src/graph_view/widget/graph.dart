@@ -74,6 +74,8 @@ class GraphView extends StatefulWidget {
     this.onBackgroundPanStart,
     this.onBackgroundPanUpdate,
     this.onBackgroundPanEnd,
+    this.dragDeltaTransform,
+    this.globalToScene,
     super.key,
   });
 
@@ -131,6 +133,28 @@ class GraphView extends StatefulWidget {
 
   /// Callback for background pan end gestures.
   final GraphBackgroundGestureCallback? onBackgroundPanEnd;
+
+  /// Optional transform applied to drag delta before updating node positions.
+  ///
+  /// Use this when [GraphView] is inside a transformed parent (e.g.
+  /// [InteractiveViewer]) to convert the screen-space drag delta into the
+  /// graph's logical coordinate space.  If null, the raw delta is used as-is.
+  ///
+  /// Example — strip the InteractiveViewer scale:
+  /// ```dart
+  /// dragDeltaTransform: (delta) {
+  ///   final scale = transformationController.value.getMaxScaleOnAxis();
+  ///   return delta / scale;
+  /// },
+  /// ```
+  final Offset Function(Offset delta)? dragDeltaTransform;
+
+  /// Optional transform that converts a global screen position to the graph's
+  /// logical (scene) coordinate space.
+  ///
+  /// Typically set to `transformationController.toScene` when [GraphView] is
+  /// inside an [InteractiveViewer].
+  final Offset Function(Offset globalPosition)? globalToScene;
 
   @override
   State<GraphView> createState() => GraphViewState();
@@ -515,6 +539,8 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
                         onBackgroundPanStart: widget.onBackgroundPanStart,
                         onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
                         onBackgroundPanEnd: widget.onBackgroundPanEnd,
+                        dragDeltaTransform: widget.dragDeltaTransform,
+                        globalToScene: widget.globalToScene,
                         onTooltipShow: (entity) {
                           _entityIdShowingTooltip = entity.id;
                         },

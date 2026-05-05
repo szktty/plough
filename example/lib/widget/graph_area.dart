@@ -8,21 +8,28 @@ import 'package:provider/provider.dart';
 
 // lib/widget/graph_area.dart
 class GraphArea extends StatelessWidget {
-  const GraphArea({super.key});
+  const GraphArea({required this.viewportController, super.key});
+
+  final GraphViewportController viewportController;
 
   @override
   Widget build(BuildContext context) {
-    // Monitor data using Provider
     return Consumer<AppState>(
       builder: (context, state, child) {
-        return GraphView(
-          graph: state.selectedData.graph,
-          layoutStrategy: state.selectedData.layoutStrategy,
-          behavior: GraphAreaBehavior(
-            linkRouting: state.selectedData.linkRouting,
-            appState: state,
+        return GraphViewport(
+          controller: viewportController,
+          child: GraphView(
+            graph: state.selectedData.graph,
+            layoutStrategy: state.selectedData.layoutStrategy,
+            behavior: GraphAreaBehavior(
+              linkRouting: state.selectedData.linkRouting,
+              appState: state,
+            ),
+            allowSelection: true,
+            // Background pan/zoom is handled by GraphViewport.
+            // Only consume gestures on nodes and links.
+            gestureMode: GraphGestureMode.nodeEdgeOnly,
           ),
-          allowSelection: true,
         );
       },
     );
