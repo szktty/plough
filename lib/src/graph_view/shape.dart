@@ -74,9 +74,10 @@ class GraphCircle implements GraphShape {
 
   @override
   Set<Offset> getLineIntersections(Rect bounds, GraphLine line) {
+    final r = radius ?? bounds.width / 2;
     final flameCircle = CircleComponent(
-      position: Vector2(bounds.left, bounds.top),
-      radius: radius,
+      position: Vector2(bounds.center.dx - r, bounds.center.dy - r),
+      radius: r,
     );
     final intersections = flameCircle.lineSegmentIntersections(
       line.flameLineSegment,

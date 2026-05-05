@@ -1,5 +1,6 @@
 ## develop
 
+- [FIX] `GraphCircle.getLineIntersections`: fixed incorrect `CircleComponent` position that caused link arrow endpoints to land outside the circle boundary when the specified `radius` differs from half the node's bounding-box width.
 - [ADD] `GraphViewport` widget: pan and pinch-to-zoom support built into plough, eliminating the need to wrap `GraphView` in Flutter's `InteractiveViewer`.
 - [ADD] `GraphViewportController`: `ValueNotifier<Matrix4>`-based controller with `pan()`, `zoomAt()`, `reset()`, and `animateTo()` for programmatic viewport control.
 - [ADD] `minScale` / `maxScale` parameters on both `GraphViewport` and `GraphViewportController` to clamp the zoom range.
