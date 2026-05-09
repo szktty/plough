@@ -19,6 +19,7 @@ class GraphInheritedData extends InheritedWidget {
     required this.constraints,
     required this.graph,
     required super.child,
+    this.globalToScene,
     super.key,
   });
 
@@ -42,6 +43,12 @@ class GraphInheritedData extends InheritedWidget {
 
   /// The graph data model as a listenable.
   final GraphImpl graph;
+
+  /// Optional transform that converts a global screen position to the graph's
+  /// logical coordinate space. Required when [GraphView] is inside a scaled
+  /// viewport (e.g. InteractiveViewer) so that geometry calculations remain
+  /// correct after the viewport is panned or zoomed.
+  final Offset Function(Offset globalPosition)? globalToScene;
 
   /// Retrieves the inherited data from the widget tree.
   ///
@@ -86,7 +93,8 @@ class GraphInheritedData extends InheritedWidget {
         nodeViewBehavior != oldWidget.nodeViewBehavior ||
         linkViewBehavior != oldWidget.linkViewBehavior ||
         constraints != oldWidget.constraints ||
-        graph != oldWidget.graph;
+        graph != oldWidget.graph ||
+        globalToScene != oldWidget.globalToScene;
   }
 }
 

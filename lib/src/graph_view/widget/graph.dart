@@ -357,8 +357,8 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
         if (_graph.geometry == null) {
           return;
         }
-        final position =
-            renderBox.localToGlobal(Offset.zero) - _graph.geometry!.position;
+        final globalTopLeft = renderBox.localToGlobal(Offset.zero);
+        final position = globalTopLeft - _graph.geometry!.position;
         final bounds = Rect.fromLTWH(
           position.dx,
           position.dy,
@@ -376,6 +376,33 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
         }
       });
     }
+  }
+
+  /// Returns the current global screen position of the GraphView's layout
+  /// origin (the inner Stack that holds nodes).
+  ///
+  /// This can be used to build a correct [GraphView.globalToScene] function:
+  /// ```dart
+  /// globalToScene: (globalPos) {
+  ///   final origin = graphViewStateKey.currentState!.layoutGlobalOrigin
+  ///       ?? Offset.zero;
+  ///   return (globalPos - origin) / viewportController.scale;
+  /// }
+  /// ```
+  Offset? get layoutGlobalOrigin {
+    final box = _layoutKey.currentContext?.findRenderObject() as RenderBox?;
+    return box?.localToGlobal(Offset.zero);
+  }
+
+  /// Refreshes geometry for all nodes after a viewport transform change.
+  ///
+  /// Call this after a pan or zoom to keep hit-test bounds in sync with the
+  /// visual positions of nodes.  Also updates the GraphView container geometry
+  /// because the Transform inside GraphViewport shifts the global positions of
+  /// all child render boxes.
+  void refreshAllNodeGeometry() {
+    _updateGraphGeometry();
+    _updateNodeGeometry();
   }
 
   Offset _getNodeAnimationStartPosition(BoxConstraints constraints) {
@@ -580,6 +607,7 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
           linkViewBehavior: _linkViewBehavior,
           constraints: constrains,
           graph: _graph,
+          globalToScene: widget.globalToScene,
           child: child,
         );
       },

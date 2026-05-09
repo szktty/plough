@@ -20,4 +20,5 @@ export 'hit_test.dart'
         GraphGestureMode,
         GraphHitTestResult;
 export 'shape.dart' show GraphCircle, GraphRectangle, GraphShape;
-export 'widget/graph.dart' show GraphView;
+export 'widget/graph.dart' show GraphView, GraphViewState;
+export 'widget/shape.dart' show GraphCircleNodeView, GraphRectangleNodeView;

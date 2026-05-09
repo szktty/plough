@@ -50,6 +50,7 @@ class GraphViewport extends StatefulWidget {
     this.maxScale = 10.0,
     this.enablePan = true,
     this.enableZoom = true,
+    this.onTransformChanged,
     super.key,
   });
 
@@ -72,6 +73,17 @@ class GraphViewport extends StatefulWidget {
   /// Whether pinch-to-zoom and scroll-wheel gestures are enabled. Defaults to `true`.
   final bool enableZoom;
 
+  /// Called whenever the viewport transform changes (pan or zoom).
+  ///
+  /// Use this to refresh node geometry after a viewport change:
+  /// ```dart
+  /// GraphViewport(
+  ///   onTransformChanged: () => graphViewState.refreshAllNodeGeometry(),
+  ///   child: GraphView(...),
+  /// )
+  /// ```
+  final VoidCallback? onTransformChanged;
+
   @override
   State<GraphViewport> createState() => _GraphViewportState();
 }
@@ -91,10 +103,25 @@ class _GraphViewportState extends State<GraphViewport> {
         maxScale: widget.maxScale,
       );
     }
+    _controller.addListener(_onTransformChanged);
+  }
+
+  @override
+  void didUpdateWidget(GraphViewport oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.removeListener(_onTransformChanged);
+      _controller.addListener(_onTransformChanged);
+    }
+  }
+
+  void _onTransformChanged() {
+    widget.onTransformChanged?.call();
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onTransformChanged);
     _internalController?.dispose();
     super.dispose();
   }

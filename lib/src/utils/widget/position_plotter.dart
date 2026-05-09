@@ -23,7 +23,7 @@ class GraphPositionPlotter extends StatefulWidget {
     this.fontSize = fontSize ?? 14;
   }
 
-  static bool enabled = false;
+  static bool enabled = true;
 
   static W wrapOr<W extends Widget>({
     required W child,

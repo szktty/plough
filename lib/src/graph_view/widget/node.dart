@@ -197,16 +197,15 @@ class GraphNodeViewState extends State<GraphNodeView>
     WidgetUtils.withSizedRenderBoxIfPresent(_key, (renderBox) {
       if (_graph?.geometry == null) return;
 
-      final size = renderBox.size;
-      final position =
-          renderBox.localToGlobal(Offset.zero) - _graph!.geometry!.position;
+      final globalTopLeft = renderBox.localToGlobal(Offset.zero);
+      final position = globalTopLeft - _graph!.geometry!.position;
 
       _node.geometry = GraphNodeViewGeometry(
         bounds: Rect.fromLTWH(
           position.dx,
           position.dy,
-          size.width,
-          size.height,
+          renderBox.size.width,
+          renderBox.size.height,
         ),
       );
     });

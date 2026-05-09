@@ -47,6 +47,25 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
   /// The current pan offset in screen pixels.
   Offset get panOffset => Offset(value[12], value[13]);
 
+  /// Converts a global screen position to scene (logical) coordinates.
+  ///
+  /// Pass this as [GraphView.globalToScene] so that node geometry calculations
+  /// remain correct after pan/zoom:
+  /// ```dart
+  /// GraphView(
+  ///   globalToScene: _viewportController.toScene,
+  ///   ...
+  /// )
+  /// ```
+  Offset toScene(Offset globalPosition) {
+    final s = scale;
+    final pan = panOffset;
+    return Offset(
+      (globalPosition.dx - pan.dx) / s,
+      (globalPosition.dy - pan.dy) / s,
+    );
+  }
+
   /// Resets pan and zoom to the identity transform.
   void reset() {
     _cancelAnimation();
