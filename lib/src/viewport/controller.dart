@@ -81,6 +81,17 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
     value = m;
   }
 
+  /// Sets the zoom scale to an absolute value, preserving the current pan offset.
+  ///
+  /// Unlike [zoomAt], this does not adjust the translation — the pan position
+  /// is kept exactly as-is and only the scale changes.
+  /// The result is clamped to [minScale, maxScale].
+  void setScale(double newScale) {
+    _cancelAnimation();
+    final clamped = newScale.clamp(_minScale, _maxScale);
+    value = _composeMatrix(clamped, panOffset);
+  }
+
   /// Zooms by [scaleDelta] around [focalPoint] (screen/widget coordinates).
   ///
   /// [scaleDelta] is a multiplier: `1.2` zooms in 20 %, `0.8` zooms out 20 %.
