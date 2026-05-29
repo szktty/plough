@@ -41,6 +41,8 @@ class GraphGestureManager {
     this.onTooltipHide,
     this.dragDeltaTransform,
     this.globalToScene,
+    this.onNodeDragStart,
+    this.onNodeDragEnd,
   }) {
     _orderManager = graph.getOrderManagerSync();
   }
@@ -61,7 +63,13 @@ class GraphGestureManager {
 
   /// Optional transform applied to drag delta before updating node positions.
   /// Use this when GraphView is inside a transformed parent (e.g. InteractiveViewer).
-  final Offset Function(Offset delta)? dragDeltaTransform;
+  Offset Function(Offset delta)? dragDeltaTransform;
+
+  /// Called when a node drag starts. Receives the dragged node's [GraphId].
+  void Function(GraphId nodeId)? onNodeDragStart;
+
+  /// Called when a node drag ends. Receives the dragged node's [GraphId].
+  void Function(GraphId nodeId)? onNodeDragEnd;
 
   /// Optional transform that converts a global screen position to the graph's
   /// logical (scene) coordinate space.
@@ -72,7 +80,15 @@ class GraphGestureManager {
   /// frame — identical to scene space only when no parent transform is applied.
   ///
   /// Typically set to `transformationController.toScene`.
-  final Offset Function(Offset globalPosition)? globalToScene;
+  Offset Function(Offset globalPosition)? globalToScene;
+
+  /// Converts a viewport-local (screen) position to scene coordinates.
+  ///
+  /// Set when an enclosing [GraphViewport] drives this manager from outside its
+  /// [Transform]: the events it forwards carry viewport-local positions, which
+  /// this maps to scene space via the controller's inverse transform.  Takes
+  /// precedence over [globalToScene] in [toScene].
+  Offset Function(Offset localPosition)? screenToScene;
 
   late final GraphNodeTapStateManager _nodeTapManager =
       GraphNodeTapStateManager(
@@ -117,6 +133,13 @@ class GraphGestureManager {
   PointerEventDetails? _lastPointerDetails;
   PointerEventDetails? get lastPointerDetails => _lastPointerDetails;
 
+  /// Local position of a pointer-down that landed on empty background while a
+  /// selection existed.  Deselection is deferred to pointer-up so that a
+  /// background *pan* (e.g. panning a [GraphViewport]) does not clear the
+  /// selection — only a background *tap* (released within touch slop) does.
+  /// Null when the current gesture did not start on the background.
+  Offset? _pendingBackgroundDeselectAt;
+
   /// Rebuild the spatial grid from current node geometries.
   void rebuildSpatialIndex() {
     _nodeGrid.rebuild(graph.nodes);
@@ -140,6 +163,9 @@ class GraphGestureManager {
   /// [TransformationController.toScene]), it is applied to the event's global
   /// position.  Otherwise the local position is returned as-is.
   Offset toScene(Offset localPosition, Offset globalPosition) {
+    if (screenToScene != null) {
+      return screenToScene!.call(localPosition);
+    }
     if (globalToScene != null) {
       return globalToScene!.call(globalPosition);
     }
@@ -617,7 +643,10 @@ class GraphGestureManager {
         'True background area (double-checked), calling background callback',
       );
       onBackgroundTapped?.call(scenePos);
-      deselectAll(details: _lastPointerDetails);
+      // Defer deselection to pointer-up: only a background *tap* should clear
+      // the selection.  A background *pan* (released far from the down point)
+      // must keep it.  Resolved in handlePointerUp.
+      _pendingBackgroundDeselectAt = event.localPosition;
     } else {
       logDebug(
         LogCategory.gesture,
@@ -634,6 +663,24 @@ class GraphGestureManager {
     );
     _lastPointerDetails = PointerEventDetails.fromPointerEvent(event);
     final details = _lastPointerDetails!;
+
+    // Resolve a deferred background deselect (see handlePointerDown): clear the
+    // selection only if the pointer was released within touch slop of where it
+    // went down on the background — i.e. a tap, not a pan.
+    final pendingDeselectAt = _pendingBackgroundDeselectAt;
+    final gestureStartedOnBackground = pendingDeselectAt != null;
+    _pendingBackgroundDeselectAt = null;
+    if (pendingDeselectAt != null) {
+      final moved = (event.localPosition - pendingDeselectAt).distance;
+      if (moved <= kTouchSlop) {
+        deselectAll(details: details);
+      } else {
+        logDebug(
+          LogCategory.selection,
+          'Skipping background deselect: pointer moved $moved px (pan, not tap)',
+        );
+      }
+    }
 
     // Send structured gesture event to debug server
     externalDebugClient.sendLog(
@@ -667,9 +714,15 @@ class GraphGestureManager {
       );
     }
 
-    final nodeTargetId = nodeAtPosition?.id ??
-        _nodeTapManager.trackedEntityId ??
-        _nodeDragManager.lastDraggedEntityId;
+    // When this gesture started on empty background, a lingering tracked/last-
+    // dragged entity belongs to a *previous* gesture and must not be revived:
+    // otherwise a background pan would toggle (and deselect) that old node on
+    // release.  Only attribute to an entity actually under the pointer here.
+    final nodeTargetId = gestureStartedOnBackground
+        ? nodeAtPosition?.id
+        : (nodeAtPosition?.id ??
+            _nodeTapManager.trackedEntityId ??
+            _nodeDragManager.lastDraggedEntityId);
     logDebug(
       LogCategory.tap,
       'TAP DEBUG: nodeAtPosition=${nodeAtPosition?.id.value.substring(0, 8) ?? 'null'}',
@@ -1010,6 +1063,9 @@ class GraphGestureManager {
   }
 
   void handlePointerCancel(PointerCancelEvent event) {
+    // A cancelled gesture is neither a tap nor a deliberate release; drop any
+    // pending background deselect so it can't fire on the next pointer-up.
+    _pendingBackgroundDeselectAt = null;
     _lastPointerDetails = PointerEventDetails.fromPointerEvent(
       event,
     ); // Update details on cancel
@@ -1033,6 +1089,11 @@ class GraphGestureManager {
 
   void handlePanStart(DragStartDetails details) {
     final scenePos = toScene(details.localPosition, details.globalPosition);
+    // Seed the last pointer details from the drag start so handlePanUpdate has
+    // a reference even when no prior pointer-down/hover set it (e.g. a touch
+    // drag, or a viewport-driven drag where the gesture arrives as pan details
+    // rather than raw pointer events).
+    _lastPointerDetails ??= PointerEventDetails.fromDragStartDetails(details);
     logGestureDebug(
       GestureDebugEventType.gestureDecision,
       'GestureManager',
@@ -1151,14 +1212,42 @@ class GraphGestureManager {
     // Priority 1: Check Pan Ready states first - this is where we transition to actual dragging
     // Check if any nodes are in Pan Ready state and should start dragging
     final readyNodeIds = _nodePanReadyManager.readyEntityIds;
+    var startedDragThisUpdate = false;
     for (final nodeId in readyNodeIds) {
       _nodePanReadyManager.handlePanUpdate(nodeId, details);
+      // A ready→drag transition already applied this update's delta to the
+      // node drag manager (see _delegateActualDragStart).  Remember it so we
+      // don't apply the same delta again in Priority 2 below.
+      if (!_nodePanReadyManager.isPanReady(nodeId)) {
+        startedDragThisUpdate = true;
+      }
     }
 
     // Check if any links are in Pan Ready state and should start dragging
     final readyLinkIds = _linkPanReadyManager.readyEntityIds;
     for (final linkId in readyLinkIds) {
       _linkPanReadyManager.handlePanUpdate(linkId, details);
+      if (!_linkPanReadyManager.isPanReady(linkId)) {
+        startedDragThisUpdate = true;
+      }
+    }
+
+    // If a drag was just started this update, its delta has already been
+    // applied during the ready→drag transition.  Skip the priority handlers so
+    // the same frame's delta is not counted twice (node jumping ahead of the
+    // pointer).  Subsequent updates flow through Priority 2/3 normally.
+    if (startedDragThisUpdate) {
+      final draggedNodeId = _nodeDragManager.lastDraggedEntityId;
+      if (draggedNodeId != null) {
+        final event = GraphDragUpdateEvent(
+          entityIds: [draggedNodeId],
+          details: _lastPointerDetails!,
+          delta: details.delta,
+        );
+        viewBehavior.onDragUpdate(event);
+        _nodeTapManager.handlePanUpdate(draggedNodeId, details);
+      }
+      return;
     }
 
     // Priority 2: If dragging a node, always update the node drag manager
@@ -1283,6 +1372,7 @@ class GraphGestureManager {
               );
               _nodeTapManager.removeStateSilently(nodeId);
             }
+            onNodeDragEnd?.call(nodeId);
           }
         }
       }

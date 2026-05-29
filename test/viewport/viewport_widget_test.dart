@@ -101,12 +101,19 @@ void main() {
       expect(transform.transform, Matrix4.identity());
     });
 
-    testWidgets('pan gesture updates controller panOffset', (tester) async {
+    testWidgets('infinite canvas: pan gesture updates controller panOffset',
+        (tester) async {
       final ctrl = GraphViewportController();
       addTearDown(ctrl.dispose);
 
       await tester.pumpWidget(
-        _wrap(GraphViewport(controller: ctrl, child: const _Box())),
+        _wrap(
+          GraphViewport(
+            controller: ctrl,
+            canvasMode: GraphViewportCanvasMode.infinite,
+            child: const _Box(),
+          ),
+        ),
       );
 
       // Simulate a drag (pan) gesture on the viewport.
@@ -114,9 +121,36 @@ void main() {
       await tester.dragFrom(center, const Offset(80, 60));
       await tester.pump();
 
-      // After dragging right/down by (80, 60), the pan offset should have moved.
+      // Infinite canvas pans freely (no clamp), so dragging right/down by
+      // (80, 60) moves the pan offset by the same amount.
       expect(ctrl.panOffset.dx, greaterThan(0));
       expect(ctrl.panOffset.dy, greaterThan(0));
+    });
+
+    testWidgets('bounded canvas: pan gesture is clamped to zero',
+        (tester) async {
+      final ctrl = GraphViewportController();
+      addTearDown(ctrl.dispose);
+
+      await tester.pumpWidget(
+        _wrap(
+          GraphViewport(
+            controller: ctrl,
+            // bounded is the default; the canvas equals the initial viewport
+            // size, so at scale 1 the valid pan range collapses to [0, 0].
+            child: const _Box(),
+          ),
+        ),
+      );
+
+      // Dragging right/down would move the pan into positive territory, but the
+      // bounded canvas clamps it back to zero (no blank area can appear).
+      final center = tester.getCenter(find.byType(GraphViewport));
+      await tester.dragFrom(center, const Offset(80, 60));
+      await tester.pump();
+
+      expect(ctrl.panOffset.dx, closeTo(0, 1e-6));
+      expect(ctrl.panOffset.dy, closeTo(0, 1e-6));
     });
 
     testWidgets('enablePan:false suppresses pan gesture', (tester) async {

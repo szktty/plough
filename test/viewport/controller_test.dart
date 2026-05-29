@@ -145,5 +145,51 @@ void main() {
         c.dispose();
       });
     });
+
+    group('screenToScene / sceneToScreen', () {
+      test('identity transform maps a point to itself', () {
+        final c = GraphViewportController();
+        const p = Offset(42, 17);
+        expect(c.screenToScene(p), p);
+        expect(c.sceneToScreen(p), p);
+        c.dispose();
+      });
+
+      test('screenToScene inverts pan + zoom (known value)', () {
+        final c = GraphViewportController();
+        // scale 2, pan (100, 50): screen = scene * 2 + pan.
+        c.zoomAt(2.0, focalPoint: Offset.zero);
+        c.setPanOffset(const Offset(100, 50));
+        // A node at scene (30, 40) draws at screen (160, 130).
+        final screen = c.sceneToScreen(const Offset(30, 40));
+        expect(screen.dx, closeTo(160, 1e-6));
+        expect(screen.dy, closeTo(130, 1e-6));
+        // And the inverse recovers the scene point.
+        final scene = c.screenToScene(screen);
+        expect(scene.dx, closeTo(30, 1e-6));
+        expect(scene.dy, closeTo(40, 1e-6));
+        c.dispose();
+      });
+
+      test('round-trips for arbitrary pan and zoom', () {
+        final c = GraphViewportController();
+        c.zoomAt(1.7, focalPoint: const Offset(200, 150));
+        c.pan(const Offset(-37, 88));
+        const original = Offset(123, -45);
+        final back = c.screenToScene(c.sceneToScreen(original));
+        expect(back.dx, closeTo(original.dx, 1e-6));
+        expect(back.dy, closeTo(original.dy, 1e-6));
+        c.dispose();
+      });
+
+      test('toScene delegates to screenToScene', () {
+        final c = GraphViewportController();
+        c.zoomAt(1.3, focalPoint: const Offset(10, 10));
+        c.pan(const Offset(5, 5));
+        const p = Offset(60, 70);
+        expect(c.toScene(p), c.screenToScene(p));
+        c.dispose();
+      });
+    });
   });
 }

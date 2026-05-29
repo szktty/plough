@@ -73,11 +73,6 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
       if (entity is GraphNode && canDrag(entityId)) {
         // Stop any ongoing animation before starting drag
         (entity as GraphNodeImpl).isAnimating = false;
-        // ignore: avoid_print
-        print('[DragDebug] PanStart: entityId=$entityId '
-            'initialLogical=${entity.logicalPosition} '
-            'localPosition=${details.localPosition} '
-            'globalPosition=${details.globalPosition}');
         setState(
           entityId,
           _DragState(
@@ -85,6 +80,7 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
             initialLogicalPosition: entity.logicalPosition,
           ),
         );
+        gestureManager.onNodeDragStart?.call(entityId);
       } else {
         logWarning(
           LogCategory.drag,
@@ -113,13 +109,6 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
       final newLogicalPosition =
           dragState.initialLogicalPosition + dragState.accumulatedDelta;
       dragState.currentLogicalPosition = newLogicalPosition;
-      // ignore: avoid_print
-      print('[DragDebug] PanUpdate: rawDelta=$rawDelta '
-          'logicalDelta=$logicalDelta '
-          'localPos=${details.localPosition} '
-          'globalPos=${details.globalPosition} '
-          'accumulated=${dragState.accumulatedDelta} '
-          'newLogical=$newLogicalPosition');
       final entity = gestureManager.getEntity(dragState.entityId);
       if (entity is GraphNode) {
         // Stop any ongoing animation during drag
@@ -159,12 +148,18 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
   void handlePointerUp(GraphId entityId, PointerUpEvent event) {
     final state = getState(entityId);
     if (state != null) {
-      // Check if state exists before warning/cancelling
+      // Drag state still exists on PointerUp means the pan recognizer hasn't
+      // fired PanEnd yet (event ordering anomaly).  Treat this as a normal
+      // drag-end so callers can react (e.g. snap-back).  Only call the
+      // callback for node drags (link drags don't currently support it).
+      if (!state.cancelled) {
+        gestureManager.onNodeDragEnd?.call(entityId);
+      }
       logWarning(
         LogCategory.drag,
-        'Drag state still exists on PointerUp for $entityId. Cancelling.',
+        'Drag state still exists on PointerUp for $entityId. Ending drag.',
       );
-      cancel(entityId); // cancel will call removeState
+      cancel(entityId);
     }
   }
 

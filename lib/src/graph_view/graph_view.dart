@@ -1,5 +1,5 @@
 export '../viewport/viewport.dart'
-    show GraphViewport, GraphViewportController;
+    show GraphViewport, GraphViewportCanvasMode, GraphViewportController;
 export 'behavior.dart'
     show
         GraphLinkRouting,

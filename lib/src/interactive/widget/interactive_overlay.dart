@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/interactive/gesture_manager.dart';
+import 'package:plough/src/viewport/controller.dart';
+import 'package:plough/src/viewport/widget/viewport_scope.dart';
 
 /// Overlay widget that handles interactive operations for the graph.
 ///
@@ -40,6 +42,8 @@ class GraphInteractiveOverlay extends StatefulWidget {
     this.onTooltipHide,
     this.dragDeltaTransform,
     this.globalToScene,
+    this.onNodeDragStart,
+    this.onNodeDragEnd,
     super.key,
   });
 
@@ -58,6 +62,8 @@ class GraphInteractiveOverlay extends StatefulWidget {
   final void Function(GraphEntity)? onTooltipHide;
   final Offset Function(Offset delta)? dragDeltaTransform;
   final Offset Function(Offset globalPosition)? globalToScene;
+  final void Function(GraphId nodeId)? onNodeDragStart;
+  final void Function(GraphId nodeId)? onNodeDragEnd;
 
   @override
   State<GraphInteractiveOverlay> createState() =>
@@ -66,6 +72,38 @@ class GraphInteractiveOverlay extends StatefulWidget {
 
 class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
   late final GraphGestureManager _gestureManager;
+
+  /// The enclosing viewport's controller, if any.  When present, the viewport
+  /// owns pointer reception (it sits outside the Transform, free of the box-size
+  /// limit that clips off-screen nodes) and drives our gesture manager via the
+  /// handlers we publish; this overlay then stops receiving pointers itself to
+  /// avoid double handling.  Null when the GraphView is used standalone.
+  GraphViewportController? _viewportController;
+
+  bool get _drivenByViewport => _viewportController != null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = GraphViewportScope.maybeOf(context);
+    if (controller != _viewportController) {
+      _viewportController?.pointerHandlers = null;
+      _viewportController = controller;
+      _viewportController?.pointerHandlers = GraphViewportPointerHandlers(
+        onPointerDown: _handlePointerDown,
+        onPointerUp: _handlePointerUp,
+        onPointerMove: _handlePointerMove,
+        onPointerHover: _handleMouseHover,
+        onPanStart: _handlePanStartConditional,
+        onPanUpdate: _handlePanUpdateConditional,
+        onPanEnd: _handlePanEndConditional,
+        hitTestsEntityAt: _shouldConsumeGestureAt,
+      );
+      // Forwarded events carry viewport-local positions; convert them to scene
+      // space through the controller's inverse transform.
+      _gestureManager.screenToScene = controller?.screenToScene;
+    }
+  }
 
   void _onLayoutChange() {
     // Rebuild spatial index after layout or node movement settles.
@@ -95,6 +133,8 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       onTooltipHide: widget.onTooltipHide,
       dragDeltaTransform: widget.dragDeltaTransform,
       globalToScene: widget.globalToScene,
+      onNodeDragStart: widget.onNodeDragStart,
+      onNodeDragEnd: widget.onNodeDragEnd,
     );
     (widget.graph as GraphImpl)
         .layoutChangeListenable
@@ -102,7 +142,17 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
   }
 
   @override
+  void didUpdateWidget(GraphInteractiveOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _gestureManager.globalToScene = widget.globalToScene;
+    _gestureManager.dragDeltaTransform = widget.dragDeltaTransform;
+    _gestureManager.onNodeDragStart = widget.onNodeDragStart;
+    _gestureManager.onNodeDragEnd = widget.onNodeDragEnd;
+  }
+
+  @override
   void dispose() {
+    _viewportController?.pointerHandlers = null;
     (widget.graph as GraphImpl)
         .layoutChangeListenable
         .removeListener(_onLayoutChange);
@@ -127,6 +177,15 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    // When driven by a viewport, the viewport (outside the Transform) owns all
+    // pointer and pan reception and calls our handlers via
+    // controller.pointerHandlers.  We attach nothing here — our own
+    // Listener/RawGestureDetector would be clipped to the initial viewport box
+    // and could not reach off-screen nodes.
+    if (_drivenByViewport) {
+      return const SizedBox.expand();
+    }
+
     // In transparent mode, allow all interactions but with translucent behavior
     if (widget.gestureMode == GraphGestureMode.transparent) {
       return MouseRegion(
@@ -152,9 +211,13 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         onPointerUp: _handlePointerUp,
         onPointerDown: _handlePointerDown,
         onPointerMove: _handlePointerMove,
+        // translucent: receive pointer events across the full overlay area
+        // while still allowing events to reach widgets below when not consumed.
+        behavior: HitTestBehavior.translucent,
         child: RawGestureDetector(
           gestures: _buildGestureRecognizers(),
-          child: const SizedBox(child: ColoredBox(color: Colors.transparent)),
+          behavior: HitTestBehavior.translucent,
+          child: const SizedBox.expand(),
         ),
       ),
     );

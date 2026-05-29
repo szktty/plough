@@ -5,6 +5,12 @@
 - [ADD] `GraphViewportController`: `ValueNotifier<Matrix4>`-based controller with `pan()`, `zoomAt()`, `reset()`, and `animateTo()` for programmatic viewport control.
 - [ADD] `minScale` / `maxScale` parameters on both `GraphViewport` and `GraphViewportController` to clamp the zoom range.
 - [ADD] `enablePan` / `enableZoom` flags on `GraphViewport` to selectively disable gesture types.
+- [ADD] `GraphViewportCanvasMode` (`bounded` / `infinite`) on `GraphViewport` and `GraphView`. In `bounded` the canvas stays the initial viewport size and pan is clamped; in `infinite` nodes can be placed and dragged anywhere and the scene pans freely.
+- [ADD] `GraphViewportController.setScale()` to change zoom while preserving the current pan offset.
+- [FIX] Hit-testing now works correctly at any pan/zoom level: pointer reception was moved outside the viewport's `Transform`, so nodes panned outside the initial viewport rectangle (in `infinite` mode) remain tappable and draggable.
+- [FIX] Dragging a node through a `GraphViewport` now moves the node instead of doing nothing, and no longer overshoots the pointer on the frame the drag starts.
+- [FIX] Panning the viewport with a background drag no longer clears the current selection; only a background tap deselects.
+- [FIX] Resolved a `setState() called during build` exception that could be thrown when another widget (e.g. a `GraphViewport` or an overlay) listened to the same graph while a layout ran; the layout-finished notification is now dispatched after the frame.
 - [IMPROVE] Example app updated to use `GraphViewport` with `GraphGestureMode.nodeEdgeOnly`, plus a "Reset View" toolbar button.
 
 ## 0.8.0

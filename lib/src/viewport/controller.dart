@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 /// Controls pan and zoom for a GraphViewport.
@@ -41,30 +42,47 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
 
   AnimationController? _animationController;
 
+  /// Pointer handlers published by the hosted [GraphView] so that the
+  /// [GraphViewport] can drive hit-testing from *outside* its [Transform].
+  ///
+  /// The viewport receives pointers in viewport-local (screen) space — which is
+  /// unaffected by the box-size limits that would otherwise clip pointers to
+  /// the initial viewport rectangle — and forwards the raw events here.  The
+  /// GraphView's gesture manager converts each event's global position to scene
+  /// space via [screenToScene], so nodes panned far outside the initial
+  /// viewport stay interactive.
+  ///
+  /// Null when no [GraphView] has attached (e.g. before first build, or when the
+  /// viewport is used with a non-GraphView child).
+  GraphViewportPointerHandlers? pointerHandlers;
+
   /// The current zoom scale.
   double get scale => value.getMaxScaleOnAxis();
 
   /// The current pan offset in screen pixels.
   Offset get panOffset => Offset(value[12], value[13]);
 
+  /// The inverse of the current transform matrix (scene ← screen).
+  ///
+  /// This is the single source of truth for screen→scene conversion so that
+  /// rendering and hit-testing cannot drift apart.
+  Matrix4 get inverse => Matrix4.inverted(value);
+
+  /// Converts a screen (viewport-local) position to scene (logical)
+  /// coordinates by applying the inverse transform.
+  Offset screenToScene(Offset screenPosition) =>
+      MatrixUtils.transformPoint(inverse, screenPosition);
+
+  /// Converts a scene (logical) position to screen (viewport-local)
+  /// coordinates by applying the forward transform.
+  Offset sceneToScreen(Offset scenePosition) =>
+      MatrixUtils.transformPoint(value, scenePosition);
+
   /// Converts a global screen position to scene (logical) coordinates.
   ///
-  /// Pass this as [GraphView.globalToScene] so that node geometry calculations
-  /// remain correct after pan/zoom:
-  /// ```dart
-  /// GraphView(
-  ///   globalToScene: _viewportController.toScene,
-  ///   ...
-  /// )
-  /// ```
-  Offset toScene(Offset globalPosition) {
-    final s = scale;
-    final pan = panOffset;
-    return Offset(
-      (globalPosition.dx - pan.dx) / s,
-      (globalPosition.dy - pan.dy) / s,
-    );
-  }
+  /// Retained as the public name used by `GraphView.globalToScene`; delegates
+  /// to [screenToScene].
+  Offset toScene(Offset globalPosition) => screenToScene(globalPosition);
 
   /// Resets pan and zoom to the identity transform.
   void reset() {
@@ -79,6 +97,12 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
     m[12] += delta.dx;
     m[13] += delta.dy;
     value = m;
+  }
+
+  /// Sets the pan offset to an absolute position in screen pixels.
+  void setPanOffset(Offset offset) {
+    _cancelAnimation();
+    value = _composeMatrix(scale, offset);
   }
 
   /// Sets the zoom scale to an absolute value, preserving the current pan offset.
@@ -143,8 +167,10 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
       // Keep the current pan, just potentially update scale.
       final currentPan = panOffset;
       endPan = Offset(
-        viewSize.width / 2 - (viewSize.width / 2 - currentPan.dx) * (endScale / scale),
-        viewSize.height / 2 - (viewSize.height / 2 - currentPan.dy) * (endScale / scale),
+        viewSize.width / 2 -
+            (viewSize.width / 2 - currentPan.dx) * (endScale / scale),
+        viewSize.height / 2 -
+            (viewSize.height / 2 - currentPan.dy) * (endScale / scale),
       );
     }
     final endMatrix = _composeMatrix(endScale, endPan);
@@ -200,4 +226,37 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
     }
     return result;
   }
+}
+
+/// Raw pointer handlers a [GraphView] publishes to its [GraphViewportController]
+/// so the enclosing [GraphViewport] can drive hit-testing from outside its
+/// [Transform].  Events carry global positions, which the GraphView's gesture
+/// manager converts to scene space.
+class GraphViewportPointerHandlers {
+  const GraphViewportPointerHandlers({
+    required this.onPointerDown,
+    required this.onPointerUp,
+    required this.onPointerMove,
+    required this.onPointerHover,
+    required this.onPanStart,
+    required this.onPanUpdate,
+    required this.onPanEnd,
+    required this.hitTestsEntityAt,
+  });
+
+  final void Function(PointerDownEvent) onPointerDown;
+  final void Function(PointerUpEvent) onPointerUp;
+  final void Function(PointerMoveEvent) onPointerMove;
+  final void Function(PointerHoverEvent) onPointerHover;
+
+  /// Pan gestures over a node/link become entity drags; over empty space they
+  /// fall through to viewport panning.  The viewport calls [hitTestsEntityAt]
+  /// (viewport-local position) to decide which, then forwards pan callbacks
+  /// here only when an entity is hit.
+  final void Function(DragStartDetails) onPanStart;
+  final void Function(DragUpdateDetails) onPanUpdate;
+  final void Function(DragEndDetails) onPanEnd;
+
+  /// Whether an entity (node or link) is under the given viewport-local point.
+  final bool Function(Offset localPosition) hitTestsEntityAt;
 }

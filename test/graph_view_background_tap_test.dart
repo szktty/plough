@@ -121,4 +121,72 @@ void main() {
     await flushTimers(tester);
     expect(bgTap, 1);
   });
+
+  testWidgets(
+    'background tap deselects, but background drag keeps the selection',
+    (tester) async {
+      final graph = Graph();
+      final a = GraphNode(properties: {'label': 'A'});
+      graph.addNode(a);
+
+      final layout = GraphManualLayoutStrategy(
+        nodePositions: [
+          GraphNodeLayoutPosition(id: a.id, position: const Offset(90, 110)),
+        ],
+        origin: GraphLayoutPositionOrigin.topLeft,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 400,
+                height: 240,
+                child: GraphView(
+                  graph: graph,
+                  behavior: const _FixedNodeSizeBehavior(),
+                  layoutStrategy: layout,
+                  animationEnabled: false,
+                  gestureMode: GraphGestureMode.exclusive,
+                  allowSelection: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final viewTopLeft = tester.getTopLeft(find.byType(GraphView));
+
+      // Select the node (60x60 at scene topLeft (90,110) → center (120,140)).
+      await tester.tapAt(viewTopLeft + const Offset(120, 140));
+      await tester.pump();
+      await flushTimers(tester);
+      expect(graph.selectedEntityIds, contains(a.id));
+
+      // A background *drag* must NOT deselect.
+      await tester.dragFrom(
+        viewTopLeft + const Offset(10, 10),
+        const Offset(120, 60),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        graph.selectedEntityIds,
+        contains(a.id),
+        reason: 'A background drag (pan) must not clear the selection',
+      );
+
+      // A background *tap* must deselect.
+      await tester.tapAt(viewTopLeft + const Offset(10, 10));
+      await tester.pump();
+      await flushTimers(tester);
+      expect(
+        graph.selectedEntityIds,
+        isNot(contains(a.id)),
+        reason: 'A background tap must clear the selection',
+      );
+    },
+  );
 }

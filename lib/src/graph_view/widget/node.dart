@@ -9,6 +9,7 @@ import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/tooltip/widget/container.dart';
 import 'package:plough/src/utils/widget.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
+import 'package:plough/src/viewport/widget/viewport_scope.dart';
 
 /// A widget that renders a node in the graph.
 ///
@@ -193,19 +194,22 @@ class GraphNodeViewState extends State<GraphNodeView>
 
   GraphNodeViewBehavior get behavior => widget.behavior;
 
+  double get _sceneScale =>
+      GraphViewportScope.maybeOf(context)?.scale ?? 1.0;
+
   void _updateGeometry() {
     WidgetUtils.withSizedRenderBoxIfPresent(_key, (renderBox) {
-      if (_graph?.geometry == null) return;
-
-      final globalTopLeft = renderBox.localToGlobal(Offset.zero);
-      final position = globalTopLeft - _graph!.geometry!.position;
-
+      // Logical-space bounds: position from the node's logical position (the
+      // same value used to lay it out), size from the rendered box divided by
+      // scale to undo viewport zoom.  Invariant under pan/zoom.
+      final scale = _sceneScale;
+      final pos = _node.logicalPosition;
       _node.geometry = GraphNodeViewGeometry(
         bounds: Rect.fromLTWH(
-          position.dx,
-          position.dy,
-          renderBox.size.width,
-          renderBox.size.height,
+          pos.dx,
+          pos.dy,
+          renderBox.size.width / scale,
+          renderBox.size.height / scale,
         ),
       );
     });
