@@ -109,52 +109,53 @@ class _InfiniteScenePageState extends State<InfiniteScenePage>
 
   Widget _buildSceneStackContent() {
     return Stack(
-        children: [
-          Positioned.fill(
-            child: Listener(
-              onPointerHover: (e) => _pointerScreen.value = e.localPosition,
-              onPointerMove: (e) => _pointerScreen.value = e.localPosition,
-              child: GraphViewport(
-                controller: _controller,
+      children: [
+        Positioned.fill(
+          child: Listener(
+            onPointerHover: (e) => _pointerScreen.value = e.localPosition,
+            onPointerMove: (e) => _pointerScreen.value = e.localPosition,
+            child: GraphViewport(
+              controller: _controller,
+              canvasMode: GraphViewportCanvasMode.infinite,
+              minScale: 0.2,
+              maxScale: 4.0,
+              child: GraphView(
+                graph: _graph,
+                layoutStrategy: _layoutStrategy,
                 canvasMode: GraphViewportCanvasMode.infinite,
-                minScale: 0.2,
-                maxScale: 4.0,
-                child: GraphView(
+                behavior: _InfiniteSceneBehavior(
                   graph: _graph,
-                  layoutStrategy: _layoutStrategy,
-                  canvasMode: GraphViewportCanvasMode.infinite,
-                  behavior: _InfiniteSceneBehavior(
-                    graph: _graph,
-                    onAction: (msg) => _lastAction.value = msg,
-                    onTapScene: (scene) => _lastTapScene.value = scene,
-                    idStr: _idStr,
-                  ),
-                  allowSelection: true,
-                  gestureMode: GraphGestureMode.nodeEdgeOnly,
+                  onAction: (msg) => _lastAction.value = msg,
+                  onTapScene: (scene) => _lastTapScene.value = scene,
+                  idStr: _idStr,
                 ),
+                allowSelection: true,
+                gestureMode: GraphGestureMode.nodeEdgeOnly,
               ),
             ),
           ),
-          Positioned(
-            left: 8,
-            top: 8,
-            child: IgnorePointer(child: _DebugOverlay(
-              controller: _controller,
-              graph: _graph,
-              lastAction: _lastAction,
-              pointerScreen: _pointerScreen,
-              lastTapScene: _lastTapScene,
-              viewportSize: () => _viewportSize,
-              idStr: _idStr,
-            )),
-          ),
-          const Positioned(
-            left: 8,
-            right: 8,
-            bottom: 8,
-            child: IgnorePointer(child: _GuideText()),
-          ),
-        ],
+        ),
+        Positioned(
+          left: 8,
+          top: 8,
+          child: IgnorePointer(
+              child: _DebugOverlay(
+            controller: _controller,
+            graph: _graph,
+            lastAction: _lastAction,
+            pointerScreen: _pointerScreen,
+            lastTapScene: _lastTapScene,
+            viewportSize: () => _viewportSize,
+            idStr: _idStr,
+          )),
+        ),
+        const Positioned(
+          left: 8,
+          right: 8,
+          bottom: 8,
+          child: IgnorePointer(child: _GuideText()),
+        ),
+      ],
     );
   }
 }
@@ -216,7 +217,8 @@ class _DebugOverlay extends StatelessWidget {
   final Size Function() viewportSize;
   final String Function(GraphId) idStr;
 
-  String _fmt(Offset o) => '(${o.dx.toStringAsFixed(1)}, ${o.dy.toStringAsFixed(1)})';
+  String _fmt(Offset o) =>
+      '(${o.dx.toStringAsFixed(1)}, ${o.dy.toStringAsFixed(1)})';
   String _fmtRect(Rect r) =>
       'LTRB(${r.left.toStringAsFixed(0)},${r.top.toStringAsFixed(0)},'
       '${r.right.toStringAsFixed(0)},${r.bottom.toStringAsFixed(0)})';

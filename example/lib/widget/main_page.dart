@@ -32,9 +32,8 @@ class _MainPageState extends State<MainPage> {
   void _zoomBy(double factor) {
     final box = _graphAreaKey.currentContext?.findRenderObject() as RenderBox?;
     final size = box?.size;
-    final focalPoint = size == null
-        ? Offset.zero
-        : Offset(size.width / 2, size.height / 2);
+    final focalPoint =
+        size == null ? Offset.zero : Offset(size.width / 2, size.height / 2);
     _viewportController.zoomAt(factor, focalPoint: focalPoint);
   }
 

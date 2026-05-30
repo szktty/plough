@@ -8,8 +8,8 @@ class _Box extends StatelessWidget {
   const _Box();
 
   @override
-  Widget build(BuildContext context) =>
-      const ColoredBox(color: Colors.blue, child: SizedBox(width: 400, height: 400));
+  Widget build(BuildContext context) => const ColoredBox(
+      color: Colors.blue, child: SizedBox(width: 400, height: 400));
 }
 
 Widget _wrap(Widget child) => MaterialApp(
@@ -63,7 +63,8 @@ void main() {
       expect(transform.transform[13], closeTo(30, 1e-6));
     });
 
-    testWidgets('programmatic zoomAt() updates Transform scale', (tester) async {
+    testWidgets('programmatic zoomAt() updates Transform scale',
+        (tester) async {
       final ctrl = GraphViewportController();
       addTearDown(ctrl.dispose);
 

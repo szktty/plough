@@ -92,7 +92,8 @@ void main() {
       expect(
         graph.selectedEntityIds,
         contains(node.id),
-        reason: 'A panned-in node outside the initial viewport must be tappable',
+        reason:
+            'A panned-in node outside the initial viewport must be tappable',
       );
     },
   );
