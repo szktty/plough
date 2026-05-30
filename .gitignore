@@ -39,7 +39,9 @@ example/ios/Podfile.lock
 doc/documentation_progress_status.xml
 
 # IDE and editor configurations
-.claude/
+.claude/*
+# Share project-wide Claude Code settings (hooks, etc.); keep personal/local out.
+!.claude/settings.json
 .cursor/
 
 # Development temporary files

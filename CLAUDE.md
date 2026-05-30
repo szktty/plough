@@ -101,4 +101,6 @@ See `doc/testing_guide.md` for the comprehensive 4-layer testing strategy.
 
 - Branch from `main` for features
 - Conventional commit style: `feat:`, `fix:`, `chore:`, etc.
+- Before committing, **always** run `dart format .` (or `make format`) and verify
+  `dart format --set-exit-if-changed .` exits 0 — CI fails on any unformatted file
 - Run `flutter analyze` and `flutter test` before committing
