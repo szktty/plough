@@ -9,7 +9,6 @@ import 'package:plough/src/graph_view/inherited_data.dart';
 import 'package:plough/src/tooltip/widget/container.dart';
 import 'package:plough/src/utils/widget.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
-import 'package:plough/src/viewport/widget/viewport_scope.dart';
 
 /// A widget that renders a node in the graph.
 ///
@@ -194,22 +193,22 @@ class GraphNodeViewState extends State<GraphNodeView>
 
   GraphNodeViewBehavior get behavior => widget.behavior;
 
-  double get _sceneScale =>
-      GraphViewportScope.maybeOf(context)?.scale ?? 1.0;
-
   void _updateGeometry() {
     WidgetUtils.withSizedRenderBoxIfPresent(_key, (renderBox) {
       // Logical-space bounds: position from the node's logical position (the
-      // same value used to lay it out), size from the rendered box divided by
-      // scale to undo viewport zoom.  Invariant under pan/zoom.
-      final scale = _sceneScale;
+      // same value used to lay it out), size from the rendered box.  The node
+      // lives inside the viewport's Transform, but a Transform only scales at
+      // paint time — it does not affect the child's layout, so renderBox.size
+      // is already in logical (scene) units and must NOT be divided by scale.
+      // Dividing by scale shrank the bounds when zoomed, which broke hit-test
+      // hit areas and pulled link endpoints toward node centers.
       final pos = _node.logicalPosition;
       _node.geometry = GraphNodeViewGeometry(
         bounds: Rect.fromLTWH(
           pos.dx,
           pos.dy,
-          renderBox.size.width / scale,
-          renderBox.size.height / scale,
+          renderBox.size.width,
+          renderBox.size.height,
         ),
       );
     });

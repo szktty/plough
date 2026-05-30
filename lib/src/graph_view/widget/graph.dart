@@ -16,7 +16,6 @@ import 'package:plough/src/interactive/widget/interactive_overlay.dart';
 import 'package:plough/src/layout_strategy/base.dart';
 import 'package:plough/src/viewport/widget/viewport.dart'
     show GraphViewportCanvasMode;
-import 'package:plough/src/viewport/widget/viewport_scope.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget.dart';
 
@@ -365,32 +364,27 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
     });
   }
 
-  /// The current viewport scale, read from the enclosing [GraphViewport].
-  ///
-  /// Used to convert a node's rendered (screen-px) size back to logical scene
-  /// units.  When the [GraphView] is used without a [GraphViewport] this is 1.
-  double get _sceneScale {
-    final context = _layoutKey.currentContext;
-    if (context == null) return 1.0;
-    return GraphViewportScope.maybeOf(context)?.scale ?? 1.0;
-  }
-
   void _updateNodeGeometry() {
-    final scale = _sceneScale;
     for (final node in _graph.nodes.cast<GraphNodeImpl>()) {
       final key = _nodeKeys[node.id];
       WidgetUtils.withSizedRenderBoxIfPresent(key, (renderBox) {
         // Bounds live in logical (scene) space: position comes straight from
         // the node's logical position (the same value used to lay it out), and
-        // the rendered size is divided by scale to undo the viewport zoom.
-        // This makes bounds invariant under pan/zoom so hit-testing — which
-        // compares against logical hit positions — stays correct at any scale.
+        // the rendered size is used as-is.  Nodes are laid out inside the
+        // viewport's Transform, which only scales at paint time — it does not
+        // affect layout — so renderBox.size is already in logical units and
+        // must NOT be divided by scale.  Dividing shrank the bounds while
+        // zoomed, which made links briefly jump on drag start (this geometry
+        // path runs in refreshAllNodeGeometry) and pulled link endpoints into
+        // the node.  Keeping it raw makes bounds invariant under pan/zoom so
+        // hit-testing — which compares against logical hit positions — stays
+        // correct at any scale.
         final pos = node.logicalPosition;
         final bounds = Rect.fromLTWH(
           pos.dx,
           pos.dy,
-          renderBox.size.width / scale,
-          renderBox.size.height / scale,
+          renderBox.size.width,
+          renderBox.size.height,
         );
         final newGeometry = GraphNodeViewGeometry(bounds: bounds);
         if (node.geometry == null || node.geometry!.bounds != bounds) {
@@ -398,7 +392,7 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
           logDebug(LogCategory.rendering, 'GraphView: update node geometry');
           logDebug(LogCategory.rendering, '    node: ${node.id}');
           logDebug(LogCategory.rendering, '    logicalPos: $pos');
-          logDebug(LogCategory.rendering, '    size/scale: ${renderBox.size} / $scale');
+          logDebug(LogCategory.rendering, '    size: ${renderBox.size}');
         }
       });
     }

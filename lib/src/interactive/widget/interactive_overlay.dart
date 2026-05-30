@@ -80,6 +80,15 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
   /// avoid double handling.  Null when the GraphView is used standalone.
   GraphViewportController? _viewportController;
 
+  /// The pointer handlers this overlay published to [_viewportController].
+  ///
+  /// Kept so that [dispose] only clears the controller's handlers when they are
+  /// still ours.  When the graph is swapped (e.g. reload), the new overlay's
+  /// [didChangeDependencies] installs its handlers *before* the old overlay's
+  /// [dispose] runs; without this guard the old dispose would null out the new
+  /// overlay's handlers, making every gesture fall through to the background.
+  GraphViewportPointerHandlers? _publishedHandlers;
+
   bool get _drivenByViewport => _viewportController != null;
 
   @override
@@ -87,9 +96,13 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     super.didChangeDependencies();
     final controller = GraphViewportScope.maybeOf(context);
     if (controller != _viewportController) {
-      _viewportController?.pointerHandlers = null;
+      // Only retract handlers we own; the controller may already hold a newer
+      // overlay's handlers when graphs are swapped.
+      if (identical(_viewportController?.pointerHandlers, _publishedHandlers)) {
+        _viewportController?.pointerHandlers = null;
+      }
       _viewportController = controller;
-      _viewportController?.pointerHandlers = GraphViewportPointerHandlers(
+      _publishedHandlers = GraphViewportPointerHandlers(
         onPointerDown: _handlePointerDown,
         onPointerUp: _handlePointerUp,
         onPointerMove: _handlePointerMove,
@@ -99,10 +112,30 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         onPanEnd: _handlePanEndConditional,
         hitTestsEntityAt: _shouldConsumeGestureAt,
       );
+      _viewportController?.pointerHandlers = _publishedHandlers;
       // Forwarded events carry viewport-local positions; convert them to scene
       // space through the controller's inverse transform.
       _gestureManager.screenToScene = controller?.screenToScene;
+      _applyViewportDragDeltaTransform();
     }
+  }
+
+  /// Installs a drag-delta transform that converts screen-space drag deltas to
+  /// scene space while the GraphView is hosted in a [GraphViewport].
+  ///
+  /// Pan deltas forwarded from the viewport are in screen pixels; at scale `s`
+  /// a screen delta corresponds to `delta / s` in scene units.  Only the scale
+  /// applies (no translation) because a delta is a vector, not a point.  A
+  /// user-supplied [GraphView.dragDeltaTransform] takes precedence; outside a
+  /// viewport the transform is whatever the widget provides (possibly null).
+  void _applyViewportDragDeltaTransform() {
+    if (widget.dragDeltaTransform != null) {
+      _gestureManager.dragDeltaTransform = widget.dragDeltaTransform;
+      return;
+    }
+    final controller = _viewportController;
+    _gestureManager.dragDeltaTransform =
+        controller == null ? null : (delta) => delta / controller.scale;
   }
 
   void _onLayoutChange() {
@@ -145,14 +178,18 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
   void didUpdateWidget(GraphInteractiveOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     _gestureManager.globalToScene = widget.globalToScene;
-    _gestureManager.dragDeltaTransform = widget.dragDeltaTransform;
+    _applyViewportDragDeltaTransform();
     _gestureManager.onNodeDragStart = widget.onNodeDragStart;
     _gestureManager.onNodeDragEnd = widget.onNodeDragEnd;
   }
 
   @override
   void dispose() {
-    _viewportController?.pointerHandlers = null;
+    // Only clear the controller's handlers if they are still ours.  On a graph
+    // swap the replacement overlay has already published its own handlers.
+    if (identical(_viewportController?.pointerHandlers, _publishedHandlers)) {
+      _viewportController?.pointerHandlers = null;
+    }
     (widget.graph as GraphImpl)
         .layoutChangeListenable
         .removeListener(_onLayoutChange);
