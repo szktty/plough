@@ -378,12 +378,37 @@ class _ViewportClip extends SingleChildRenderObjectWidget {
 }
 
 class _RenderViewportClip extends RenderProxyBox {
+  final LayerHandle<ClipRectLayer> _clipLayer = LayerHandle<ClipRectLayer>();
+
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.canvas.save();
-    context.canvas.clipRect(offset & size);
-    super.paint(context, offset);
-    context.canvas.restore();
+    if (child == null) {
+      _clipLayer.layer = null;
+      return;
+    }
+    // Use a layer-based clip (pushClipRect) rather than canvas.clipRect.
+    // The child subtree contains a Transform (and may push its own
+    // compositing layers); a raw canvas.clipRect on this context's canvas is
+    // not guaranteed to propagate into those child layers, so panned/scaled
+    // nodes could paint outside the viewport. pushClipRect installs a real
+    // ClipRectLayer that clips all descendant layers.
+    // The clipRect is in the child's local coordinate space; pushClipRect
+    // shifts it by `offset` internally, so it must NOT already include offset
+    // (passing `offset & size` would double-apply it and shrink the clip by
+    // the render object's offset).
+    _clipLayer.layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      super.paint,
+      oldLayer: _clipLayer.layer,
+    );
+  }
+
+  @override
+  void dispose() {
+    _clipLayer.layer = null;
+    super.dispose();
   }
 
   // Do NOT override hitTest — default RenderProxyBox passes through to
