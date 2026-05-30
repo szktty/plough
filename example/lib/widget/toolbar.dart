@@ -5,9 +5,16 @@ import 'package:provider/provider.dart';
 
 // lib/widget/toolbar.dart
 class MainPageToolbar extends StatelessWidget {
-  const MainPageToolbar({required this.viewportController, super.key});
+  const MainPageToolbar({
+    required this.viewportController,
+    required this.onZoomIn,
+    required this.onZoomOut,
+    super.key,
+  });
 
   final GraphViewportController viewportController;
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +63,16 @@ class MainPageToolbar extends StatelessWidget {
                     onPressed: state.clearAllSelections,
                     icon: const Icon(Icons.deselect),
                     tooltip: 'Clear Selection',
+                  ),
+                  IconButton(
+                    onPressed: onZoomOut,
+                    icon: const Icon(Icons.zoom_out),
+                    tooltip: 'Zoom Out',
+                  ),
+                  IconButton(
+                    onPressed: onZoomIn,
+                    icon: const Icon(Icons.zoom_in),
+                    tooltip: 'Zoom In',
                   ),
                   IconButton(
                     onPressed: viewportController.reset,

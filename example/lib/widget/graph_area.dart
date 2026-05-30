@@ -8,9 +8,16 @@ import 'package:provider/provider.dart';
 
 // lib/widget/graph_area.dart
 class GraphArea extends StatelessWidget {
-  const GraphArea({required this.viewportController, super.key});
+  const GraphArea({
+    required this.viewportController,
+    this.minScale = 0.25,
+    this.maxScale = 4.0,
+    super.key,
+  });
 
   final GraphViewportController viewportController;
+  final double minScale;
+  final double maxScale;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +25,11 @@ class GraphArea extends StatelessWidget {
       builder: (context, state, child) {
         return GraphViewport(
           controller: viewportController,
+          minScale: minScale,
+          maxScale: maxScale,
+          // Allow zooming/panning out beyond the initial viewport so that
+          // zoomed-out content (and nodes dragged outside) stays reachable.
+          canvasMode: GraphViewportCanvasMode.infinite,
           child: GraphView(
             graph: state.selectedData.graph,
             layoutStrategy: state.selectedData.layoutStrategy,
