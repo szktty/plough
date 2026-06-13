@@ -217,8 +217,6 @@ class GraphImpl
   @override
   late final ValueNotifier<GraphData> state;
 
-  final Map<GraphId, List<GraphLinkData>> _nodeDependencies = {};
-
   /// Adjacency index: node id → links where this node is the target.
   final Map<GraphId, List<GraphLink>> _incomingIndex = {};
 
@@ -302,19 +300,28 @@ class GraphImpl
     if (!state.value.nodes.containsKey(id)) {
       throw ArgumentError('node not found: $id');
     }
-    // Remove all links connected to this node from the adjacency index.
-    final affectedLinks = [
-      ...(_incomingIndex[id] ?? []),
-      ...(_outgoingIndex[id] ?? []),
-    ];
+    // Remove all links connected to this node, both from the adjacency index
+    // and from the links map. A link may appear in both indexes (self loop) so
+    // collect a unique set first.
+    final affectedLinks = {
+      ...(_incomingIndex[id] ?? const <GraphLink>[]),
+      ...(_outgoingIndex[id] ?? const <GraphLink>[]),
+    };
     for (final link in affectedLinks) {
       _incomingIndex[link.target.id]?.remove(link);
       _outgoingIndex[link.source.id]?.remove(link);
     }
     _incomingIndex.remove(id);
     _outgoingIndex.remove(id);
-    _nodeDependencies.remove(id);
-    state.value = state.value.copyWith(nodes: state.value.nodes.remove(id));
+
+    var links = state.value.links;
+    for (final link in affectedLinks) {
+      links = links.remove(link.id);
+    }
+    state.value = state.value.copyWith(
+      nodes: state.value.nodes.remove(id),
+      links: links,
+    );
     _notifyLayoutChange();
   }
 
@@ -367,10 +374,8 @@ class GraphImpl
     final link = state.value.links[id]!;
     _incomingIndex[link.target.id]?.remove(link);
     _outgoingIndex[link.source.id]?.remove(link);
-    _nodeDependencies.removeWhere(
-      (key, value) => state.value.links.containsKey(key),
-    );
     state.value = state.value.copyWith(links: state.value.links.remove(id));
+    _notifyLayoutChange();
   }
 
   @override

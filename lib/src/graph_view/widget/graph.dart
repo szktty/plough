@@ -225,9 +225,13 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
 
   final Map<GraphId, GlobalKey> _nodeKeys = {};
   final Map<GraphId, Widget> _nodeViews = {};
-
-  // TODO(user): Not used
   final Map<GraphId, GlobalKey> _linkKeys = {};
+
+  /// Number of cached node/link entries. Exposed for tests that verify removed
+  /// entities are pruned from the caches (see [_pruneRemovedEntityCaches]).
+  @visibleForTesting
+  int get debugCachedEntityCount =>
+      _nodeKeys.length + _nodeViews.length + _linkKeys.length;
 
   GraphId? _entityIdShowingTooltip;
 
@@ -602,6 +606,8 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
           elements = _sortedElements!;
         }
 
+        _pruneRemovedEntityCaches();
+
         final graphContent = _buildCommonProviders(
           context,
           constrains: constraints,
@@ -730,6 +736,19 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
       showTooltip: _entityIdShowingTooltip == node.id,
       buildState: _buildState,
     );
+  }
+
+  /// Drops cached views/keys for nodes and links that no longer exist in the
+  /// graph. Without this, `_nodeKeys`/`_linkKeys` (and stale `_nodeViews`
+  /// entries) grow monotonically as entities are removed, leaking GlobalKeys
+  /// and widgets for the lifetime of the GraphView.
+  void _pruneRemovedEntityCaches() {
+    final liveNodeIds = _graph.nodes.map((n) => n.id).toSet();
+    final liveLinkIds = _graph.links.map((l) => l.id).toSet();
+
+    _nodeKeys.removeWhere((id, _) => !liveNodeIds.contains(id));
+    _nodeViews.removeWhere((id, _) => !liveNodeIds.contains(id));
+    _linkKeys.removeWhere((id, _) => !liveLinkIds.contains(id));
   }
 
   Widget _buildLinkView(BuildContext context, GraphLinkImpl link) {
