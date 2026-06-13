@@ -383,6 +383,11 @@
   呼び(`graph.dart:559`)による sort キャッシュ無効化、空間グリッドのリンク非対応。
 - 方針: 単独では費用対効果が低く回帰リスクが高いため、**D1 に統合**して設計する。
 - 依存: D1。
+- **申し送り(removal レビュー [R1])**: F1 の `_pruneRemovedEntityCaches()` が正しく動く
+  前提は「`_markSortDirty()` 毎回呼びで `elements` が毎ビルド再構築される」こと。sort
+  キャッシュ無効化を直す際は、**prune の供給源(`_graph.nodes/links`)と `elements` の
+  供給源を一致**させ、できれば両者を削除イベント駆動へ寄せる。供給源がズレると prune は
+  最新 graph・`elements` は古いキャッシュ、という乖離が起きうる。
 
 ---
 

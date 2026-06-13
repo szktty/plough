@@ -78,6 +78,28 @@ void main() {
         expect(graph.links.length, 1);
         expect(graph.getLink(bc.id), isNotNull);
       });
+
+      // A self loop (source == target) appears in both the incoming and the
+      // outgoing index, so removeNode collects affected links into a unique
+      // set. Guards against a regression where the set is turned back into a
+      // list (double-remove) or the links map cleanup is skipped.
+      test('removing a node with a self-loop drops the loop link', () {
+        final graph = Graph();
+        final a = GraphNode(properties: {'label': 'a'});
+        graph.addNode(a);
+        final aa = _link(a, a);
+        graph.addLink(aa);
+
+        expect(graph.links.length, 1);
+        expect(graph.getIncomingLinks(a.id).length, 1);
+        expect(graph.getOutgoingLinks(a.id).length, 1);
+
+        graph.removeNode(a.id);
+
+        expect(graph.nodes, isEmpty);
+        expect(graph.links, isEmpty);
+        expect(graph.getLink(aa.id), isNull);
+      });
     });
 
     // A8: removeLink must notify layout listeners, mirroring addLink.
