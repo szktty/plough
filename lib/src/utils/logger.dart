@@ -53,6 +53,18 @@ class PloughLogger {
     return _loggers[category] ?? _createLogger(Level.off, category);
   }
 
+  /// Whether logging is enabled for [category].
+  ///
+  /// Used to skip building log messages (string interpolation, map literals,
+  /// `DateTime.now()` etc.) on hot paths when the category is disabled.
+  /// Mirrors the level the underlying [Logger] was created with; `configure`
+  /// has not run yet means everything defaults to [Level.off].
+  bool enabled(LogCategory category) {
+    final level = _levels[category];
+    if (level == null) return false;
+    return level != Level.off;
+  }
+
   /// Quick logging methods
   void d(LogCategory category, String message) {
     getLogger(category).d(message);
@@ -80,6 +92,10 @@ class PloughLogger {
     String level,
     String message,
   ) {
+    // Guard before calling sendLog so the disabled case pays nothing; sendLog
+    // also re-checks internally, but the metadata/log-entry map would otherwise
+    // be built on every call regardless.
+    if (!externalDebugClient.enabled) return;
     try {
       externalDebugClient.sendLog(
         category: category,
@@ -96,18 +112,42 @@ class PloughLogger {
 final PloughLogger _logger = PloughLogger();
 
 /// Internal logging functions - not part of public API
+///
+/// [message] accepts either a [String] (evaluated eagerly by the caller) or a
+/// `String Function()` closure. Passing a closure defers message construction
+/// until the category is known to be enabled, so hot paths can avoid string
+/// interpolation when logging is off; for a disabled category the closure is
+/// never invoked. Returns `null` when nothing should be logged.
+String? _resolve(LogCategory category, Object message) {
+  if (message is String Function()) {
+    return _logger.enabled(category) ? message() : null;
+  }
+  return message as String;
+}
+
 @internal
-void logDebug(LogCategory category, String message) =>
-    _logger.d(category, message);
+void logDebug(LogCategory category, Object message) {
+  final resolved = _resolve(category, message);
+  if (resolved != null) _logger.d(category, resolved);
+}
+
 @internal
-void logInfo(LogCategory category, String message) =>
-    _logger.i(category, message);
+void logInfo(LogCategory category, Object message) {
+  final resolved = _resolve(category, message);
+  if (resolved != null) _logger.i(category, resolved);
+}
+
 @internal
-void logWarning(LogCategory category, String message) =>
-    _logger.w(category, message);
+void logWarning(LogCategory category, Object message) {
+  final resolved = _resolve(category, message);
+  if (resolved != null) _logger.w(category, resolved);
+}
+
 @internal
-void logError(LogCategory category, String message) =>
-    _logger.e(category, message);
+void logError(LogCategory category, Object message) {
+  final resolved = _resolve(category, message);
+  if (resolved != null) _logger.e(category, resolved);
+}
 
 /// Configure logging for the entire package
 @internal

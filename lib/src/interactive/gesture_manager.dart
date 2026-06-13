@@ -1452,9 +1452,12 @@ class GraphGestureManager {
     if (_nodeDragManager.isActive || findNodeAt(scenePos) != null) {
       _nodeDragManager.handlePointerMove(event);
 
-      // Send real-time TAP_DEBUG_STATE during drag operations
+      // Send real-time TAP_DEBUG_STATE during drag operations.
+      // Guard on isGestureDebugEnabled first: this runs every frame during a
+      // drag and the data map below (plus getTapStateDebugInfo / DateTime.now)
+      // would otherwise be built on every move even when debugging is off.
       final draggedEntityId = _nodeDragManager.lastDraggedEntityId;
-      if (draggedEntityId != null) {
+      if (isGestureDebugEnabled && draggedEntityId != null) {
         final node = getEntity(draggedEntityId) as GraphNode?;
         if (node != null) {
           final tapState = _nodeTapManager.getState(draggedEntityId);

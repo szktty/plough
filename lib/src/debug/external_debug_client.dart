@@ -14,6 +14,12 @@ class ExternalDebugClient {
 
   String _serverUrl = 'http://localhost:8082';
   bool _enabled = false;
+
+  /// Whether the client is currently sending logs to the external server.
+  ///
+  /// Callers should guard on this before building the `metadata` map (or other
+  /// per-call payloads) so disabled sessions don't pay for log construction.
+  bool get enabled => _enabled;
   Timer? _batchTimer;
   final List<Map<String, dynamic>> _logQueue = [];
   static const int _batchSize = 10;
