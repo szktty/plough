@@ -20,7 +20,7 @@
 >   `() =>` 化は**スコープ外**(ユーザー判断で「最ホットのみ」)とし、以降のタスクへ。
 > - `sendLog` の引数 Map 構築は `_sendToExternalDebug` 冒頭で
 >   `externalDebugClient.enabled` ガード。
-> 実装レビュー依頼は `doc/review_request_E1.md`(結果は `doc/review_feedback_E1.md`)。
+> 実装レビュー依頼は `doc/review_request_20260614_01_E1.md`(結果は `doc/review_feedback_20260614_01_E1.md`)。
 
 ---
 
@@ -123,7 +123,7 @@ E1 が実際に行ったのは **(1) クロージャ受けオーバーロード 
   などにクロージャ渡しを導入していく([S4])。その際 `enabled` 判定を
   `logDebug` ならレベル `debug` 以上かまで見る精緻化も検討する([S3])。
 
-詳細は `doc/review_feedback_E1.md` を参照。
+詳細は `doc/review_feedback_20260614_01_E1.md` を参照。
 
 ---
 

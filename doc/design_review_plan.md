@@ -325,7 +325,7 @@
 - 位置づけ: 短期。番号は E だが**実施は早期**。D2 だけでなく **B2 の前提でもある**
   (計装の注入点を 1 インターフェースに集約)。
 - **実装済み(2026-06-14, commit 2d6c4c0、assert は別コミット)**。実装レビュー承認
-  (`doc/review_feedback_E1.md`)。E1 はクロージャ受けオーバーロード API の導入(土台)+
+  (`doc/review_feedback_20260614_01_E1.md`)。E1 はクロージャ受けオーバーロード API の導入(土台)+
   最ホット 1 経路(`handlePointerMove` の `TAP_DEBUG_STATE` ブロック)の
   `isGestureDebugEnabled` 前置ガード + `_sendToExternalDebug` の enabled ガードまで。
   **クロージャ(`() =>`)渡しの実利用は 0 件**で、それは次段の土台という設計判断([S1])。

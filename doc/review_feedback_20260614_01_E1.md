@@ -1,7 +1,7 @@
 # E1 実装レビュー結果
 
 レビュー日: 2026-06-14
-対象: `doc/review_request_E1.md`(E1: ログ API オーバーロード + ホットパス lazy 化)
+対象: `doc/review_request_20260614_01_E1.md`(E1: ログ API オーバーロード + ホットパス lazy 化)
 対象コミット: `2d6c4c0`(perf(logging): defer hot-path log construction (E1))
 レビュー方針: 実装の正しさ・副作用・スコープ妥当性。コードは変更していない。
 

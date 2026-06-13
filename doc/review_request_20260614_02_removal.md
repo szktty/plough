@@ -88,4 +88,4 @@
 - 見落とした副作用・回帰リスクがあれば `file:line` 付きで指摘。
 - スコープ・粒度の妥当性。
 
-レビュー結果は **`doc/review_feedback_removal.md`** に書き出してほしい。
+レビュー結果は **`doc/review_feedback_20260614_02_removal.md`** に書き出してほしい。
