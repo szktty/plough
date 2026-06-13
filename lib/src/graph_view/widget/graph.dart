@@ -688,7 +688,10 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
         );
 
         return KeyedSubtree(
-          key: ValueKey(_graph.hashCode),
+          // Key on the stable graph id, not hashCode: hashCode can collide
+          // across different graphs and is not guaranteed stable, which would
+          // make the subtree key unreliable on graph swaps.
+          key: ValueKey(_graph.id),
           child: graphContent,
         );
       },

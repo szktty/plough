@@ -383,9 +383,23 @@ class GraphImpl
     final link = getLinkOrThrow(id) as GraphLinkImpl;
     final source = link.source;
     final target = link.target;
+
+    // Detach from the adjacency index using the *current* endpoints before
+    // mutating, then re-attach using the swapped ones. Skipping this left the
+    // indexes pointing at the old source/target.
+    _outgoingIndex[source.id]?.remove(link);
+    _incomingIndex[target.id]?.remove(link);
+
     link
       ..target = source
       ..source = target;
+
+    _outgoingIndex.putIfAbsent(link.source.id, () => []).add(link);
+    _incomingIndex.putIfAbsent(link.target.id, () => []).add(link);
+
+    // The link object mutated in place (same map entry), so notify layout
+    // listeners explicitly — otherwise the reversal would not reach the UI.
+    _notifyLayoutChange();
   }
 
   @override
@@ -462,15 +476,18 @@ class GraphImpl
   void deselectNode(GraphId id) {
     final node = getNodeOrThrow(id) as GraphNodeImpl;
 
-    node.isSelected = false;
-
-    if (!state.value.allowMultiSelection) {
-      state.value = state.value.copyWith(selectedNodeIds: const IListConst([]));
-    } else {
-      state.value = state.value.copyWith(
-        selectedNodeIds: state.value.selectedNodeIds.remove(node.id),
-      );
+    // Only touch the given node. The old single-selection branch wiped the
+    // whole selectedNodeIds list regardless of [id], which left the state list
+    // and per-node isSelected flags inconsistent when deselecting a node that
+    // was not the selected one.
+    if (!state.value.selectedNodeIds.contains(node.id)) {
+      return;
     }
+
+    node.isSelected = false;
+    state.value = state.value.copyWith(
+      selectedNodeIds: state.value.selectedNodeIds.remove(node.id),
+    );
   }
 
   @override
@@ -524,15 +541,15 @@ class GraphImpl
   void deselectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
 
-    link.isSelected = false;
-
-    if (!state.value.allowMultiSelection) {
-      state.value = state.value.copyWith(selectedLinkIds: const IListConst([]));
-    } else {
-      state.value = state.value.copyWith(
-        selectedLinkIds: state.value.selectedLinkIds.remove(link.id),
-      );
+    // Only touch the given link (see deselectNode for the rationale).
+    if (!state.value.selectedLinkIds.contains(link.id)) {
+      return;
     }
+
+    link.isSelected = false;
+    state.value = state.value.copyWith(
+      selectedLinkIds: state.value.selectedLinkIds.remove(link.id),
+    );
   }
 
   @override
