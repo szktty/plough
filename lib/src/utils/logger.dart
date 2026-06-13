@@ -119,6 +119,11 @@ final PloughLogger _logger = PloughLogger();
 /// interpolation when logging is off; for a disabled category the closure is
 /// never invoked. Returns `null` when nothing should be logged.
 String? _resolve(LogCategory category, Object message) {
+  assert(
+    message is String || message is String Function(),
+    'log message must be a String or a String Function(), got '
+    '${message.runtimeType}',
+  );
   if (message is String Function()) {
     return _logger.enabled(category) ? message() : null;
   }
