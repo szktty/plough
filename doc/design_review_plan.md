@@ -324,6 +324,35 @@
   "体感半分以下" の即効性)。
 - 位置づけ: 短期。番号は E だが**実施は早期**。D2 だけでなく **B2 の前提でもある**
   (計装の注入点を 1 インターフェースに集約)。
+- **実装済み(2026-06-14, commit 2d6c4c0、assert は別コミット)**。実装レビュー承認
+  (`doc/review_feedback_E1.md`)。E1 はクロージャ受けオーバーロード API の導入(土台)+
+  最ホット 1 経路(`handlePointerMove` の `TAP_DEBUG_STATE` ブロック)の
+  `isGestureDebugEnabled` 前置ガード + `_sendToExternalDebug` の enabled ガードまで。
+  **クロージャ(`() =>`)渡しの実利用は 0 件**で、それは次段の土台という設計判断([S1])。
+- **次段への申し送り(レビュー [S3]/[S4])**:
+  - **[S3] `enabled` のレベル精緻化**: 現状 `enabled(category)` は `Level.off` 以外で true。
+    `logDebug` 用に `Level.debug` 以上か等のレベル階層比較まで見ると、無効でないだけの
+    カテゴリでのクロージャ無駄評価を防げる。クロージャ渡しを増やす前に検討。
+    → **E2** として下記に新設。
+  - **[S4] `handlePointerDown`/`handlePointerUp` の lazy 化**: 毎ポインタ毎の
+    `externalDebugClient.sendLog(metadata: {...})` / `logGestureDebug(data: {...})` の
+    map 構築が残存(`gesture_manager.dart` 462-656, 658-1063)。毎フレームではないが
+    drag 開始/終了・タップ毎に走る。→ **E3** として下記に新設。
+
+### E2. ログ `enabled` 判定のレベル階層精緻化(レビュー [S3]・次段)
+- 対象: `PloughLogger.enabled(category)` が `Level.off` 以外で一律 true を返す点。
+- 対応: `logDebug`/`logInfo`/... ごとに必要レベル(debug/info/...)以上かを比較する
+  `enabled(category, level)` 等に拡張し、クロージャ無駄評価を抑える。
+- 前提: E3(クロージャ渡しの増加)とセットで効く。単独では現状実害なし。
+- リスク: 低。受け入れ基準: 出力内容不変・無効レベルでクロージャ非評価。
+
+### E3. `handlePointerDown`/`Up` のログ map 構築の lazy 化(レビュー [S4]・次段)
+- 対象: `gesture_manager.dart` 462-656 / 658-1063 の毎ポインタ毎 `sendLog`/`logGestureDebug`。
+- 対応: `metadata: {...}` / `data: {...}` 構築を `isGestureDebugEnabled` /
+  `externalDebugClient.enabled` ガード下に置く(handlePointerMove と同方式)、
+  またはクロージャ渡しに移行。
+- 依存: E2(レベル精緻化)があると無駄評価をさらに削れる。
+- リスク: 中(箇所が多くポインタ毎経路)。gesture テストで担保。
 
 ---
 
@@ -409,6 +438,9 @@
 | C2 | 長期 | NodeViewState 分離 | 最高 | C1,D1 | 未着手 |
 | D1 | 長期 | RenderObject 化 RFC+PoC | 最大 | A,B | 未着手 |
 | D2 | 長期 | ジェスチャ FSM 集約 | 高 | E1 | 未着手 |
+| E1 | 短期 | ログ API lazy 化土台 + 最ホットガード | 低中 | なし | **完了(2d6c4c0)** |
+| E2 | 短期 | ログ enabled のレベル階層精緻化([S3]) | 低 | E3 と併用 | 未着手 |
+| E3 | 短期 | handlePointerDown/Up のログ map lazy 化([S4]) | 中 | E2 | 未着手 |
 | F3+ | 性能 | rebuild 範囲縮小・sort キャッシュ | 高 | D1 | 未着手 |
 
 ---

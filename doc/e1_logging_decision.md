@@ -107,6 +107,24 @@ void logDebug(LogCategory category, Object message) =>
   **`if (enabled)` ガードを `sendLog` の外(呼び出し側)に出す**。
 - 全 273 箇所の一括 lazy 化は**対象外**(以降のタスクで段階的に)。
 
+### 実装後の補足(実装レビュー [S1] 反映, 2026-06-14)
+
+E1 が実際に行ったのは **(1) クロージャ受けオーバーロード API の導入(土台)**と
+**(2) 最ホット 1 経路(`handlePointerMove` の `TAP_DEBUG_STATE` ブロック)の
+`isGestureDebugEnabled` 前置ガード**、および **(3) `_sendToExternalDebug` の
+呼び出し側 enabled ガード**である。
+
+- 今回の実ランタイム改善は (2)(3) によるもの。**(2) は `logGestureDebug` のガードであり、
+  新オーバーロード API は経由しない。**
+- 追加したオーバーロードに**クロージャ(`() =>`)を渡している呼び出しは現時点で 0 件**
+  (lib 全体)。オーバーロードは「次段でクロージャ渡しを増やすための土台」であり、
+  E1 時点では実利用がない。これは段階移行の設計判断であって欠陥ではない。
+- 次段(別タスク)で `handlePointerDown`/`handlePointerUp` の `sendLog`/`logGestureDebug`
+  などにクロージャ渡しを導入していく([S4])。その際 `enabled` 判定を
+  `logDebug` ならレベル `debug` 以上かまで見る精緻化も検討する([S3])。
+
+詳細は `doc/review_feedback_E1.md` を参照。
+
 ---
 
 ## E1 の受け入れ基準
