@@ -394,7 +394,7 @@
 1.  E1(ログ lazy 化)                  ← 完了(2d6c4c0/b20fee2)
 2.  削除パス整理: A1 + A2 + A8(+ F1)   ← 完了(e63c302)
 3.  A7(死にファイル enhanced_client 削除)
-4.  A3, A4, A5, A6                    ← 独立・並行可(A4 は暫定と明記)
+4.  A3, A4, A5, A6                    ← 完了(A3/A4/A5: bcce23d, A6: e56b4e3)
 5.  B1(flame 撤去 / first 依存排除), B3(棚卸し)
 6.  B2(debug 別パッケージ化)          ← E1 後・設計レビュー反映後
 7.  F2(shouldRepaint)
@@ -423,11 +423,11 @@
 | E1 | 短期 | ログ API にクロージャ受けオーバーロード追加 + ホットパスのみ `() =>` 化 | 低中 | なし | 未着手 |
 | A1 | バグ | removeNode の links 掃除 | 低 | なし | **完了(e63c302)** |
 | A2 | バグ | 死にフィールド削除 | 低 | A1 | **完了(e63c302)** |
-| A3 | バグ | reverseLink 通知/インデックス張替 | 中 | なし | 未着手 |
-| A4 | バグ | deselectNode の state/フラグ乖離是正(暫定) | 低中 | なし | 未着手 |
-| A5 | バグ | KeyedSubtree キー → graph.id | 低 | なし | 未着手 |
-| A6 | 小 | thickness 定数化等 | 低 | なし | 未着手 |
-| A7 | 死コード | enhanced_client.dart 削除(未参照・http) | 低 | なし | 未着手 |
+| A3 | バグ | reverseLink 通知/インデックス張替 | 中 | なし | **完了(bcce23d)** |
+| A4 | バグ | deselectNode の state/フラグ乖離是正(暫定) | 低中 | なし | **完了(bcce23d)** |
+| A5 | バグ | KeyedSubtree キー → graph.id | 低 | なし | **完了(bcce23d)** |
+| A6 | 小 | thickness 定数化等 | 低 | なし | **完了(e56b4e3)** |
+| A7 | 死コード | enhanced_client.dart 削除(未参照・http) | 低 | なし | **完了(2fad4b2)** |
 | A8 | バグ | removeLink の `_notifyLayoutChange` 欠落 | 低中 | A1 と同 PR | **完了(e63c302)** |
 | B1 | 依存 | flame 撤去 / `intersections.first` 依存排除 | 中 | なし | 未着手 |
 | B2 | 依存 | debug 別パッケージ化 | 高 | E1 | 未着手 |
