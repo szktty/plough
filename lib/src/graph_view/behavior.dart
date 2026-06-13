@@ -136,12 +136,19 @@ class GraphLinkViewBehavior {
   /// Creates a link view behavior with the specified configuration.
   const GraphLinkViewBehavior({
     required this.builder,
-    this.thickness = 30,
+    this.thickness = defaultThickness,
     this.thicknessGetter,
     this.routing = GraphLinkRouting.straight,
     this.tooltipBehavior,
     this.child,
   });
+
+  /// Default link thickness in logical pixels.
+  ///
+  /// Used as the hit-test/visual width when no explicit thickness or
+  /// [thicknessGetter] is supplied. A larger value makes links easier to
+  /// interact with at the cost of visual weight.
+  static const double defaultThickness = 30;
 
   /// A function that builds the custom widget for rendering links.
   final GraphLinkWidgetBuilder builder;
@@ -319,7 +326,7 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
 
   @override
   GraphLinkViewBehavior createLinkViewBehavior() {
-    const thickness = 30.0; // Consider making this configurable
+    const thickness = GraphLinkViewBehavior.defaultThickness;
     return GraphLinkViewBehavior(
       builder: (
         context,
