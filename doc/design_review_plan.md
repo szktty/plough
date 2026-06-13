@@ -223,9 +223,17 @@
      (個別 `ValueNotifier<bool> _isSelected` を廃止、または selectedIds 変更を購読)。
   3. `selectNode`/`deselectNode`/`clearSelection` から二重同期と `force: true` を除去。
   4. レンダリングが選択変更で更新されることを widget/golden テストで担保。
+  5. **`set canSelect(false)` の選択解除も単一ソース経由にする**(下記 [R1])。
 - 受け入れ基準: 選択系の全テスト緑。`_isSelected` の手動同期コードが消える。
+  **`canSelect=false` 後に `isSelected` と `selectedNodeIds` が乖離しない**ことを検証。
+- **申し送り(phaseA レビュー [R1])**: `node.dart:172-179` の `set canSelect(bool)` は
+  選択中ノードを `canSelect=false` にすると `_isSelected.value=false` でフラグだけ落とし、
+  `GraphData.selectedNodeIds` を更新しない(A4 が正した deselect 経路とは逆向きの乖離)。
+  A4 はあくまで deselect 経路の修正で、この `canSelect` 経路の乖離は残っている。
+  `isSelected` を derived 化すれば原理的に消えるため、C1 で吸収する(個別パッチは
+  二度手間になるので当てない)。
 - リスク: 高(レンダリング購読経路の変更)。A4 修正後に着手。
-- 依存: A4 完了後。
+- 依存: A4 完了後(完了済み)。
 
 ### C2. `GraphNode` から View 状態(`NodeViewState`)を分離
 - 対象指摘: 課題 2-4(`geometry`/`animatedPosition`/`isArranged`/
