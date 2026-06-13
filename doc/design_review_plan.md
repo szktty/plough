@@ -391,8 +391,8 @@
 レビュー(`design_review_plan_feedback.md`)の修正提案を反映:
 
 ```
-1.  E1(ログ lazy 化)                  ← 即効・低リスク・B2/D2 の前提
-2.  削除パス整理: A1 + A2 + A8(+ F1)   ← 実装 1 PR、テストは項目別
+1.  E1(ログ lazy 化)                  ← 完了(2d6c4c0/b20fee2)
+2.  削除パス整理: A1 + A2 + A8(+ F1)   ← 完了(e63c302)
 3.  A7(死にファイル enhanced_client 削除)
 4.  A3, A4, A5, A6                    ← 独立・並行可(A4 は暫定と明記)
 5.  B1(flame 撤去 / first 依存排除), B3(棚卸し)
@@ -421,18 +421,18 @@
 | ID | 区分 | 概要 | リスク | 依存 | 状態 |
 |---|---|---|---|---|---|
 | E1 | 短期 | ログ API にクロージャ受けオーバーロード追加 + ホットパスのみ `() =>` 化 | 低中 | なし | 未着手 |
-| A1 | バグ | removeNode の links 掃除 | 低 | なし | 未着手 |
-| A2 | バグ | 死にフィールド削除 | 低 | A1 | 未着手 |
+| A1 | バグ | removeNode の links 掃除 | 低 | なし | **完了(e63c302)** |
+| A2 | バグ | 死にフィールド削除 | 低 | A1 | **完了(e63c302)** |
 | A3 | バグ | reverseLink 通知/インデックス張替 | 中 | なし | 未着手 |
 | A4 | バグ | deselectNode の state/フラグ乖離是正(暫定) | 低中 | なし | 未着手 |
 | A5 | バグ | KeyedSubtree キー → graph.id | 低 | なし | 未着手 |
 | A6 | 小 | thickness 定数化等 | 低 | なし | 未着手 |
 | A7 | 死コード | enhanced_client.dart 削除(未参照・http) | 低 | なし | 未着手 |
-| A8 | バグ | removeLink の `_notifyLayoutChange` 欠落 | 低中 | A3 と同 PR | 未着手 |
+| A8 | バグ | removeLink の `_notifyLayoutChange` 欠落 | 低中 | A1 と同 PR | **完了(e63c302)** |
 | B1 | 依存 | flame 撤去 / `intersections.first` 依存排除 | 中 | なし | 未着手 |
 | B2 | 依存 | debug 別パッケージ化 | 高 | E1 | 未着手 |
 | B3 | 調査 | 値等価性棚卸し | 低 | なし | 未着手 |
-| F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | 未着手 |
+| F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | **完了(e63c302)** |
 | F2 | 性能 | shouldRepaint をジオメトリ/スタイル比較に | 中 | なし | 未着手 |
 | C1 | 中期 | 選択状態単一ソース化(A4 吸収) | 高 | A4 | 未着手 |
 | C2 | 長期 | NodeViewState 分離 | 最高 | C1,D1 | 未着手 |
