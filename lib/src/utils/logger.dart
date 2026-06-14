@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logger/logger.dart';
-import 'package:plough/src/debug/external_debug_client.dart';
+import 'package:plough/src/debug/debug_sink.dart';
 
 /// Logger categories for selective logging control
 enum LogCategory {
@@ -95,9 +95,9 @@ class PloughLogger {
     // Guard before calling sendLog so the disabled case pays nothing; sendLog
     // also re-checks internally, but the metadata/log-entry map would otherwise
     // be built on every call regardless.
-    if (!externalDebugClient.enabled) return;
+    if (!debugSink.enabled) return;
     try {
-      externalDebugClient.sendLog(
+      debugSink.sendLog(
         category: category,
         level: level,
         message: message,

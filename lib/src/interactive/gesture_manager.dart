@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/debug/external_debug_client.dart';
+import 'package:plough/src/debug/debug_sink.dart';
 import 'package:plough/src/graph/entity.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/id.dart';
@@ -467,7 +467,7 @@ class GraphGestureManager {
     );
 
     // Send structured gesture event to debug server
-    externalDebugClient.sendLog(
+    debugSink.sendLog(
       category: LogCategory.gesture,
       level: 'DEBUG',
       message: 'Pointer down event',
@@ -490,7 +490,7 @@ class GraphGestureManager {
       );
 
       // Send structured node event to debug server
-      externalDebugClient.sendLog(
+      debugSink.sendLog(
         category: LogCategory.gesture,
         level: 'DEBUG',
         message: 'Node found at pointer down',
@@ -591,7 +591,7 @@ class GraphGestureManager {
       );
 
       // Send structured link event to debug server
-      externalDebugClient.sendLog(
+      debugSink.sendLog(
         category: LogCategory.gesture,
         level: 'DEBUG',
         message: 'Link found at pointer down',
@@ -683,7 +683,7 @@ class GraphGestureManager {
     }
 
     // Send structured gesture event to debug server
-    externalDebugClient.sendLog(
+    debugSink.sendLog(
       category: LogCategory.gesture,
       level: 'DEBUG',
       message: 'Pointer up event',
@@ -748,7 +748,7 @@ class GraphGestureManager {
     );
 
     // Send structured node target info to debug server
-    externalDebugClient.sendLog(
+    debugSink.sendLog(
       category: LogCategory.gesture,
       level: 'DEBUG',
       message: 'Node target tracking',
@@ -769,7 +769,7 @@ class GraphGestureManager {
         logDebug(LogCategory.gesture, 'Node not found, cleaning up');
 
         // Send structured cleanup event to debug server
-        externalDebugClient.sendLog(
+        debugSink.sendLog(
           category: LogCategory.gesture,
           level: 'WARNING',
           message: 'Node not found during cleanup',
@@ -796,7 +796,7 @@ class GraphGestureManager {
       );
 
       // Send structured node processing event to debug server
-      externalDebugClient.sendLog(
+      debugSink.sendLog(
         category: LogCategory.gesture,
         level: 'DEBUG',
         message: 'Processing node at pointer up',
@@ -876,7 +876,7 @@ class GraphGestureManager {
       );
 
       // Also send to external debug client if available
-      externalDebugClient.sendLog(
+      debugSink.sendLog(
         category: LogCategory.gesture,
         level: 'DEBUG',
         message: 'TAP_STATE',
