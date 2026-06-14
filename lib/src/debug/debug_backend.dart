@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/debug/debug_manager.dart';
 
 /// Backend for advanced debug features (HTTP server, structured logging,
 /// performance monitoring).
@@ -9,16 +8,17 @@ import 'package:plough/src/debug/debug_manager.dart';
 /// concrete `dart:io`/`http` implementation directly; it talks to a
 /// [DebugBackend].
 ///
-/// The default backend ([debugBackend]) forwards to the in-package
-/// [PloughDebugManager], preserving existing behavior. A later step (B2-b)
-/// moves that implementation into a separate `plough_devtools` package and
-/// swaps the default to a no-op, making the core web-safe and
-/// dependency-light.
+/// The default backend ([debugBackend]) is a [NoopDebugBackend] — web-safe and
+/// dependency-free. The real server stack lives in the separate
+/// `plough_devtools` package; attach it at runtime via the `debugBackend`
+/// injection point so the core stays free of `dart:io`/`http`.
 ///
 /// See `doc/b2_debug_separation_design.md` for the full plan. This complements
 /// [DebugSink] (log telemetry); [DebugBackend] covers server lifecycle and
 /// reporting.
-@internal
+///
+/// Implemented by `plough_devtools` and injected via
+/// `Plough().attachDebugBackend(...)`.
 abstract interface class DebugBackend {
   /// Starts the configured debug features.
   Future<void> initialize({
@@ -45,15 +45,12 @@ abstract interface class DebugBackend {
   Map<String, dynamic> generateDebugReport();
 }
 
-/// Default [DebugBackend] forwarding to the in-package [PloughDebugManager].
+/// Default [DebugBackend]: a web-safe no-op with no server.
 ///
-/// Behavior is identical to calling `debugManager`/`initializeDebug`/
-/// `shutdownDebug` directly; this only routes through the [DebugBackend]
-/// interface so the dependency can be relocated later without touching
-/// [Plough].
-@internal
-class DebugManagerBackend implements DebugBackend {
-  const DebugManagerBackend();
+/// Active unless `plough_devtools` (or a custom implementation) replaces
+/// the backend with the real server-backed one.
+class NoopDebugBackend implements DebugBackend {
+  const NoopDebugBackend();
 
   @override
   Future<void> initialize({
@@ -62,39 +59,27 @@ class DebugManagerBackend implements DebugBackend {
     bool enablePerformanceMonitoring = true,
     int serverPort = 8080,
     bool tryAlternativePorts = true,
-  }) {
-    return initializeDebug(
-      enableServer: enableServer,
-      enableStructuredLogging: enableStructuredLogging,
-      enablePerformanceMonitoring: enablePerformanceMonitoring,
-      serverPort: serverPort,
-      tryAlternativePorts: tryAlternativePorts,
-    );
-  }
+  }) async {}
 
   @override
-  Future<void> shutdown() => shutdownDebug();
+  Future<void> shutdown() async {}
 
   @override
-  bool get isServerRunning => debugManager.isServerRunning;
+  bool get isServerRunning => false;
 
   @override
-  String? get serverUrl =>
-      debugManager.isServerRunning ? debugManager.serverUrl : null;
+  String? get serverUrl => null;
 
   @override
-  int? get serverPort =>
-      debugManager.isServerRunning ? debugManager.serverPort : null;
+  int? get serverPort => null;
 
   @override
-  Map<String, dynamic> generateDebugReport() =>
-      debugManager.generateDebugReport();
+  Map<String, dynamic> generateDebugReport() => const {};
 }
 
 /// The active debug backend used by the package core.
 ///
-/// Defaults to [DebugManagerBackend] (existing behavior). B2-b will allow
-/// swapping this via `Plough().attachDebugBackend(...)` and default it to a
-/// no-op so the core no longer depends on `dart:io`/`http`.
+/// Defaults to [NoopDebugBackend]. `plough_devtools` swaps in the real
+/// server-backed backend when debug features are enabled.
 @internal
-DebugBackend debugBackend = const DebugManagerBackend();
+DebugBackend debugBackend = const NoopDebugBackend();

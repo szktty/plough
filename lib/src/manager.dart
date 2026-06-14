@@ -1,5 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:plough/src/debug/debug_backend.dart';
+import 'package:plough/src/debug/debug_sink.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
 
@@ -212,5 +213,30 @@ final class Plough {
   /// Generate comprehensive debug report.
   Map<String, dynamic> generateDebugReport() {
     return debugBackend.generateDebugReport();
+  }
+
+  /// Attaches a [DebugSink] implementation for structured log telemetry.
+  ///
+  /// The core package ships a web-safe no-op sink by default. The
+  /// `plough_devtools` package provides an HTTP-backed sink and calls this for
+  /// you via `attachPloughDevtools()`. Pass your own [DebugSink] to route logs
+  /// elsewhere.
+  void attachDebugSink(DebugSink sink) {
+    debugSink = sink;
+  }
+
+  /// Attaches a [DebugBackend] implementation for advanced debug features
+  /// (HTTP server, structured logging, performance monitoring).
+  ///
+  /// The core ships a web-safe no-op backend by default; `plough_devtools`
+  /// provides the real `dart:io` server-backed one.
+  void attachDebugBackend(DebugBackend backend) {
+    debugBackend = backend;
+  }
+
+  /// Restores the web-safe no-op debug sink and backend.
+  void detachDebug() {
+    debugSink = const NoopDebugSink();
+    debugBackend = const NoopDebugBackend();
   }
 }

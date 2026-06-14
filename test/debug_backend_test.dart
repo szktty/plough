@@ -60,8 +60,10 @@ void main() {
     debugBackend = original;
   });
 
-  test('default backend is the debug-manager adapter', () {
-    expect(debugBackend, isA<DebugManagerBackend>());
+  test('default backend is a web-safe no-op', () {
+    expect(debugBackend, isA<NoopDebugBackend>());
+    expect(debugBackend.isServerRunning, isFalse);
+    expect(debugBackend.serverUrl, isNull);
   });
 
   test('generateDebugReport routes to the injected backend', () {

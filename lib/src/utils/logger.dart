@@ -130,25 +130,21 @@ String? _resolve(LogCategory category, Object message) {
   return message as String;
 }
 
-@internal
 void logDebug(LogCategory category, Object message) {
   final resolved = _resolve(category, message);
   if (resolved != null) _logger.d(category, resolved);
 }
 
-@internal
 void logInfo(LogCategory category, Object message) {
   final resolved = _resolve(category, message);
   if (resolved != null) _logger.i(category, resolved);
 }
 
-@internal
 void logWarning(LogCategory category, Object message) {
   final resolved = _resolve(category, message);
   if (resolved != null) _logger.w(category, resolved);
 }
 
-@internal
 void logError(LogCategory category, Object message) {
   final resolved = _resolve(category, message);
   if (resolved != null) _logger.e(category, resolved);

@@ -1,0 +1,28 @@
+name: plough_devtools
+description: >-
+  Debug tooling for the Plough graph package: an HTTP debug server, external
+  log client, structured logging, performance monitoring and diagnostics.
+  Kept out of the core package so that `plough` stays web-safe and free of
+  dart:io/http dependencies.
+version: 0.8.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.3
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  freezed_annotation: ^3.1.0
+  http: ^1.1.0
+  logger: ^2.4.0
+  plough:
+    path: ../
+
+dev_dependencies:
+  build_runner: ^2.4.12
+  freezed: ^3.2.5
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^10.0.0

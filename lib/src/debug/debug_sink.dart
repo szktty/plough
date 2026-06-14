@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/debug/external_debug_client.dart';
 import 'package:plough/src/utils/logger.dart';
 
 /// Sink for debug log telemetry.
@@ -8,14 +7,16 @@ import 'package:plough/src/utils/logger.dart';
 /// structured logs to a debug backend. The core never references the concrete
 /// HTTP/server implementation directly; it talks to a [DebugSink].
 ///
-/// The default sink ([debugSink], an [ExternalClientDebugSink]) forwards to the
-/// in-package [ExternalDebugClient], preserving existing behavior. A later step
-/// (B2-b) moves that implementation into a separate `plough_devtools` package
-/// and swaps the default to a no-op, making the core web-safe and
-/// dependency-light.
+/// The default sink ([debugSink]) is a [NoopDebugSink] — web-safe and
+/// dependency-free. The real HTTP implementation lives in the separate
+/// `plough_devtools` package; attach it at runtime via the `debugSink`
+/// injection point (e.g. from `plough_devtools`'s setup) so the core stays
+/// free of `dart:io`/`http`.
 ///
 /// See `doc/b2_debug_separation_design.md` for the full plan.
-@internal
+///
+/// Implemented by `plough_devtools` and injected via
+/// `Plough().attachDebugSink(...)`.
 abstract interface class DebugSink {
   /// Whether the sink is actively forwarding logs.
   ///
@@ -34,17 +35,15 @@ abstract interface class DebugSink {
   });
 }
 
-/// Default [DebugSink] that forwards to the in-package [ExternalDebugClient].
+/// Default [DebugSink]: a web-safe no-op that forwards nothing.
 ///
-/// Behavior is identical to calling `externalDebugClient` directly; this only
-/// routes the call through the [DebugSink] interface so the dependency can be
-/// relocated later without touching call sites.
-@internal
-class ExternalClientDebugSink implements DebugSink {
-  const ExternalClientDebugSink();
+/// Active unless `plough_devtools` (or a custom implementation) replaces
+/// the sink with a real one.
+class NoopDebugSink implements DebugSink {
+  const NoopDebugSink();
 
   @override
-  bool get enabled => externalDebugClient.enabled;
+  bool get enabled => false;
 
   @override
   void sendLog({
@@ -52,19 +51,12 @@ class ExternalClientDebugSink implements DebugSink {
     required String level,
     required String message,
     Map<String, dynamic>? metadata,
-  }) {
-    externalDebugClient.sendLog(
-      category: category,
-      level: level,
-      message: message,
-      metadata: metadata,
-    );
-  }
+  }) {}
 }
 
 /// The active debug sink used by the package core.
 ///
-/// Defaults to [ExternalClientDebugSink] (existing behavior). B2-b will allow
-/// swapping this via `Plough().attachDebugSink(...)` and default it to a no-op.
+/// Defaults to [NoopDebugSink]. `plough_devtools` swaps in an HTTP-backed sink
+/// when debug features are enabled.
 @internal
-DebugSink debugSink = const ExternalClientDebugSink();
+DebugSink debugSink = const NoopDebugSink();

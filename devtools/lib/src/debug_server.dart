@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/utils/logger.dart';
+import 'package:plough/plough.dart';
 
 /// HTTP server for monitoring
 ///

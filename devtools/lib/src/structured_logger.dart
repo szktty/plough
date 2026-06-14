@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/debug/debug_server.dart';
-import 'package:plough/src/utils/logger.dart';
+import 'package:plough_devtools/src/debug_server.dart';
+import 'package:plough/plough.dart';
 
 /// Structured log entry
 @internal

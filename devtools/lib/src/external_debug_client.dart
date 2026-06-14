@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:http/http.dart' as http;
-import 'package:plough/src/utils/logger.dart';
+import 'package:plough/plough.dart';
 
 /// Client that sends logs to external debug server
 @internal

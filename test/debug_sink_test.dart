@@ -76,8 +76,9 @@ void main() {
     expect(sink.calls, isEmpty);
   });
 
-  test('default sink is the external-client adapter', () {
-    expect(debugSink, isA<ExternalClientDebugSink>());
+  test('default sink is a web-safe no-op', () {
+    expect(debugSink, isA<NoopDebugSink>());
+    expect(debugSink.enabled, isFalse);
   });
 
   test('sendLog carries metadata through to the sink', () {
