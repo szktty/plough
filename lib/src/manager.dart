@@ -1,5 +1,5 @@
 import 'package:logger/logger.dart';
-import 'package:plough/src/debug/debug_manager.dart';
+import 'package:plough/src/debug/debug_backend.dart';
 import 'package:plough/src/utils/logger.dart';
 import 'package:plough/src/utils/widget/position_plotter.dart';
 
@@ -125,9 +125,9 @@ final class Plough {
   set debugAdvancedEnabled(bool enabled) {
     _debugAdvancedEnabled = enabled;
     if (enabled) {
-      initializeDebug();
+      debugBackend.initialize();
     } else {
-      shutdownDebug();
+      debugBackend.shutdown();
     }
   }
 
@@ -150,7 +150,7 @@ final class Plough {
   }) async {
     logInfo(LogCategory.debug, 'Initializing Plough debug features...');
 
-    await initializeDebug(
+    await debugBackend.initialize(
       enableServer: enableServer,
       enableStructuredLogging: enableStructuredLogging,
       enablePerformanceMonitoring: enablePerformanceMonitoring,
@@ -161,10 +161,10 @@ final class Plough {
 
     // Display URL if debug server started
     if (enableServer) {
-      if (debugManager.isServerRunning) {
+      if (debugBackend.isServerRunning) {
         logInfo(
           LogCategory.debug,
-          '🌐 Debug server is running at: ${debugManager.serverUrl}',
+          '🌐 Debug server is running at: ${debugBackend.serverUrl}',
         );
         logInfo(
           LogCategory.debug,
@@ -174,10 +174,10 @@ final class Plough {
           LogCategory.debug,
           '🔧 Use CLI tools: python3 debug/simple_cli.py recent --category gesture',
         );
-        if (debugManager.serverPort != serverPort) {
+        if (debugBackend.serverPort != serverPort) {
           logInfo(
             LogCategory.debug,
-            'ℹ️ Server started on alternative port ${debugManager.serverPort}',
+            'ℹ️ Server started on alternative port ${debugBackend.serverPort}',
           );
         }
       } else {
@@ -201,18 +201,16 @@ final class Plough {
   /// Shutdown all debug features.
   Future<void> shutdownDebugFeatures() async {
     logInfo(LogCategory.debug, 'Shutting down Plough debug features...');
-    await shutdownDebug();
+    await debugBackend.shutdown();
     _debugAdvancedEnabled = false;
     logInfo(LogCategory.debug, 'Plough debug features shut down successfully');
   }
 
   /// Get debug server URL if running.
-  String? get debugServerUrl {
-    return debugManager.isServerRunning ? debugManager.serverUrl : null;
-  }
+  String? get debugServerUrl => debugBackend.serverUrl;
 
   /// Generate comprehensive debug report.
   Map<String, dynamic> generateDebugReport() {
-    return debugManager.generateDebugReport();
+    return debugBackend.generateDebugReport();
   }
 }
