@@ -408,7 +408,7 @@
 2.  削除パス整理: A1 + A2 + A8(+ F1)   ← 完了(e63c302)
 3.  A7(死にファイル enhanced_client 削除)
 4.  A3, A4, A5, A6                    ← 完了(A3/A4/A5: bcce23d, A6: e56b4e3)
-5.  B1(flame 撤去 / first 依存排除), B3(棚卸し)
+5.  B1(flame 撤去 / first 依存排除) ← 完了(31d8d07), B3(棚卸し)
 6.  B2(debug 別パッケージ化)          ← E1 後・設計レビュー反映後
 7.  F2(shouldRepaint)
 8.  C1(選択単一ソース → A4 吸収)
@@ -442,7 +442,7 @@
 | A6 | 小 | thickness 定数化等 | 低 | なし | **完了(e56b4e3)** |
 | A7 | 死コード | enhanced_client.dart 削除(未参照・http) | 低 | なし | **完了(2fad4b2)** |
 | A8 | バグ | removeLink の `_notifyLayoutChange` 欠落 | 低中 | A1 と同 PR | **完了(e63c302)** |
-| B1 | 依存 | flame 撤去 / `intersections.first` 依存排除 | 中 | なし | 未着手 |
+| B1 | 依存 | flame 撤去 / `intersections.first` 依存排除 | 中 | なし | **完了(31d8d07)** |
 | B2 | 依存 | debug 別パッケージ化 | 高 | E1 | 未着手 |
 | B3 | 調査 | 値等価性棚卸し | 低 | なし | 未着手 |
 | F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | **完了(e63c302)** |
