@@ -9,4 +9,4 @@ export 'src/manager.dart';
 export 'src/renderer/renderer.dart';
 export 'src/tooltip/tooltip.dart';
 export 'src/utils/logger.dart'
-    show LogCategory, logDebug, logError, logInfo, logWarning;
+    show LogCategory, logDebug, logEnabled, logError, logInfo, logWarning;

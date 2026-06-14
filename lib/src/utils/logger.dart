@@ -53,16 +53,24 @@ class PloughLogger {
     return _loggers[category] ?? _createLogger(Level.off, category);
   }
 
-  /// Whether logging is enabled for [category].
+  /// Whether logging is enabled for [category], optionally at a specific [level].
   ///
   /// Used to skip building log messages (string interpolation, map literals,
   /// `DateTime.now()` etc.) on hot paths when the category is disabled.
   /// Mirrors the level the underlying [Logger] was created with; `configure`
   /// has not run yet means everything defaults to [Level.off].
-  bool enabled(LogCategory category) {
-    final level = _levels[category];
-    if (level == null) return false;
-    return level != Level.off;
+  ///
+  /// When [level] is given, returns true only if a message at that severity
+  /// would actually be emitted — i.e. the category's configured level is not
+  /// [Level.off] and is at or below [level] (so e.g. a category set to
+  /// [Level.warning] reports `enabled(cat, Level.debug) == false`). This lets
+  /// hot paths skip closure evaluation for sub-threshold severities, not just
+  /// fully-disabled categories.
+  bool enabled(LogCategory category, [Level? level]) {
+    final configured = _levels[category];
+    if (configured == null || configured == Level.off) return false;
+    if (level == null) return true;
+    return level.value >= configured.value;
   }
 
   /// Quick logging methods
@@ -118,35 +126,44 @@ final PloughLogger _logger = PloughLogger();
 /// until the category is known to be enabled, so hot paths can avoid string
 /// interpolation when logging is off; for a disabled category the closure is
 /// never invoked. Returns `null` when nothing should be logged.
-String? _resolve(LogCategory category, Object message) {
+String? _resolve(LogCategory category, Object message, Level level) {
   assert(
     message is String || message is String Function(),
     'log message must be a String or a String Function(), got '
     '${message.runtimeType}',
   );
   if (message is String Function()) {
-    return _logger.enabled(category) ? message() : null;
+    // Only invoke the closure if a message at this severity would be emitted,
+    // so sub-threshold categories (e.g. set to warning) skip debug closures.
+    return _logger.enabled(category, level) ? message() : null;
   }
   return message as String;
 }
 
+/// Whether a log for [category] (optionally at [level]) would be emitted.
+///
+/// Useful as a guard before building expensive log payloads (maps, joined
+/// strings) outside the logging call, mirroring the closure short-circuit.
+bool logEnabled(LogCategory category, [Level? level]) =>
+    _logger.enabled(category, level);
+
 void logDebug(LogCategory category, Object message) {
-  final resolved = _resolve(category, message);
+  final resolved = _resolve(category, message, Level.debug);
   if (resolved != null) _logger.d(category, resolved);
 }
 
 void logInfo(LogCategory category, Object message) {
-  final resolved = _resolve(category, message);
+  final resolved = _resolve(category, message, Level.info);
   if (resolved != null) _logger.i(category, resolved);
 }
 
 void logWarning(LogCategory category, Object message) {
-  final resolved = _resolve(category, message);
+  final resolved = _resolve(category, message, Level.warning);
   if (resolved != null) _logger.w(category, resolved);
 }
 
 void logError(LogCategory category, Object message) {
-  final resolved = _resolve(category, message);
+  final resolved = _resolve(category, message, Level.error);
   if (resolved != null) _logger.e(category, resolved);
 }
 

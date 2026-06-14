@@ -466,18 +466,24 @@ class GraphGestureManager {
       'Starting handlePointerDown at ${event.localPosition} (scene: $scenePos), mode: $gestureMode',
     );
 
-    // Send structured gesture event to debug server
-    debugSink.sendLog(
-      category: LogCategory.gesture,
-      level: 'DEBUG',
-      message: 'Pointer down event',
-      metadata: {
-        'event_type': 'pointerDown',
-        'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-        'gesture_mode': gestureMode.name,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
+    // Send structured gesture event to debug server. Guard so the metadata map
+    // (and DateTime.now()) is not built on every pointer-down when disabled.
+    if (debugSink.enabled) {
+      debugSink.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'Pointer down event',
+        metadata: {
+          'event_type': 'pointerDown',
+          'position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy,
+          },
+          'gesture_mode': gestureMode.name,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
 
     _nodeHoverManager.handlePointerDown(event);
     _linkHoverManager.handlePointerDown(event);
@@ -489,30 +495,33 @@ class GraphGestureManager {
         'Node found: ${node.id.value.substring(0, 4)}',
       );
 
-      // Send structured node event to debug server
-      debugSink.sendLog(
-        category: LogCategory.gesture,
-        level: 'DEBUG',
-        message: 'Node found at pointer down',
-        metadata: {
-          'event_type': 'nodeFound',
-          'nodeId': node.id.value,
-          'node_id': node.id.value, // backward compatibility
-          'position': {
-            'x': event.localPosition.dx,
-            'y': event.localPosition.dy,
+      // Send structured node event to debug server (guarded: skip map build
+      // when disabled).
+      if (debugSink.enabled) {
+        debugSink.sendLog(
+          category: LogCategory.gesture,
+          level: 'DEBUG',
+          message: 'Node found at pointer down',
+          metadata: {
+            'event_type': 'nodeFound',
+            'nodeId': node.id.value,
+            'node_id': node.id.value, // backward compatibility
+            'position': {
+              'x': event.localPosition.dx,
+              'y': event.localPosition.dy,
+            },
+            'node_position': {
+              'x': node.logicalPosition.dx,
+              'y': node.logicalPosition.dy,
+            },
+            'can_select': node.canSelect,
+            'can_drag': node.canDrag,
+            'is_selected': graph.selectedEntityIds.contains(node.id),
+            'gesture_mode': gestureMode.name,
+            'timestamp': DateTime.now().toIso8601String(),
           },
-          'node_position': {
-            'x': node.logicalPosition.dx,
-            'y': node.logicalPosition.dy,
-          },
-          'can_select': node.canSelect,
-          'can_drag': node.canDrag,
-          'is_selected': graph.selectedEntityIds.contains(node.id),
-          'gesture_mode': gestureMode.name,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
+        );
+      }
 
       logDebug(
         LogCategory.tap,
@@ -529,45 +538,50 @@ class GraphGestureManager {
         'TAP DEBUG DOWN: trackedEntityId after handlePointerDown=${_nodeTapManager.trackedEntityId?.value.substring(0, 8) ?? 'null'}',
       );
 
-      // Send TAP_DEBUG_STATE after pointer down
-      final tapState = _nodeTapManager.getState(node.id);
-      final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(node.id);
-      logGestureDebug(
-        GestureDebugEventType.tapDebugState,
-        'GraphGestureManager',
-        'TAP_STATE_DOWN',
-        data: {
-          'event_type': 'tap_debug_state',
-          'phase': 'down',
-          'nodeTargetId': node.id.value,
-          'state_exists': tapState != null,
-          'state_completed': tapState?.completed ?? false,
-          'state_cancelled': tapState?.cancelled ?? false,
-          'tap_count': tapState?.tapCount ?? 0,
-          'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
-          'is_still_dragging_after_up': false,
-          'is_tap_completed_after_up': false,
-          'touch_slop': kTouchSlop * 8,
-          'k_touch_slop': kTouchSlop,
-          'timestamp': DateTime.now().toIso8601String(),
-          // Additional debug info
-          'tap_debug_info': tapDebugInfo,
-          'node_can_select': node.canSelect,
-          'node_can_drag': node.canDrag,
-          'node_is_selected': graph.selectedEntityIds.contains(node.id),
-          'gesture_mode': gestureMode.name,
-          'pointer_position': {
-            'x': event.localPosition.dx,
-            'y': event.localPosition.dy,
+      // Send TAP_DEBUG_STATE after pointer down. Guard so the debug-state reads
+      // (getState/getTapStateDebugInfo, both side-effect-free) and the data map
+      // are skipped on every pointer-down when gesture debugging is off.
+      if (isGestureDebugEnabled) {
+        final tapState = _nodeTapManager.getState(node.id);
+        final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(node.id);
+        logGestureDebug(
+          GestureDebugEventType.tapDebugState,
+          'GraphGestureManager',
+          'TAP_STATE_DOWN',
+          data: {
+            'event_type': 'tap_debug_state',
+            'phase': 'down',
+            'nodeTargetId': node.id.value,
+            'state_exists': tapState != null,
+            'state_completed': tapState?.completed ?? false,
+            'state_cancelled': tapState?.cancelled ?? false,
+            'tap_count': tapState?.tapCount ?? 0,
+            'tracked_entity_id':
+                _nodeTapManager.trackedEntityId?.value ?? 'null',
+            'is_still_dragging_after_up': false,
+            'is_tap_completed_after_up': false,
+            'touch_slop': kTouchSlop * 8,
+            'k_touch_slop': kTouchSlop,
+            'timestamp': DateTime.now().toIso8601String(),
+            // Additional debug info
+            'tap_debug_info': tapDebugInfo,
+            'node_can_select': node.canSelect,
+            'node_can_drag': node.canDrag,
+            'node_is_selected': graph.selectedEntityIds.contains(node.id),
+            'gesture_mode': gestureMode.name,
+            'pointer_position': {
+              'x': event.localPosition.dx,
+              'y': event.localPosition.dy,
+            },
+            'node_position': {
+              'x': node.logicalPosition.dx,
+              'y': node.logicalPosition.dy,
+            },
+            'tap_manager_states_count': _nodeTapManager.states.length,
+            'drag_manager_is_dragging': _nodeDragManager.isDragging(node.id),
           },
-          'node_position': {
-            'x': node.logicalPosition.dx,
-            'y': node.logicalPosition.dy,
-          },
-          'tap_manager_states_count': _nodeTapManager.states.length,
-          'drag_manager_is_dragging': _nodeDragManager.isDragging(node.id),
-        },
-      );
+        );
+      }
       // Return early for all modes except transparent
       if (gestureMode == GraphGestureMode.transparent) {
         logDebug(
@@ -590,27 +604,29 @@ class GraphGestureManager {
         'Link found: ${link.id.value.substring(0, 4)}',
       );
 
-      // Send structured link event to debug server
-      debugSink.sendLog(
-        category: LogCategory.gesture,
-        level: 'DEBUG',
-        message: 'Link found at pointer down',
-        metadata: {
-          'event_type': 'linkFound',
-          'linkId': link.id.value,
-          'link_id': link.id.value, // backward compatibility
-          'position': {
-            'x': event.localPosition.dx,
-            'y': event.localPosition.dy,
+      // Send structured link event to debug server (guarded).
+      if (debugSink.enabled) {
+        debugSink.sendLog(
+          category: LogCategory.gesture,
+          level: 'DEBUG',
+          message: 'Link found at pointer down',
+          metadata: {
+            'event_type': 'linkFound',
+            'linkId': link.id.value,
+            'link_id': link.id.value, // backward compatibility
+            'position': {
+              'x': event.localPosition.dx,
+              'y': event.localPosition.dy,
+            },
+            'source_node_id': link.source.id.value,
+            'target_node_id': link.target.id.value,
+            'can_select': link.canSelect,
+            'is_selected': graph.selectedEntityIds.contains(link.id),
+            'gesture_mode': gestureMode.name,
+            'timestamp': DateTime.now().toIso8601String(),
           },
-          'source_node_id': link.source.id.value,
-          'target_node_id': link.target.id.value,
-          'can_select': link.canSelect,
-          'is_selected': graph.selectedEntityIds.contains(link.id),
-          'gesture_mode': gestureMode.name,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
+        );
+      }
 
       _linkTapManager.handlePointerDown(link.id, event);
       _linkDragManager.handlePointerDown(link.id, event);
@@ -682,18 +698,23 @@ class GraphGestureManager {
       }
     }
 
-    // Send structured gesture event to debug server
-    debugSink.sendLog(
-      category: LogCategory.gesture,
-      level: 'DEBUG',
-      message: 'Pointer up event',
-      metadata: {
-        'event_type': 'pointerUp',
-        'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-        'gesture_mode': gestureMode.name,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
+    // Send structured gesture event to debug server (guarded).
+    if (debugSink.enabled) {
+      debugSink.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'Pointer up event',
+        metadata: {
+          'event_type': 'pointerUp',
+          'position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy,
+          },
+          'gesture_mode': gestureMode.name,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
 
     // Track if we're processing an entity
     var entityProcessed = false;
@@ -747,43 +768,51 @@ class GraphGestureManager {
       'lastDraggedEntityId: ${_nodeDragManager.lastDraggedEntityId?.value.substring(0, 4) ?? 'null'})',
     );
 
-    // Send structured node target info to debug server
-    debugSink.sendLog(
-      category: LogCategory.gesture,
-      level: 'DEBUG',
-      message: 'Node target tracking',
-      metadata: {
-        'event_type': 'nodeTargetTracking',
-        'nodeId': nodeTargetId?.value,
-        'node_id': nodeTargetId?.value, // backward compatibility
-        'tracked_by_tap_manager': _nodeTapManager.trackedEntityId?.value,
-        'tracked_by_drag_manager': _nodeDragManager.lastDraggedEntityId?.value,
-        'position': {'x': event.localPosition.dx, 'y': event.localPosition.dy},
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
+    // Send structured node target info to debug server (guarded).
+    if (debugSink.enabled) {
+      debugSink.sendLog(
+        category: LogCategory.gesture,
+        level: 'DEBUG',
+        message: 'Node target tracking',
+        metadata: {
+          'event_type': 'nodeTargetTracking',
+          'nodeId': nodeTargetId?.value,
+          'node_id': nodeTargetId?.value, // backward compatibility
+          'tracked_by_tap_manager': _nodeTapManager.trackedEntityId?.value,
+          'tracked_by_drag_manager':
+              _nodeDragManager.lastDraggedEntityId?.value,
+          'position': {
+            'x': event.localPosition.dx,
+            'y': event.localPosition.dy,
+          },
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
 
     if (nodeTargetId != null) {
       final node = graph.getNode(nodeTargetId);
       if (node == null) {
         logDebug(LogCategory.gesture, 'Node not found, cleaning up');
 
-        // Send structured cleanup event to debug server
-        debugSink.sendLog(
-          category: LogCategory.gesture,
-          level: 'WARNING',
-          message: 'Node not found during cleanup',
-          metadata: {
-            'event_type': 'nodeNotFoundCleanup',
-            'nodeId': nodeTargetId.value,
-            'node_id': nodeTargetId.value, // backward compatibility
-            'position': {
-              'x': event.localPosition.dx,
-              'y': event.localPosition.dy,
+        // Send structured cleanup event to debug server (guarded).
+        if (debugSink.enabled) {
+          debugSink.sendLog(
+            category: LogCategory.gesture,
+            level: 'WARNING',
+            message: 'Node not found during cleanup',
+            metadata: {
+              'event_type': 'nodeNotFoundCleanup',
+              'nodeId': nodeTargetId.value,
+              'node_id': nodeTargetId.value, // backward compatibility
+              'position': {
+                'x': event.localPosition.dx,
+                'y': event.localPosition.dy,
+              },
+              'timestamp': DateTime.now().toIso8601String(),
             },
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        );
+          );
+        }
 
         _nodeTapManager.cleanupTapState(nodeTargetId);
         _nodeDragManager.cancel(nodeTargetId);
@@ -795,30 +824,32 @@ class GraphGestureManager {
         'Processing node: ${node.id.value.substring(0, 4)}',
       );
 
-      // Send structured node processing event to debug server
-      debugSink.sendLog(
-        category: LogCategory.gesture,
-        level: 'DEBUG',
-        message: 'Processing node at pointer up',
-        metadata: {
-          'event_type': 'nodeProcessing',
-          'nodeId': node.id.value,
-          'node_id': node.id.value, // backward compatibility
-          'position': {
-            'x': event.localPosition.dx,
-            'y': event.localPosition.dy,
+      // Send structured node processing event to debug server (guarded).
+      if (debugSink.enabled) {
+        debugSink.sendLog(
+          category: LogCategory.gesture,
+          level: 'DEBUG',
+          message: 'Processing node at pointer up',
+          metadata: {
+            'event_type': 'nodeProcessing',
+            'nodeId': node.id.value,
+            'node_id': node.id.value, // backward compatibility
+            'position': {
+              'x': event.localPosition.dx,
+              'y': event.localPosition.dy,
+            },
+            'node_position': {
+              'x': node.logicalPosition.dx,
+              'y': node.logicalPosition.dy,
+            },
+            'can_select': node.canSelect,
+            'can_drag': node.canDrag,
+            'is_selected': graph.selectedEntityIds.contains(node.id),
+            'was_being_dragged': _nodeDragManager.isDragging(nodeTargetId),
+            'timestamp': DateTime.now().toIso8601String(),
           },
-          'node_position': {
-            'x': node.logicalPosition.dx,
-            'y': node.logicalPosition.dy,
-          },
-          'can_select': node.canSelect,
-          'can_drag': node.canDrag,
-          'is_selected': graph.selectedEntityIds.contains(node.id),
-          'was_being_dragged': _nodeDragManager.isDragging(nodeTargetId),
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
+        );
+      }
 
       _nodeTapManager.handlePointerUp(nodeTargetId, event);
       _nodeDragManager.handlePointerUp(nodeTargetId, event);
@@ -831,70 +862,79 @@ class GraphGestureManager {
       // Additional debugging
       final tapState = _nodeTapManager.getState(nodeTargetId);
 
-      // Send detailed debug info to workbench via gesture debug stream
-      final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(nodeTargetId);
-      final dragState = _nodeDragManager.getState(nodeTargetId);
-      logGestureDebug(
-        GestureDebugEventType.tapDebugState,
-        'GraphGestureManager',
-        'TAP_STATE_UP',
-        data: {
-          'event_type': 'tap_debug_state',
-          'phase': 'up',
-          'nodeTargetId': nodeTargetId.value,
-          'state_exists': tapState != null,
-          'state_completed': tapState?.completed ?? false,
-          'state_cancelled': tapState?.cancelled ?? false,
-          'tap_count': tapState?.tapCount ?? 0,
-          'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
-          'is_still_dragging_after_up': isStillDraggingAfterUp,
-          'is_tap_completed_after_up': isTapCompletedAfterUp,
-          'touch_slop': kTouchSlop * 8,
-          'k_touch_slop': kTouchSlop,
-          'timestamp': DateTime.now().toIso8601String(),
-          // Additional debug info
-          'tap_debug_info': tapDebugInfo,
-          'node_can_select': node.canSelect,
-          'node_can_drag': node.canDrag,
-          'node_is_selected': graph.selectedEntityIds.contains(node.id),
-          'gesture_mode': gestureMode.name,
-          'pointer_position': {
-            'x': event.localPosition.dx,
-            'y': event.localPosition.dy,
+      // Send detailed debug info to workbench via gesture debug stream.
+      // Guard so the workbench-only reads and the data map are skipped on every
+      // pointer-up when gesture debugging is off (reads are side-effect-free).
+      if (isGestureDebugEnabled) {
+        final tapDebugInfo = _nodeTapManager.getTapStateDebugInfo(nodeTargetId);
+        final dragState = _nodeDragManager.getState(nodeTargetId);
+        logGestureDebug(
+          GestureDebugEventType.tapDebugState,
+          'GraphGestureManager',
+          'TAP_STATE_UP',
+          data: {
+            'event_type': 'tap_debug_state',
+            'phase': 'up',
+            'nodeTargetId': nodeTargetId.value,
+            'state_exists': tapState != null,
+            'state_completed': tapState?.completed ?? false,
+            'state_cancelled': tapState?.cancelled ?? false,
+            'tap_count': tapState?.tapCount ?? 0,
+            'tracked_entity_id':
+                _nodeTapManager.trackedEntityId?.value ?? 'null',
+            'is_still_dragging_after_up': isStillDraggingAfterUp,
+            'is_tap_completed_after_up': isTapCompletedAfterUp,
+            'touch_slop': kTouchSlop * 8,
+            'k_touch_slop': kTouchSlop,
+            'timestamp': DateTime.now().toIso8601String(),
+            // Additional debug info
+            'tap_debug_info': tapDebugInfo,
+            'node_can_select': node.canSelect,
+            'node_can_drag': node.canDrag,
+            'node_is_selected': graph.selectedEntityIds.contains(node.id),
+            'gesture_mode': gestureMode.name,
+            'pointer_position': {
+              'x': event.localPosition.dx,
+              'y': event.localPosition.dy,
+            },
+            'node_position': {
+              'x': node.logicalPosition.dx,
+              'y': node.logicalPosition.dy,
+            },
+            'node_at_position': nodeAtPosition?.id.value,
+            'tap_manager_states_count': _nodeTapManager.states.length,
+            'drag_state_exists': dragState != null,
+            'drag_manager_is_dragging':
+                _nodeDragManager.isDragging(nodeTargetId),
+            'will_toggle_selection':
+                !isStillDraggingAfterUp && isTapCompletedAfterUp,
           },
-          'node_position': {
-            'x': node.logicalPosition.dx,
-            'y': node.logicalPosition.dy,
-          },
-          'node_at_position': nodeAtPosition?.id.value,
-          'tap_manager_states_count': _nodeTapManager.states.length,
-          'drag_state_exists': dragState != null,
-          'drag_manager_is_dragging': _nodeDragManager.isDragging(nodeTargetId),
-          'will_toggle_selection':
-              !isStillDraggingAfterUp && isTapCompletedAfterUp,
-        },
-      );
+        );
+      }
 
-      // Also send to external debug client if available
-      debugSink.sendLog(
-        category: LogCategory.gesture,
-        level: 'DEBUG',
-        message: 'TAP_STATE',
-        metadata: {
-          'event_type': 'tap_debug_state',
-          'nodeTargetId': nodeTargetId.value,
-          'state_exists': tapState != null,
-          'state_completed': tapState?.completed ?? false,
-          'state_cancelled': tapState?.cancelled ?? false,
-          'tap_count': tapState?.tapCount ?? 0,
-          'tracked_entity_id': _nodeTapManager.trackedEntityId?.value ?? 'null',
-          'is_still_dragging_after_up': isStillDraggingAfterUp,
-          'is_tap_completed_after_up': isTapCompletedAfterUp,
-          'touch_slop': kTouchSlop * 8,
-          'k_touch_slop': kTouchSlop,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
+      // Also send to external debug client if available (guarded).
+      if (debugSink.enabled) {
+        debugSink.sendLog(
+          category: LogCategory.gesture,
+          level: 'DEBUG',
+          message: 'TAP_STATE',
+          metadata: {
+            'event_type': 'tap_debug_state',
+            'nodeTargetId': nodeTargetId.value,
+            'state_exists': tapState != null,
+            'state_completed': tapState?.completed ?? false,
+            'state_cancelled': tapState?.cancelled ?? false,
+            'tap_count': tapState?.tapCount ?? 0,
+            'tracked_entity_id':
+                _nodeTapManager.trackedEntityId?.value ?? 'null',
+            'is_still_dragging_after_up': isStillDraggingAfterUp,
+            'is_tap_completed_after_up': isTapCompletedAfterUp,
+            'touch_slop': kTouchSlop * 8,
+            'k_touch_slop': kTouchSlop,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+      }
 
       logDebug(
         LogCategory.tap,
@@ -957,35 +997,37 @@ class GraphGestureManager {
         );
 
         // Log detailed failure reason for tap recognition
-        var failureReason = '';
-        if (isStillDraggingAfterUp && !isTapCompletedAfterUp) {
-          failureReason = 'still_dragging_and_tap_not_completed';
-        } else if (isStillDraggingAfterUp) {
-          failureReason = 'still_dragging';
-        } else if (!isTapCompletedAfterUp) {
-          failureReason = 'tap_not_completed';
-        } else {
-          failureReason = 'unknown';
-        }
+        if (isGestureDebugEnabled) {
+          var failureReason = '';
+          if (isStillDraggingAfterUp && !isTapCompletedAfterUp) {
+            failureReason = 'still_dragging_and_tap_not_completed';
+          } else if (isStillDraggingAfterUp) {
+            failureReason = 'still_dragging';
+          } else if (!isTapCompletedAfterUp) {
+            failureReason = 'tap_not_completed';
+          } else {
+            failureReason = 'unknown';
+          }
 
-        logGestureDebug(
-          GestureDebugEventType.tapDebugState,
-          'GraphGestureManager',
-          'TAP_RECOGNITION_FAILED',
-          data: {
-            'event_type': 'tap_recognition_failed',
-            'nodeTargetId': nodeTargetId.value,
-            'failure_reason': failureReason,
-            'is_still_dragging_after_up': isStillDraggingAfterUp,
-            'is_tap_completed_after_up': isTapCompletedAfterUp,
-            'tap_state_exists': tapState != null,
-            'tap_state_completed': tapState?.completed ?? false,
-            'tap_state_cancelled': tapState?.cancelled ?? false,
-            'tap_count': tapState?.tapCount ?? 0,
-            'tracked_entity_id':
-                _nodeTapManager.trackedEntityId?.value ?? 'null',
-          },
-        );
+          logGestureDebug(
+            GestureDebugEventType.tapDebugState,
+            'GraphGestureManager',
+            'TAP_RECOGNITION_FAILED',
+            data: {
+              'event_type': 'tap_recognition_failed',
+              'nodeTargetId': nodeTargetId.value,
+              'failure_reason': failureReason,
+              'is_still_dragging_after_up': isStillDraggingAfterUp,
+              'is_tap_completed_after_up': isTapCompletedAfterUp,
+              'tap_state_exists': tapState != null,
+              'tap_state_completed': tapState?.completed ?? false,
+              'tap_state_cancelled': tapState?.cancelled ?? false,
+              'tap_count': tapState?.tapCount ?? 0,
+              'tracked_entity_id':
+                  _nodeTapManager.trackedEntityId?.value ?? 'null',
+            },
+          );
+        }
       }
       entityProcessed = true;
     }
