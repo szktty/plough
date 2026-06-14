@@ -449,10 +449,10 @@
 | B3 | 調査 | 値等価性棚卸し(+ 未使用 equatable 削除) | 低 | なし | **完了(doc/value_equality_survey_B3.md, equatable 削除)** |
 | F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | **完了(e63c302)** |
 | F2 | 性能 | shouldRepaint をジオメトリ/スタイル比較に | 中 | なし | **完了(47615aa)** |
-| C1 | 中期 | 選択状態単一ソース化(A4 吸収) | 高 | A4 | **完了(8adc717)**: isSelected を derived 化、[R1] 乖離解消、force:true 除去 |
+| C1 | 中期 | 選択状態単一ソース化(A4 吸収) | 高 | A4 | **完了(8adc717 + 013f872)**: isSelected を derived 化、[R1] 乖離解消、force:true 除去。follow-up: removeNode/removeLink 時の stale selected id 除去(013f872) |
 | C2 | 長期 | NodeViewState 分離 | 最高 | C1,D1 | 設計メモ作成(`doc/c2_node_view_state_design.md`)。実装は D1 後・再レビュー必須 |
 | D1 | 長期 | RenderObject 化 RFC+PoC | 最大 | A,B | RFC ドラフト作成(`doc/rfc_render_graph_view.md`)。実装は PoC 合意後 |
-| D2 | 長期 | ジェスチャ FSM 集約 | 高 | E1 | テスト網拡充(D2-pre `e5d277b`)完了。FSM 化本体は未着手(テスト網先行の前提を満たした段階) |
+| D2 | 長期 | ジェスチャ FSM 集約 | 高 | E1 | テスト網拡充(D2-pre `e5d277b`+`d8f5449`)完了。FSM 化本体は未着手。**既知バグ**: リンク選択後の背景タップで deselect されない(ノード側と非対称、連続操作でノード deselect も汚染)。FSM 化(D2)の受け入れ基準に「リンク選択も背景タップで解除」を含める |
 | E1 | 短期 | ログ API lazy 化土台 + 最ホットガード | 低中 | なし | **完了(2d6c4c0)** |
 | E2 | 短期 | ログ enabled のレベル階層精緻化([S3]) | 低 | E3 と併用 | **完了(40eb44c)** |
 | E3 | 短期 | handlePointerDown/Up のログ map lazy 化([S4]) | 中 | E2 | **完了(40eb44c)**: handlePanStart はスコープ外 |

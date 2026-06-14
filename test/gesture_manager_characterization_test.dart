@@ -259,10 +259,13 @@ void main() {
       tapAt(gm, const Offset(200, 200));
       expect(graph.selectedEntityIds, contains(link.id));
 
-      // Current behavior: background tap after a link tap must not throw.
-      // Whether it actually clears the link selection is a known gap
-      // (background deselect path is deferred for nodes; link selection state
-      // may persist). This characterization pins the no-throw invariant.
+      // BUG (asymmetric deselect): node selection → background tap clears it;
+      // link selection → background tap does NOT clear it. The _pendingBackground-
+      // DeselectAt path is not reached after a link tap (early-return in
+      // handlePointerDown). Additionally, a link-tap followed by a background tap
+      // corrupts the node-side background deselect for subsequent interactions.
+      // Fix tracked separately (D2 FSM rework acceptance criterion).
+      // This characterization pins only the no-throw invariant.
       expect(() => tapAt(gm, const Offset(10, 10)), returnsNormally);
     });
 
@@ -347,6 +350,11 @@ void main() {
     // -- concurrent pointer (second down while first is tracked) ---------------
 
     test('second pointer down while node is tracked does not throw', () {
+      // NOTE: PointerDownEvent/PointerUpEvent here use the default pointer id (0),
+      // so both events are treated as the *same* pointer by the framework. This
+      // tests single-pointer-id reentrancy, NOT true multitouch (two independent
+      // pointer ids). True multitouch behaviour (pointer: 1 vs pointer: 2) should
+      // be characterised separately when needed.
       _addNodeAt(graph, const Offset(100, 100));
       final gm = manager();
 
