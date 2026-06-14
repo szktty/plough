@@ -449,7 +449,7 @@
 | B3 | 調査 | 値等価性棚卸し(+ 未使用 equatable 削除) | 低 | なし | **完了(doc/value_equality_survey_B3.md, equatable 削除)** |
 | F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | **完了(e63c302)** |
 | F2 | 性能 | shouldRepaint をジオメトリ/スタイル比較に | 中 | なし | **完了(47615aa)** |
-| C1 | 中期 | 選択状態単一ソース化(A4 吸収) | 高 | A4 | 未着手 |
+| C1 | 中期 | 選択状態単一ソース化(A4 吸収) | 高 | A4 | **完了(8adc717)**: isSelected を derived 化、[R1] 乖離解消、force:true 除去 |
 | C2 | 長期 | NodeViewState 分離 | 最高 | C1,D1 | 未着手 |
 | D1 | 長期 | RenderObject 化 RFC+PoC | 最大 | A,B | 未着手 |
 | D2 | 長期 | ジェスチャ FSM 集約 | 高 | E1 | 未着手 |
