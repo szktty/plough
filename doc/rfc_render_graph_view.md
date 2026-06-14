@@ -73,7 +73,15 @@
 - post-frame なしで geometry が取れる(同一フレームで子サイズ確定)。
 - tap / drag / zoom が既存と同等に動く(characterization テスト
   `gesture_manager_characterization_test.dart` を流用・拡張)。
+- **リンクの `hitTestSelf` が線分距離判定でヒットすること**(ノードは `hitTestChildren`
+  で済むが、リンクは子でない描画のため `hitTestSelf` + 線分距離判定が別途必要。
+  これが PoC で最も不確実な点であり、「リンクのヒットテストが当たる」を明示の
+  受け入れ基準に加える)。
 - 上記 4 つの既知 gotcha が PoC 構造で再現しない(または解消する)ことを確認。
+
+**no-go 条件**: 上記いずれかで RenderObject 機構が既存手書きより複雑化する、
+または gotcha が形を変えて残る場合は段階移行を保留し、F3+(rebuild 範囲縮小・
+sort キャッシュ)のみを単独で先行する。
 
 PoC で原理確認できたら**段階移行**(ノード描画 → リンク描画 → ヒットテスト → viewport)。
 
