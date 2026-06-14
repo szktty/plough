@@ -454,8 +454,8 @@
 | D1 | 長期 | RenderObject 化 RFC+PoC | 最大 | A,B | 未着手 |
 | D2 | 長期 | ジェスチャ FSM 集約 | 高 | E1 | 未着手 |
 | E1 | 短期 | ログ API lazy 化土台 + 最ホットガード | 低中 | なし | **完了(2d6c4c0)** |
-| E2 | 短期 | ログ enabled のレベル階層精緻化([S3]) | 低 | E3 と併用 | 未着手 |
-| E3 | 短期 | handlePointerDown/Up のログ map lazy 化([S4]) | 中 | E2 | 未着手 |
+| E2 | 短期 | ログ enabled のレベル階層精緻化([S3]) | 低 | E3 と併用 | **完了(40eb44c)** |
+| E3 | 短期 | handlePointerDown/Up のログ map lazy 化([S4]) | 中 | E2 | **完了(40eb44c)**: handlePanStart はスコープ外 |
 | F3+ | 性能 | rebuild 範囲縮小・sort キャッシュ | 高 | D1 | 未着手 |
 
 ---
