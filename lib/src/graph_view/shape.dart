@@ -1,11 +1,8 @@
 import 'dart:ui';
-import 'package:flame/components.dart';
-import 'package:flame/experimental.dart';
-import 'package:flame/geometry.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:plough/plough.dart';
 import 'package:plough/src/graph_view/geometry.dart';
 import 'package:plough/src/graph_view/graph_view.dart';
+import 'package:plough/src/utils/geometry_intersect.dart';
 
 /// A line segment between two points in a graph.
 ///
@@ -25,11 +22,6 @@ class GraphLine {
 
   /// The ending point of the line.
   final Offset end;
-
-  /// Internal helper to convert to Flame's line segment representation.
-  @internal
-  LineSegment get flameLineSegment =>
-      LineSegment(Vector2(start.dx, start.dy), Vector2(end.dx, end.dy));
 }
 
 /// An interface for defining node shapes in the graph.
@@ -75,14 +67,7 @@ class GraphCircle implements GraphShape {
   @override
   Set<Offset> getLineIntersections(Rect bounds, GraphLine line) {
     final r = radius ?? bounds.width / 2;
-    final flameCircle = CircleComponent(
-      position: Vector2(bounds.center.dx - r, bounds.center.dy - r),
-      radius: r,
-    );
-    final intersections = flameCircle.lineSegmentIntersections(
-      line.flameLineSegment,
-    );
-    return _vector2SetToOffsetSet(intersections);
+    return segmentCircleIntersections(line.start, line.end, bounds.center, r);
   }
 }
 
@@ -99,12 +84,6 @@ class GraphRectangle implements GraphShape {
 
   @override
   Set<Offset> getLineIntersections(Rect bounds, GraphLine line) {
-    final flameRect = Rectangle.fromRect(bounds);
-    final intersections = flameRect.intersections(line.flameLineSegment);
-    return _vector2SetToOffsetSet(intersections);
+    return segmentRectIntersections(line.start, line.end, bounds);
   }
-}
-
-Set<Offset> _vector2SetToOffsetSet(Iterable<Vector2> vectors) {
-  return vectors.map((v) => Offset(v.x, v.y)).toSet();
 }

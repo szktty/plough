@@ -16,7 +16,6 @@ dependencies:
   collection: ^1.18.0
   equatable: ^2.0.5
   fast_immutable_collections: ^11.0.0
-  flame: ^1.23.0
   flutter:
     sdk: flutter
   freezed_annotation: ^3.1.0
