@@ -327,6 +327,10 @@ class GraphImpl
 
   @override
   void addLink(GraphLinkImpl link) {
+    // Associate the link with this graph so graph-derived state (e.g. the
+    // derived link.isSelected backed by selectedLinkIds) resolves. Nodes are
+    // associated via onAdded in addNode; links were missing this.
+    link.onAdded(this);
     state.value = state.value.copyWith(
       links: state.value.links.add(link.id, link),
     );
@@ -443,29 +447,13 @@ class GraphImpl
       return;
     }
 
-    var hasChanged = false;
-
     bringToFront(id);
 
+    // selectedNodeIds is the single source of truth; node.isSelected is a
+    // derived view of it, so we only update the set here.
     if (!state.value.allowMultiSelection) {
-      final currentSelectedNodes = state.value.selectedNodeIds.toList();
-      final updatedNodeIds = IList([node.id]);
-
-      for (final currentId in currentSelectedNodes) {
-        if (currentId != id) {
-          (getNodeOrThrow(currentId) as GraphNodeImpl).isSelected = false;
-          hasChanged = true;
-        }
-      }
-
-      node.isSelected = true;
-      hasChanged = true;
-
-      if (hasChanged) {
-        state.value = state.value.copyWith(selectedNodeIds: updatedNodeIds);
-      }
+      state.value = state.value.copyWith(selectedNodeIds: IList([node.id]));
     } else {
-      node.isSelected = true;
       state.value = state.value.copyWith(
         selectedNodeIds: state.value.selectedNodeIds.add(node.id),
       );
@@ -484,7 +472,6 @@ class GraphImpl
       return;
     }
 
-    node.isSelected = false;
     state.value = state.value.copyWith(
       selectedNodeIds: state.value.selectedNodeIds.remove(node.id),
     );
@@ -509,28 +496,11 @@ class GraphImpl
       return;
     }
 
-    var hasChanged = false;
-
+    // selectedLinkIds is the single source of truth; link.isSelected is a
+    // derived view of it, so we only update the set here.
     if (!state.value.allowMultiSelection) {
-      final currentSelectedLinks = state.value.selectedLinkIds.toList();
-      final updatedLinkIds = IList([link.id]);
-
-      for (final currentId in currentSelectedLinks) {
-        if (currentId != id) {
-          final otherLink = getLinkOrThrow(currentId) as GraphLinkImpl;
-          otherLink.isSelected = false;
-          hasChanged = true;
-        }
-      }
-
-      link.isSelected = true;
-      hasChanged = true;
-
-      if (hasChanged) {
-        state.value = state.value.copyWith(selectedLinkIds: updatedLinkIds);
-      }
+      state.value = state.value.copyWith(selectedLinkIds: IList([link.id]));
     } else {
-      link.isSelected = true;
       state.value = state.value.copyWith(
         selectedLinkIds: state.value.selectedLinkIds.add(link.id),
       );
@@ -546,7 +516,6 @@ class GraphImpl
       return;
     }
 
-    link.isSelected = false;
     state.value = state.value.copyWith(
       selectedLinkIds: state.value.selectedLinkIds.remove(link.id),
     );
@@ -564,29 +533,18 @@ class GraphImpl
 
   @override
   void clearSelection() {
-    // Save IDs of currently selected nodes and links
-    final selectedNodeIds = state.value.selectedNodeIds.toList();
-    final selectedLinkIds = state.value.selectedLinkIds.toList();
-
-    // Deselect all selected nodes (individual state update, reflected in UI)
-    for (final nodeId in selectedNodeIds) {
-      final node = getNodeOrThrow(nodeId) as GraphNodeImpl;
-      node.isSelected = false;
+    if (state.value.selectedNodeIds.isEmpty &&
+        state.value.selectedLinkIds.isEmpty) {
+      return;
     }
-
-    // Deselect all selected links (individual state update, reflected in UI)
-    for (final linkId in selectedLinkIds) {
-      final link = getLinkOrThrow(linkId) as GraphLinkImpl;
-      link.isSelected = false;
-    }
-
-    // Clear graph selection state
+    // Clearing the single source of truth updates every derived isSelected and
+    // notifies once. The old per-node/link _isSelected sync (and the resulting
+    // `force: true` to mask duplicate notifications) is no longer needed.
     setState(
       state.value.copyWith(
         selectedNodeIds: const IListConst([]),
         selectedLinkIds: const IListConst([]),
       ),
-      force: true,
     );
   }
 
