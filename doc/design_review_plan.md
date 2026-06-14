@@ -445,7 +445,7 @@
 | A7 | 死コード | enhanced_client.dart 削除(未参照・http) | 低 | なし | **完了(2fad4b2)** |
 | A8 | バグ | removeLink の `_notifyLayoutChange` 欠落 | 低中 | A1 と同 PR | **完了(e63c302)** |
 | B1 | 依存 | flame 撤去 / `intersections.first` 依存排除 | 中 | なし | **完了(31d8d07)** |
-| B2 | 依存 | debug 別パッケージ化 | 高 | E1 | **B2-a 完了(DebugSink 注入点集約・挙動不変)/ B2-b 未着手(モノレポ移動・http 除去)** |
+| B2 | 依存 | debug 別パッケージ化 | 高 | E1 | **完了**: B2-a(DebugSink 集約 `493f209`)/ B2-b stage1(DebugBackend `b9c6ead`)/ B2-b stage2(plough_devtools 分離・http 除去・web 安全 `8a56176`) |
 | B3 | 調査 | 値等価性棚卸し(+ 未使用 equatable 削除) | 低 | なし | **完了(doc/value_equality_survey_B3.md, equatable 削除)** |
 | F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | **完了(e63c302)** |
 | F2 | 性能 | shouldRepaint をジオメトリ/スタイル比較に | 中 | なし | **完了(47615aa)** |
