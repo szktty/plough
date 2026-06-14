@@ -73,6 +73,12 @@ Set<Offset> segmentCircleIntersections(
 /// rectangle produces no points. Uses the Liang–Barsky parametric clip to find
 /// where the segment enters and exits the rectangle, then keeps the parameters
 /// that correspond to an actual edge crossing.
+///
+/// When [start] is already on or inside the rectangle, the entry point is not
+/// emitted (only the exit is); symmetrically, an [end] on or inside the
+/// rectangle omits the exit. For the center-to-center link routing this is
+/// used for, [start] is the node center (always interior), so callers get the
+/// single boundary crossing toward [end].
 Set<Offset> segmentRectIntersections(
   Offset start,
   Offset end,
