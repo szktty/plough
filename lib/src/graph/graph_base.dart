@@ -315,12 +315,16 @@ class GraphImpl
     _outgoingIndex.remove(id);
 
     var links = state.value.links;
+    var selectedLinkIds = state.value.selectedLinkIds;
     for (final link in affectedLinks) {
       links = links.remove(link.id);
+      selectedLinkIds = selectedLinkIds.remove(link.id);
     }
     state.value = state.value.copyWith(
       nodes: state.value.nodes.remove(id),
       links: links,
+      selectedNodeIds: state.value.selectedNodeIds.remove(id),
+      selectedLinkIds: selectedLinkIds,
     );
     _notifyLayoutChange();
   }
@@ -378,7 +382,10 @@ class GraphImpl
     final link = state.value.links[id]!;
     _incomingIndex[link.target.id]?.remove(link);
     _outgoingIndex[link.source.id]?.remove(link);
-    state.value = state.value.copyWith(links: state.value.links.remove(id));
+    state.value = state.value.copyWith(
+      links: state.value.links.remove(id),
+      selectedLinkIds: state.value.selectedLinkIds.remove(id),
+    );
     _notifyLayoutChange();
   }
 

@@ -84,6 +84,65 @@ void main() {
       expect(graph.selectedLinkIds, isEmpty);
     });
 
+    test('removing a selected node clears it from selectedNodeIds', () {
+      final graph = Graph();
+      final a = GraphNode(properties: const {'label': 'a'});
+      graph.addNode(a);
+      graph.selectNode(a.id);
+      expect(graph.selectedNodeIds, contains(a.id));
+
+      graph.removeNode(a.id);
+
+      expect(graph.selectedNodeIds, isEmpty);
+      // selectedNodes must not throw (no stale id).
+      expect(graph.selectedNodes, isEmpty);
+    });
+
+    test('removing a selected link clears it from selectedLinkIds', () {
+      final graph = Graph();
+      final a = GraphNode(properties: const {'label': 'a'});
+      final b = GraphNode(properties: const {'label': 'b'});
+      graph
+        ..addNode(a)
+        ..addNode(b);
+      final link = GraphLink(
+        source: a,
+        target: b,
+        direction: GraphLinkDirection.outgoing,
+      );
+      graph.addLink(link);
+      graph.selectLink(link.id);
+      expect(graph.selectedLinkIds, contains(link.id));
+
+      graph.removeLink(link.id);
+
+      expect(graph.selectedLinkIds, isEmpty);
+      expect(graph.selectedLinks, isEmpty);
+    });
+
+    test('removing a node also clears its connected selected links', () {
+      final graph = Graph();
+      final a = GraphNode(properties: const {'label': 'a'});
+      final b = GraphNode(properties: const {'label': 'b'});
+      graph
+        ..addNode(a)
+        ..addNode(b);
+      final link = GraphLink(
+        source: a,
+        target: b,
+        direction: GraphLinkDirection.outgoing,
+      );
+      graph.addLink(link);
+      graph.selectLink(link.id);
+      expect(graph.selectedLinkIds, contains(link.id));
+
+      // Removing node a cascades to remove the link.
+      graph.removeNode(a.id);
+
+      expect(graph.selectedLinkIds, isEmpty);
+      expect(graph.selectedLinks, isEmpty);
+    });
+
     test('link selection stays consistent with selectedLinkIds', () {
       final graph = Graph();
       final a = GraphNode(properties: const {'label': 'a'});
