@@ -126,12 +126,16 @@ class NoopDebugSink implements DebugSink {
   確定の実施は **B2-b 着手時**でよい(B2-a は単一パッケージ内のため不要)。
 
 ## 未決事項(B2-b 着手時に確定)
-2. **`logger` 依存の扱い**: `logger`(コンソール整形)は本体ログでも使われている可能性。
+1. **`logger` 依存の扱い**: `logger`(コンソール整形)は本体ログでも使われている可能性。
    本体に残すか devtools へ寄せるか(B2 の受け入れ基準は「可能なら」)。実装時に利用箇所確認。
-3. **公開 API の互換**: 現状 example/利用者が `Plough().enableExternalDebug(...)` 等の
+2. **公開 API の互換**: 現状 example/利用者が `Plough().enableExternalDebug(...)` 等の
    API を直接呼んでいるか。呼んでいれば `attachDebugSink` への移行で**破壊的変更**になる。
    → `plough.dart` の公開デバッグ API を棚卸しして、後方互換の必要性を判断する(次の調査)。
-4. **段階 PR の粒度**: B2-a / B2-b を分けるか一括か。
+3. **注入点のスレッド/isolate 前提**(B2-a レビュー指摘): B2-a の `debugSink` は可変
+   トップレベル変数で、並行/複数 isolate / `test/concurrency` では競合しうる。B2-b で
+   `Plough` シングルトンのフィールド(`attachDebugSink` セッター)へ寄せる際、
+   **どの isolate からの差し替えを想定するか**(基本はメイン isolate で起動時に 1 回)を
+   明記する。現状の利用(デバッグ有効化は起動時 1 回)では実害なし。
 
 ---
 

@@ -8,10 +8,11 @@ import 'package:plough/src/utils/logger.dart';
 /// structured logs to a debug backend. The core never references the concrete
 /// HTTP/server implementation directly; it talks to a [DebugSink].
 ///
-/// The default sink ([defaultDebugSink]) forwards to the in-package
-/// [ExternalDebugClient], preserving existing behavior. A later step (B2-b)
-/// moves that implementation into a separate `plough_devtools` package and
-/// swaps the default to a no-op, making the core web-safe and dependency-light.
+/// The default sink ([debugSink], an [ExternalClientDebugSink]) forwards to the
+/// in-package [ExternalDebugClient], preserving existing behavior. A later step
+/// (B2-b) moves that implementation into a separate `plough_devtools` package
+/// and swaps the default to a no-op, making the core web-safe and
+/// dependency-light.
 ///
 /// See `doc/b2_debug_separation_design.md` for the full plan.
 @internal

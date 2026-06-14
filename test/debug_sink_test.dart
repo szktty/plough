@@ -12,7 +12,13 @@ import 'package:plough/src/utils/logger.dart';
 /// Records the calls it receives so the test can assert on them.
 class _RecordingDebugSink implements DebugSink {
   bool sinkEnabled = true;
-  final List<({LogCategory category, String level, String message})> calls = [];
+  final List<
+      ({
+        LogCategory category,
+        String level,
+        String message,
+        Map<String, dynamic>? metadata,
+      })> calls = [];
 
   @override
   bool get enabled => sinkEnabled;
@@ -24,7 +30,14 @@ class _RecordingDebugSink implements DebugSink {
     required String message,
     Map<String, dynamic>? metadata,
   }) {
-    calls.add((category: category, level: level, message: message));
+    calls.add(
+      (
+        category: category,
+        level: level,
+        message: message,
+        metadata: metadata,
+      ),
+    );
   }
 }
 
@@ -65,5 +78,22 @@ void main() {
 
   test('default sink is the external-client adapter', () {
     expect(debugSink, isA<ExternalClientDebugSink>());
+  });
+
+  test('sendLog carries metadata through to the sink', () {
+    // gesture_manager passes a `metadata:` map on every call; guard that the
+    // DebugSink contract preserves it (regression net for B2-b sink swaps).
+    final sink = _RecordingDebugSink();
+    debugSink = sink;
+
+    debugSink.sendLog(
+      category: LogCategory.gesture,
+      level: 'INFO',
+      message: 'with metadata',
+      metadata: {'x': 1.0, 'y': 2.0},
+    );
+
+    expect(sink.calls, hasLength(1));
+    expect(sink.calls.single.metadata, {'x': 1.0, 'y': 2.0});
   });
 }
