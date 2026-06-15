@@ -4,7 +4,7 @@
 
 Plough is a comprehensive Flutter library designed for implementing interactive graph visualizations in Flutter applications. It provides a flexible and powerful framework for creating, manipulating, and visualizing graph data structures with rich interactive capabilities.
 
-Version: 0.1.0
+Version: 0.8.0 (develop)
 
 ## Key Features
 
@@ -569,8 +569,28 @@ Plough follows a modular architecture with clear separation of concerns:
 3. **Layout Strategies**: Implements different algorithms for node positioning
 4. **Renderers**: Controls the visual appearance of graph elements
 5. **Interactive Components**: Manages user interactions like drag, tap, and hover
+6. **Debug Abstraction**: `DebugSink`/`DebugBackend` interfaces with web-safe no-op defaults; heavy `dart:io`/`http` stack lives in `plough_devtools`
 
 This architecture allows for extensive customization while maintaining a consistent API.
+
+### Debug Architecture
+
+The core package is web-safe: it ships no-op implementations of `DebugSink`
+(log telemetry) and `DebugBackend` (server lifecycle) by default. The full
+debug stack (HTTP server, structured logging, performance monitoring) is
+provided by the companion `plough_devtools` package. Inject it at startup:
+
+```dart
+import 'package:plough_devtools/plough_devtools.dart';
+
+void main() {
+  attachPloughDevtools();  // swaps in real DebugSink + DebugBackend
+  runApp(MyApp());
+}
+```
+
+Without `plough_devtools`, all debug calls are no-ops and the core has no
+`dart:io`/`http` dependency.
 
 ## Directory Structure
 
@@ -638,6 +658,7 @@ See also:
 *   `void selectLink(GraphId id)`: Selects the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
 *   `void deselectLink(GraphId id)`: Deselects the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
 *   `void toggleSelectLink(GraphId id)`: Toggles the selection state of the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
+*   `void clearSelection()`: Deselects all currently selected nodes and links.
 *   `void markNeedsLayout()`: Marks the graph as needing a layout recalculation, triggering `GraphView` to update.
 *   `void bringToFront(GraphId id)`: Brings the entity (node or link) with the given `id` to the front of the display stack. Throws `ArgumentError` if no entity with `id` exists.
 *   `GraphOrderManager getOrderManager([List<GraphId>? ids])`: Returns a `GraphOrderManager` for controlling the z-order of entities (all entities if `ids` is null, specified entities otherwise). Throws `ArgumentError` if any provided ID doesn't exist.
@@ -1545,6 +1566,70 @@ Key implementations:
 - `GraphRandomLayoutStrategy`: Random placement
 - `GraphManualLayoutStrategy`: Manual positioning
 
+### Debug Interfaces
+
+#### DebugSink
+
+Injection point for structured log telemetry. The core uses the active
+`debugSink` to forward per-call log entries to a backend. The default is
+`NoopDebugSink` (web-safe, no-op). The real HTTP-backed implementation is
+provided by `plough_devtools` and injected via `Plough().attachDebugSink(...)`.
+
+##### Interface
+
+```dart
+abstract interface class DebugSink {
+  bool get enabled;
+  void sendLog({
+    required LogCategory category,
+    required String level,
+    required String message,
+    Map<String, dynamic>? metadata,
+  });
+}
+```
+
+##### Implementations
+
+*   `NoopDebugSink`: Default web-safe no-op (always `enabled == false`).
+*   `ExternalClientDebugSink` (in `plough_devtools`): HTTP-backed sink that forwards entries to the debug server.
+
+#### DebugBackend
+
+Injection point for advanced debug features (HTTP server, structured logging,
+performance monitoring). The default is `NoopDebugBackend`. Injected via
+`Plough().attachDebugBackend(...)`.
+
+##### Interface
+
+*   `Future<void> initialize({bool enableServer, bool enableStructuredLogging, bool enablePerformanceMonitoring, int serverPort, bool tryAlternativePorts})`: Starts debug features.
+*   `Future<void> shutdown()`: Stops all debug features.
+*   `bool get isServerRunning`: Whether the HTTP server is running.
+*   `String? get serverUrl`: Server URL, or `null` when not running.
+*   `int? get serverPort`: Server port, or `null` when not running.
+*   `Map<String, dynamic> generateDebugReport()`: Returns a debug snapshot.
+
+##### Implementations
+
+*   `NoopDebugBackend`: Default web-safe no-op.
+*   `DebugManagerBackend` (in `plough_devtools`): Full `dart:io`/`http` server stack.
+
+### Logging API
+
+Top-level logging functions exported from `package:plough/plough.dart`.
+
+*   `bool logEnabled(LogCategory category, [Level? level])`: Returns `true` if a log at `category` (optionally at `level`) would be emitted. Use as a guard before building expensive payloads (maps, joined strings) on hot paths.
+*   `void logDebug(LogCategory category, Object message)`: Logs at debug level. `message` may be a `String` or `String Function()` — the closure form avoids string construction when logging is off.
+*   `void logInfo(LogCategory category, Object message)`: Logs at info level (same overload as `logDebug`).
+*   `void logWarning(LogCategory category, Object message)`: Logs at warning level.
+*   `void logError(LogCategory category, Object message)`: Logs at error level.
+
+#### LogCategory (Enum)
+
+Selects the subsystem for a log entry. Used with `logEnabled` and the log functions above.
+
+Values: `gesture`, `selection`, `drag`, `tap`, `layout`, `rendering`, `graph`, `performance`, `debug`, `state`, `animation`, `hitTest`.
+
 ### Global Settings
 
 #### Plough (Singleton)
@@ -1552,11 +1637,30 @@ Key implementations:
 Singleton class managing global settings for the Plough library.
 Access the instance via `Plough()`.
 
+The core package ships with web-safe no-op defaults for all debug features.
+Advanced debug functionality (HTTP server, structured logging, performance
+monitoring) lives in the separate `plough_devtools` package and is injected
+at runtime via `attachDebugSink` / `attachDebugBackend`.
+
 ##### Properties
 
-*   `bool debugLogEnabled`: Controls the output of debug logs. Setting to `true` enables detailed logging.
+*   `bool debugLogEnabled`: Controls the output of debug logs. Setting to `true` enables detailed logging via `configureLogging`.
 *   `bool debugViewEnabled`: Controls debug drawing in the graph view (bounding boxes, grid lines, node positions, connection points). Setting to `true` enables `GraphPositionPlotter` globally.
-*   `bool debugSignalsEnabled`: Controls the output of debug information related to state management (graph data changes, property updates, layout/selection state changes). Setting to `true` enables Signals DevTools.
+*   `bool debugSignalsEnabled`: Controls the output of debug information related to state management.
+*   `bool debugAdvancedEnabled`: Controls the advanced debug backend (server lifecycle). Setting to `true` calls `debugBackend.initialize()`.
+*   `String? debugServerUrl`: The running debug server URL (delegates to the active `DebugBackend`; `null` when not running or using the default no-op backend).
+
+##### Methods
+
+*   `Plough enableLogCategories(Map<LogCategory, Level> categories)`: Enable logging for specific categories at specified levels.
+*   `Plough enableAllLogCategories([Level level = Level.debug])`: Enable all log categories at the given level.
+*   `Plough clearLogCategories()`: Clear all log category configurations.
+*   `Future<void> initializeDebugFeatures({bool enableServer, bool enableStructuredLogging, bool enablePerformanceMonitoring, int serverPort, bool tryAlternativePorts})`: Initialize advanced debug features via the active `DebugBackend`.
+*   `Future<void> shutdownDebugFeatures()`: Shutdown all debug features via the active `DebugBackend`.
+*   `Map<String, dynamic> generateDebugReport()`: Generate a comprehensive debug report snapshot via the active `DebugBackend`.
+*   `void attachDebugSink(DebugSink sink)`: Replaces the active `DebugSink` with a custom implementation (e.g. the HTTP-backed sink from `plough_devtools`).
+*   `void attachDebugBackend(DebugBackend backend)`: Replaces the active `DebugBackend` with a custom implementation.
+*   `void detachDebug()`: Restores the web-safe no-op `DebugSink` and `DebugBackend`.
 
 ### Renderer Styles
 
