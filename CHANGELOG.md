@@ -1,5 +1,33 @@
 ## develop
 
+### Design review — bug fixes, architecture, and performance
+
+**Bug Fixes**
+- [FIX] `removeNode` now removes connected links from the `links` map; previously orphaned link entries remained and could be used as render targets.
+- [FIX] `removeLink` now calls `_notifyLayoutChange()`; previously removing a link was not reflected in the UI or layout.
+- [FIX] `reverseLink` now notifies listeners and re-indexes the adjacency maps (`_incomingIndex`/`_outgoingIndex`); previously the direction swap was invisible to the UI.
+- [FIX] `deselectNode`/`deselectLink` no longer diverges `isSelected` flag and `selectedNodeIds` when called on an already-unselected entity.
+- [FIX] `KeyedSubtree` key changed from `graph.hashCode` to `graph.id` to prevent collisions on graph swap.
+- [FIX] `removeNode`/`removeLink` now clean stale ids from `selectedNodeIds`/`selectedLinkIds`; previously stale ids caused `ArgumentError` in `selectedNodes`/`selectedLinks`.
+
+**Performance**
+- [IMPROVE] Link painter `shouldRepaint` now compares geometry and style fields instead of unconditionally returning `true`, reducing unnecessary repaints.
+- [IMPROVE] View/key maps (`_nodeViews`, `_nodeKeys`, `_linkKeys`) are now cleaned up when a node or link is removed, eliminating an unbounded memory leak.
+- [IMPROVE] Log API extended to accept `Object message` (both `String` and `String Function()`); gesture-manager hot paths now pass closures so string construction is skipped when logging is off. Level-aware `enabled(category, level)` guard added.
+
+**Architecture / Internal**
+- [REFACTOR] Selection state unified: `node.isSelected`/`link.isSelected` are now derived getters backed by `GraphData.selectedNodeIds`/`selectedLinkIds`; manual dual-sync code and `force: true` removed.
+- [REFACTOR] Debug stack abstracted behind `DebugSink`/`DebugBackend` no-op defaults; the heavyweight `dart:io`/`http` implementation moved to a separate `plough_devtools` package. The core package is now web-safe and no longer depends on `http`.
+- [REFACTOR] `flame` dependency removed; segment × circle and segment × rectangle intersection logic is now implemented internally.
+- [CLEANUP] Dead file `enhanced_client.dart` (unreferenced) and dead field `_nodeDependencies` (never read) removed.
+- [CLEANUP] Default link thickness extracted to a named constant (was a magic number `30` with a TODO comment).
+
+**Testing**
+- [TEST] Gesture manager characterization tests expanded to cover link tap/drag, drag lifecycle (pan produces drag-update events, not tap), drag-end does not toggle selection, and concurrent pointer reentrancy.
+- [TEST] Selection single-source tests added covering stale-id removal on node/link deletion, `canSelect` divergence, and derived `isSelected` consistency.
+
+---
+
 - [FIX] `GraphCircle.getLineIntersections`: fixed incorrect `CircleComponent` position that caused link arrow endpoints to land outside the circle boundary when the specified `radius` differs from half the node's bounding-box width.
 - [ADD] `GraphViewport` widget: pan and pinch-to-zoom support built into plough, eliminating the need to wrap `GraphView` in Flutter's `InteractiveViewer`.
 - [ADD] `GraphViewportController`: `ValueNotifier<Matrix4>`-based controller with `pan()`, `zoomAt()`, `reset()`, and `animateTo()` for programmatic viewport control.

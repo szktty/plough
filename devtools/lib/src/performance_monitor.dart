@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/utils/logger.dart';
+import 'package:plough/plough.dart';
 
 /// Performance measurement result
 @internal

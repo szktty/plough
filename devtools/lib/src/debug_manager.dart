@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:plough/src/debug/debug_server.dart';
-import 'package:plough/src/debug/performance_monitor.dart';
-import 'package:plough/src/debug/structured_logger.dart';
-import 'package:plough/src/utils/logger.dart';
+import 'package:plough_devtools/src/debug_server.dart';
+import 'package:plough_devtools/src/performance_monitor.dart';
+import 'package:plough_devtools/src/structured_logger.dart';
+import 'package:plough/plough.dart';
 
 /// Integrated management class for debug features
 @internal

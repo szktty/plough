@@ -50,7 +50,7 @@ cd example && flutter run -d macos    # or -d ios, -d chrome
 
 5. **Tooltip** (`lib/src/tooltip/`) — Tooltip behavior config and widgets.
 
-6. **Debug** (`lib/src/debug/`) — `Plough` singleton for global config, performance monitor, structured logger.
+6. **Debug** (`lib/src/debug/`) — `Plough` singleton for global config. The core only holds the web-safe abstractions `DebugSink`/`DebugBackend` (default to no-ops). The heavyweight `dart:io`/`http` debug stack (HTTP server, external log client, structured logger, performance monitor, diagnostics) lives in the separate `plough_devtools` package under `devtools/`; call `attachPloughDevtools()` to wire it in. This keeps the core free of `dart:io`/`http` (web-safe).
 
 ### State Management Flow
 

@@ -73,7 +73,6 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   }
 
   final ValueNotifier<GraphLinkViewGeometry?> _geometry = ValueNotifier(null);
-  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
 
   /// Updates the state and notifies changes
   ///
@@ -146,14 +145,8 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
     setState(state.value.copyWith(canDrag: canDrag));
   }
 
-  ValueNotifier<bool> get isSelectedState => _isSelected;
-
   @override
-  bool get isSelected => _isSelected.value;
-
-  set isSelected(bool isSelected) {
-    _isSelected.value = isSelected;
-  }
+  bool get isSelected => graph?.selectedLinkIds.contains(id) ?? false;
 
   @override
   GraphLinkViewGeometry? get geometry => _geometry.value;

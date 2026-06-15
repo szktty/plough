@@ -65,7 +65,6 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
       _connectionGeometries = {};
   final ValueNotifier<GraphShape?> _shape = ValueNotifier(null);
   final ValueNotifier<Offset> _animatedPosition = ValueNotifier(Offset.zero);
-  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
   final ValueNotifier<bool> _isAnimating = ValueNotifier(false);
   final ValueNotifier<bool> _isAnimationCompleted = ValueNotifier(false);
   final ValueNotifier<Offset> _animationStartPosition = ValueNotifier(
@@ -82,10 +81,25 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     state, // for isArranged and other state changes
   ]);
 
-  /// Listenable for state changes that affect rendering but not layout
-  late final Listenable _renderStateListenable = Listenable.merge([
-    _isSelected, // for selection state changes
-  ]);
+  /// Listenable for state changes that affect rendering but not layout.
+  ///
+  /// Selection is a derived view of the owning graph's `selectedNodeIds`
+  /// (single source of truth), so we listen to the graph itself for selection
+  /// changes. The listenable is (re)built when the node is added to a graph.
+  Listenable _renderStateListenable = Listenable.merge([]);
+
+  void _rebuildRenderStateListenable() {
+    final g = graph;
+    _renderStateListenable = Listenable.merge([
+      if (g != null) g, // graph notifies on selectedNodeIds changes
+    ]);
+  }
+
+  @override
+  void onAdded(Graph graph) {
+    super.onAdded(graph);
+    _rebuildRenderStateListenable();
+  }
 
   /// Public accessor for render state listenable
   @override
@@ -172,9 +186,10 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   @override
   set canSelect(bool canSelect) {
     setState(state.value.copyWith(canSelect: canSelect));
-    // If canSelect is disabled, also deselect the node
+    // If canSelect is disabled, also deselect the node — through the graph so
+    // selectedNodeIds (the single source of truth) and isSelected stay in sync.
     if (!canSelect && isSelected) {
-      _isSelected.value = false;
+      graph?.deselectNode(id);
     }
   }
 
@@ -183,14 +198,8 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     setState(state.value.copyWith(canDrag: canDrag));
   }
 
-  ValueNotifier<bool> get isSelectedState => _isSelected;
-
   @override
-  bool get isSelected => _isSelected.value;
-
-  set isSelected(bool isSelected) {
-    _isSelected.value = isSelected;
-  }
+  bool get isSelected => graph?.selectedNodeIds.contains(id) ?? false;
 
   bool get isArranged => state.value.isArranged;
 

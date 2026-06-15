@@ -191,7 +191,26 @@ abstract class _BaseLinkRendererPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is! _BaseLinkRendererPainter) return true;
+    // Repaint only when something the paint() path actually reads has changed.
+    // geometry and style are @freezed value types; the rest are doubles, a
+    // Color, enums, or the link direction enum — all with value equality.
+    // sourceView/targetView/child Widgets are not read while painting, so they
+    // are intentionally excluded.
+    final a = renderer;
+    final b = oldDelegate.renderer;
+    return a.geometry != b.geometry ||
+        a.style != b.style ||
+        a.color != b.color ||
+        a.lineWidth != b.lineWidth ||
+        a.lineStyle != b.lineStyle ||
+        a.arrowStyle != b.arrowStyle ||
+        a.arrowSize != b.arrowSize ||
+        a.thickness != b.thickness ||
+        a.routing != b.routing ||
+        a.link.direction != b.link.direction;
+  }
 }
 
 /// Straight link renderer.

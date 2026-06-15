@@ -136,12 +136,19 @@ class GraphLinkViewBehavior {
   /// Creates a link view behavior with the specified configuration.
   const GraphLinkViewBehavior({
     required this.builder,
-    this.thickness = 30,
+    this.thickness = defaultThickness,
     this.thicknessGetter,
     this.routing = GraphLinkRouting.straight,
     this.tooltipBehavior,
     this.child,
   });
+
+  /// Default link thickness in logical pixels.
+  ///
+  /// Used as the hit-test/visual width when no explicit thickness or
+  /// [thicknessGetter] is supplied. A larger value makes links easier to
+  /// interact with at the cost of visual weight.
+  static const double defaultThickness = 30;
 
   /// A function that builds the custom widget for rendering links.
   final GraphLinkWidgetBuilder builder;
@@ -319,7 +326,7 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
 
   @override
   GraphLinkViewBehavior createLinkViewBehavior() {
-    const thickness = 30.0; // Consider making this configurable
+    const thickness = GraphLinkViewBehavior.defaultThickness;
     return GraphLinkViewBehavior(
       builder: (
         context,
@@ -361,12 +368,21 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
     return GraphConnectionPoints(outgoing: outgoing, incoming: incoming);
   }
 
-  /// Calculates intersection points between a line and a node's shape.
+  /// Calculates the point where the link from [source] to [target] meets the
+  /// boundary of [source]'s shape.
   ///
-  /// Returns the first intersection point found, or null if no intersections exist.
+  /// The line runs from the source center toward the target center. Since the
+  /// source center lies inside the shape, the connection point is the boundary
+  /// crossing closest to that center (the smallest segment parameter). Among
+  /// possibly multiple intersections we pick that one explicitly rather than
+  /// relying on iteration order, which is unspecified for a [Set].
+  ///
+  /// Returns null when the shapes/geometry are missing or no intersection
+  /// exists.
   Offset? _getLineIntersections(GraphNode source, GraphNode target) {
+    final sourceCenter = source.geometry!.bounds.center;
     final line = GraphLine(
-      source.geometry!.bounds.center,
+      sourceCenter,
       target.geometry!.bounds.center,
     );
     final intersections = source.shape!.getLineIntersections(
@@ -376,7 +392,14 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
     if (intersections.isEmpty) {
       return null;
     }
-    return intersections.first;
+    // Pick the intersection nearest the source center so the result is
+    // deterministic regardless of the set's iteration order.
+    return intersections.reduce(
+      (a, b) => (a - sourceCenter).distanceSquared <=
+              (b - sourceCenter).distanceSquared
+          ? a
+          : b,
+    );
   }
 
   @override

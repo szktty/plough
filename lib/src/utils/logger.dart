@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logger/logger.dart';
-import 'package:plough/src/debug/external_debug_client.dart';
+import 'package:plough/src/debug/debug_sink.dart';
 
 /// Logger categories for selective logging control
 enum LogCategory {
@@ -53,6 +53,26 @@ class PloughLogger {
     return _loggers[category] ?? _createLogger(Level.off, category);
   }
 
+  /// Whether logging is enabled for [category], optionally at a specific [level].
+  ///
+  /// Used to skip building log messages (string interpolation, map literals,
+  /// `DateTime.now()` etc.) on hot paths when the category is disabled.
+  /// Mirrors the level the underlying [Logger] was created with; `configure`
+  /// has not run yet means everything defaults to [Level.off].
+  ///
+  /// When [level] is given, returns true only if a message at that severity
+  /// would actually be emitted — i.e. the category's configured level is not
+  /// [Level.off] and is at or below [level] (so e.g. a category set to
+  /// [Level.warning] reports `enabled(cat, Level.debug) == false`). This lets
+  /// hot paths skip closure evaluation for sub-threshold severities, not just
+  /// fully-disabled categories.
+  bool enabled(LogCategory category, [Level? level]) {
+    final configured = _levels[category];
+    if (configured == null || configured == Level.off) return false;
+    if (level == null) return true;
+    return level.value >= configured.value;
+  }
+
   /// Quick logging methods
   void d(LogCategory category, String message) {
     getLogger(category).d(message);
@@ -80,8 +100,12 @@ class PloughLogger {
     String level,
     String message,
   ) {
+    // Guard before calling sendLog so the disabled case pays nothing; sendLog
+    // also re-checks internally, but the metadata/log-entry map would otherwise
+    // be built on every call regardless.
+    if (!debugSink.enabled) return;
     try {
-      externalDebugClient.sendLog(
+      debugSink.sendLog(
         category: category,
         level: level,
         message: message,
@@ -96,18 +120,52 @@ class PloughLogger {
 final PloughLogger _logger = PloughLogger();
 
 /// Internal logging functions - not part of public API
-@internal
-void logDebug(LogCategory category, String message) =>
-    _logger.d(category, message);
-@internal
-void logInfo(LogCategory category, String message) =>
-    _logger.i(category, message);
-@internal
-void logWarning(LogCategory category, String message) =>
-    _logger.w(category, message);
-@internal
-void logError(LogCategory category, String message) =>
-    _logger.e(category, message);
+///
+/// [message] accepts either a [String] (evaluated eagerly by the caller) or a
+/// `String Function()` closure. Passing a closure defers message construction
+/// until the category is known to be enabled, so hot paths can avoid string
+/// interpolation when logging is off; for a disabled category the closure is
+/// never invoked. Returns `null` when nothing should be logged.
+String? _resolve(LogCategory category, Object message, Level level) {
+  assert(
+    message is String || message is String Function(),
+    'log message must be a String or a String Function(), got '
+    '${message.runtimeType}',
+  );
+  if (message is String Function()) {
+    // Only invoke the closure if a message at this severity would be emitted,
+    // so sub-threshold categories (e.g. set to warning) skip debug closures.
+    return _logger.enabled(category, level) ? message() : null;
+  }
+  return message as String;
+}
+
+/// Whether a log for [category] (optionally at [level]) would be emitted.
+///
+/// Useful as a guard before building expensive log payloads (maps, joined
+/// strings) outside the logging call, mirroring the closure short-circuit.
+bool logEnabled(LogCategory category, [Level? level]) =>
+    _logger.enabled(category, level);
+
+void logDebug(LogCategory category, Object message) {
+  final resolved = _resolve(category, message, Level.debug);
+  if (resolved != null) _logger.d(category, resolved);
+}
+
+void logInfo(LogCategory category, Object message) {
+  final resolved = _resolve(category, message, Level.info);
+  if (resolved != null) _logger.i(category, resolved);
+}
+
+void logWarning(LogCategory category, Object message) {
+  final resolved = _resolve(category, message, Level.warning);
+  if (resolved != null) _logger.w(category, resolved);
+}
+
+void logError(LogCategory category, Object message) {
+  final resolved = _resolve(category, message, Level.error);
+  if (resolved != null) _logger.e(category, resolved);
+}
 
 /// Configure logging for the entire package
 @internal
