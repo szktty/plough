@@ -1,81 +1,96 @@
-# 設計メモ: GraphNode から NodeViewState を分離(C2)
+# Design Note: Separating NodeViewState from GraphNode (C2)
 
-ステータス: **ドラフト(着手前・実装なし・着手前再レビュー必須)**
-作成日: 2026-06-14
-対象タスク: `doc/design_review_plan.md` の **C2**(リスク最高)
-依存: **D1 従属**(`doc/rfc_render_graph_view.md` 参照)。C1 完了済み。
-
----
-
-## 1. 背景と問題(課題 2-4)
-
-`GraphNode`(モデル)に **View 状態**が同居している:
-- `node.dart:63-75` 付近の `ValueNotifier` 群: `_geometry`、`_animatedPosition`、
-  `_isAnimating`、`_isAnimationCompleted`、`_animationStartPosition`、`_logicalPosition`、
-  `_stackOrder`。
-- `isArranged`、`animatedPosition`、`stackOrder` 等。
-
-これらは「ある Graph をある GraphView でどう描くか」という **View 固有の状態**で、純粋な
-グラフデータ(id、properties、weight、canSelect …)とは別物。同居の結果:
-
-- **1 つの Graph を 2 つの GraphView に同時表示できない**(geometry 等が 1 ノードに 1 つしか
-  持てず、2 つの View で取り合いになる)。
-- モデルと描画状態が密結合し、テスト・再利用が難しい。
-
-> 注: C1 で選択状態(`isSelected`)は既に `GraphData.selectedNodeIds` 由来の derived に
-> 分離済み([[graph-selection-single-source]])。選択は「Graph に属する状態」なのでモデル側
-> 単一ソースで正しい。C2 が扱うのは「View に属する状態」(geometry/animation/stackOrder)で
-> 方向が逆(モデルから出して View 側に置く)。
+Status: **Draft (not yet implemented — mandatory re-review before starting)**
+Created: 2026-06-14
+Task: **C2** in `doc/design_review_plan.md` (highest risk)
+Dependency: **Subordinate to D1** (see `doc/rfc_render_graph_view.md`).
+C1 is complete.
 
 ---
 
-## 2. 提案する分離
+## 1. Background and Problem (Issues 2–4)
 
-1. `GraphNode` を**純データ**に縮約(id、properties、weight、canSelect、canDrag、visible、
-   isEnabled 等のモデル属性のみ)。
-2. `GraphView` 側に `Map<GraphId, NodeViewState>` を持つ。`NodeViewState` =
-   geometry、animatedPosition、isAnimating、animationStartPosition、logicalPosition、
-   stackOrder、isArranged。
-3. レイアウト/レンダリング/ジェスチャの geometry 参照を**すべて View 側状態へ付け替える**。
-4. C1 と同様、reverseLink まわりの不変化(A3 で通知/インデックス対応済み)と整合を取る。
+`GraphNode` (the model) currently co-locates **View state**:
+- `ValueNotifier` fields around `node.dart:63–75`: `_geometry`,
+  `_animatedPosition`, `_isAnimating`, `_isAnimationCompleted`,
+  `_animationStartPosition`, `_logicalPosition`, `_stackOrder`.
+- Derived properties: `isArranged`, `animatedPosition`, `stackOrder`, etc.
 
----
+These fields represent **View-specific state** — "how a given Graph is rendered
+in a given GraphView" — and are distinct from pure graph data (id, properties,
+weight, canSelect, …). Co-locating them causes two concrete problems:
 
-## 3. 受け入れ基準
+- **A single `Graph` cannot be displayed in two `GraphView` instances
+  simultaneously**: each piece of geometry (bounds, animated position, etc.)
+  belongs to exactly one node, so two views would fight over the same fields.
+- Model and rendering state are tightly coupled, making testing and reuse
+  harder.
 
-- **同一 `Graph` を 2 つの `GraphView` に並べる widget テスト**を新設し、片方の操作
-  (ドラッグ等)がもう片方の geometry を壊さないことを確認。
-- 既存のレイアウト/ジェスチャ/golden テストが緑のまま。
-
----
-
-## 4. なぜ D1 従属か(着手順序)
-
-geometry の**保持場所・座標系・ヒットテスト経路**は D1(RenderObject 化)が規定する:
-- D1 ではノード位置を `ParentData` に持ちうる。その場合 `NodeViewState` の geometry は
-  ParentData と二重持ちになりかねない。
-- **D1 で「geometry を誰が持つか」を決め、その器に C2 が `NodeViewState` を流し込む**順が
-  正しい。C2 を先に切り出すと、D1 で保持構造を作り直す際に二度手間になる。
-
-したがって着手は **C1 完了(済) + D1 方針確定後**。
+> Note: In C1, selection state (`isSelected`) was already separated into a
+> derived getter backed by `GraphData.selectedNodeIds` (single source of truth).
+> Selection belongs to the **graph**, so keeping it on the model side is
+> correct. C2 targets **View state** (geometry/animation/stackOrder) and moves
+> in the opposite direction: out of the model and into the View layer.
 
 ---
 
-## 5. リスクと既知 gotcha
+## 2. Proposed Separation
 
-リスク: **非常に高**。geometry 同期は以下の既知 gotcha 群に直撃する:
-- [[node-geometry-no-scale-divide]]: geometry の座標系(logical/physical)を取り違えると
-  ヒットテスト/リンク端点が壊れる。
-- [[viewport-hittest-ownership]]: pointer 受け取りと scene 変換の責務。
-- [[drag-end-spatial-index-refresh]]: ドラッグ後の geometry 再構築タイミング。
-
-`Map<GraphId, NodeViewState>` 化で geometry の所有が View に移ると、これらの経路すべてを
-付け替える必要があり、回帰の影響が広い。
+1. Reduce `GraphNode` to **pure data**: id, properties, weight, canSelect,
+   canDrag, visible, isEnabled, and other model attributes only.
+2. Hold `Map<GraphId, NodeViewState>` on the `GraphView` side. `NodeViewState`
+   encompasses: geometry, animatedPosition, isAnimating, animationStartPosition,
+   logicalPosition, stackOrder, isArranged.
+3. **Redirect all geometry references** in layout, rendering, and gesture code
+   to the View-side state.
+4. Maintain consistency with the reverseLink invariants already handled in A3
+   (notify/index swap).
 
 ---
 
-## 6. 結論(現時点)
+## 3. Acceptance Criteria
 
-C2 は最高リスクで **D1 従属・着手前再レビュー必須**。本セッションでは設計メモのみ作成し、
-実装は行わない。D1 の PoC で geometry 保持構造が確定してから、本メモを更新して着手可否を
-再レビューする。
+- Add a **widget test that mounts the same `Graph` in two `GraphView` instances
+  side-by-side** and verify that an operation on one view (e.g. dragging a
+  node) does not corrupt the other view's geometry.
+- Existing layout, gesture, and golden tests remain green.
+
+---
+
+## 4. Why C2 is Subordinate to D1 (Order of Operations)
+
+The **location, coordinate system, and hit-test path for geometry** are
+determined by D1 (RenderObject migration):
+- D1 may store node positions in `ParentData`. If that happens, a
+  `NodeViewState.geometry` field would duplicate the `ParentData` storage.
+- The correct order is: **D1 decides who owns geometry, then C2 fills that
+  container with `NodeViewState`**. Starting C2 first means rebuilding the
+  storage structure when D1 arrives, doubling the work.
+
+Therefore: begin C2 only after **C1 is complete (done) and D1 direction is
+confirmed**.
+
+---
+
+## 5. Risks and Known Gotchas
+
+Risk: **Very high**. Moving geometry ownership to the View side directly
+intersects the following known gotchas:
+- **node-geometry-no-scale-divide**: Confusing logical vs. physical coordinate
+  systems in geometry breaks hit-testing and link endpoints.
+- **viewport-hittest-ownership**: The responsibility for pointer reception and
+  scene transformation.
+- **drag-end-spatial-index-refresh**: Timing of geometry reconstruction after a
+  drag ends.
+
+When `Map<GraphId, NodeViewState>` takes ownership of geometry, every one of
+these paths must be rewired. The regression surface is wide.
+
+---
+
+## 6. Conclusion (Current State)
+
+C2 carries maximum risk and is **subordinate to D1 with a mandatory re-review
+before starting**. This session produces only the design note; no implementation
+is performed. Once the D1 PoC establishes where geometry will be stored, update
+this note and re-review before deciding whether to proceed.

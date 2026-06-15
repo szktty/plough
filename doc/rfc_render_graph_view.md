@@ -1,121 +1,154 @@
-# RFC: GraphView の RenderObject 化(D1)
+# RFC: RenderObject Migration for GraphView (D1)
 
-ステータス: **ドラフト(着手前・実装なし)**
-作成日: 2026-06-14
-対象タスク: `doc/design_review_plan.md` の **D1**(リスク最大)
-前提: フェーズ A/B 完了済み。本 RFC は PoC 着手判断のための設計文書であり、
-実装は本ドキュメントの承認後に別途行う。
-
----
-
-## 1. 背景と問題
-
-現状の `GraphView` は Flutter の標準ウィジェット合成 + post-frame コールバックで
-レイアウト→geometry 読み戻し→再描画を行っている。これにより:
-
-- **post-frame ブートストラップ**(課題 1): `performLayout` 後に geometry を post-frame で
-  読み戻し、`GlobalKey` で子のサイズ/位置を取得、3 相 `_buildState`、
-  `refreshAllNodeGeometry` でヒットテスト用 spatial index を再構築する多段構造。
-  1 フレーム遅延・タイミング依存のバグ温床。
-- **性能上限**(課題 5): `AnimatedBuilder` が全ツリーを包み毎フレーム全 rebuild、
-  `_markSortDirty` 毎フレーム呼びで sort キャッシュ無効化、空間グリッドがリンク非対応。
-- **座標変換の手書き**: viewport の Transform に対し `screenToScene`/`globalToScene`/
-  `dragDeltaTransform` を手書きで合わせており、ズーム時の delta 補正など既知 gotcha が多い。
-
-### 関連する既知 gotcha(memory 由来)
-- [[drag-end-spatial-index-refresh]]: `handleDragEnd` の post-frame
-  `refreshAllNodeGeometry` は削除不可(ドラッグ後ヒットテストが壊れる)。
-- [[node-geometry-no-scale-divide]]: Transform 内でも `renderBox.size` は logical。
-  ズーム中 rebuild で bounds が縮みヒットテスト/リンク端点が壊れる。
-- [[viewport-drag-delta-and-handler-swap]]: ズーム中ドラッグは delta を scale で割る等。
-- [[viewport-hittest-ownership]]: pointer を Transform の外で受け `screenToScene` で
-  scene 変換。
-
-これらはいずれも「レイアウト/geometry/座標変換/ヒットテストを手書きで多段に組んでいる」
-ことの帰結。RenderObject 化で**原理的に解消されうる**かを PoC で検証するのが D1。
+Status: **Draft (not yet implemented)**
+Created: 2026-06-14
+Task: **D1** in `doc/design_review_plan.md` (highest risk)
+Prerequisite: Phases A and B complete. This RFC is a design document to inform
+the PoC decision; implementation follows only after this document is approved.
 
 ---
 
-## 2. 提案する構造
+## 1. Background and Problem
 
-`MultiChildRenderObjectWidget` + カスタム `RenderBox`(仮 `RenderGraph`)へ移行する。
+The current `GraphView` uses standard Flutter widget composition together with
+post-frame callbacks to drive the layout → geometry read-back → repaint cycle.
+This causes several problems:
 
-### 2.1 レイアウト
-- `performLayout` 内で各子(ノードウィジェット)に
-  `child.layout(constraints, parentUsesSize: true)` を呼び、**同一フレームで子サイズを取得**。
-  → post-frame の geometry 読み戻し・`GlobalKey`・3 相 `_buildState`・
-  `refreshAllNodeGeometry` を不要化。
-- ノード位置はレイアウト戦略(`GraphLayoutStrategy.performLayout`)が決めた logical 座標を
-  `BoxParentData`(または専用 ParentData)に保持。
+- **Post-frame bootstrap** (issue 1): After `performLayout`, geometry is read
+  back in a post-frame callback using `GlobalKey` to obtain child sizes and
+  positions, followed by a three-phase `_buildState` and
+  `refreshAllNodeGeometry` to rebuild the spatial index for hit-testing. This
+  multi-stage pipeline introduces one-frame delays and is a persistent source of
+  timing-dependent bugs.
+- **Performance ceiling** (issue 5): `AnimatedBuilder` wraps the entire tree and
+  triggers a full rebuild every frame; `_markSortDirty` is called every frame,
+  invalidating the sort cache; the spatial grid does not cover links.
+- **Hand-written coordinate transforms**: The viewport `Transform` requires
+  manual implementations of `screenToScene`, `globalToScene`, and
+  `dragDeltaTransform`. Known gotchas related to zoom delta correction follow
+  from this approach.
 
-### 2.2 描画
-- リンクは `RenderGraph.paint()` 内で直接描画(現在の `CustomPainter` 群を統合)。
-  ノードは子 RenderBox として `context.paintChild`。
-- スタックオーダー(z-order)は paint 順で表現。
+### Related Known Gotchas (from memory)
+- **drag-end-spatial-index-refresh**: The post-frame `refreshAllNodeGeometry`
+  call in `handleDragEnd` must not be removed — removing it breaks hit-testing
+  after a drag.
+- **node-geometry-no-scale-divide**: Even inside a `Transform`, `renderBox.size`
+  is in logical coordinates. Rebuilding during a zoom shrinks bounds, breaking
+  hit-testing and link endpoints.
+- **viewport-drag-delta-and-handler-swap**: During a zoom, the drag delta must
+  be divided by the scale factor, among other adjustments.
+- **viewport-hittest-ownership**: Pointer reception is placed outside the
+  `Transform` and a `screenToScene` conversion is applied.
 
-### 2.3 ヒットテスト
-- `hitTestChildren` でノードのヒットテストを RenderObject 機構に委譲。
-  → 手書き spatial index の一部を置換できるか PoC で評価(リンクのヒットテストは要検討)。
-
-### 2.4 viewport / Transform
-- viewport のズーム/パンは `applyPaintTransform` + `hitTest` の Matrix4 機構に乗せ、
-  手書きの `screenToScene`/`globalToScene`/`dragDeltaTransform` を縮約。
-  → [[node-geometry-no-scale-divide]] / [[viewport-drag-delta-and-handler-swap]] が
-  RenderObject の座標変換で自然に解決するかを PoC で確認。
-
----
-
-## 3. PoC のスコープと受け入れ基準
-
-**PoC**: 数ノード + 1 リンクの最小 `RenderGraph` 試作。
-
-受け入れ基準:
-- post-frame なしで geometry が取れる(同一フレームで子サイズ確定)。
-- tap / drag / zoom が既存と同等に動く(characterization テスト
-  `gesture_manager_characterization_test.dart` を流用・拡張)。
-- **リンクの `hitTestSelf` が線分距離判定でヒットすること**(ノードは `hitTestChildren`
-  で済むが、リンクは子でない描画のため `hitTestSelf` + 線分距離判定が別途必要。
-  これが PoC で最も不確実な点であり、「リンクのヒットテストが当たる」を明示の
-  受け入れ基準に加える)。
-- 上記 4 つの既知 gotcha が PoC 構造で再現しない(または解消する)ことを確認。
-
-**no-go 条件**: 上記いずれかで RenderObject 機構が既存手書きより複雑化する、
-または gotcha が形を変えて残る場合は段階移行を保留し、F3+(rebuild 範囲縮小・
-sort キャッシュ)のみを単独で先行する。
-
-PoC で原理確認できたら**段階移行**(ノード描画 → リンク描画 → ヒットテスト → viewport)。
+All of these are consequences of implementing layout, geometry, coordinate
+transforms, and hit-testing by hand across multiple stages. D1 investigates
+whether migrating to `RenderObject` can principally eliminate these issues.
 
 ---
 
-## 4. リスクと検証項目
+## 2. Proposed Structure
 
-リスク: **最大**。以下を PoC で潰す:
-1. ドラッグ後ヒットテスト([[drag-end-spatial-index-refresh]]): RenderObject の
-   `hitTestChildren` がドラッグ後も最新の子位置で当たるか。
-2. ズーム中の bounds/端点([[node-geometry-no-scale-divide]]): logical vs physical の
-   座標系が `applyPaintTransform` で一貫するか。
-3. ドラッグ delta のズーム補正([[viewport-drag-delta-and-handler-swap]]): hitTest の
-   Matrix4 逆変換で delta が自然に scene 座標になるか。
-4. ヒットテスト所有権([[viewport-hittest-ownership]]): pointer 受け取り位置と scene 変換の
-   責務が RenderObject 機構で整理されるか。
-5. リンクのヒットテスト: ノードは `hitTestChildren` で済むが、リンク(子でない描画)の
-   ヒットテストは別途(`hitTestSelf` + 線分距離判定)が要る。
+Migrate to `MultiChildRenderObjectWidget` with a custom `RenderBox`
+(tentatively called `RenderGraph`).
+
+### 2.1 Layout
+- Call `child.layout(constraints, parentUsesSize: true)` for each child (node
+  widget) inside `performLayout` to **obtain child sizes in the same frame**.
+  → Eliminates post-frame geometry read-back, `GlobalKey`, three-phase
+  `_buildState`, and `refreshAllNodeGeometry`.
+- Store node positions (logical coordinates determined by
+  `GraphLayoutStrategy.performLayout`) in `BoxParentData` or a dedicated
+  `ParentData` subclass.
+
+### 2.2 Painting
+- Draw links directly inside `RenderGraph.paint()`, consolidating the current
+  `CustomPainter` classes.
+- Paint node children via `context.paintChild`.
+- Express z-order through paint order.
+
+### 2.3 Hit-testing
+- Delegate node hit-testing to the RenderObject machinery via
+  `hitTestChildren`.
+  → Evaluate in the PoC whether this can replace part of the hand-written
+  spatial index. (Link hit-testing requires separate consideration.)
+
+### 2.4 Viewport / Transform
+- Route viewport zoom/pan through the `applyPaintTransform` + `hitTest`
+  Matrix4 mechanism, eliminating hand-written
+  `screenToScene`/`globalToScene`/`dragDeltaTransform`.
+  → Confirm in the PoC whether **node-geometry-no-scale-divide** and
+  **viewport-drag-delta-and-handler-swap** resolve naturally through the
+  RenderObject coordinate system.
 
 ---
 
-## 5. 依存・順序
+## 3. PoC Scope and Acceptance Criteria
 
-- フェーズ A/B 完了後に着手(完了済み)。**C と並行設計**。
-- **C2(NodeViewState 分離)は D1 従属**: geometry の保持場所(ParentData か別マップか)を
-  D1 が規定し、その器に C2 が `NodeViewState` を流し込む([[c2-node-view-state-design]] 参照)。
-- **F3+(rebuild 範囲縮小・sort キャッシュ)は D1 に統合**: `AnimatedBuilder` 全包み廃止・
-  sort キャッシュ・空間グリッドのリンク対応は RenderObject 化と同時に設計する(本 RFC の
-  §2.2/§2.3 に含まれる)。
+**PoC**: A minimal `RenderGraph` prototype with a few nodes and one link.
+
+Acceptance criteria:
+- Geometry is available without post-frame callbacks (child sizes confirmed in
+  the same frame).
+- Tap, drag, and zoom behave equivalently to the current implementation
+  (reuse and extend `gesture_manager_characterization_test.dart`).
+- **Link `hitTestSelf` hits via segment-distance testing**: Nodes are handled
+  by `hitTestChildren`, but links are not children of the render tree and
+  require separate `hitTestSelf` + segment-distance logic. This is the most
+  uncertain part of the PoC, so "link hit-testing works" must be an explicit
+  acceptance criterion.
+- Confirm that the four known gotchas above do not reproduce (or are resolved)
+  under the PoC structure.
+
+**No-go condition**: If any of the above shows that the RenderObject mechanism
+is more complex than the current hand-written approach, or if a gotcha
+reappears in a different form, hold the staged migration and instead pursue
+F3+ (rebuild-scope reduction and sort cache) as a standalone prior step.
+
+Once the PoC validates the approach, proceed with **staged migration**:
+node rendering → link rendering → hit-testing → viewport.
 
 ---
 
-## 6. 結論(現時点)
+## 4. Risks and Verification Items
 
-D1 は最大リスクで、**実装着手前に本 RFC のレビューと PoC 計画の合意が必須**。本セッションでは
-RFC ドラフトのみ作成し、実装は行わない。次段は「PoC を別ブランチで試作 → 4 gotcha の
-再現/解消を計測 → 段階移行の可否判断」。
+Risk: **Maximum**. The PoC must resolve the following:
+
+1. **Post-drag hit-testing** (drag-end-spatial-index-refresh): Does
+   `hitTestChildren` still hit the correct child positions after a drag?
+2. **Zoom-time bounds / link endpoints** (node-geometry-no-scale-divide): Does
+   the coordinate system remain consistent (logical vs. physical) through
+   `applyPaintTransform`?
+3. **Drag delta zoom correction** (viewport-drag-delta-and-handler-swap): Does
+   the Matrix4 inverse transform in `hitTest` naturally produce delta in scene
+   coordinates?
+4. **Hit-test ownership** (viewport-hittest-ownership): Does the RenderObject
+   mechanism cleanly separate the responsibility for pointer reception and scene
+   transform?
+5. **Link hit-testing**: Nodes are handled by `hitTestChildren`, but links
+   (painted outside the child tree) require `hitTestSelf` + segment-distance
+   detection.
+
+---
+
+## 5. Dependencies and Order
+
+- Begin after Phases A and B are complete (both complete). **Design in parallel
+  with Phase C**.
+- **C2 (NodeViewState separation) is subordinate to D1**: D1 determines where
+  geometry is stored (ParentData or a separate map). Starting C2 first risks
+  rebuilding the storage structure in D1, duplicating work. See
+  `doc/c2_node_view_state_design.md`.
+- **F3+ (rebuild-scope reduction, sort cache) is merged into D1**: Eliminating
+  the `AnimatedBuilder` full-tree wrap, sort caching, and spatial-grid link
+  support are designed together with the RenderObject migration (covered in
+  §2.2 and §2.3 of this RFC).
+
+---
+
+## 6. Conclusion (Current State)
+
+D1 carries maximum risk. **A review of this RFC and agreement on the PoC plan
+are required before any implementation begins.** The current session produces
+only the RFC draft; implementation is deferred. The next step is: "Prototype
+the PoC on a separate branch → measure whether the four gotchas reproduce or
+resolve → decide whether to proceed with staged migration."

@@ -1,525 +1,527 @@
-# Plough 設計レビュー 実行計画
+# Plough Design Review — Implementation Plan
 
-策定日: 2026-06-13
-ベース: `doc/design_review.md`(実施日 2026-06-10, HEAD 4f579bc)
-対象ブランチ: `feature/redesign`
+Drafted: 2026-06-13
+Base: `doc/design_review.md` (reviewed 2026-06-10, HEAD 4f579bc)
+Branch: `feature/redesign`
 
-このドキュメントは `doc/design_review.md` の指摘を**検証可能・着手可能な作業単位**に分解し、
-依存関係・受け入れ基準・リスクを明示した実行計画である。
-末尾に**別セッションへのレビュー依頼**を記載している。
+This document breaks the findings from `doc/design_review.md` into verifiable,
+actionable work units with explicit dependencies, acceptance criteria, and risk
+ratings. A review-request section for an independent session appears at the end.
 
-> **更新 2026-06-13**: 別セッションのレビュー(`doc/design_review_plan_feedback.md`)を
-> 反映済み。追加された主な変更:
-> - 新タスク **A7**(死にファイル `enhanced_client.dart` 削除)、**A8**(`removeLink` の
->   通知欠落)、**F1/F2**(性能の単独修正)を追加。
-> - **A4** を「全クリア」ではなく「state とノードフラグの乖離」と精緻化し、C1 で吸収される
->   暫定対処と位置づけ。
-> - **B1** に `intersections.first`(順不同 Set)依存の排除を追加。
-> - **B2** の依存に **E1** を追加(注入点集約が前提)、配置方針を (c) 別パッケージ化に確定。
-> - **C2** を D1 従属と明記、**E1** に状態読取の副作用確認手順を追記。
-> - レビューで `http` が 2 ファイル使用・`removeLink` の通知欠落・view マップのリークが
->   実コードで追確認された。
+> **Updated 2026-06-13**: Incorporated feedback from the independent review
+> (`doc/design_review_plan_feedback.md`). Major additions:
+> - New tasks **A7** (delete dead file `enhanced_client.dart`) and **A8**
+>   (`removeLink` missing notification), plus **F1/F2** (standalone performance
+>   fixes).
+> - **A4** refined from "clear everything" to "state/flag divergence in
+>   deselectNode"; positioned as a stopgap that C1 will absorb.
+> - **B1** extended to remove the `intersections.first` (unordered Set)
+>   dependency.
+> - **B2** dependency on **E1** made explicit (injection-point consolidation is
+>   a prerequisite); placement strategy confirmed as (c) separate package.
+> - **C2** explicitly marked as subordinate to D1; **E1** extended with a
+>   side-effect check procedure for state-reading expressions.
+> - Review confirmed: `http` used in 2 files, `removeLink` notification missing,
+>   view-map leak verified in actual code.
 >
-> **更新 2026-06-13(第2ラウンド)**: 再レビュー(進行可)を反映。**E1 の実装方式を
-> オーバーロード折衷案に確定**:ログ API を `Object message`(String と
-> `String Function()` 両受け)にして既存 約 268 箇所を無改修のまま残し、ホットパスだけ
-> `() =>` 化する。全箇所一括 lazy 化はスコープ外。`sendLog` の enabled ガードは呼び出し側へ。
-> ランタイムでは案A も重くならず、ボトルネックは改修コスト(268 箇所)という整理。
+> **Updated 2026-06-13 (second round)**: Incorporated the second-round review
+> (proceed). **E1 implementation strategy confirmed as the overload compromise**:
+> accept `Object message` (both `String` and `String Function()`) so the ~268
+> existing call sites compile unchanged; only hot-path calls are migrated to
+> `() =>`. Blanket lazy migration of all 268 sites is out of scope.
+> `sendLog` enabled-guard moves to the call site. Runtime cost of option A is
+> negligible; the bottleneck is migration cost (268 sites).
 
 ---
 
-## 0. 前提と進め方
+## 0. Principles
 
-- 各タスクは「挙動を変えない(リファクタ/修正)」ものから着手し、設計変更は後段に置く。
-- すべてのタスクで完了条件に `flutter analyze` 無警告・`flutter test` グリーン・
-  `dart format --set-exit-if-changed .` 0 を含める(CLAUDE.md の Git Workflow に準拠)。
-- 1 タスク = 1 ブランチ = 1 PR を原則とする(`main` から派生。Conventional Commits)。
-- 「挙動を変えない」タスクは**変更前に回帰テストを追加**してから着手する(セーフティネット先行)。
-- 計画策定時点で `design_review.md` の主要指摘は実コードと一致を確認済み:
-  - `removeNode` が links map を掃除していない(`graph_base.dart:300-319`)
-  - `_nodeDependencies` は populate されない死にフィールド(`graph_base.dart:316,370`)
-  - `reverseLink` が通知なし mutate(`graph_base.dart:377-384`)
-  - `deselectNode` が単一選択時に全クリア相当(`graph_base.dart:457-469`)
-  - `flame` 依存は `shape.dart` のみ、`dart:io` は `debug_server.dart` のみ
-  - `KeyedSubtree(key: ValueKey(_graph.hashCode))`(`graph.dart:684`)
-  - build 中(`AnimatedBuilder` builder 内)で `_performLayout` / `_markSortDirty`
-    (`graph.dart:559,575`)
-
----
-
-## フェーズ A: バグ修正(設計と独立・即実施)
-
-挙動是正が目的。各々が独立しており並行可能。**まず再現テストを書いてから直す。**
-
-### A1. `removeNode` が接続リンクを links map から削除しない
-- 箇所: `lib/src/graph/graph_base.dart:300-319`
-- 現状: 隣接インデックスからは除去するが `state.value.links` に残り、削除済みノードを
-  参照するリンクが描画対象として残留。ドキュメントの "automatically removes any links"
-  と矛盾。
-- 対応:
-  1. 失敗する回帰テストを追加(ノード削除後 `links` に接続リンクが残らないこと、
-     描画/`getIncomingLinks`/`getOutgoingLinks` の整合)。
-  2. `affectedLinks` の各リンクを `state.value.links.remove(link.id)` で除去してから
-     `copyWith`。インデックス除去と map 除去を 1 つの `setState` にまとめる。
-- 受け入れ基準: 削除ノードを端点に持つリンクが `getAllLinks()`/描画から消える。
-  既存テスト緑。
-- リスク: 低。`removeLink` のロジックと重複させず共通化を検討。
-
-### A2. 死にフィールド `_nodeDependencies` の削除
-- 箇所: `graph_base.dart:220 付近(宣言), 316, 370-372`
-- 現状: 書き込み(削除)のみで populate されず、`removeLink` 内 `removeWhere` 条件
-  (`state.value.links.containsKey(key)`)も意味を成さない。
-- 対応: フィールドと全参照を削除。`removeLink` の `removeWhere` ブロックを除去。
-- 受け入れ基準: フィールド全削除後も全テスト緑、analyze 無警告。
-- リスク: 低(未使用確認済み)。A1 と同ファイルなので**順序付けて連続実施**推奨。
-
-### A3. `reverseLink` の変更通知欠落
-- 箇所: `graph_base.dart:377-384`
-- 現状: `GraphLinkImpl.source/target` を直接 mutate するだけで `state` 通知も
-  layout 通知もない → UI が更新されない。加えて Freezed immutable な map の中身を
-  可変オブジェクトとして書き換えている設計上の歪み。
-- 対応(2 段階):
-  1. **最小修正(挙動是正)**: mutate 後に `_notifyLayoutChange()` 相当を呼び、
-     隣接インデックス(`_incomingIndex`/`_outgoingIndex`)も source/target 反転に
-     合わせて張り替える(現状インデックスが古いまま)。回帰テストを追加。
-  2. **設計是正(フェーズ C と連動)**: `reverseLink` を「新リンクで置換」する不変更新に
-     変更する案を C2 で検討。まずは 1 を入れる。
-- 受け入れ基準: `reverseLink` 後に向きが反転し UI/インデックスが更新される回帰テスト緑。
-  **反転後にインデックスが新 source/target を指す**ことを必須テスト化。
-- 推奨(レビュー反映): A3 は最小修正(mutate+通知+インデックス張替)で止める。
-  即不変化は `GraphLinkImpl` の可変前提に依存する他箇所との整合作業が膨らむため、
-  不変化は C2(NodeViewState/不変リンク)で一括する方が費用対効果が高い。
-- 関連: **A8(`removeLink` の通知欠落)と同種の問題なので同じ PR でまとめて直す**。
-- リスク: 中(インデックス張り替え漏れ)。テスト必須。
-
-### A4. `deselectNode` の state とノードフラグの乖離(C1 で吸収される暫定修正)
-- 箇所: `graph_base.dart:457-469`(`deselectLink` も同型: 518-531)
-- 現状(レビュー追補で精緻化): 単に「全クリア」ではなく、単一選択モードで
-  `deselectNode(別id)` を呼ぶと **3 つの状態が相互矛盾**する:
-  - 対象ノードの `isSelected` は false(本来触るべきでないノード)
-  - 実際に選択中のノードの `isSelected` は true のまま残る
-  - `selectedNodeIds` は空に置換
-  これは課題 2-3(選択の二重管理)の典型症状で、**A4 と C1 は同じ病根**。
-- 対応: 対象 id が現在選択されている場合のみ除去するよう統一
-  (multi/single で分岐せず `selectedNodeIds.remove(id)` を基本に、
-  `node.isSelected` は対象が選択中のときのみ false)。node/link 両方を修正。回帰テスト追加。
-- 受け入れ基準: 非選択 id に対する `deselectNode` が既存選択を変えないテスト緑。
-  **state リストとノードフラグが乖離しない**ことを検証。
-- 位置づけ: **C1(単一ソース化)が入れば A4 の分岐自体が消える暫定対処**。
-  「先に薄く直して出血を止め、C1 で恒久化」という順序(A4→C1)を維持。
-- リスク: 低〜中。選択 API の他箇所(`toggleSelectNode` 等)との整合を確認。
-
-### A5. `KeyedSubtree` のキーを `graph.hashCode` から `graph.id` に
-- 箇所: `lib/src/graph_view/widget/graph.dart:684`
-- 現状: `ValueKey(_graph.hashCode)` は衝突・不安定の元。
-- 対応: `ValueKey(_graph.id)`(`GraphId` が一意)に変更。
-- 受け入れ基準: グラフ差し替え時のリビルドが従来同様に動く widget テスト緑。
-- リスク: 低。ただし「graph 差し替え時に旧 overlay が pointerHandlers を奪わない」
-  という既知 gotcha([[viewport-drag-delta-and-handler-swap]])に触れるため、
-  差し替えシナリオの widget テストを必ず通す。
-
-### A6. `behavior.dart` の小さな TODO・契約の歪み
-- 箇所: `lib/src/graph_view/behavior.dart:139`(thickness=30 ハードコード TODO)、
-  `195/276`(`abstract interface class` なのに `isEquivalentTo` が実装持ち)
-- 対応(小):
-  - thickness の TODO はマジックナンバーを名前付き定数化し、TODO の意図を確認。
-  - `isEquivalentTo` の実装は `implements` 利用者へ再実装を強制するため、
-    インターフェース分割は**フェーズ C(中期)に送る**。ここではコメントで現状を明文化
-    するに留め、破壊的変更はしない。
-- 受け入れ基準: 定数化のみ。挙動不変。
-- リスク: 低。
-
-### A7. 死にファイル `enhanced_client.dart` の削除(レビュー追加)
-- 箇所: `lib/src/debug/enhanced_client.dart`
-- 現状(追検証で確認): `package:http` を import しているが **lib 内のどこからも
-  import されていない**(参照 0 件)。A2 の死にコード削除と同類。
-- 対応: ファイルを削除。`http` 利用ファイルが `external_debug_client.dart` のみになり、
-  B2(debug 分離)の前さばきになる。
-- 受け入れ基準: 削除後も全テスト緑・analyze 無警告。
-- リスク: 極小(未参照確認済み)。
-
-### A8. `removeLink` の `_notifyLayoutChange()` 欠落(レビュー追加)
-- 箇所: `graph_base.dart:362-374`
-- 現状(追検証で確認): `addLink`(328)は `_notifyLayoutChange()` を呼ぶが、
-  **`removeLink` は呼ばない**(非対称)。リンク削除が UI/レイアウトに反映されない。
-  `reverseLink`(A3)の通知欠落と同種。
-- 対応: `copyWith` 後に `_notifyLayoutChange()` を追加。**A3 と同じ PR でまとめる**。
-  なお A2 でこの関数内の `_nodeDependencies.removeWhere` ブロックも除去される。
-- 受け入れ基準: リンク削除後に描画から消える widget テスト緑。
-- リスク: 低〜中。
+- Begin with behavior-preserving tasks (refactors/fixes); defer design changes
+  to later phases.
+- Every task's completion criteria includes: `flutter analyze` with no new
+  warnings, `flutter test` green, `dart format --set-exit-if-changed .` exits 0
+  (per CLAUDE.md Git Workflow).
+- One task = one branch = one PR (branched from `main`; Conventional Commits).
+- For behavior-preserving tasks, **add regression tests before changing any
+  code** (safety-net-first rule).
+- All major findings from `design_review.md` were verified against actual code
+  before planning:
+  - `removeNode` does not clean up the links map (`graph_base.dart:300–319`)
+  - `_nodeDependencies` is a dead field that is never populated
+    (`graph_base.dart:316, 370`)
+  - `reverseLink` mutates without notifying (`graph_base.dart:377–384`)
+  - `deselectNode` in single-selection mode clears everything
+    (`graph_base.dart:457–469`)
+  - `flame` dependency is used only in `shape.dart`; `dart:io` only in
+    `debug_server.dart`
+  - `KeyedSubtree(key: ValueKey(_graph.hashCode))` (`graph.dart:684`)
+  - `_performLayout` / `_markSortDirty` called during build (inside
+    `AnimatedBuilder` builder) (`graph.dart:559, 575`)
 
 ---
 
-## フェーズ B: 依存の軽量化(pub 品質・web 安全性)
+## Phase A: Bug Fixes (independent of design; implement immediately)
 
-公開 API の import graph から重量級・プラットフォーム依存を外す。
+Goal: correct behavior. Each item is independent and can be worked in parallel.
+**Write a failing regression test first, then fix.**
 
-### B1. `flame` 依存を自前幾何コードに置換
-- 箇所: `lib/src/graph_view/shape.dart`(flame 利用は本ファイルのみ確認済み)
-  - `LineSegment`(flame), `CircleComponent.lineSegmentIntersections`,
-    `Rectangle.fromRect(...).intersections(...)` を使用(line 2-4, 31, 78-103)
-- 対応:
-  1. 線分×円・線分×矩形(軸平行)の交差を行う ~50 行の自前ユーティリティを
-     `lib/src/utils/geometry_intersect.dart` 等に新設。
-  2. 既存の交差結果と**数値一致を検証する単体テスト**を先に書く
-     (flame 版と自前版を並走させ同値確認 → 確認後 flame 除去)。
-  3. `pubspec.yaml` から `flame` を削除。
-- 受け入れ基準: 交差計算の単体テストが flame 撤去後も緑。リンク端点描画が目視/golden で不変。
-- **重要(レビュー追補)**: flame の `intersections` は **Set(順不同)** を返し、
-  現状 `behavior.dart:379` は `intersections.first` を使っている。自前版で `first` が
-  別の点を返すとリンク端点が変わりうる。受け入れ基準に
-  **「`first` 依存を排除し、最近点を選ぶ等の明示的選択に変更」**を追加。
-  これは [[link-endpoint-gap-followup]] とも接続する。
-- リスク: 中(浮動小数の境界・接線ケース・順序依存)。golden と数値テストで担保。
-- 補足: [[link-endpoint-gap-followup]] の調査はこの幾何コード整備と相性が良いが、
-  本タスクでは挙動を変えない(別タスク化)。
+### A1. `removeNode` does not remove connected links from the links map
+- Location: `lib/src/graph/graph_base.dart:300–319`
+- Current: removes from the adjacency index but leaves links in
+  `state.value.links`, so links referencing a deleted node remain as render
+  targets. Contradicts the documentation's "automatically removes any links."
+- Fix:
+  1. Add a failing regression test (no connected link remains in `links` after
+     node removal; `getIncomingLinks`/`getOutgoingLinks` consistency).
+  2. Remove each affected link with `state.value.links.remove(link.id)` before
+     `copyWith`; combine index removal and map removal in a single `setState`.
+- Acceptance: connected links disappear from `getAllLinks()` and rendering after
+  node removal. Existing tests remain green.
+- Risk: Low. Avoid duplicating `removeLink` logic; consider sharing.
 
-### B2. デバッグサーバー群(`dart:io`/`http`)を本体から分離
-- 箇所: `lib/src/debug/debug_server.dart`(`dart:io`)、
-  `external_debug_client.dart`(`http`)、`debug_manager.dart`/`structured_logger.dart`
-  が `debug_server.dart` を import。`gesture_manager.dart:7` が
-  `external_debug_client.dart` を import。
-- 公開 import graph(追検証で確定):
-  `plough.dart → manager.dart → debug_manager.dart → debug_server.dart(dart:io)`。
-  **`dart:io` は確かに公開 import graph に乗っている**。問題意識は正当。
-- 現状の問題: `dart:io` と `http`・`logger` がパッケージ本体の import graph に入り、
-  web 安全性と依存の軽さを損なう。`http` 利用は `external_debug_client.dart` と
-  `enhanced_client.dart`(A7 で先に削除)の 2 ファイル。
-- 方針(レビュー推奨): **(c) 別パッケージ化(段階的)**。`plough_devtools`(仮)を
-  別パッケージにし、本体は **no-op の `DebugSink` インターフェース**だけ持ち、
-  `Plough().attachDebugSink(...)` でデバッグ時のみ実装を注入する。
-  - (a) 条件付き import(`dart.library.io` stub)は `http`/`logger`/workbench
-    プロトコルまで本体に残り「依存の軽さ」目標を達成できない。
-  - (b) example 移設は、デバッグ計装が `gesture_manager` 内部に食い込む現状では
-    結合を切りにくい。
-- 対応(段階):
-  1. A7 で `enhanced_client.dart` 削除済み前提。
-  2. 計装の注入点を 1 インターフェース(`DebugSink`)に集約(**E1 が前提**)。
-  3. `debug_server`/`external_debug_client`/workbench 連携を別パッケージへ移し、
-     本体デフォルトを no-op に。
-  4. `http` を本体 `pubspec.yaml` から削除。
-- 受け入れ基準: `flutter test -p chrome`(web)で本体が import エラーを出さない。
-  本体 `pubspec.yaml` から `http`(と可能なら `logger`)が消える。
-- リスク: 高(配置方針の決定が必要)。
-- 依存: **E1(注入点集約)完了後**。
+### A2. Delete dead field `_nodeDependencies`
+- Location: `graph_base.dart:~220` (declaration), `316`, `370–372`
+- Current: only written (on deletion), never read; the `removeWhere` condition
+  in `removeLink` (`state.value.links.containsKey(key)`) is therefore
+  meaningless.
+- Fix: delete the field and all references; remove the `removeWhere` block from
+  `removeLink`.
+- Acceptance: all tests green and `analyze` clean after deletion.
+- Risk: Low (confirmed unused). Same file as A1; **do sequentially**.
 
-### B3. 値等価性の流儀統一(調査タスク)
-- 箇所: `equatable` + `freezed` + `fast_immutable_collections` が併存(`pubspec.yaml:17-19`)
-- 対応: `equatable` 利用箇所を洗い出し、Freezed へ寄せられるか調査
-  (まずは grep ベースの棚卸しレポートのみ。実変更は別タスク)。
-- 受け入れ基準: 利用箇所一覧と移行可否の判断メモを `doc/` に残す。
-- リスク: 低(調査のみ)。
+### A3. `reverseLink` mutates without notifying
+- Location: `graph_base.dart:377–384`
+- Current: directly mutates `GraphLinkImpl.source/target` with no `state`
+  notification and no layout notification → UI does not update. Also mutates a
+  mutable object inside a Freezed-immutable map (design smell).
+- Fix (two stages):
+  1. **Minimal fix (behavior correction)**: call `_notifyLayoutChange()` after
+     mutation; re-index `_incomingIndex`/`_outgoingIndex` to reflect the
+     swapped source/target. Add regression test.
+  2. **Design correction (Phase C)**: consider replacing `reverseLink` with an
+     immutable swap (remove old link, add new one). Defer to C2.
+- Acceptance: after `reverseLink`, the direction is reversed and
+  UI/index are updated. **Mandatory test: index points to new source/target.**
+- Note: stop at the minimal fix here. Immutable replacement interacts broadly
+  with the mutable-link assumptions elsewhere; batch that work into C2.
+- Related: **same kind of issue as A8 (`removeLink` missing notification);
+  fix in the same PR**.
+- Risk: Medium (risk of missing index update). Tests required.
+
+### A4. `deselectNode` state/flag divergence (stopgap absorbed by C1)
+- Location: `graph_base.dart:457–469` (`deselectLink` has the same pattern:
+  `518–531`)
+- Current: in single-selection mode, calling `deselectNode(otherId)` creates a
+  three-way inconsistency:
+  - The targeted node's `isSelected` is set to false (a node that should not
+    have been touched)
+  - The actually-selected node's `isSelected` remains true
+  - `selectedNodeIds` is replaced with an empty list
+  This is a typical symptom of the dual-management problem (issue 2–3); A4 and
+  C1 share the same root cause.
+- Fix: only remove the id when it is currently selected (use
+  `selectedNodeIds.remove(id)` as the base; set `node.isSelected = false` only
+  when the target is actually selected). Fix both node and link paths. Add
+  regression test.
+- Acceptance: `deselectNode` on an unselected id leaves the current selection
+  unchanged. `state` list and node flag do not diverge.
+- Position: **stopgap that C1 (single source of truth) will supersede.**
+  "Fix the bleeding now with A4; make it permanent with C1." Maintain A4 → C1
+  order.
+- Risk: Low–medium. Verify consistency with other selection APIs
+  (`toggleSelectNode`, etc.).
+
+### A5. Change `KeyedSubtree` key from `graph.hashCode` to `graph.id`
+- Location: `lib/src/graph_view/widget/graph.dart:684`
+- Current: `ValueKey(_graph.hashCode)` can collide and is unstable.
+- Fix: change to `ValueKey(_graph.id)` (`GraphId` is unique).
+- Acceptance: widget test for graph-swap scenario passes as before.
+- Risk: Low, but this touches the "stale overlay pointerHandlers after graph
+  swap" gotcha (viewport-drag-delta-and-handler-swap); the graph-swap widget
+  test is mandatory.
+
+### A6. Minor TODOs and contract oddities in `behavior.dart`
+- Location: `lib/src/graph_view/behavior.dart:139` (hardcoded thickness=30 TODO),
+  `195/276` (`abstract interface class` with a concrete `isEquivalentTo`
+  implementation)
+- Fix (minimal):
+  - Extract the magic number to a named constant; clarify the TODO intent.
+  - Do **not** split the interface now (breaking change). Add a comment
+    documenting the current state; defer interface separation to Phase C.
+- Acceptance: constant extraction only. Behavior unchanged.
+- Risk: Low.
+
+### A7. Delete dead file `enhanced_client.dart` (added by review)
+- Location: `lib/src/debug/enhanced_client.dart`
+- Current: imports `package:http` but is **not imported anywhere in `lib/`**
+  (zero references). Same category as A2.
+- Fix: delete file. Reduces `http` usage to `external_debug_client.dart` only;
+  prepares for B2.
+- Acceptance: all tests green and `analyze` clean after deletion.
+- Risk: Negligible (confirmed unused).
+
+### A8. `removeLink` missing `_notifyLayoutChange()` (added by review)
+- Location: `graph_base.dart:362–374`
+- Current: `addLink` (line 328) calls `_notifyLayoutChange()`, but
+  **`removeLink` does not** (asymmetric). Removing a link is not reflected in
+  the UI or layout. Same class of issue as A3.
+- Fix: add `_notifyLayoutChange()` after `copyWith`. **Fix in the same PR as
+  A3.** A2 also removes the `_nodeDependencies.removeWhere` block from this
+  function.
+- Acceptance: widget test showing link removal disappears from rendering.
+- Risk: Low–medium.
 
 ---
 
-## フェーズ C: 状態管理の整理(中期・設計変更)
+## Phase B: Dependency Reduction (pub quality, web safety)
 
-### C1. 選択状態の単一ソース化
-- 対象指摘: 課題 2-3(`node._isSelected` と `GraphData.selectedNodeIds` の二重管理、
-  `force: true` ハック)
-- 対応:
-  1. `GraphData.selectedNodeIds`/`selectedLinkIds` を**唯一の真実**とする。
-  2. `node.isSelected` / `link.isSelected` を `selectedIds` 由来の derived getter に変更
-     (個別 `ValueNotifier<bool> _isSelected` を廃止、または selectedIds 変更を購読)。
-  3. `selectNode`/`deselectNode`/`clearSelection` から二重同期と `force: true` を除去。
-  4. レンダリングが選択変更で更新されることを widget/golden テストで担保。
-  5. **`set canSelect(false)` の選択解除も単一ソース経由にする**(下記 [R1])。
-- 受け入れ基準: 選択系の全テスト緑。`_isSelected` の手動同期コードが消える。
-  **`canSelect=false` 後に `isSelected` と `selectedNodeIds` が乖離しない**ことを検証。
-- **申し送り(phaseA レビュー [R1])**: `node.dart:172-179` の `set canSelect(bool)` は
-  選択中ノードを `canSelect=false` にすると `_isSelected.value=false` でフラグだけ落とし、
-  `GraphData.selectedNodeIds` を更新しない(A4 が正した deselect 経路とは逆向きの乖離)。
-  A4 はあくまで deselect 経路の修正で、この `canSelect` 経路の乖離は残っている。
-  `isSelected` を derived 化すれば原理的に消えるため、C1 で吸収する(個別パッチは
-  二度手間になるので当てない)。
-- リスク: 高(レンダリング購読経路の変更)。A4 修正後に着手。
-- 依存: A4 完了後(完了済み)。
+Remove heavy and platform-specific dependencies from the public import graph.
 
-### C2. `GraphNode` から View 状態(`NodeViewState`)を分離
-- 対象指摘: 課題 2-4(`geometry`/`animatedPosition`/`isArranged`/
-  `animationStartPosition`/`stackOrder` がモデルに同居 → 1 Graph を 2 View に
-  同時表示不可)。`node.dart:63-75` に該当 `ValueNotifier` 群。
-- 対応:
-  1. `GraphNode` を純データ(id, properties, weight, canSelect …)に縮約。
-  2. `GraphView` 側に `Map<GraphId, NodeViewState>`(geometry, animation, stackOrder)。
-  3. レイアウト/レンダリング/ジェスチャの geometry 参照を View 側状態へ付け替え。
-  4. C1 の reverseLink 不変化(A3-2)もここで整合。
-- 受け入れ基準: 同一 `Graph` を 2 つの `GraphView` に並べる widget テストを新設し、
-  片方の操作がもう片方の geometry を壊さないことを確認。
-- リスク: 非常に高(geometry 同期・[[node-geometry-no-scale-divide]]・
-  [[viewport-hittest-ownership]] 等の既知 gotcha 群に直撃)。
-- 依存・根拠(レビュー反映): **D1 従属**。geometry の保持場所・座標系・ヒットテスト経路は
-  D1(RenderObject)が規定する。C2 で `NodeViewState` を先に切り出しても、D1 で
-  保持構造を作り直すなら二度手間。**D1 の RFC/PoC で「geometry を誰が持つか」を決め、
-  その器に C2 が `NodeViewState` を流し込む**順とする。C1 完了 + D1 方針確定後に着手し、
-  **着手前に再レビュー必須**。
+### B1. Replace `flame` dependency with self-contained geometry code
+- Location: `lib/src/graph_view/shape.dart` (only file using flame)
+  - Uses `LineSegment` (flame), `CircleComponent.lineSegmentIntersections`,
+    `Rectangle.fromRect(...).intersections(...)` (lines 2–4, 31, 78–103)
+- Fix:
+  1. Add a ~50-line utility (`lib/src/utils/geometry_intersect.dart` or similar)
+     implementing segment × circle and segment × axis-aligned rectangle
+     intersection.
+  2. **Write a numeric unit test first** that runs both the flame version and the
+     new version in parallel and asserts equal results.
+  3. Remove `flame` from `pubspec.yaml` after the test passes.
+- Acceptance: intersection unit tests green after flame removal. Link endpoint
+  rendering unchanged visually / in goldens.
+- **Important (review note)**: flame's `intersections` returns a `Set`
+  (unordered). The current `behavior.dart:379` uses `.first`, which may return
+  a different point with a custom implementation. Add to acceptance criteria:
+  **"remove the `.first` dependency; choose the nearest point (or equivalent)
+  explicitly."** (Related to the link-endpoint-gap-followup gotcha.)
+- Risk: Medium (floating-point edge cases, tangent cases, order dependency).
+  Covered by goldens and numeric tests.
+
+### B2. Separate debug server stack (`dart:io`/`http`) from the core package
+- Locations: `lib/src/debug/debug_server.dart` (`dart:io`),
+  `external_debug_client.dart` (`http`), `debug_manager.dart`/
+  `structured_logger.dart` importing `debug_server.dart`.
+  `gesture_manager.dart:7` imports `external_debug_client.dart`.
+- Public import graph (verified): `plough.dart → manager.dart →
+  debug_manager.dart → debug_server.dart (dart:io)`. **`dart:io` is in the
+  public import graph.** The concern is valid.
+- Problem: `dart:io`, `http`, and `logger` appear in the core package's import
+  graph, harming web safety and package weight.
+- Strategy (recommended by review): **(c) Separate package, staged.**
+  Create `plough_devtools` (provisional name) as a separate package. The core
+  holds only a **no-op `DebugSink` interface**; debug implementations are
+  injected at runtime via `Plough().attachDebugSink(...)`.
+- Fix (stages):
+  1. A7: `enhanced_client.dart` deleted (prerequisite).
+  2. Consolidate injection points into one interface (`DebugSink`)
+     (**E1 is a prerequisite**).
+  3. Move `debug_server`/`external_debug_client`/workbench integration to the
+     separate package; set the core default to no-op.
+  4. Remove `http` from the core `pubspec.yaml`.
+- Acceptance: `flutter test -p chrome` (web) produces no import errors.
+  `http` (and ideally `logger`) removed from core `pubspec.yaml`.
+- Risk: High (requires a placement decision).
+- Dependency: **after E1 (injection-point consolidation) is complete**.
+
+### B3. Value-equality style survey (investigation task)
+- Concern: `equatable`, `freezed`, and `fast_immutable_collections` coexist
+  in `pubspec.yaml:17–19`.
+- Fix: grep for `equatable` usage; evaluate whether those cases can migrate to
+  Freezed. **Survey only — no code changes yet.**
+- Acceptance: a list of usage sites and a migration-feasibility note left in
+  `doc/`.
+- Risk: Low (survey only).
 
 ---
 
-## フェーズ D: ジェスチャ/レンダリングの構造改善(長期・v2)
+## Phase C: State Management Cleanup (medium-term; design changes)
 
-### D1. `MultiChildRenderObjectWidget` + カスタム `RenderBox` への移行
-- 対象指摘: 課題 1(post-frame ブートストラップ)・課題 5(性能上限)
-- 概要: `performLayout` 内で `child.layout(constraints, parentUsesSize: true)` し
-  同一フレームで子サイズを取得 → post-frame geometry 読み戻し・`GlobalKey`・
-  3 相 `_buildState`・`refreshAllNodeGeometry` を不要化。リンクは `paint()`、
-  ヒットテストは `hitTestChildren`、viewport Transform は
-  `applyPaintTransform`/`hitTest` に乗せ、手書きの `screenToScene`/`globalToScene`/
-  `dragDeltaTransform` を縮約。
-- 進め方: **大型のため設計 RFC を別途起票**(`doc/rfc_render_graph_view.md`)。
-  小さな PoC(数ノード+1リンクの RenderObject 試作)で原理確認 → 段階移行。
-- 受け入れ基準(PoC): post-frame なしで geometry が取れ、tap/drag/zoom が既存と同等。
-- リスク: 最大。既知 gotcha([[drag-end-spatial-index-refresh]],
-  [[node-geometry-no-scale-divide]], [[viewport-drag-delta-and-handler-swap]],
-  [[viewport-hittest-ownership]])が原理的に解消されるかを PoC で検証。
-- 依存: フェーズ A/B 完了後に着手。C と並行設計。
+### C1. Single source of truth for selection state
+- Issue: issues 2–3 (`node._isSelected` vs `GraphData.selectedNodeIds` dual
+  management; `force: true` hack)
+- Fix:
+  1. Make `GraphData.selectedNodeIds` / `selectedLinkIds` the **sole truth**.
+  2. Change `node.isSelected` / `link.isSelected` to derived getters backed by
+     `selectedIds` (eliminate individual `ValueNotifier<bool> _isSelected`).
+  3. Remove dual-sync code and `force: true` from `selectNode`, `deselectNode`,
+     `clearSelection`.
+  4. Guarantee that rendering updates on selection change (widget/golden tests).
+  5. **Make `set canSelect(false)` clear selection through the single source**
+     (see [R1] below).
+- Acceptance: all selection tests green. Manual sync code for `_isSelected`
+  deleted. **Verify that `isSelected` and `selectedNodeIds` do not diverge after
+  `canSelect = false`.**
+- **Carry-over (phase-A review [R1])**: `node.dart:172–179`
+  `set canSelect(bool)` on a selected node sets `_isSelected.value = false` but
+  does not update `GraphData.selectedNodeIds` — the opposite divergence from
+  what A4 fixed. A4 only fixes the `deselectNode` path; this `canSelect` path
+  divergence remains. Deriving `isSelected` eliminates this in principle; C1
+  absorbs it.
+- Risk: High (changes rendering subscription path). Begin after A4 is complete.
+- Dependency: A4 complete.
 
-### D2. GestureManager をポインタ単位 FSM へ集約
-- 対象指摘: 課題 4(10 個の state manager / node・link 二重実装 / enum 分岐 /
-  無駄な二重 `findNodeAt` / `GraphGestureMode` 分岐散在)
-- 対応:
-  1. ポインタごとの明示 FSM(idle → pressed → panReady → dragging / tapped)を
-     1 オブジェクトに集約。
-  2. `GraphId` は entity 横断で一意なので node/link でクラスを分けず統合。
-  3. `handlePointerUp` の node(~230 行)/link(~60 行)コピーを共通化。
-  4. 「Double-check to prevent race conditions」の二重 `findNodeAt`
-     (`gesture_manager.dart:634,1178` 他)を 1 回に。同期コードに race はない。
-  5. `GraphGestureMode` を mode 別 Strategy に集約。
-- 受け入れ基準: gesture テスト(simulated pointer)が全緑のまま行数大幅減。
-- リスク: 高(回帰の宝庫)。gesture テスト網を厚くしてから着手。
-- 依存: フェーズ A(ログ lazy 化 = E1)後。D1 とは独立着手可能。
+### C2. Separate View state (`NodeViewState`) from `GraphNode`
+- Issue: issues 2–4 (`geometry`/`animatedPosition`/`isArranged`/
+  `animationStartPosition`/`stackOrder` live in the model → one `Graph` cannot
+  be shown in two `GraphView` instances simultaneously).
+  `node.dart:63–75` holds the relevant `ValueNotifier` fields.
+- Fix:
+  1. Reduce `GraphNode` to pure data (id, properties, weight, canSelect, …).
+  2. Hold `Map<GraphId, NodeViewState>` (geometry, animation, stackOrder) on the
+     `GraphView` side.
+  3. Redirect all geometry references in layout/rendering/gesture to the
+     View-side state.
+  4. Ensure consistency with the reverseLink invariants from A3.
+- Acceptance: add a widget test that mounts one `Graph` in two `GraphView`
+  instances side-by-side; verify that an operation on one view does not corrupt
+  the other's geometry.
+- Risk: Very high (geometry sync / node-geometry-no-scale-divide /
+  viewport-hittest-ownership and other known gotchas).
+- Dependency / rationale (from review): **subordinate to D1.** D1 determines
+  where geometry is stored and what coordinate system it uses. Starting C2 first
+  risks rebuilding the storage structure when D1 arrives. **D1 RFC/PoC must
+  establish "who owns geometry" before C2 fills that container.** Mandatory
+  re-review before starting. See `doc/c2_node_view_state_design.md`.
 
-### E1. ログ API のクロージャ受けオーバーロード追加 + ホットパス lazy 化
-- 対象指摘: 課題 3(`logDebug(cat, '...substring...')` が無効時も文字列補間/Map 構築、
-  ポインタ/フレーム毎に走る)
-- 前提(第2ラウンドで確定): `logDebug`/`logInfo`/`logWarning`/`logError`/`logGestureDebug`
-  は現在 `(LogCategory, String)` の **String 固定シグネチャ**(`utils/logger.dart:100-110`)で、
-  lib 全体から **約 268 箇所**呼ばれている(追検証で確認)。
-- 「重さ」は 2 軸で評価する:**ランタイムでは案A(全 API lazy 化)は重くならない**
-  (キャプチャ無しクロージャは static 化されアロケーションなし、回避できる
-  `substring`/`map`/`join`/`DateTime.now().toIso8601String()` のコストが桁違いに大きい)。
-  重いのは**改修コスト(268 箇所)**であり、これが「即効・低リスク」と噛み合わない。
-- **採用方針(折衷案)**: オーバーロードで段階移行する。
+---
+
+## Phase D: Gesture / Rendering Architecture (long-term; v2)
+
+### D1. Migrate to `MultiChildRenderObjectWidget` + custom `RenderBox`
+- Issues: issue 1 (post-frame bootstrap), issue 5 (performance ceiling)
+- Summary: call `child.layout(constraints, parentUsesSize: true)` inside
+  `performLayout` to obtain child sizes in the same frame → eliminate post-frame
+  geometry read-back, `GlobalKey`, three-phase `_buildState`,
+  `refreshAllNodeGeometry`. Draw links in `paint()`; delegate node hit-testing
+  to `hitTestChildren`; route viewport Transform through
+  `applyPaintTransform`/`hitTest`; eliminate hand-written
+  `screenToScene`/`globalToScene`/`dragDeltaTransform`.
+- Approach: **too large for a single PR — file a design RFC**
+  (`doc/rfc_render_graph_view.md`). Validate the approach with a small PoC
+  (a few nodes + 1 link as a RenderObject prototype), then migrate in stages.
+- Acceptance (PoC): geometry available without post-frame callbacks; tap/drag/
+  zoom behave equivalently to current implementation.
+- Risk: Maximum. Verify in the PoC whether the four known gotchas
+  (drag-end-spatial-index-refresh, node-geometry-no-scale-divide,
+  viewport-drag-delta-and-handler-swap, viewport-hittest-ownership) are
+  principally resolved.
+- Dependency: begin after Phases A and B are complete. Design in parallel with C.
+
+### D2. Consolidate GestureManager into a per-pointer FSM
+- Issue: issue 4 (10 state managers; node/link code duplication; enum
+  branching scattered throughout; redundant double `findNodeAt` calls;
+  `GraphGestureMode` branching spread everywhere)
+- Fix:
+  1. Consolidate into an explicit per-pointer FSM
+     (idle → pressed → panReady → dragging / tapped) in one object.
+  2. Unify node and link handling: `GraphId` is unique across entity types, so
+     separate classes are unnecessary.
+  3. Deduplicate the `handlePointerUp` node (~230 lines) and link (~60 lines)
+     implementations.
+  4. Eliminate the redundant double `findNodeAt` ("Double-check to prevent race
+     conditions" at `gesture_manager.dart:634, 1178`, etc.) — synchronous code
+     has no races.
+  5. Consolidate `GraphGestureMode` into per-mode Strategy objects.
+- Acceptance: gesture tests (simulated pointer) remain fully green; significant
+  line-count reduction.
+- **Known bug**: after selecting a link, a background tap does not deselect it
+  (asymmetric vs. node behavior; also corrupts the node-side background deselect
+  in subsequent interactions). Add "background tap clears link selection" as a
+  D2 acceptance criterion.
+- Risk: High (regression-prone). Expand gesture test coverage before starting.
+- Dependency: after Phase A (logging lazy-init = E1). Can start independently
+  of D1.
+
+### E1. Closure-overload addition to log API + lazy-init for hot paths
+- Issue: issue 3 (`logDebug(cat, '...substring...')` evaluates string
+  interpolation and builds Maps even when logging is disabled; runs on every
+  pointer event / frame)
+- Context (confirmed in second-round review): `logDebug`/`logInfo`/`logWarning`/
+  `logError`/`logGestureDebug` currently take a fixed `String` signature
+  (`utils/logger.dart:100–110`) and are called from **~268 sites** across the
+  library.
+- "Cost" has two dimensions: **at runtime, option A (full lazy migration) is not
+  expensive** (capture-free closures are statically allocated; the
+  `substring`/`map`/`join`/`DateTime.now().toIso8601String()` costs that can be
+  avoided are orders of magnitude larger). The expensive part is **migration cost
+  (268 sites)**, which is at odds with "quick/low-risk."
+- **Adopted strategy (compromise)**: stage the migration with an overload.
   ```dart
-  // 例: Object で String と String Function() の両方を受ける
+  // Accept both String and String Function() via Object
   void logDebug(LogCategory category, Object message) => _logger.d(
         category,
         message is String Function() ? (enabled ? message() : '') : message,
       );
   ```
-  - **既存 268 箇所は無改修のまま動く**(String をそのまま渡せる)。
-  - **ホットパス(`gesture_manager` の `handlePointerDown`/drag 等の毎フレーム経路)だけ
-    `() => '...'` に書き換え**、そこだけ無効時の文字列構築をゼロに。
-  - 案A のランタイム利点を案B の小さな改修範囲で段階取り込み。残りは以降のタスクで順次。
-  - 注: `Object message` 化しても**既存 String 呼び出し側の補間は呼び出し時点で評価済み**
-    なので、改善が効くのは `() =>` 化したホットパスのみ(=スコープを絞る根拠)。
-- スコープ: 「ログ API にクロージャ受けオーバーロード追加 + ホットパスのみ `() =>` 化」。
-  **全 268 箇所の一括 lazy 化は対象外**。
-- 加えて `externalDebugClient.sendLog(metadata: {...})` は **`if (enabled)` ガードを
-  `sendLog` の外(呼び出し側)へ出す**(現状 `_enabled` チェックが関数内で、引数 Map は
-  無効時も構築される)。これも E1 に含める。
-- **注意(レビュー追補)**: `gesture_manager.dart` のデバッグ補間内に
-  `_nodeTapManager.states` 走査や `getTapStateDebugInfo()` 等 **状態を読む呼び出し**が
-  引数式に紛れている箇所がある。クロージャ化・ガード移動の前に
-  **「引数式が状態を変更しない(読み取りのみ)」ことをレビューで確認**してから移す。
-- 受け入れ基準:
-  - クロージャ受けオーバーロードを追加し、**既存 String 呼び出しが無改修でコンパイル・動作**。
-  - `() =>` 化対象が「ポインタ/フレーム毎に走る経路」に限定されていることをレビューで確認。
-  - ガード式・移動した引数式が **状態を変更しない(読み取りのみ)**。
-  - **ログ有効時の出力内容が従来と一致**(ガード/オーバーロードが出力を欠落させない)。
-  - ログ無効時にホットパスで文字列補間/Map 構築が走らない(コード検査 or ベンチ)。挙動不変。
-- リスク: 低〜中。**フェーズ A と並行で最初に着手して良い**(レビューが言う
-  "体感半分以下" の即効性)。
-- 位置づけ: 短期。番号は E だが**実施は早期**。D2 だけでなく **B2 の前提でもある**
-  (計装の注入点を 1 インターフェースに集約)。
-- **実装済み(2026-06-14, commit 2d6c4c0、assert は別コミット)**。実装レビュー承認
-  (`doc/review_feedback_20260614_01_E1.md`)。E1 はクロージャ受けオーバーロード API の導入(土台)+
-  最ホット 1 経路(`handlePointerMove` の `TAP_DEBUG_STATE` ブロック)の
-  `isGestureDebugEnabled` 前置ガード + `_sendToExternalDebug` の enabled ガードまで。
-  **クロージャ(`() =>`)渡しの実利用は 0 件**で、それは次段の土台という設計判断([S1])。
-- **次段への申し送り(レビュー [S3]/[S4])**:
-  - **[S3] `enabled` のレベル精緻化**: 現状 `enabled(category)` は `Level.off` 以外で true。
-    `logDebug` 用に `Level.debug` 以上か等のレベル階層比較まで見ると、無効でないだけの
-    カテゴリでのクロージャ無駄評価を防げる。クロージャ渡しを増やす前に検討。
-    → **E2** として下記に新設。
-  - **[S4] `handlePointerDown`/`handlePointerUp` の lazy 化**: 毎ポインタ毎の
-    `externalDebugClient.sendLog(metadata: {...})` / `logGestureDebug(data: {...})` の
-    map 構築が残存(`gesture_manager.dart` 462-656, 658-1063)。毎フレームではないが
-    drag 開始/終了・タップ毎に走る。→ **E3** として下記に新設。
+  - **All 268 existing String call sites compile and run unchanged.**
+  - **Only hot paths** (`handlePointerDown`, drag, etc. in `gesture_manager`)
+    are migrated to `() => '...'`, eliminating string construction on those
+    paths when logging is off.
+  - Incrementally captures the runtime benefit of option A with the small change
+    surface of option B. Remaining sites are migrated in later tasks.
+  - Note: even after switching to `Object message`, **existing call-site
+    interpolations are already evaluated at the call site**, so the benefit only
+    applies to `() =>`-migrated hot paths (this justifies the narrow scope).
+- Scope: "add closure-overload to log API + migrate only hot paths to `() =>`."
+  **Blanket migration of all 268 sites is out of scope.**
+- Additionally: move the `if (enabled)` guard for
+  `externalDebugClient.sendLog(metadata: {...})` to the **call site** (currently
+  the `_enabled` check is inside the function, so the argument Map is built even
+  when logging is off). Include in E1.
+- **Caution (review note)**: some debug interpolation arguments in
+  `gesture_manager.dart` contain **state-reading calls** such as
+  `_nodeTapManager.states` traversal and `getTapStateDebugInfo()`. Before
+  converting to closures or moving guards, **verify in review that the argument
+  expressions are read-only (no side effects)**.
+- Acceptance:
+  - Closure overload added; **existing String calls compile and run unchanged**.
+  - `() =>`-migrated targets are confirmed to be in per-pointer/per-frame paths.
+  - Moved argument expressions are **read-only (no side effects)**.
+  - **Log output content is identical to before** when logging is enabled.
+  - Hot paths do not build strings/Maps when logging is off (code review or
+    benchmark). Behavior unchanged.
+- Risk: Low–medium. **Can start alongside Phase A** (immediately effective).
+- Position: short-term. Despite the "E" prefix, **implement early.** Also a
+  **prerequisite for B2** (consolidating injection points into one interface).
+- **Implemented** (2026-06-14, commit `2d6c4c0`; assert in separate commit).
+  Review approved. E1 covers: closure-overload API (foundation) + one hottest
+  path (`TAP_DEBUG_STATE` block in `handlePointerMove`) with
+  `isGestureDebugEnabled` pre-guard + `_sendToExternalDebug` enabled guard.
+  **Zero actual `() =>` call sites** at this stage; that is intentional — the
+  foundation enables the next phase ([S1]).
+- **Next-phase carry-overs (review [S3]/[S4])**:
+  - **[S3] Level-aware `enabled` refinement**: currently `enabled(category)`
+    returns true for anything other than `Level.off`. Comparing against the
+    required level (e.g., `Level.debug` for `logDebug`) would prevent wasted
+    closure evaluation for categories that are enabled but at a lower level than
+    the call. Evaluate before adding more `() =>` sites. → Filed as **E2**.
+  - **[S4] Lazy-init `handlePointerDown`/`handlePointerUp` map construction**:
+    per-pointer `externalDebugClient.sendLog(metadata: {...})` /
+    `logGestureDebug(data: {...})` map construction remains
+    (`gesture_manager.dart:462–656, 658–1063`). Not every frame, but runs on
+    each drag start/end and tap. → Filed as **E3**.
 
-### E2. ログ `enabled` 判定のレベル階層精緻化(レビュー [S3]・次段)
-- 対象: `PloughLogger.enabled(category)` が `Level.off` 以外で一律 true を返す点。
-- 対応: `logDebug`/`logInfo`/... ごとに必要レベル(debug/info/...)以上かを比較する
-  `enabled(category, level)` 等に拡張し、クロージャ無駄評価を抑える。
-- 前提: E3(クロージャ渡しの増加)とセットで効く。単独では現状実害なし。
-- リスク: 低。受け入れ基準: 出力内容不変・無効レベルでクロージャ非評価。
+### E2. Level-aware `enabled` refinement for log API (review [S3]; next phase)
+- Target: `PloughLogger.enabled(category)` returns true for anything other than
+  `Level.off`.
+- Fix: extend to `enabled(category, level)` that compares the required level
+  (debug/info/…) and suppresses wasted closure evaluation.
+- Prerequisite: effective mainly when combined with E3 (more `() =>` sites).
+  No urgent practical impact on its own.
+- Risk: Low. Acceptance: output content unchanged; closures not evaluated at
+  disabled levels.
 
-### E3. `handlePointerDown`/`Up` のログ map 構築の lazy 化(レビュー [S4]・次段)
-- 対象: `gesture_manager.dart` 462-656 / 658-1063 の毎ポインタ毎 `sendLog`/`logGestureDebug`。
-- 対応: `metadata: {...}` / `data: {...}` 構築を `isGestureDebugEnabled` /
-  `externalDebugClient.enabled` ガード下に置く(handlePointerMove と同方式)、
-  またはクロージャ渡しに移行。
-- 依存: E2(レベル精緻化)があると無駄評価をさらに削れる。
-- リスク: 中(箇所が多くポインタ毎経路)。gesture テストで担保。
-
----
-
-## フェーズ F: 性能(D1 を待たず単独で直せるもの・レビュー追加)
-
-課題 5 の性能項目のうち、D1(RenderObject 化)を待たずに単独で直せるものを切り出す。
-
-### F1. ノード/リンク削除時の `_nodeViews`/`_nodeKeys`/`_linkKeys` 掃除
-- 箇所: `lib/src/graph_view/widget/graph.dart`(`_nodeKeys:226`/`_nodeViews:227`/
-  `_linkKeys:230`)
-- 現状(追検証で確認): `clear()` は `_nodeViews`(344 付近)等でまとめて行うのみで、
-  個別ノード/リンク削除時の `remove` がなくリーク。
-- 対応: ノード/リンク削除時に対応キーを掃除。A1(removeNode)と同じ
-  「削除時クリーンアップ」系なので **A1 と近い時期に実施**(文脈共有)。
-- 受け入れ基準: ノード追加→削除を繰り返してもマップが単調増加しないテスト。
-- リスク: 低。
-- 依存: A1 と同時期が望ましい。
-
-### F2. `_BaseLinkRendererPainter.shouldRepaint => true` の見直し
-- 箇所: `lib/src/renderer/widget/link.dart:194`
-- 現状: 常に true を返し、毎回再描画。
-- 対応: ジオメトリ/スタイル比較に基づく `shouldRepaint` に変更。
-- 受け入れ基準: golden 不変。不要再描画が減ることをコード検査で確認。
-- リスク: 中(比較漏れで再描画不足)。golden で担保。
-
-### F3+. rebuild 範囲縮小・sort キャッシュ
-- 対象: `AnimatedBuilder` 全体包みによる全ツリー rebuild、`_markSortDirty` 毎フレーム
-  呼び(`graph.dart:559`)による sort キャッシュ無効化、空間グリッドのリンク非対応。
-- 方針: 単独では費用対効果が低く回帰リスクが高いため、**D1 に統合**して設計する。
-- 依存: D1。
-- **申し送り(removal レビュー [R1])**: F1 の `_pruneRemovedEntityCaches()` が正しく動く
-  前提は「`_markSortDirty()` 毎回呼びで `elements` が毎ビルド再構築される」こと。sort
-  キャッシュ無効化を直す際は、**prune の供給源(`_graph.nodes/links`)と `elements` の
-  供給源を一致**させ、できれば両者を削除イベント駆動へ寄せる。供給源がズレると prune は
-  最新 graph・`elements` は古いキャッシュ、という乖離が起きうる。
+### E3. Lazy Map construction in `handlePointerDown`/`Up` (review [S4]; next phase)
+- Target: per-pointer `sendLog`/`logGestureDebug` calls in
+  `gesture_manager.dart:462–656` and `658–1063`.
+- Fix: guard `metadata: {...}` / `data: {...}` construction behind
+  `isGestureDebugEnabled` / `externalDebugClient.enabled` (same pattern as
+  `handlePointerMove`), or migrate to closure passing.
+- Dependency: E2 level refinement further reduces wasted evaluation.
+- Risk: Medium (many sites; per-pointer path). Covered by gesture tests.
 
 ---
 
-## 実施順序(推奨)
+## Phase F: Performance (can be done without D1)
 
-レビュー(`design_review_plan_feedback.md`)の修正提案を反映:
+Extract performance items from issue 5 that can be fixed standalone, without
+waiting for D1 (RenderObject migration).
+
+### F1. Clean up `_nodeViews`/`_nodeKeys`/`_linkKeys` on node/link removal
+- Location: `lib/src/graph_view/widget/graph.dart` (`_nodeKeys:226`,
+  `_nodeViews:227`, `_linkKeys:230`)
+- Current: `clear()` on these maps is done in bulk (around line 344); individual
+  `remove` on node/link deletion is missing → maps grow without bound (leak).
+- Fix: remove the corresponding key when a node or link is deleted. Same
+  "cleanup on deletion" category as A1; **implement at the same time**.
+- Acceptance: test showing that the maps do not grow monotonically when nodes
+  are added and removed repeatedly.
+- Risk: Low.
+- Dependency: best done alongside A1.
+
+### F2. Replace `_BaseLinkRendererPainter.shouldRepaint => true`
+- Location: `lib/src/renderer/widget/link.dart:194`
+- Current: always returns true, forcing a repaint every frame.
+- Fix: implement geometry/style comparison in `shouldRepaint`.
+- Acceptance: goldens unchanged. Reduced unnecessary repaints verified by code
+  review.
+- Risk: Medium (a missed comparison causes insufficient repaints). Covered by
+  goldens.
+
+### F3+. Rebuild-scope reduction and sort cache
+- Target: full-tree rebuild from `AnimatedBuilder` wrapping everything; sort
+  cache invalidated every frame by `_markSortDirty` (`graph.dart:559`); spatial
+  grid does not cover links.
+- Strategy: poor cost-benefit and high regression risk in isolation. **Merge
+  into D1** and design them together.
+- Dependency: D1.
+- **Carry-over (removal review [R1])**: `_pruneRemovedEntityCaches()` (F1)
+  works correctly only because `_markSortDirty()` every build causes `elements`
+  to be reconstructed every time. When fixing sort-cache invalidation, **align
+  the data source for prune (`_graph.nodes/links`) with the data source for
+  `elements`**, ideally driving both from deletion events. A mismatch causes
+  prune to see the latest graph while `elements` holds a stale cache.
+
+---
+
+## Recommended Implementation Order
+
+Reflecting the corrections from the review (`design_review_plan_feedback.md`):
 
 ```
-1.  E1(ログ lazy 化)                  ← 完了(2d6c4c0/b20fee2)
-2.  削除パス整理: A1 + A2 + A8(+ F1)   ← 完了(e63c302)
-3.  A7(死にファイル enhanced_client 削除)
-4.  A3, A4, A5, A6                    ← 完了(A3/A4/A5: bcce23d, A6: e56b4e3)
-5.  B1(flame 撤去 / first 依存排除) ← 完了(31d8d07), B3(棚卸し) ← 完了(equatable 削除まで実施)
-6.  B2(debug 別パッケージ化)          ← E1 後・設計レビュー反映後
-    - B2-a(DebugSink 注入点集約・挙動不変) ← 完了
-    - B2-b(モノレポ移動・http 除去・web 安全化) ← 未着手(B2-a レビュー後)
-7.  F2(shouldRepaint)
-8.  C1(選択単一ソース → A4 吸収)
-9.  D1 RFC + PoC / D2(FSM)           ← A/B 後、設計レビュー後
-10. C2(NodeViewState、D1 従属)
+1.  E1 (log lazy-init)                          ← done (2d6c4c0/b20fee2)
+2.  Deletion-path cleanup: A1 + A2 + A8 (+ F1)  ← done (e63c302)
+3.  A7 (delete dead enhanced_client.dart)        ← done (2fad4b2)
+4.  A3, A4, A5, A6                              ← done (bcce23d, e56b4e3)
+5.  B1 (remove flame / fix .first dependency)   ← done (31d8d07)
+    B3 (value-equality survey)                  ← done (equatable deleted)
+6.  B2 (debug separate package)
+    - B2-a (DebugSink injection point; behavior unchanged) ← done (493f209)
+    - B2-b (move to plough_devtools; remove http; web safe) ← done (8a56176)
+7.  F2 (shouldRepaint)                          ← done (47615aa)
+8.  C1 (selection single source → absorbs A4)   ← done (8adc717 + 013f872)
+9.  D1 RFC + PoC / D2 (FSM)                     ← after A/B; after design review
+10. C2 (NodeViewState; subordinate to D1)        ← after D1 PoC
 ```
 
-主な変更点(レビュー反映):
-- A7/A8/F1 を追加。A1 周辺を「削除パス整理」として束ねた(実装 1 PR、テスト項目別)。
-- B2 の前提に E1 を明示(注入点集約)。配置方針は (c) 別パッケージ化。
-- A4 を「C1 で吸収される暫定」と位置づけ。
-- B1 に `intersections.first` 依存排除を追加。
-- F2(shouldRepaint)を性能の単独タスクとして追加。F3+ は D1 に統合。
+Key changes from the review:
+- A7/A8/F1 added. A1 area grouped as "deletion-path cleanup" (one PR; separate
+  test items).
+- B2 prerequisite on E1 made explicit. Strategy confirmed as (c) separate
+  package.
+- A4 positioned as a stopgap absorbed by C1.
+- B1 extended to remove `intersections.first` dependency.
+- F2 (shouldRepaint) added as a standalone performance task. F3+ merged into D1.
 
-短期(挙動不変): E1, A1-A8(A7/A8 含む), B1, B3, F1
-中期: B2, C1, F2
-長期(v2): D1, D2, C2, F3+
-
----
-
-## トラッキング表
-
-| ID | 区分 | 概要 | リスク | 依存 | 状態 |
-|---|---|---|---|---|---|
-| E1 | 短期 | ログ API にクロージャ受けオーバーロード追加 + ホットパスのみ `() =>` 化 | 低中 | なし | 未着手 |
-| A1 | バグ | removeNode の links 掃除 | 低 | なし | **完了(e63c302)** |
-| A2 | バグ | 死にフィールド削除 | 低 | A1 | **完了(e63c302)** |
-| A3 | バグ | reverseLink 通知/インデックス張替 | 中 | なし | **完了(bcce23d)** |
-| A4 | バグ | deselectNode の state/フラグ乖離是正(暫定) | 低中 | なし | **完了(bcce23d)** |
-| A5 | バグ | KeyedSubtree キー → graph.id | 低 | なし | **完了(bcce23d)** |
-| A6 | 小 | thickness 定数化等 | 低 | なし | **完了(e56b4e3)** |
-| A7 | 死コード | enhanced_client.dart 削除(未参照・http) | 低 | なし | **完了(2fad4b2)** |
-| A8 | バグ | removeLink の `_notifyLayoutChange` 欠落 | 低中 | A1 と同 PR | **完了(e63c302)** |
-| B1 | 依存 | flame 撤去 / `intersections.first` 依存排除 | 中 | なし | **完了(31d8d07)** |
-| B2 | 依存 | debug 別パッケージ化 | 高 | E1 | **完了**: B2-a(DebugSink 集約 `493f209`)/ B2-b stage1(DebugBackend `b9c6ead`)/ B2-b stage2(plough_devtools 分離・http 除去・web 安全 `8a56176`) |
-| B3 | 調査 | 値等価性棚卸し(+ 未使用 equatable 削除) | 低 | なし | **完了(doc/value_equality_survey_B3.md, equatable 削除)** |
-| F1 | 性能 | node/link 削除時の view マップ掃除 | 低 | A1 同時期 | **完了(e63c302)** |
-| F2 | 性能 | shouldRepaint をジオメトリ/スタイル比較に | 中 | なし | **完了(47615aa)** |
-| C1 | 中期 | 選択状態単一ソース化(A4 吸収) | 高 | A4 | **完了(8adc717 + 013f872)**: isSelected を derived 化、[R1] 乖離解消、force:true 除去。follow-up: removeNode/removeLink 時の stale selected id 除去(013f872) |
-| C2 | 長期 | NodeViewState 分離 | 最高 | C1,D1 | 設計メモ作成(`doc/c2_node_view_state_design.md`)。実装は D1 後・再レビュー必須 |
-| D1 | 長期 | RenderObject 化 RFC+PoC | 最大 | A,B | RFC ドラフト作成(`doc/rfc_render_graph_view.md`)。実装は PoC 合意後 |
-| D2 | 長期 | ジェスチャ FSM 集約 | 高 | E1 | テスト網拡充(D2-pre `e5d277b`+`d8f5449`)完了。FSM 化本体は未着手。**既知バグ**: リンク選択後の背景タップで deselect されない(ノード側と非対称、連続操作でノード deselect も汚染)。FSM 化(D2)の受け入れ基準に「リンク選択も背景タップで解除」を含める |
-| E1 | 短期 | ログ API lazy 化土台 + 最ホットガード | 低中 | なし | **完了(2d6c4c0)** |
-| E2 | 短期 | ログ enabled のレベル階層精緻化([S3]) | 低 | E3 と併用 | **完了(40eb44c)** |
-| E3 | 短期 | handlePointerDown/Up のログ map lazy 化([S4]) | 中 | E2 | **完了(40eb44c)**: handlePanStart はスコープ外 |
-| F3+ | 性能 | rebuild 範囲縮小・sort キャッシュ | 高 | D1 | D1 RFC に統合(`doc/rfc_render_graph_view.md` §2.2/§2.3)。実装は D1 と同時 |
+Short-term (behavior-preserving): E1, A1–A8 (including A7/A8), B1, B3, F1
+Medium-term: B2, C1, F2
+Long-term (v2): D1, D2, C2, F3+
 
 ---
 
-## 別セッションへのレビュー依頼
+## Tracking Table
 
-このセクションを別セッション(レビュー担当)にそのまま渡してください。
-
-### 依頼概要
-
-`doc/design_review.md`(原レビュー)を踏まえて作成した本実行計画
-(`doc/design_review_plan.md`)を批判的にレビューしてほしい。
-コードを変更する必要はなく、**計画の妥当性**を見てほしい。
-
-### 必ず確認してほしい論点
-
-1. **原レビューの事実確認の追検証**
-   - 本計画は以下を実コードで確認済みとしている。各々を独立に再確認し、
-     誤認があれば指摘してほしい:
-     - `graph_base.dart:300-319` `removeNode` が `state.value.links` を掃除しない
-     - `graph_base.dart` `_nodeDependencies` が死にフィールド
-     - `graph_base.dart:377-384` `reverseLink` が通知なし mutate
-     - `graph_base.dart:457-469` `deselectNode` の単一選択時全クリア
-     - `flame` 依存は `lib/src/graph_view/shape.dart` のみか
-     - `dart:io` は `lib/src/debug/debug_server.dart` のみか、本体 import graph に
-       実際に乗っているか
-     - `graph.dart:684` `ValueKey(_graph.hashCode)`
-
-2. **タスク分割の粒度と順序**
-   - A1→A2 を同ファイル連続で行う判断は妥当か。
-   - E1(ログ)を最初に置く順序は合理的か。
-   - C1(選択単一ソース化)を A4 の後に置く依存は正しいか。逆に C1 を先に
-     やった方が A4 が不要になるなど、統合余地はないか。
-
-3. **リスク評価の妥当性**
-   - B2(debug 分離)を「高」、C2/D1 を「最高/最大」とした評価は妥当か。
-   - 「挙動を変えない」と分類したタスク(E1, A5, B1)が本当に挙動不変か、
-     見落とした副作用(特に [[viewport-drag-delta-and-handler-swap]] /
-     [[node-geometry-no-scale-divide]] 等の既知 gotcha への抵触)はないか。
-
-4. **設計判断を要する未決事項(最重要)**
-   - **B2 の配置方針**: debug サーバー群を (a) 条件付き import で本体内に残す /
-     (b) example 側へ移す / (c) 別パッケージ化、のどれが良いか。
-     pub パッケージ品質(web 安全性・依存の軽さ)と利用者の利便性のトレードオフで
-     推奨を出してほしい。
-   - **D1 vs C2 の順序**: RenderObject 化(D1)と NodeViewState 分離(C2)は
-     どちらを先に設計すべきか。D1 が geometry の持ち方を規定するなら C2 は
-     D1 に従属させるべきでは、という仮説の当否。
-   - **A3 reverseLink**: 最小修正(mutate+通知)で止めるか、即座に不変更新へ
-     変えるか。後者は C1/C2 の不変化方針と一貫するが影響範囲が広がる。
-
-5. **抜け漏れ**
-   - 原レビューの指摘で本計画が拾えていないものはないか
-     (特に課題 5 の「`_nodeViews`/`_nodeKeys`/`_linkKeys` のリーク」、
-     `_BaseLinkRendererPainter.shouldRepaint => true`、空間グリッドがリンク非対応、
-     `AnimatedBuilder` 全体包みによる全ツリー rebuild、
-     `_markSortDirty` 毎フレーム呼びによる sort キャッシュ無効化 を
-     独立タスクとして起こすべきか)。
-
-### 期待する成果物
-
-- 各論点への所見(賛成/反対/修正案)。
-- 事実確認の誤りがあれば該当ファイル・行番号付きで指摘。
-- 設計判断 4 項目への推奨(理由付き)。
-- 計画に追加・削除・並べ替えすべきタスクの提案。
-
-レビュー結果は `doc/design_review_plan_feedback.md` に書き出してほしい。
+| ID  | Category    | Summary                                                  | Risk   | Depends | Status |
+|-----|-------------|----------------------------------------------------------|--------|---------|--------|
+| E1  | Short-term  | Add closure overload to log API + lazy-init hot paths    | Low–Med | —      | **Done** (2d6c4c0/b20fee2) |
+| A1  | Bug         | `removeNode` clean up connected links                    | Low    | —       | **Done** (e63c302) |
+| A2  | Bug         | Delete dead field `_nodeDependencies`                    | Low    | A1      | **Done** (e63c302) |
+| A3  | Bug         | `reverseLink` notify + re-index                          | Med    | —       | **Done** (bcce23d) |
+| A4  | Bug         | `deselectNode` state/flag divergence (stopgap)           | Low–Med | —      | **Done** (bcce23d) |
+| A5  | Bug         | `KeyedSubtree` key: hashCode → graph.id                  | Low    | —       | **Done** (bcce23d) |
+| A6  | Minor       | Name default link thickness constant                     | Low    | —       | **Done** (e56b4e3) |
+| A7  | Dead code   | Delete `enhanced_client.dart` (unreferenced, http)       | Low    | —       | **Done** (2fad4b2) |
+| A8  | Bug         | `removeLink` missing `_notifyLayoutChange()`             | Low–Med | A1     | **Done** (e63c302) |
+| B1  | Dependency  | Remove flame / fix `.first` dependency                   | Med    | —       | **Done** (31d8d07) |
+| B2  | Dependency  | Separate debug stack into `plough_devtools`              | High   | E1      | **Done**: B2-a (493f209) / B2-b stage1 (b9c6ead) / B2-b stage2 — move + remove http + web safe (8a56176) |
+| B3  | Survey      | Value-equality survey (+ delete unused equatable)        | Low    | —       | **Done** (equatable deleted; survey in `doc/value_equality_survey_B3.md`) |
+| F1  | Performance | Clean up view/key maps on node/link removal              | Low    | A1      | **Done** (e63c302) |
+| F2  | Performance | Compare-based `shouldRepaint` for link painter           | Med    | —       | **Done** (47615aa) |
+| C1  | Medium-term | Single source of truth for selection (absorbs A4)        | High   | A4      | **Done** (8adc717 + 013f872): `isSelected` derived; [R1] divergence closed; `force:true` removed; `removeNode`/`removeLink` clean up stale selected ids |
+| C2  | Long-term   | Separate `NodeViewState` from `GraphNode`                | V.High | C1, D1  | Design note created (`doc/c2_node_view_state_design.md`). Implementation deferred until after D1 PoC; mandatory re-review before starting. |
+| D1  | Long-term   | RenderObject migration RFC + PoC                         | Max    | A, B    | RFC draft created (`doc/rfc_render_graph_view.md`). Implementation deferred until PoC is agreed. |
+| D2  | Long-term   | Consolidate GestureManager into per-pointer FSM          | High   | E1      | Characterization tests complete (D2-pre: e5d277b + d8f5449). FSM body not started. **Known bug**: background tap does not deselect a selected link (asymmetric; also corrupts node background-deselect in subsequent interactions). Fix is a D2 acceptance criterion. |
+| E2  | Short-term  | Level-aware `enabled` refinement ([S3])                  | Low    | —       | **Done** (40eb44c) |
+| E3  | Short-term  | Lazy Map construction in `handlePointerDown`/`Up` ([S4]) | Med    | E2      | **Done** (40eb44c): `handlePanStart` sites out of scope |
+| F3+ | Performance | Reduce rebuild scope; sort cache                         | High   | D1      | Merged into D1 RFC (`doc/rfc_render_graph_view.md` §2.2/§2.3). Implement alongside D1. |
