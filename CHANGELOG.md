@@ -1,30 +1,17 @@
 ## develop
 
-### Design review — bug fixes, architecture, and performance
-
-**Bug Fixes**
 - [FIX] `removeNode` now removes connected links from the `links` map; previously orphaned link entries remained and could be used as render targets.
 - [FIX] `removeLink` now calls `_notifyLayoutChange()`; previously removing a link was not reflected in the UI or layout.
 - [FIX] `reverseLink` now notifies listeners and re-indexes the adjacency maps (`_incomingIndex`/`_outgoingIndex`); previously the direction swap was invisible to the UI.
 - [FIX] `deselectNode`/`deselectLink` no longer diverges `isSelected` flag and `selectedNodeIds` when called on an already-unselected entity.
 - [FIX] `KeyedSubtree` key changed from `graph.hashCode` to `graph.id` to prevent collisions on graph swap.
 - [FIX] `removeNode`/`removeLink` now clean stale ids from `selectedNodeIds`/`selectedLinkIds`; previously stale ids caused `ArgumentError` in `selectedNodes`/`selectedLinks`.
-
-**Performance**
-- [IMPROVE] Link painter `shouldRepaint` now compares geometry and style fields instead of unconditionally returning `true`, reducing unnecessary repaints.
-- [IMPROVE] View/key maps (`_nodeViews`, `_nodeKeys`, `_linkKeys`) are now cleaned up when a node or link is removed, eliminating an unbounded memory leak.
-- [IMPROVE] Log API extended to accept `Object message` (both `String` and `String Function()`); gesture-manager hot paths now pass closures so string construction is skipped when logging is off. Level-aware `enabled(category, level)` guard added.
-
-**Architecture / Internal**
-- [REFACTOR] Selection state unified: `node.isSelected`/`link.isSelected` are now derived getters backed by `GraphData.selectedNodeIds`/`selectedLinkIds`; manual dual-sync code and `force: true` removed.
-- [REFACTOR] Debug stack abstracted behind `DebugSink`/`DebugBackend` no-op defaults; the heavyweight `dart:io`/`http` implementation moved to a separate `plough_devtools` package. The core package is now web-safe and no longer depends on `http`.
-- [REFACTOR] `flame` dependency removed; segment × circle and segment × rectangle intersection logic is now implemented internally.
-- [CLEANUP] Dead file `enhanced_client.dart` (unreferenced) and dead field `_nodeDependencies` (never read) removed.
-- [CLEANUP] Default link thickness extracted to a named constant (was a magic number `30` with a TODO comment).
-
-**Testing**
-- [TEST] Gesture manager characterization tests expanded to cover link tap/drag, drag lifecycle (pan produces drag-update events, not tap), drag-end does not toggle selection, and concurrent pointer reentrancy.
-- [TEST] Selection single-source tests added covering stale-id removal on node/link deletion, `canSelect` divergence, and derived `isSelected` consistency.
+- [UPDATE] Link painter `shouldRepaint` now compares geometry and style fields instead of unconditionally returning `true`, reducing unnecessary repaints.
+- [UPDATE] View/key maps (`_nodeViews`, `_nodeKeys`, `_linkKeys`) are now cleaned up when a node or link is removed, eliminating an unbounded memory leak.
+- [UPDATE] Log API extended to accept `Object message` (both `String` and `String Function()`); gesture-manager hot paths now pass closures so string construction is skipped when logging is off. Level-aware `enabled(category, level)` guard added.
+- [UPDATE] Selection state unified: `node.isSelected`/`link.isSelected` are now derived getters backed by `GraphData.selectedNodeIds`/`selectedLinkIds`; manual dual-sync code and `force: true` removed.
+- [CHANGE] Debug stack abstracted behind `DebugSink`/`DebugBackend` no-op defaults; the heavyweight `dart:io`/`http` implementation moved to a separate `plough_devtools` package. The core package is now web-safe and no longer depends on `http`.
+- [CHANGE] `flame` dependency removed; segment × circle and segment × rectangle intersection logic is now implemented internally.
 
 ---
 
@@ -39,17 +26,17 @@
 - [FIX] Dragging a node through a `GraphViewport` now moves the node instead of doing nothing, and no longer overshoots the pointer on the frame the drag starts.
 - [FIX] Panning the viewport with a background drag no longer clears the current selection; only a background tap deselects.
 - [FIX] Resolved a `setState() called during build` exception that could be thrown when another widget (e.g. a `GraphViewport` or an overlay) listened to the same graph while a layout ran; the layout-finished notification is now dispatched after the frame.
-- [IMPROVE] Example app updated to use `GraphViewport` with `GraphGestureMode.nodeEdgeOnly`, plus a "Reset View" toolbar button.
+- [UPDATE] Example app updated to use `GraphViewport` with `GraphGestureMode.nodeEdgeOnly`, plus a "Reset View" toolbar button.
 
 ## 0.8.0
 
 - [ADD] Smooth force-directed layout animation: nodes now visibly scatter from random positions and settle into place each time the graph is displayed, using a Ticker-driven incremental simulation instead of a single synchronous computation.
 - [ADD] `GraphForceDirectedLayoutStrategy.stepsPerFrame` parameter to control animation speed vs. smoothness (default: 3 iterations per frame).
-- [IMPROVE] Force-directed repulsion calculation upgraded from O(n²) to O(n log n) using a Barnes-Hut quadtree. New `barnesHutTheta` parameter (default: 0.5) controls approximation accuracy.
-- [IMPROVE] `getIncomingLinks` / `getOutgoingLinks` now O(1) via adjacency index maintained on `addLink` / `removeLink` / `removeNode`.
-- [IMPROVE] Stack-order sort result is cached and only recomputed when the order actually changes, eliminating a per-frame O(n log n) sort.
-- [IMPROVE] `GraphNodeView` flattened from three nested `AnimatedBuilder` wrappers to one, reducing widget tree depth per node.
-- [IMPROVE] Spatial grid index added to `GraphGestureManager` for fast node hit-testing; rebuilt after each layout change.
+- [UPDATE] Force-directed repulsion calculation upgraded from O(n²) to O(n log n) using a Barnes-Hut quadtree. New `barnesHutTheta` parameter (default: 0.5) controls approximation accuracy.
+- [UPDATE] `getIncomingLinks` / `getOutgoingLinks` now O(1) via adjacency index maintained on `addLink` / `removeLink` / `removeNode`.
+- [UPDATE] Stack-order sort result is cached and only recomputed when the order actually changes, eliminating a per-frame O(n log n) sort.
+- [UPDATE] `GraphNodeView` flattened from three nested `AnimatedBuilder` wrappers to one, reducing widget tree depth per node.
+- [UPDATE] Spatial grid index added to `GraphGestureManager` for fast node hit-testing; rebuilt after each layout change.
 - [ADD] Large-graph sample scenes (200 / 300 / 500 nodes) in the example app for performance testing.
 
 ## 0.7.1
