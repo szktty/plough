@@ -307,6 +307,10 @@ void main() {
         )
         ..handlePanEnd(DragEndDetails());
 
+      // The drag must be announced before any update arrives, so a listener
+      // can prepare state that the update handlers then act on.
+      expect(behavior.dragStartEvents, hasLength(1));
+      expect(behavior.dragStartEvents.single.entityIds, [node.id]);
       // At least one drag-update event must be dispatched.
       expect(behavior.dragUpdateEvents, isNotEmpty);
       // Node position must have shifted.

@@ -1,5 +1,6 @@
 ## develop
 
+- [FIX] `GraphViewBehavior.onDragStart` is now dispatched. The method was declared and overridable but no call site ever invoked it, so drag handling could only observe a drag from `onDragUpdate` onwards — too late to set up state the update handlers depend on. It now fires from `_startActualDrag` at the moment the pan-ready threshold is crossed, for both nodes and links, carrying the original pan-start details.
 - [FIX] `removeNode` now removes connected links from the `links` map; previously orphaned link entries remained and could be used as render targets.
 - [FIX] `removeLink` now calls `_notifyLayoutChange()`; previously removing a link was not reflected in the UI or layout.
 - [FIX] `reverseLink` now notifies listeners and re-indexes the adjacency maps (`_incomingIndex`/`_outgoingIndex`); previously the direction swap was invisible to the UI.
