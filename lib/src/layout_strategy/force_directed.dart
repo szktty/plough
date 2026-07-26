@@ -49,6 +49,7 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
     this.centerNodeId,
     super.seed,
     super.padding,
+    super.nodePositions,
   })  : springLength = springLength ?? 200.0,
         springConstant = springConstant ?? 0.1,
         damping = damping ?? 0.8,
