@@ -77,6 +77,7 @@ class GraphView extends StatefulWidget {
     this.onBackgroundPanUpdate,
     this.onBackgroundPanEnd,
     this.dragDeltaTransform,
+    this.suppressDragMovement = false,
     this.globalToScene,
     this.canvasMode = GraphViewportCanvasMode.bounded,
     this.debugShowBorder = false,
@@ -103,6 +104,13 @@ class GraphView extends StatefulWidget {
   /// Typically `(delta) => delta / viewportController.scale` when a
   /// [GraphViewport] is in use.  When null, deltas are used as-is.
   final Offset Function(Offset delta)? dragDeltaTransform;
+
+  /// When true, drags report their progress but do not move the entity.
+  ///
+  /// Set this while a drag means something other than "move" — drawing a link
+  /// from a node, for instance. See
+  /// [GraphGestureManager.suppressDragMovement].
+  final bool suppressDragMovement;
 
   /// Converts a global screen position to scene coordinates.
   ///
@@ -643,6 +651,7 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
                   onBackgroundPanUpdate: widget.onBackgroundPanUpdate,
                   onBackgroundPanEnd: widget.onBackgroundPanEnd,
                   dragDeltaTransform: widget.dragDeltaTransform,
+                  suppressDragMovement: widget.suppressDragMovement,
                   globalToScene: widget.globalToScene,
                   onNodeDragStart: recordDragStart,
                   onNodeDragEnd: handleDragEnd,

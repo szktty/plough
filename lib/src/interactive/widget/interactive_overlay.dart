@@ -41,6 +41,7 @@ class GraphInteractiveOverlay extends StatefulWidget {
     this.onTooltipShow,
     this.onTooltipHide,
     this.dragDeltaTransform,
+    this.suppressDragMovement = false,
     this.globalToScene,
     this.onNodeDragStart,
     this.onNodeDragEnd,
@@ -61,6 +62,9 @@ class GraphInteractiveOverlay extends StatefulWidget {
   final void Function(GraphEntity)? onTooltipShow;
   final void Function(GraphEntity)? onTooltipHide;
   final Offset Function(Offset delta)? dragDeltaTransform;
+
+  /// See [GraphGestureManager.suppressDragMovement].
+  final bool suppressDragMovement;
   final Offset Function(Offset globalPosition)? globalToScene;
   final void Function(GraphId nodeId)? onNodeDragStart;
   final void Function(GraphId nodeId)? onNodeDragEnd;
@@ -170,7 +174,7 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       globalToScene: widget.globalToScene,
       onNodeDragStart: widget.onNodeDragStart,
       onNodeDragEnd: widget.onNodeDragEnd,
-    );
+    )..suppressDragMovement = widget.suppressDragMovement;
     (widget.graph as GraphImpl)
         .layoutChangeListenable
         .addListener(_onLayoutChange);
@@ -183,6 +187,7 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     _applyViewportDragDeltaTransform();
     _gestureManager.onNodeDragStart = widget.onNodeDragStart;
     _gestureManager.onNodeDragEnd = widget.onNodeDragEnd;
+    _gestureManager.suppressDragMovement = widget.suppressDragMovement;
   }
 
   @override
