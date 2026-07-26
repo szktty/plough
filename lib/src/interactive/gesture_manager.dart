@@ -1289,12 +1289,18 @@ class GraphGestureManager {
     // applied during the ready→drag transition.  Skip the priority handlers so
     // the same frame's delta is not counted twice (node jumping ahead of the
     // pointer).  Subsequent updates flow through Priority 2/3 normally.
+    // Where the pointer is *now*. `_lastPointerDetails` is deliberately not
+    // refreshed from a DragUpdateDetails (it feeds tap/hover bookkeeping that
+    // wants the press position), but a drag-update event describing the press
+    // position is useless to anything following the pointer.
+    final dragDetails = PointerEventDetails.fromDragUpdateDetails(details);
+
     if (startedDragThisUpdate) {
       final draggedNodeId = _nodeDragManager.lastDraggedEntityId;
       if (draggedNodeId != null) {
         final event = GraphDragUpdateEvent(
           entityIds: [draggedNodeId],
-          details: _lastPointerDetails!,
+          details: dragDetails,
           delta: details.delta,
         );
         viewBehavior.onDragUpdate(event);
@@ -1310,7 +1316,7 @@ class GraphGestureManager {
       if (updatedIds.isNotEmpty) {
         final event = GraphDragUpdateEvent(
           entityIds: updatedIds,
-          details: _lastPointerDetails!, // Use last known details
+          details: dragDetails,
           delta: details.delta, // Include delta in the event
         );
         viewBehavior.onDragUpdate(event);
@@ -1330,7 +1336,7 @@ class GraphGestureManager {
       if (updatedIds.isNotEmpty) {
         final event = GraphDragUpdateEvent(
           entityIds: updatedIds,
-          details: _lastPointerDetails!, // Use last known details
+          details: dragDetails,
           delta: details.delta, // Include delta in the event
         );
         viewBehavior.onDragUpdate(event);

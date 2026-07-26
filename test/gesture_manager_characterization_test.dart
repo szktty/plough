@@ -350,6 +350,32 @@ void main() {
       expect(node.logicalPosition, const Offset(200, 200));
     });
 
+    test('drag-update events carry the current pointer position', () {
+      _addNodeAt(graph, const Offset(200, 200));
+      final gm = manager();
+
+      const start = Offset(200, 200);
+      const end = Offset(320, 260);
+
+      gm
+        ..handlePointerDown(const PointerDownEvent(position: start))
+        ..handlePanStart(
+          DragStartDetails(localPosition: start, globalPosition: start),
+        )
+        ..handlePanUpdate(
+          DragUpdateDetails(
+            globalPosition: end,
+            localPosition: end,
+            delta: end - start,
+          ),
+        );
+
+      // Anything following the pointer — a preview line, a drop-target
+      // highlight — needs where it is now, not where it was pressed.
+      expect(behavior.dragUpdateEvents, isNotEmpty);
+      expect(behavior.dragUpdateEvents.last.details.localPosition, end);
+    });
+
     test('drag does not toggle selection when pointer is released', () {
       _addNodeAt(graph, const Offset(200, 200));
       final gm = manager();
