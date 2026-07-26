@@ -117,6 +117,9 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         hitTestsEntityAt: _shouldConsumeGestureAt,
         nodeIdAtScene: (scenePosition) =>
             _gestureManager.findNodeAt(scenePosition)?.id,
+        setSuppressDragMovement: (suppress) {
+          _gestureManager.suppressDragMovement = suppress;
+        },
       );
       _viewportController?.pointerHandlers = _publishedHandlers;
       // Forwarded events carry viewport-local positions; convert them to scene
@@ -187,7 +190,13 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     _applyViewportDragDeltaTransform();
     _gestureManager.onNodeDragStart = widget.onNodeDragStart;
     _gestureManager.onNodeDragEnd = widget.onNodeDragEnd;
-    _gestureManager.suppressDragMovement = widget.suppressDragMovement;
+    // Only follow the widget when its own value changed. Otherwise a rebuild
+    // would clobber a value set through
+    // GraphViewportController.suppressDragMovement, which exists precisely for
+    // callers that must toggle it mid-gesture.
+    if (widget.suppressDragMovement != oldWidget.suppressDragMovement) {
+      _gestureManager.suppressDragMovement = widget.suppressDragMovement;
+    }
   }
 
   @override

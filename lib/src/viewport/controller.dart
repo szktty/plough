@@ -57,6 +57,18 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
   /// viewport is used with a non-GraphView child).
   GraphViewportPointerHandlers? pointerHandlers;
 
+  /// Whether drags report their progress without moving the entity.
+  ///
+  /// Prefer this over [GraphView.suppressDragMovement] when the flag has to
+  /// change *during* a gesture — drawing a link that begins on Alt+drag, say.
+  /// Rebuilding the view mid-drag would replace the gesture state and kill the
+  /// drag; setting it here reaches the live gesture manager instead.
+  ///
+  /// No-op before a [GraphView] has attached to this controller.
+  set suppressDragMovement(bool suppress) {
+    pointerHandlers?.setSuppressDragMovement(suppress);
+  }
+
   /// The frontmost node at [scenePosition], or null if none is there.
   ///
   /// Uses the same hit-testing the gesture layer uses, so it accounts for node
@@ -255,6 +267,7 @@ class GraphViewportPointerHandlers {
     required this.onPanEnd,
     required this.hitTestsEntityAt,
     required this.nodeIdAtScene,
+    required this.setSuppressDragMovement,
   });
 
   final void Function(PointerDownEvent) onPointerDown;
@@ -277,4 +290,9 @@ class GraphViewportPointerHandlers {
   ///
   /// Backs [GraphViewportController.nodeIdAt].
   final GraphId? Function(Offset scenePosition) nodeIdAtScene;
+
+  /// Turns drag-movement suppression on or off.
+  ///
+  /// Backs [GraphViewportController.suppressDragMovement].
+  final void Function(bool suppress) setSuppressDragMovement;
 }
