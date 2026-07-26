@@ -111,6 +111,8 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         onPanUpdate: _handlePanUpdateConditional,
         onPanEnd: _handlePanEndConditional,
         hitTestsEntityAt: _shouldConsumeGestureAt,
+        nodeIdAtScene: (scenePosition) =>
+            _gestureManager.findNodeAt(scenePosition)?.id,
       );
       _viewportController?.pointerHandlers = _publishedHandlers;
       // Forwarded events carry viewport-local positions; convert them to scene

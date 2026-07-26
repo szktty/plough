@@ -113,7 +113,11 @@ abstract base class GraphEntityDragStateManager<E extends GraphEntity>
       if (entity is GraphNode) {
         // Stop any ongoing animation during drag
         (entity as GraphNodeImpl).isAnimating = false;
-        setPosition(entity.id, newLogicalPosition);
+        // The id is still reported when movement is suppressed, so the drag is
+        // observable even though the node stays put.
+        if (!gestureManager.suppressDragMovement) {
+          setPosition(entity.id, newLogicalPosition);
+        }
         updatedIds.add(dragState.entityId);
       } else {
         logWarning(

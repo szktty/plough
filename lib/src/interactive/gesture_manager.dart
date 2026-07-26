@@ -65,6 +65,17 @@ class GraphGestureManager {
   /// Use this when GraphView is inside a transformed parent (e.g. InteractiveViewer).
   Offset Function(Offset delta)? dragDeltaTransform;
 
+  /// When true, a drag reports its progress but does not move the entity.
+  ///
+  /// Set this while a drag means something other than "move" — drawing a link
+  /// from a node, for instance. [GraphViewBehavior.onDragStart],
+  /// [GraphViewBehavior.onDragUpdate] and [GraphViewBehavior.onDragEnd] still
+  /// fire so the gesture can be followed, but positions are left alone.
+  ///
+  /// Prefer this over clearing [GraphNode.canDrag]: that makes the node refuse
+  /// the gesture outright, so no drag begins and no events arrive at all.
+  bool suppressDragMovement = false;
+
   /// Called when a node drag starts. Receives the dragged node's [GraphId].
   void Function(GraphId nodeId)? onNodeDragStart;
 

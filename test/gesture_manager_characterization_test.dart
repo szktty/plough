@@ -319,6 +319,37 @@ void main() {
       expect(behavior.tapEvents, isEmpty);
     });
 
+    test('suppressDragMovement reports the drag without moving the node', () {
+      final node = _addNodeAt(graph, const Offset(200, 200));
+      final gm = manager()..suppressDragMovement = true;
+
+      const start = Offset(200, 200);
+      const end = Offset(260, 200);
+      final delta = end - start;
+
+      gm
+        ..handlePointerDown(const PointerDownEvent(position: start))
+        ..handlePanStart(
+          DragStartDetails(localPosition: start, globalPosition: start),
+        )
+        ..handlePanUpdate(
+          DragUpdateDetails(
+            globalPosition: end,
+            localPosition: end,
+            delta: delta,
+          ),
+        )
+        ..handlePanEnd(DragEndDetails());
+
+      // The gesture is still observable — this is what a link-drawing drag
+      // follows to place its preview line.
+      expect(behavior.dragStartEvents, hasLength(1));
+      expect(behavior.dragUpdateEvents, isNotEmpty);
+      expect(behavior.dragEndEvents, hasLength(1));
+      // But the node stayed where it was.
+      expect(node.logicalPosition, const Offset(200, 200));
+    });
+
     test('drag does not toggle selection when pointer is released', () {
       _addNodeAt(graph, const Offset(200, 200));
       final gm = manager();
