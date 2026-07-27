@@ -137,6 +137,20 @@ abstract base class GraphEntityPanReadyStateManager<E extends GraphEntity>
       },
     );
 
+    // Notify the behavior before delegating, so a listener can set up state
+    // that the drag managers will then act on. This is the point where a drag
+    // has actually begun — the pan-ready threshold has just been crossed —
+    // which is why the event carries the original pan-start details rather
+    // than the update that tripped the threshold.
+    behavior.onDragStart(
+      GraphDragStartEvent(
+        entityIds: [entityId],
+        details: PointerEventDetails.fromDragStartDetails(
+          readyState.startDetails,
+        ),
+      ),
+    );
+
     // Delegate to appropriate drag manager
     _delegateActualDragStart(entityId, readyState.startDetails, updateDetails);
 

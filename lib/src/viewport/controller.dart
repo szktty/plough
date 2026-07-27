@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
+import 'package:plough/src/graph/id.dart';
 
 /// Controls pan and zoom for a GraphViewport.
 ///
@@ -55,6 +56,29 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
   /// Null when no [GraphView] has attached (e.g. before first build, or when the
   /// viewport is used with a non-GraphView child).
   GraphViewportPointerHandlers? pointerHandlers;
+
+  /// Whether drags report their progress without moving the entity.
+  ///
+  /// Prefer this over [GraphView.suppressDragMovement] when the flag has to
+  /// change *during* a gesture — drawing a link that begins on Alt+drag, say.
+  /// Rebuilding the view mid-drag would replace the gesture state and kill the
+  /// drag; setting it here reaches the live gesture manager instead.
+  ///
+  /// No-op before a [GraphView] has attached to this controller.
+  set suppressDragMovement(bool suppress) {
+    pointerHandlers?.setSuppressDragMovement(suppress);
+  }
+
+  /// The frontmost node at [scenePosition], or null if none is there.
+  ///
+  /// Uses the same hit-testing the gesture layer uses, so it accounts for node
+  /// shape (a circular node is not hit at the corners of its bounding box) and
+  /// for stacking order when nodes overlap. Comparing against `bounds`
+  /// directly gets both of those wrong.
+  ///
+  /// Returns null before a [GraphView] has attached to this controller.
+  GraphId? nodeIdAt(Offset scenePosition) =>
+      pointerHandlers?.nodeIdAtScene(scenePosition);
 
   /// The current zoom scale.
   double get scale => value.getMaxScaleOnAxis();
@@ -242,6 +266,8 @@ class GraphViewportPointerHandlers {
     required this.onPanUpdate,
     required this.onPanEnd,
     required this.hitTestsEntityAt,
+    required this.nodeIdAtScene,
+    required this.setSuppressDragMovement,
   });
 
   final void Function(PointerDownEvent) onPointerDown;
@@ -259,4 +285,14 @@ class GraphViewportPointerHandlers {
 
   /// Whether an entity (node or link) is under the given viewport-local point.
   final bool Function(Offset localPosition) hitTestsEntityAt;
+
+  /// The frontmost node at a **scene** position, or null if there is none.
+  ///
+  /// Backs [GraphViewportController.nodeIdAt].
+  final GraphId? Function(Offset scenePosition) nodeIdAtScene;
+
+  /// Turns drag-movement suppression on or off.
+  ///
+  /// Backs [GraphViewportController.suppressDragMovement].
+  final void Function(bool suppress) setSuppressDragMovement;
 }

@@ -41,6 +41,7 @@ class GraphInteractiveOverlay extends StatefulWidget {
     this.onTooltipShow,
     this.onTooltipHide,
     this.dragDeltaTransform,
+    this.suppressDragMovement = false,
     this.globalToScene,
     this.onNodeDragStart,
     this.onNodeDragEnd,
@@ -61,6 +62,9 @@ class GraphInteractiveOverlay extends StatefulWidget {
   final void Function(GraphEntity)? onTooltipShow;
   final void Function(GraphEntity)? onTooltipHide;
   final Offset Function(Offset delta)? dragDeltaTransform;
+
+  /// See [GraphGestureManager.suppressDragMovement].
+  final bool suppressDragMovement;
   final Offset Function(Offset globalPosition)? globalToScene;
   final void Function(GraphId nodeId)? onNodeDragStart;
   final void Function(GraphId nodeId)? onNodeDragEnd;
@@ -111,6 +115,11 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         onPanUpdate: _handlePanUpdateConditional,
         onPanEnd: _handlePanEndConditional,
         hitTestsEntityAt: _shouldConsumeGestureAt,
+        nodeIdAtScene: (scenePosition) =>
+            _gestureManager.findNodeAt(scenePosition)?.id,
+        setSuppressDragMovement: (suppress) {
+          _gestureManager.suppressDragMovement = suppress;
+        },
       );
       _viewportController?.pointerHandlers = _publishedHandlers;
       // Forwarded events carry viewport-local positions; convert them to scene
@@ -168,7 +177,7 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       globalToScene: widget.globalToScene,
       onNodeDragStart: widget.onNodeDragStart,
       onNodeDragEnd: widget.onNodeDragEnd,
-    );
+    )..suppressDragMovement = widget.suppressDragMovement;
     (widget.graph as GraphImpl)
         .layoutChangeListenable
         .addListener(_onLayoutChange);
@@ -181,6 +190,13 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     _applyViewportDragDeltaTransform();
     _gestureManager.onNodeDragStart = widget.onNodeDragStart;
     _gestureManager.onNodeDragEnd = widget.onNodeDragEnd;
+    // Only follow the widget when its own value changed. Otherwise a rebuild
+    // would clobber a value set through
+    // GraphViewportController.suppressDragMovement, which exists precisely for
+    // callers that must toggle it mid-gesture.
+    if (widget.suppressDragMovement != oldWidget.suppressDragMovement) {
+      _gestureManager.suppressDragMovement = widget.suppressDragMovement;
+    }
   }
 
   @override

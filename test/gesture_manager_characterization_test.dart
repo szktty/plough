@@ -307,12 +307,73 @@ void main() {
         )
         ..handlePanEnd(DragEndDetails());
 
+      // The drag must be announced before any update arrives, so a listener
+      // can prepare state that the update handlers then act on.
+      expect(behavior.dragStartEvents, hasLength(1));
+      expect(behavior.dragStartEvents.single.entityIds, [node.id]);
       // At least one drag-update event must be dispatched.
       expect(behavior.dragUpdateEvents, isNotEmpty);
       // Node position must have shifted.
       expect(node.logicalPosition, isNot(const Offset(200, 200)));
       // Tap events must NOT fire (it became a drag, not a tap).
       expect(behavior.tapEvents, isEmpty);
+    });
+
+    test('suppressDragMovement reports the drag without moving the node', () {
+      final node = _addNodeAt(graph, const Offset(200, 200));
+      final gm = manager()..suppressDragMovement = true;
+
+      const start = Offset(200, 200);
+      const end = Offset(260, 200);
+      final delta = end - start;
+
+      gm
+        ..handlePointerDown(const PointerDownEvent(position: start))
+        ..handlePanStart(
+          DragStartDetails(localPosition: start, globalPosition: start),
+        )
+        ..handlePanUpdate(
+          DragUpdateDetails(
+            globalPosition: end,
+            localPosition: end,
+            delta: delta,
+          ),
+        )
+        ..handlePanEnd(DragEndDetails());
+
+      // The gesture is still observable — this is what a link-drawing drag
+      // follows to place its preview line.
+      expect(behavior.dragStartEvents, hasLength(1));
+      expect(behavior.dragUpdateEvents, isNotEmpty);
+      expect(behavior.dragEndEvents, hasLength(1));
+      // But the node stayed where it was.
+      expect(node.logicalPosition, const Offset(200, 200));
+    });
+
+    test('drag-update events carry the current pointer position', () {
+      _addNodeAt(graph, const Offset(200, 200));
+      final gm = manager();
+
+      const start = Offset(200, 200);
+      const end = Offset(320, 260);
+
+      gm
+        ..handlePointerDown(const PointerDownEvent(position: start))
+        ..handlePanStart(
+          DragStartDetails(localPosition: start, globalPosition: start),
+        )
+        ..handlePanUpdate(
+          DragUpdateDetails(
+            globalPosition: end,
+            localPosition: end,
+            delta: end - start,
+          ),
+        );
+
+      // Anything following the pointer — a preview line, a drop-target
+      // highlight — needs where it is now, not where it was pressed.
+      expect(behavior.dragUpdateEvents, isNotEmpty);
+      expect(behavior.dragUpdateEvents.last.details.localPosition, end);
     });
 
     test('drag does not toggle selection when pointer is released', () {

@@ -45,6 +45,14 @@ abstract interface class GraphNode implements GraphEntity {
   /// Defines how the node is visually rendered.
   GraphShape? get shape;
 
+  /// Whether a layout pass has placed this node.
+  ///
+  /// Set once a layout finishes, so it distinguishes nodes holding a position
+  /// worth preserving from ones that have only just been added. Useful for
+  /// pinning the former via [GraphLayoutStrategy.nodePositions] when the graph
+  /// grows and the layout would otherwise move everything.
+  bool get isArranged;
+
   /// Listenable for state changes that affect rendering but not layout.
   ///
   /// Used to trigger UI updates when visual properties like selection state
@@ -201,6 +209,7 @@ final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
   @override
   bool get isSelected => graph?.selectedNodeIds.contains(id) ?? false;
 
+  @override
   bool get isArranged => state.value.isArranged;
 
   set isArranged(bool isArranged) {

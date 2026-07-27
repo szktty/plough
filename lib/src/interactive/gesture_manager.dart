@@ -65,6 +65,17 @@ class GraphGestureManager {
   /// Use this when GraphView is inside a transformed parent (e.g. InteractiveViewer).
   Offset Function(Offset delta)? dragDeltaTransform;
 
+  /// When true, a drag reports its progress but does not move the entity.
+  ///
+  /// Set this while a drag means something other than "move" — drawing a link
+  /// from a node, for instance. [GraphViewBehavior.onDragStart],
+  /// [GraphViewBehavior.onDragUpdate] and [GraphViewBehavior.onDragEnd] still
+  /// fire so the gesture can be followed, but positions are left alone.
+  ///
+  /// Prefer this over clearing [GraphNode.canDrag]: that makes the node refuse
+  /// the gesture outright, so no drag begins and no events arrive at all.
+  bool suppressDragMovement = false;
+
   /// Called when a node drag starts. Receives the dragged node's [GraphId].
   void Function(GraphId nodeId)? onNodeDragStart;
 
@@ -1278,12 +1289,18 @@ class GraphGestureManager {
     // applied during the ready→drag transition.  Skip the priority handlers so
     // the same frame's delta is not counted twice (node jumping ahead of the
     // pointer).  Subsequent updates flow through Priority 2/3 normally.
+    // Where the pointer is *now*. `_lastPointerDetails` is deliberately not
+    // refreshed from a DragUpdateDetails (it feeds tap/hover bookkeeping that
+    // wants the press position), but a drag-update event describing the press
+    // position is useless to anything following the pointer.
+    final dragDetails = PointerEventDetails.fromDragUpdateDetails(details);
+
     if (startedDragThisUpdate) {
       final draggedNodeId = _nodeDragManager.lastDraggedEntityId;
       if (draggedNodeId != null) {
         final event = GraphDragUpdateEvent(
           entityIds: [draggedNodeId],
-          details: _lastPointerDetails!,
+          details: dragDetails,
           delta: details.delta,
         );
         viewBehavior.onDragUpdate(event);
@@ -1299,7 +1316,7 @@ class GraphGestureManager {
       if (updatedIds.isNotEmpty) {
         final event = GraphDragUpdateEvent(
           entityIds: updatedIds,
-          details: _lastPointerDetails!, // Use last known details
+          details: dragDetails,
           delta: details.delta, // Include delta in the event
         );
         viewBehavior.onDragUpdate(event);
@@ -1319,7 +1336,7 @@ class GraphGestureManager {
       if (updatedIds.isNotEmpty) {
         final event = GraphDragUpdateEvent(
           entityIds: updatedIds,
-          details: _lastPointerDetails!, // Use last known details
+          details: dragDetails,
           delta: details.delta, // Include delta in the event
         );
         viewBehavior.onDragUpdate(event);
