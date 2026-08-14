@@ -151,6 +151,13 @@ class GraphGestureManager {
   /// Null when the current gesture did not start on the background.
   Offset? _pendingBackgroundDeselectAt;
 
+  /// Whether the gesture in progress began with the primary button.
+  ///
+  /// A [PointerUpEvent] reports no buttons — they have just been released — so
+  /// the up handler cannot tell a primary release from a secondary one on its
+  /// own and has to remember what went down.
+  bool _pointerIsPrimary = true;
+
   /// Rebuild the spatial grid from current node geometries.
   void rebuildSpatialIndex() {
     _nodeGrid.rebuild(graph.nodes);
@@ -471,6 +478,15 @@ class GraphGestureManager {
   }
 
   void handlePointerDown(PointerDownEvent event) {
+    // Selection, dragging and tapping are all primary-button gestures. A
+    // secondary press is how platforms ask for a context menu, and the host
+    // app handles it: acting on it here selected whatever was under the
+    // pointer and, on empty background, armed the deferred deselect that
+    // handlePointerUp resolves — so opening a menu cleared the very selection
+    // the menu was about to act on.
+    _pointerIsPrimary = event.buttons == kPrimaryButton;
+    if (!_pointerIsPrimary) return;
+
     final scenePos = toScene(event.localPosition, event.position);
     logDebug(
       LogCategory.gesture,
@@ -683,6 +699,13 @@ class GraphGestureManager {
   }
 
   void handlePointerUp(PointerUpEvent event) {
+    // Mirrors the guard in handlePointerDown. The press was never processed,
+    // so there is no drag to finish and no deferred deselect to resolve.
+    if (!_pointerIsPrimary) {
+      _pointerIsPrimary = true;
+      return;
+    }
+
     final scenePos = toScene(event.localPosition, event.position);
     logDebug(
       LogCategory.gesture,
