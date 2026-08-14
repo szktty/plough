@@ -65,7 +65,18 @@ class QuadtreeNode {
     return root;
   }
 
-  void _insert(QuadtreeBody body) {
+  /// How far the tree may subdivide before bodies are allowed to share a node.
+  ///
+  /// Two bodies at the same coordinates fall into the same quadrant however
+  /// small it gets, so subdividing to separate them never terminates. That is
+  /// not a hypothetical: nodes are constructed at the origin, so any two that
+  /// have not been placed yet sit exactly on top of each other — which was
+  /// enough to recurse until the stack overflowed and take the whole layout
+  /// down with it. Past this depth a node simply keeps several bodies; the
+  /// force approximation is unaffected at a scale this small.
+  static const int _maxDepth = 32;
+
+  void _insert(QuadtreeBody body, [int depth = 0]) {
     if (_totalMass == 0) {
       // Empty node — become a leaf.
       _body = body;
@@ -80,16 +91,22 @@ class QuadtreeNode {
     _cy = (_cy * _totalMass + body.y * body.mass) / (_totalMass + body.mass);
     _totalMass += body.mass;
 
+    if (depth >= _maxDepth) {
+      // Deep enough. The centre of mass above already accounts for this body,
+      // which is all the traversal reads from an internal node.
+      return;
+    }
+
     if (_isLeaf) {
       // Subdivide: push the existing body into a child.
       _isLeaf = false;
       if (_body != null) {
-        _childFor(_body!)._insert(_body!);
+        _childFor(_body!)._insert(_body!, depth + 1);
         _body = null;
       }
     }
 
-    _childFor(body)._insert(body);
+    _childFor(body)._insert(body, depth + 1);
   }
 
   QuadtreeNode _childFor(QuadtreeBody body) {
