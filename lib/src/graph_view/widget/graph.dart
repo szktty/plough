@@ -604,6 +604,21 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
           }
         } else {
           elements = [..._graph.nodes, ..._graph.links];
+          // A graph that is mutated in place — a node added to the one already
+          // on screen, rather than a replacement Graph — asks for a layout
+          // through markNeedsLayout. Nothing else moves the view out of
+          // `ready`, since that only happens when the whole graph is swapped,
+          // so without this the request was dropped: the new node kept the
+          // origin it was created at, far outside the viewport, while links to
+          // it were still drawn because a link only needs its endpoints to
+          // exist.
+          if (_graph.needsLayout && !_isIncrementalLayoutRunning) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && _graph.needsLayout) {
+                _setBuildState(GraphViewBuildState.performLayout);
+              }
+            });
+          }
         }
 
         if (_sortDirty || _sortedElements == null) {
