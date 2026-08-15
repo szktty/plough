@@ -4,6 +4,7 @@ export 'custom.dart'
 export 'force_directed.dart' show GraphForceDirectedLayoutStrategy;
 export 'manual.dart' show GraphLayoutPositionOrigin, GraphManualLayoutStrategy;
 export 'random.dart' show GraphRandomLayoutStrategy;
+export 'snapshot.dart' show GraphSnapshotLayoutStrategy;
 export 'tree.dart'
     show
         GraphTreeLayoutDirection,

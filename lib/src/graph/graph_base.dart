@@ -201,6 +201,31 @@ abstract class Graph implements Listenable {
   /// If [ids] is omitted, manages all entities in the graph.
   /// Throws [ArgumentError] if any of the provided IDs don't exist.
   GraphOrderManager getOrderManagerSync([List<GraphId>? ids]);
+
+  /// The current logical position of every node, keyed by node id.
+  ///
+  /// Take this before removing nodes — when a filter hides part of the graph,
+  /// say — and hand it back afterwards through
+  /// [GraphSnapshotLayoutStrategy] so the nodes that come back land where they
+  /// were instead of at the origin. Removing a node destroys the object that
+  /// held its position, so nothing else preserves it.
+  ///
+  /// ```dart
+  /// final snapshot = graph.nodePositionSnapshot();
+  /// // …filter nodes out and later add them back…
+  /// GraphView(
+  ///   graph: graph,
+  ///   layoutStrategy: GraphSnapshotLayoutStrategy(
+  ///     snapshot: snapshot,
+  ///     fallback: GraphForceDirectedLayoutStrategy(),
+  ///   ),
+  /// );
+  /// ```
+  ///
+  /// Only nodes a layout has actually placed are included unless
+  /// [includeUnarranged] is true, so a node still waiting at the origin does
+  /// not enter the snapshot and pin itself there.
+  Map<GraphId, Offset> nodePositionSnapshot({bool includeUnarranged = false});
 }
 
 class GraphImpl
@@ -612,6 +637,14 @@ class GraphImpl
         sync: true,
       );
     }
+  }
+
+  @override
+  Map<GraphId, Offset> nodePositionSnapshot({bool includeUnarranged = false}) {
+    return {
+      for (final node in nodes.cast<GraphNodeImpl>())
+        if (includeUnarranged || node.isArranged) node.id: node.logicalPosition,
+    };
   }
 
   @override
