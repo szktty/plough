@@ -73,10 +73,29 @@ abstract class GraphLinkViewGeometry with _$GraphLinkViewGeometry {
   const GraphLinkViewGeometry._();
 
   /// Determines if a point is within the link's area.
+  ///
+  /// [bounds] spans the two endpoints only, so for an axis-aligned link it has
+  /// zero height or width and `Rect.contains` can never be true — a horizontal
+  /// link was unhittable at every point, including its own centre line. The
+  /// band the user actually sees and aims at is [thickness] wide, so the test
+  /// inflates the rect to that width across the link before comparing.
   bool containsPoint(Offset point) {
     final center = bounds.center;
     final rotatedPoint = _rotatePoint(point, center, -angle);
-    return bounds.contains(rotatedPoint);
+    // Rotating by -angle lays the link along the x axis regardless of how it
+    // runs on screen, so the hit area is built in that frame: as long as the
+    // endpoints are apart, centred on the midpoint, and half a thickness to
+    // either side. Using bounds directly would keep the degenerate extent for
+    // vertical links, which rotate onto a zero-width rect.
+    final halfLength = connection.connectionPoints.distance / 2;
+    final halfThickness = thickness / 2;
+    final hitArea = Rect.fromLTRB(
+      center.dx - halfLength,
+      center.dy - halfThickness,
+      center.dx + halfLength,
+      center.dy + halfThickness,
+    );
+    return hitArea.contains(rotatedPoint);
   }
 
   Offset _rotatePoint(Offset point, Offset center, double angle) {
