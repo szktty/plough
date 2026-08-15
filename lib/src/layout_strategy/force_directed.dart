@@ -127,6 +127,11 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       if (nodeImpl.isArranged && node.logicalPosition != Offset.zero) {
         continue;
       }
+      // A caller-supplied position is a deliberate starting point; randomising
+      // over it would throw away the very placement that was just requested.
+      if (getNodePosition(node) != null) {
+        continue;
+      }
       final dx = random.nextDouble() * width + padding.left;
       final dy = random.nextDouble() * height + padding.top;
       positionNode(node, Offset(dx, dy));
@@ -249,6 +254,11 @@ base class GraphForceDirectedLayoutStrategy extends GraphLayoutStrategy {
       // Skip initial placement for already positioned nodes
       final nodeImpl = node as GraphNodeImpl;
       if (nodeImpl.isArranged && node.logicalPosition != Offset.zero) {
+        continue;
+      }
+      // A caller-supplied position is a deliberate starting point; randomising
+      // over it would throw away the very placement that was just requested.
+      if (getNodePosition(node) != null) {
         continue;
       }
       final dx = random.nextDouble() * width + padding.left;

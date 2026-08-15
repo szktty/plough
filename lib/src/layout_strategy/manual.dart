@@ -187,7 +187,11 @@ base class GraphManualLayoutStrategy extends GraphLayoutStrategy {
           centerOffset: centerOffset,
           screenCenter: screenCenter,
         );
-        positionNode(node, absolutePosition);
+        // Written directly rather than through positionNode: this strategy's
+        // positions are relative to [origin], so the transformed value — not
+        // the raw one super.performLayout seeded — is the intended placement,
+        // and that holds for fixed entries too (positionNode skips those).
+        (node as GraphNodeImpl).logicalPosition = absolutePosition;
       }
     }
   }

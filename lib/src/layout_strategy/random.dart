@@ -46,6 +46,11 @@ base class GraphRandomLayoutStrategy extends GraphLayoutStrategy {
     final width = size.width;
     final height = size.height;
     for (final node in graph.nodes) {
+      // A caller-supplied position is a deliberate placement; randomising over
+      // it would throw away the very position that was just requested.
+      if (getNodePosition(node) != null) {
+        continue;
+      }
       final dx = random.nextDouble() * (width - padding.left - padding.right) +
           padding.left;
       final dy = random.nextDouble() * (height - padding.top - padding.bottom) +

@@ -18,9 +18,24 @@ abstract interface class GraphNode implements GraphEntity {
   /// Creates a node with optional [id] and [properties].
   ///
   /// If [id] is not provided, generates a unique identifier.
-  factory GraphNode({GraphId? id, Map<String, Object>? properties}) {
+  ///
+  /// [logicalPosition] places the node immediately, before any layout runs.
+  /// Use it when re-adding a node whose position is already known — one hidden
+  /// by a filter and then restored, say — so it never flashes at the origin.
+  /// Pass [isArranged] as `true` alongside it to tell layouts the position is
+  /// worth keeping; otherwise a layout may treat the node as new and move it.
+  factory GraphNode({
+    GraphId? id,
+    Map<String, Object>? properties,
+    Offset? logicalPosition,
+    bool isArranged = false,
+  }) {
     return GraphNodeImpl(
-      GraphNodeData(id: id ?? GraphId.unique(GraphIdType.node)),
+      GraphNodeData(
+        id: id ?? GraphId.unique(GraphIdType.node),
+        logicalPosition: logicalPosition ?? Offset.zero,
+        isArranged: isArranged,
+      ),
       properties: properties,
     );
   }
@@ -64,8 +79,15 @@ abstract interface class GraphNode implements GraphEntity {
 final class GraphNodeImpl extends GraphEntityImpl<GraphNodeData>
     with Diagnosticable
     implements GraphNode {
-  GraphNodeImpl(super.val, {Map<String, Object>? properties}) {
+  GraphNodeImpl(GraphNodeData val, {Map<String, Object>? properties})
+      : super(val) {
     this.properties = properties ?? const {};
+    // logicalPosition is served by _logicalPosition, not by the state field, so
+    // a position supplied at construction has to be copied across or it would
+    // be silently dropped and the node would start at the origin.
+    if (val.logicalPosition != Offset.zero) {
+      _logicalPosition.value = val.logicalPosition;
+    }
   }
 
   final ValueNotifier<GraphNodeViewGeometry?> _geometry = ValueNotifier(null);

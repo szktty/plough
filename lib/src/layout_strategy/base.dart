@@ -34,6 +34,21 @@ class GraphNodeLayoutPosition {
 
   /// Whether this node's position should remain fixed during layout calculations.
   final bool fixed;
+
+  // Value equality so that baseEquals — and through it shouldRelayout — compares
+  // what the positions say rather than which objects hold them. Callers rebuild
+  // these lists on every build, so identity would report a change every time and
+  // relayout the graph continuously.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GraphNodeLayoutPosition &&
+          id == other.id &&
+          position == other.position &&
+          fixed == other.fixed;
+
+  @override
+  int get hashCode => Object.hash(id, position, fixed);
 }
 
 /// The base class for graph layout algorithms.
@@ -115,9 +130,29 @@ abstract base class GraphLayoutStrategy {
     return (node as GraphNodeImpl).geometry?.bounds.size;
   }
 
+  /// Extra positions layered on top of [nodePositions] by the caller.
+  ///
+  /// [nodePositions] is final, so a strategy handed to another strategy as a
+  /// delegate cannot be given more pins at construction. This is the seam for
+  /// that: [GraphSnapshotLayoutStrategy] uses it to pin the nodes it has
+  /// already restored before letting a fallback strategy place the rest.
+  ///
+  /// Entries in [nodePositions] take precedence, so an explicitly requested
+  /// position always wins over one layered on here.
+  List<GraphNodeLayoutPosition> overlaidNodePositions = const [];
+
+  /// All positions that apply to this run, [nodePositions] first.
+  Iterable<GraphNodeLayoutPosition> get effectiveNodePositions sync* {
+    yield* nodePositions;
+    if (overlaidNodePositions.isEmpty) return;
+    final own = nodePositions.map((p) => p.id).toSet();
+    yield* overlaidNodePositions.where((p) => !own.contains(p.id));
+  }
+
   /// Gets the predefined position for a node, if any exists.
   GraphNodeLayoutPosition? getNodePosition(GraphNode node) {
-    return nodePositions.firstWhereOrNull((element) => element.id == node.id);
+    return effectiveNodePositions
+        .firstWhereOrNull((element) => element.id == node.id);
   }
 
   /// Checks if a node's position should remain fixed during layout.
@@ -150,13 +185,7 @@ abstract base class GraphLayoutStrategy {
     logDebug(LogCategory.layout, '    size: $size');
     logDebug(LogCategory.layout, '    seed: $seed');
 
-    // node positions
-    for (final nodePosition in nodePositions) {
-      final node = graph.getNode(nodePosition.id);
-      if (node != null) {
-        positionNode(node, nodePosition.position);
-      }
-    }
+    applyNodePositions(graph);
 
     for (final node in graph.nodes.cast<GraphNodeImpl>()) {
       node.animationStartPosition = _nodeAnimationStartPosition;
@@ -185,9 +214,31 @@ abstract base class GraphLayoutStrategy {
   /// Subclasses that support incremental layout must override this.
   bool stepIncrementalLayout(Graph graph) => false;
 
+  /// Writes every entry of [nodePositions] to its node.
+  ///
+  /// This is the one place allowed to move a fixed node, and it must run before
+  /// the algorithm starts iterating: [positionNode] deliberately refuses to
+  /// move fixed nodes, so without this seeding pass a `fixed: true` entry would
+  /// pin a node to wherever it already happened to be — the origin, for a node
+  /// that was just constructed — instead of to the requested position.
+  ///
+  /// Subclasses that do not call `super.performLayout` must call this
+  /// themselves before positioning anything.
+  @protected
+  void applyNodePositions(Graph graph) {
+    for (final nodePosition in effectiveNodePositions) {
+      final node = graph.getNode(nodePosition.id);
+      if (node != null) {
+        (node as GraphNodeImpl).logicalPosition = nodePosition.position;
+      }
+    }
+  }
+
   /// Positions a node at the specified coordinates.
   ///
-  /// Respects fixed node positions and handles state updates.
+  /// Respects fixed node positions and handles state updates. Fixed nodes are
+  /// seeded once by [applyNodePositions]; every later write goes through here
+  /// and is ignored for them.
   void positionNode(GraphNode node, Offset position) {
     if (isNodeFixed(node)) {
       return;
