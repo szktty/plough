@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:plough/src/graph/entity.dart';
+import 'package:plough/src/graph/filtered_graph.dart';
 import 'package:plough/src/graph/graph_base.dart';
 import 'package:plough/src/graph/id.dart';
 import 'package:plough/src/graph/link.dart';
@@ -80,12 +82,40 @@ class GraphView extends StatefulWidget {
     this.suppressDragMovement = false,
     this.globalToScene,
     this.canvasMode = GraphViewportCanvasMode.bounded,
+    this.hiddenNodeIds = const {},
+    this.hiddenLinkIds = const {},
     this.debugShowBorder = false,
     super.key,
   });
 
   /// The graph data model.
   final Graph graph;
+
+  /// Nodes to keep in the graph but leave undrawn.
+  ///
+  /// A node listed here is not rendered, not hit-tested, and not laid out — the
+  /// layout arranges only what is visible, so a filtered graph closes up rather
+  /// than leaving gaps. The node keeps its position and properties, so removing
+  /// it from this set brings it back exactly as it was. Prefer this over
+  /// removing the node from the [Graph] when the removal is a display filter:
+  /// removing destroys the object holding the position, so the node comes back
+  /// at the origin.
+  ///
+  /// Links touching a hidden node are hidden with it, so no link is ever drawn
+  /// to a node that is not there.
+  ///
+  /// This combines with the per-entity [GraphEntity.visible] flag: an entity is
+  /// drawn only when `visible` is true *and* its id is absent here. Use the flag
+  /// for one-off control and this set for filtering, where swapping the whole
+  /// set is cheaper than walking every node.
+  final Set<GraphId> hiddenNodeIds;
+
+  /// Links to keep in the graph but leave undrawn.
+  ///
+  /// Works like [hiddenNodeIds]. Links touching a hidden node are already
+  /// hidden, so this is only for hiding a link whose endpoints both remain
+  /// visible.
+  final Set<GraphId> hiddenLinkIds;
 
   /// Defines the appearance and interaction behavior.
   final GraphViewBehavior behavior;
@@ -218,6 +248,42 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
   GraphLayoutStrategy get _layoutStrategy => widget.layoutStrategy;
   GraphLayoutStrategy? _oldLayoutStrategy;
 
+  /// Whether [node] should be drawn, hit-tested and laid out.
+  ///
+  /// The per-entity flag and the widget's filter set are both authoritative:
+  /// either one can hide a node.
+  bool isNodeVisible(GraphNode node) =>
+      node.visible && !widget.hiddenNodeIds.contains(node.id);
+
+  /// Whether [link] should be drawn and hit-tested.
+  ///
+  /// A link is only as visible as its endpoints: drawing one to a node that is
+  /// not there leaves a line trailing off to nothing, which is the exact
+  /// artifact hiding a node is meant to avoid.
+  bool isLinkVisible(GraphLink link) =>
+      link.visible &&
+      !widget.hiddenLinkIds.contains(link.id) &&
+      isNodeVisible(link.source) &&
+      isNodeVisible(link.target);
+
+  /// The nodes currently drawn, in graph order.
+  Iterable<GraphNode> get visibleNodes => _graph.nodes.where(isNodeVisible);
+
+  /// The links currently drawn, in graph order.
+  Iterable<GraphLink> get visibleLinks => _graph.links.where(isLinkVisible);
+
+  /// The graph as the layout sees it: hidden entities omitted.
+  ///
+  /// Hidden nodes take no part in the layout, so the visible ones close up
+  /// around them instead of being arranged around gaps nobody can see. Passing
+  /// the real graph here would let the algorithm place — and push the visible
+  /// nodes away from — entities that are not drawn.
+  Graph get _layoutGraph => FilteredGraph(
+        _graph,
+        isNodeVisible: isNodeVisible,
+        isLinkVisible: isLinkVisible,
+      );
+
   // Cache for sorted elements — rebuilt only when stackOrder changes.
   List<GraphEntity>? _sortedElements;
   bool _sortDirty = true;
@@ -278,14 +344,17 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
 
     final strategy = _layoutStrategy;
     final size = Size(constraints.maxWidth, constraints.maxHeight);
-    strategy.initIncrementalLayout(_graph, size);
+    // Captured once: the ticker must keep stepping the same set of nodes it was
+    // initialised with, even if visibility changes mid-run.
+    final layoutGraph = _layoutGraph;
+    strategy.initIncrementalLayout(layoutGraph, size);
 
     _layoutTicker = createTicker((_) {
       if (!mounted) {
         _stopIncrementalLayout();
         return;
       }
-      final hasMore = strategy.stepIncrementalLayout(_graph);
+      final hasMore = strategy.stepIncrementalLayout(layoutGraph);
       // Bump the layout notifier so AnimatedBuilder rebuilds this frame.
       _graph.notifyLayoutStep();
 
@@ -327,6 +396,18 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
         !widget.behavior.isEquivalentTo(oldWidget.behavior);
     if (needsReinit) {
       _initBehavior();
+      return;
+    }
+
+    // A visibility change alters which nodes the layout arranges, so the
+    // remaining ones have to be re-placed. It must NOT go through
+    // _initBehavior: that discards geometry and re-runs from scratch, which is
+    // the expensive reset hiding a node is meant to avoid.
+    if (!setEquals(widget.hiddenNodeIds, oldWidget.hiddenNodeIds) ||
+        !setEquals(widget.hiddenLinkIds, oldWidget.hiddenLinkIds)) {
+      _graph.markNeedsLayout();
+      _sortedElements = null;
+      _sortDirty = true;
     }
   }
 
@@ -527,7 +608,7 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
         }
       }
       _layoutStrategy.performLayout(
-        _graph,
+        _layoutGraph,
         Size(constrains.maxWidth, constrains.maxHeight),
       );
       // Defer onLayoutFinished (which notifies GraphData listeners) to the
@@ -582,12 +663,12 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
               }
             });
           }
-          elements = [..._graph.nodes];
+          elements = [...visibleNodes];
         } else if (_buildState.value == GraphViewBuildState.performLayout) {
           _performLayout(context: context, constrains: constraints);
           elements = _isIncrementalLayoutRunning
-              ? [..._graph.nodes, ..._graph.links]
-              : [..._graph.nodes];
+              ? [...visibleNodes, ...visibleLinks]
+              : [...visibleNodes];
           if (!_isIncrementalLayoutRunning && !_isGeometryUpdateScheduled) {
             _isGeometryUpdateScheduled = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -603,7 +684,7 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
             });
           }
         } else {
-          elements = [..._graph.nodes, ..._graph.links];
+          elements = [...visibleNodes, ...visibleLinks];
           // A graph that is mutated in place — a node added to the one already
           // on screen, rather than a replacement Graph — asks for a layout
           // through markNeedsLayout. Nothing else moves the view out of
@@ -670,6 +751,8 @@ class GraphViewState extends State<GraphView> with TickerProviderStateMixin {
                   globalToScene: widget.globalToScene,
                   onNodeDragStart: recordDragStart,
                   onNodeDragEnd: handleDragEnd,
+                  isNodeVisible: isNodeVisible,
+                  isLinkVisible: isLinkVisible,
                   onTooltipShow: (entity) {
                     _entityIdShowingTooltip = entity.id;
                   },

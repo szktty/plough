@@ -43,9 +43,31 @@ class GraphGestureManager {
     this.globalToScene,
     this.onNodeDragStart,
     this.onNodeDragEnd,
+    this.isNodeVisible,
+    this.isLinkVisible,
   }) {
     _orderManager = graph.getOrderManagerSync();
   }
+
+  /// Whether a node is currently drawn, and so can be hit.
+  ///
+  /// An entity nobody can see must not answer a pointer: hitting one would let
+  /// a filtered-out node swallow a click, or select something invisible. Null
+  /// means every node is hittable.
+  ///
+  /// Mutable because the manager outlives a rebuild: the predicate closes over
+  /// the current widget, so it has to be refreshed rather than captured once.
+  bool Function(GraphNode node)? isNodeVisible;
+
+  /// Whether a link is currently drawn, and so can be hit.
+  ///
+  /// Null means every link is hittable. Mutable for the same reason as
+  /// [isNodeVisible].
+  bool Function(GraphLink link)? isLinkVisible;
+
+  bool _nodeIsHittable(GraphNode node) => isNodeVisible?.call(node) ?? true;
+
+  bool _linkIsHittable(GraphLink link) => isLinkVisible?.call(link) ?? true;
 
   final Graph graph;
   final GraphViewBehavior viewBehavior;
@@ -245,7 +267,7 @@ class GraphGestureManager {
       // Check candidates in frontmost-first order.
       GraphNode? best;
       for (final node in candidates) {
-        if (viewBehavior.hitTestNode(node, position)) {
+        if (_nodeIsHittable(node) && viewBehavior.hitTestNode(node, position)) {
           if (best == null || node.stackOrder > best.stackOrder) {
             best = node;
           }
@@ -256,7 +278,8 @@ class GraphGestureManager {
     // Fall back to linear scan (catches nodes not yet in the grid).
     return _orderManager.frontmostWhereOrNull((entity) {
       if (entity is GraphNode) {
-        return viewBehavior.hitTestNode(entity, position);
+        return _nodeIsHittable(entity) &&
+            viewBehavior.hitTestNode(entity, position);
       } else {
         return false;
       }
@@ -266,7 +289,8 @@ class GraphGestureManager {
   GraphLink? findLinkAt(Offset position) {
     return _orderManager.frontmostWhereOrNull((entity) {
       if (entity is GraphLink) {
-        return viewBehavior.hitTestLink(entity, position);
+        return _linkIsHittable(entity) &&
+            viewBehavior.hitTestLink(entity, position);
       } else {
         return false;
       }

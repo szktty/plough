@@ -45,6 +45,8 @@ class GraphInteractiveOverlay extends StatefulWidget {
     this.globalToScene,
     this.onNodeDragStart,
     this.onNodeDragEnd,
+    this.isNodeVisible,
+    this.isLinkVisible,
     super.key,
   });
 
@@ -68,6 +70,12 @@ class GraphInteractiveOverlay extends StatefulWidget {
   final Offset Function(Offset globalPosition)? globalToScene;
   final void Function(GraphId nodeId)? onNodeDragStart;
   final void Function(GraphId nodeId)? onNodeDragEnd;
+
+  /// Whether a node is currently drawn, and so can be hit. Null hits everything.
+  final bool Function(GraphNode node)? isNodeVisible;
+
+  /// Whether a link is currently drawn, and so can be hit. Null hits everything.
+  final bool Function(GraphLink link)? isLinkVisible;
 
   @override
   State<GraphInteractiveOverlay> createState() =>
@@ -179,6 +187,8 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
       globalToScene: widget.globalToScene,
       onNodeDragStart: widget.onNodeDragStart,
       onNodeDragEnd: widget.onNodeDragEnd,
+      isNodeVisible: widget.isNodeVisible,
+      isLinkVisible: widget.isLinkVisible,
     )..suppressDragMovement = widget.suppressDragMovement;
     (widget.graph as GraphImpl)
         .layoutChangeListenable
@@ -192,6 +202,10 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
     _applyViewportDragDeltaTransform();
     _gestureManager.onNodeDragStart = widget.onNodeDragStart;
     _gestureManager.onNodeDragEnd = widget.onNodeDragEnd;
+    // These close over the current widget's visibility filter, so a stale one
+    // would keep hit-testing against the previous frame's hidden set.
+    _gestureManager.isNodeVisible = widget.isNodeVisible;
+    _gestureManager.isLinkVisible = widget.isLinkVisible;
     // Only follow the widget when its own value changed. Otherwise a rebuild
     // would clobber a value set through
     // GraphViewportController.suppressDragMovement, which exists precisely for

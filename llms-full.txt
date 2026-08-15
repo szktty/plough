@@ -552,9 +552,31 @@ Passing `logicalPosition` with `isArranged: true` restores the saved layout dire
 
 ### Filtering Without Losing Positions
 
-An application that filters a graph — hiding nodes by label, say — usually does it by removing them and adding them back later. Removing a node destroys the object that held its position, so the node that returns is a new object starting at the origin: off screen, with its links trailing off to nothing.
+An application that filters a graph — hiding nodes by label, say — has two ways to do it.
 
-Capture the positions before the removal and replay them afterwards:
+**Preferred: keep the nodes and hide them.** Pass the filtered-out ids to `GraphView.hiddenNodeIds`. The nodes stay in the graph, keeping their positions and properties, so clearing the filter brings them back exactly as they were. Nothing is destroyed, so nothing has to be reconstructed.
+
+```dart
+GraphView(
+  graph: graph,
+  layoutStrategy: layoutStrategy,
+  hiddenNodeIds: filteredOutIds,  // just swap the set to change the filter
+);
+```
+
+A hidden node is not drawn, not hit-tested, and not laid out — the layout arranges only what is visible, so the graph closes up around the remaining nodes rather than leaving gaps. Links touching a hidden node are hidden with it, so no line is ever drawn to a node that is not there.
+
+For one-off control, the per-entity flag does the same thing:
+
+```dart
+node.visible = false;
+```
+
+An entity is drawn only when `visible` is true *and* its id is absent from `hiddenNodeIds`, so the two combine. Use the flag for individual entities and the set for filtering, where swapping the whole set beats walking every node.
+
+Note that a node hidden before any layout has placed it holds no position yet — the layout never saw it. Give it one at construction (`GraphNode(logicalPosition: …, isArranged: true)`) if it must appear somewhere specific when revealed.
+
+**If you must remove instead:** removing a node destroys the object that held its position, so the node that returns is a new object starting at the origin — off screen, with its links trailing off to nothing. Capture the positions before the removal and replay them afterwards:
 
 ```dart
 // Before applying the filter:
@@ -904,8 +926,8 @@ See also:
 *   `set stackOrder(int stackOrder)`: Sets the stack order.
 *   `bool get isEnabled`: Whether this entity is enabled for interaction.
 *   `set isEnabled(bool isEnabled)`: Sets the enabled state.
-*   `bool get visible`: Whether this entity is currently visible.
-*   `set visible(bool visible)`: Sets the visibility state.
+*   `bool get visible`: Whether this entity is currently visible. A hidden entity is not drawn, not hit-tested, and not laid out, but stays in the graph with its position and properties intact. For links, being visible also requires both endpoints to be visible.
+*   `set visible(bool visible)`: Sets the visibility state. For filtering many entities at once, prefer `GraphView.hiddenNodeIds`, which swaps one set instead of walking every entity.
 *   `bool get canSelect`: Whether this entity can be selected by user interaction.
 *   `set canSelect(bool canSelect)`: Sets the selectable state.
 *   `bool get isSelected`: Whether this entity is currently selected (read-only, managed by `GraphView`).
@@ -1041,7 +1063,7 @@ The main widget for displaying a graph. Handles node/link rendering, automatic l
 
 ##### Constructor
 
-*   `const GraphView({required Graph graph, required GraphViewBehavior behavior, required GraphLayoutStrategy layoutStrategy, bool allowSelection = false, bool allowMultiSelection = false, bool animationEnabled = true, Offset? nodeAnimationStartPosition, Duration nodeAnimationDuration = const Duration(milliseconds: 500), Curve nodeAnimationCurve = Curves.easeOutQuint, Key? key})`: Creates a graph visualization widget.
+*   `const GraphView({required Graph graph, required GraphViewBehavior behavior, required GraphLayoutStrategy layoutStrategy, bool allowSelection = false, bool allowMultiSelection = false, bool animationEnabled = true, Offset? nodeAnimationStartPosition, Duration nodeAnimationDuration = const Duration(milliseconds: 500), Curve nodeAnimationCurve = Curves.easeOutQuint, GraphGestureMode gestureMode = GraphGestureMode.exclusive, GraphGestureConsumptionCallback? shouldConsumeGesture, GraphBackgroundGestureCallback? onBackgroundTapped, GraphBackgroundGestureCallback? onBackgroundPanStart, GraphBackgroundPanCallback? onBackgroundPanUpdate, GraphBackgroundGestureCallback? onBackgroundPanEnd, Offset Function(Offset)? dragDeltaTransform, bool suppressDragMovement = false, Offset Function(Offset)? globalToScene, GraphViewportCanvasMode canvasMode = GraphViewportCanvasMode.bounded, Set<GraphId> hiddenNodeIds = const {}, Set<GraphId> hiddenLinkIds = const {}, bool debugShowBorder = false, Key? key})`: Creates a graph visualization widget.
 
 ##### Properties
 
@@ -1054,6 +1076,18 @@ The main widget for displaying a graph. Handles node/link rendering, automatic l
 *   `Offset? nodeAnimationStartPosition`: Starting position for node animations (defaults to screen center if null).
 *   `Duration nodeAnimationDuration`: Duration of node movement animations.
 *   `Curve nodeAnimationCurve`: Easing curve for node movement animations.
+*   `GraphGestureMode gestureMode`: How gestures are handled. See `GraphGestureMode`.
+*   `GraphGestureConsumptionCallback? shouldConsumeGesture`: Custom gesture-consumption predicate, used when `gestureMode` is `custom`.
+*   `GraphBackgroundGestureCallback? onBackgroundTapped` / `onBackgroundPanStart` / `onBackgroundPanEnd`, `GraphBackgroundPanCallback? onBackgroundPanUpdate`: Background gesture callbacks, called only when the gesture is not consumed by a graph element.
+*   `Offset Function(Offset delta)? dragDeltaTransform`: Converts a drag delta from screen pixels to scene coordinates. Typically `(d) => d / controller.scale` when inside a `GraphViewport`. Set automatically when a viewport is in use.
+*   `bool suppressDragMovement`: When true, drags report their progress but do not move the entity. To toggle this *during* a gesture use `GraphViewportController.suppressDragMovement` instead — rebuilding the view mid-drag replaces the gesture state and kills the drag.
+*   `Offset Function(Offset globalPosition)? globalToScene`: Converts a global screen position to scene coordinates for hit-testing.
+*   `GraphViewportCanvasMode canvasMode`: `bounded` snaps nodes back when dragged outside the initial bounds; `infinite` lets them go anywhere.
+*   `Set<GraphId> hiddenNodeIds`: Nodes to keep in the graph but leave undrawn. A hidden node is not rendered, not hit-tested, and not laid out, so the layout closes up around the visible nodes rather than leaving a gap. It keeps its position and properties, so removing it from this set brings it back exactly as it was. Links touching a hidden node are hidden with it.
+*   `Set<GraphId> hiddenLinkIds`: Links to keep in the graph but leave undrawn. Links touching a hidden node are already hidden, so this is only for hiding a link whose endpoints both remain visible.
+*   `bool debugShowBorder`: Draws a red border around the GraphView bounds for debugging.
+
+Both hidden sets combine with the per-entity `GraphEntity.visible` flag: an entity is drawn only when `visible` is true *and* its id is absent from the corresponding set. See "Filtering Without Losing Positions".
 
 #### GraphViewBehavior
 
