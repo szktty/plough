@@ -138,6 +138,13 @@ class GraphLinkImpl extends GraphEntityImpl<GraphLinkData>
   @override
   set canSelect(bool canSelect) {
     setState(state.value.copyWith(canSelect: canSelect));
+    // If canSelect is disabled, also deselect the link — through the graph so
+    // selectedLinkIds (the single source of truth) and isSelected stay in sync.
+    // Mirrors GraphNodeImpl.canSelect, which has always done this; without it a
+    // link already selected stayed selected after being made unselectable.
+    if (!canSelect && isSelected) {
+      graph?.deselectLink(id);
+    }
   }
 
   @override

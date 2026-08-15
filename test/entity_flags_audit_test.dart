@@ -4,11 +4,14 @@ import 'package:plough/plough.dart';
 
 /// Audits every [GraphEntity] flag for whether it actually does anything.
 ///
-/// `visible` shipped for a year declared but never read by the render path, so
-/// a node with `visible = false` was untappable yet fully drawn. Nothing caught
-/// it because no test ever set the flag and checked the result. These tests set
-/// each flag and assert on observable behaviour, so a flag that is only
-/// declared fails here rather than in an application.
+/// `visible` shipped declared but never read by the render path, so a node with
+/// `visible = false` was untappable yet fully drawn. Nothing caught it because
+/// no test ever set the flag and checked the result — the suite covered the
+/// half that worked (hit-testing) and never touched the half that did not.
+/// Auditing the rest turned up three more of the same shape, since fixed.
+///
+/// These tests set each flag and assert on observable behaviour, so a flag that
+/// is only declared fails here rather than in an application.
 GraphLink _link(GraphNode source, GraphNode target) => GraphLink(
       source: source,
       target: target,
@@ -103,9 +106,7 @@ void main() {
 
       expect(link.isSelected, isFalse);
       expect(graph.selectedLinkIds, isEmpty);
-    },
-        skip: 'BUG: Graph.selectLink does not check canSelect, unlike '
-            'selectNode. A link with canSelect = false is still selected.');
+    });
 
     test('clearing canSelect deselects an already selected link', () {
       final graph = Graph();
@@ -123,9 +124,7 @@ void main() {
       link.canSelect = false;
 
       expect(link.isSelected, isFalse);
-    },
-        skip: 'BUG: GraphLink.canSelect has no deselect-on-clear, unlike '
-            'GraphNode.canSelect. A selected link stays selected.');
+    });
   });
 
   group('isEnabled', () {
@@ -153,10 +152,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
 
       expect(node.isSelected, isFalse);
-    },
-        // BUG: isEnabled is never read outside its own setter, so it has no
-        // effect on anything.
-        skip: true);
+    });
 
     testWidgets('a disabled link does not respond to a tap', (tester) async {
       final graph = Graph();
@@ -189,10 +185,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
 
       expect(link.isSelected, isFalse);
-    },
-        // BUG: isEnabled is never read outside its own setter, so it has no
-        // effect on anything.
-        skip: true);
+    });
   });
 
   group('canDrag', () {
@@ -302,9 +295,7 @@ void main() {
           graph.getOrderManagerSync().frontmostWhereOrNull((e) => true);
 
       expect(found?.id, second.id);
-    },
-        skip: 'BUG: frontmostWhereOrNull walks the id list in insertion order '
-            'and never sorts by stackOrder.');
+    });
 
     testWidgets('the frontmost node wins an overlapping hit test',
         (tester) async {
@@ -340,9 +331,39 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.nodeIdAt(const Offset(100, 100)), back.id);
-    },
-        // BUG: hit-testing falls back to the order manager, which ignores
-        // stackOrder, so the drawn-on-top node can lose the hit test.
-        skip: true);
+    });
+
+    testWidgets('bringToFront makes a node win the hit test', (tester) async {
+      // bringToFront only raises stackOrder, so it was cosmetic for hit
+      // testing: the node was painted on top but the pointer still found the
+      // one beneath it.
+      final graph = Graph();
+      final a = GraphNode(properties: {'label': 'a'});
+      final b = GraphNode(properties: {'label': 'b'});
+      graph
+        ..addNode(a)
+        ..addNode(b);
+
+      final layout = GraphManualLayoutStrategy(
+        nodePositions: [
+          GraphNodeLayoutPosition(id: a.id, position: const Offset(50, 50)),
+          GraphNodeLayoutPosition(id: b.id, position: const Offset(60, 60)),
+        ],
+        origin: GraphLayoutPositionOrigin.topLeft,
+      );
+      final controller = GraphViewportController();
+      await tester.pumpWidget(_build(graph, layout, controller));
+      await tester.pumpAndSettle();
+
+      const overlap = Offset(100, 100);
+
+      graph.bringToFront(a.id);
+      await tester.pumpAndSettle();
+      expect(controller.nodeIdAt(overlap), a.id);
+
+      graph.bringToFront(b.id);
+      await tester.pumpAndSettle();
+      expect(controller.nodeIdAt(overlap), b.id);
+    });
   });
 }

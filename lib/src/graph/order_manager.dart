@@ -206,14 +206,27 @@ class GraphOrderManager {
   }
 
   /// Returns the frontmost entity that satisfies the [predicate], or null if none exist.
+  ///
+  /// "Frontmost" means the highest [GraphEntity.stackOrder], matching
+  /// [frontmostNode] and the order the view paints in. This previously returned
+  /// whichever match came first in the id list — insertion order — so a node
+  /// raised with [Graph.bringToFront] kept losing the hit test to one drawn
+  /// beneath it, because rendering sorted by stackOrder and this did not.
+  ///
+  /// Ties keep the earlier entity, so entities sharing a stack order still
+  /// resolve by insertion order as before.
   GraphEntity? frontmostWhereOrNull(
     bool Function(GraphEntity entity) predicate,
   ) {
-    final id = _entityIds.firstWhereOrNull((id) {
+    GraphEntity? best;
+    for (final id in _entityIds) {
       final entity = _getEntity(id);
-      return entity != null && predicate(entity);
-    });
-    return id != null ? _getEntity(id) : null;
+      if (entity == null || !predicate(entity)) continue;
+      if (best == null || entity.stackOrder > best.stackOrder) {
+        best = entity;
+      }
+    }
+    return best;
   }
 
   /// Returns the highest stack order among all managed entities.

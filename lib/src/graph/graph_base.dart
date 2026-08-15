@@ -522,6 +522,12 @@ class GraphImpl
   @override
   void selectLink(GraphId id) {
     final link = getLinkOrThrow(id) as GraphLinkImpl;
+    // Mirrors selectNode, which has always honoured canSelect. Without this a
+    // link that refused selection through the gesture layer could still be
+    // selected by calling this directly.
+    if (!link.canSelect) {
+      return;
+    }
 
     if (state.value.selectedLinkIds.length == 1 &&
         state.value.selectedLinkIds.contains(id)) {

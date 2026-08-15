@@ -764,12 +764,12 @@ See also:
 *   `void selectNode(GraphId id)`: Selects the node with the given `id`. Throws `ArgumentError` if no node with `id` exists.
 *   `void deselectNode(GraphId id)`: Deselects the node with the given `id`. Throws `ArgumentError` if no node with `id` exists.
 *   `void toggleSelectNode(GraphId id)`: Toggles the selection state of the node with the given `id`. Throws `ArgumentError` if no node with `id` exists.
-*   `void selectLink(GraphId id)`: Selects the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
+*   `void selectLink(GraphId id)`: Selects the link with the given `id`. Does nothing if the link's `canSelect` is false, matching `selectNode`. Throws `ArgumentError` if no link with `id` exists.
 *   `void deselectLink(GraphId id)`: Deselects the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
 *   `void toggleSelectLink(GraphId id)`: Toggles the selection state of the link with the given `id`. Throws `ArgumentError` if no link with `id` exists.
 *   `void clearSelection()`: Deselects all currently selected nodes and links.
 *   `void markNeedsLayout()`: Marks the graph as needing a layout recalculation, triggering `GraphView` to update.
-*   `void bringToFront(GraphId id)`: Brings the entity (node or link) with the given `id` to the front of the display stack. Throws `ArgumentError` if no entity with `id` exists.
+*   `void bringToFront(GraphId id)`: Brings the entity (node or link) with the given `id` to the front of the display stack, by raising its `stackOrder` above every other entity's. Affects both painting and hit-testing, so the raised entity also wins a pointer where entities overlap. Throws `ArgumentError` if no entity with `id` exists.
 *   `GraphOrderManager getOrderManager([List<GraphId>? ids])`: Returns a `GraphOrderManager` for controlling the z-order of entities (all entities if `ids` is null, specified entities otherwise). Throws `ArgumentError` if any provided ID doesn't exist.
 *   `GraphOrderManager getOrderManagerSync([List<GraphId>? ids])`: Similar to `getOrderManager` but changes take effect immediately. Throws `ArgumentError` if any provided ID doesn't exist.
 *   `Map<GraphId, Offset> nodePositionSnapshot({bool includeUnarranged = false})`: The current logical position of every node, keyed by node id. Take this before removing nodes and hand it back through `GraphSnapshotLayoutStrategy` so nodes that come back land where they were instead of at the origin. Only nodes a layout has actually placed are included unless `includeUnarranged` is true, so a node still waiting at the origin does not enter the snapshot and pin itself there.
@@ -797,7 +797,7 @@ See also:
 *   `size`: Node size (usually determined by renderer).
 *   `weight`: Weight used for layout algorithms (e.g., force-directed).
 *   `stackOrder`: Z-index for display order.
-*   `isEnabled`: Whether the node can be interacted with.
+*   `isEnabled`: Whether the node responds to pointers. Still drawn when false; see `GraphEntity.isEnabled`.
 *   `visible`: Whether the node is rendered.
 *   `canSelect`: Whether the node can be selected.
 *   `isSelected`: Whether the node is currently selected.
@@ -838,7 +838,7 @@ See also:
 *   `logicalPosition`: Current logical position of the link (often the midpoint or a control point).
 *   `weight`: Weight used for layout algorithms.
 *   `stackOrder`: Z-index for display order.
-*   `isEnabled`: Whether the link can be interacted with.
+*   `isEnabled`: Whether the link responds to pointers. Still drawn when false; see `GraphEntity.isEnabled`.
 *   `visible`: Whether the link is rendered.
 *   `canSelect`: Whether the link can be selected.
 *   `isSelected`: Whether the link is currently selected.
@@ -897,7 +897,7 @@ Provides operations to modify the display order without affecting the underlying
 *   `List<GraphId> sortedBy(int Function(GraphEntity entity) comparator)`: Returns a new list of entity IDs sorted by the comparator.
 *   `void sortByStackOrder()`: Sorts entities by their stack order (lowest to highest).
 *   `List<GraphId> sortedByStackOrder()`: Returns a new list of entity IDs sorted by stack order.
-*   `GraphEntity? frontmostWhereOrNull(bool Function(GraphEntity entity) predicate)`: Returns the frontmost entity satisfying the predicate, or null.
+*   `GraphEntity? frontmostWhereOrNull(bool Function(GraphEntity entity) predicate)`: Returns the frontmost entity satisfying the predicate, or null. "Frontmost" means the highest `stackOrder`, matching `frontmostNode` and the order the view paints in; ties keep the earlier entity.
 
 ### Base Classes and Enums
 
@@ -924,12 +924,12 @@ See also:
 *   `set weight(double weight)`: Sets the weight.
 *   `int get stackOrder`: The z-order of this entity (higher values are in front).
 *   `set stackOrder(int stackOrder)`: Sets the stack order.
-*   `bool get isEnabled`: Whether this entity is enabled for interaction.
+*   `bool get isEnabled`: Whether this entity is enabled for interaction. A disabled entity keeps being drawn but answers no pointer, so gestures over it fall through to whatever is behind — this is the "visible but inert" state, as opposed to `visible`, which stops the drawing too.
 *   `set isEnabled(bool isEnabled)`: Sets the enabled state.
 *   `bool get visible`: Whether this entity is currently visible. A hidden entity is not drawn, not hit-tested, and not laid out, but stays in the graph with its position and properties intact. For links, being visible also requires both endpoints to be visible.
 *   `set visible(bool visible)`: Sets the visibility state. For filtering many entities at once, prefer `GraphView.hiddenNodeIds`, which swaps one set instead of walking every entity.
 *   `bool get canSelect`: Whether this entity can be selected by user interaction.
-*   `set canSelect(bool canSelect)`: Sets the selectable state.
+*   `set canSelect(bool canSelect)`: Sets the selectable state. Setting it false also deselects the entity if it was selected, for both nodes and links.
 *   `bool get isSelected`: Whether this entity is currently selected (read-only, managed by `GraphView`).
 *   `Map<String, Object> get properties`: Custom properties associated with this entity.
 *   `set properties(Map<String, Object> values)`: Sets the custom properties map.
