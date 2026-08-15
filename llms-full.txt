@@ -108,6 +108,20 @@ GraphManualLayoutStrategy(
 )
 ```
 
+5. **Snapshot Layout**: Restores positions captured earlier, placing only new nodes.
+
+```dart
+final snapshot = graph.nodePositionSnapshot();
+// …remove and later re-add nodes…
+
+GraphSnapshotLayoutStrategy(
+  snapshot: snapshot,
+  fallback: GraphForceDirectedLayoutStrategy(),
+)
+```
+
+Any strategy can also pin individual nodes through `nodePositions` with `fixed: true`, which keeps them where you put them while the algorithm arranges everything else around them.
+
 #### GraphViewport
 
 `GraphViewport` wraps `GraphView` (or any widget) with built-in pan and pinch-to-zoom support. It owns the transformation matrix internally, so all coordinate math inside `GraphView` — hit-testing, node dragging — remains correct at any pan/zoom level.
@@ -487,17 +501,90 @@ final layoutStrategy = GraphManualLayoutStrategy(
 
 ### Graph Data Serialization
 
-The `GraphData` class handles graph serialization and deserialization, supporting data persistence in JSON format:
+Plough has no built-in serialization: `GraphData` is internal, and there is no `Graph.toData`/`Graph.fromData`. Persist the graph through your own model instead, rebuilding it from nodes and links on load. Node and link `properties` are plain `Map<String, Object>`, so they serialize directly.
 
 ```dart
-// Save graph state
-final graphData = graph.toData();
-final jsonString = jsonEncode(graphData.toJson());
+// Save: walk the graph into your own representation.
+final saved = {
+  'nodes': [
+    for (final node in graph.nodes)
+      {
+        'id': node.id.value,
+        'properties': node.properties,
+        'x': node.logicalPosition.dx,
+        'y': node.logicalPosition.dy,
+      },
+  ],
+  'links': [
+    for (final link in graph.links)
+      {
+        'source': link.source.id.value,
+        'target': link.target.id.value,
+        'direction': link.direction.name,
+      },
+  ],
+};
 
-// Restore graph state
-final restoredData = GraphData.fromJson(jsonDecode(jsonString));
-final restoredGraph = Graph.fromData(restoredData);
+// Restore: rebuild, placing each node where it was saved.
+final graph = Graph();
+final byId = <String, GraphNode>{};
+for (final n in saved['nodes']! as List) {
+  final node = GraphNode(
+    properties: (n as Map)['properties'] as Map<String, Object>,
+    logicalPosition: Offset(n['x'] as double, n['y'] as double),
+    isArranged: true,
+  );
+  byId[n['id'] as String] = node;
+  graph.addNode(node);
+}
+for (final l in saved['links']! as List) {
+  graph.addLink(
+    GraphLink(
+      source: byId[(l as Map)['source']]!,
+      target: byId[l['target']]!,
+      direction: GraphLinkDirection.values.byName(l['direction'] as String),
+    ),
+  );
+}
 ```
+
+Passing `logicalPosition` with `isArranged: true` restores the saved layout directly; use a layout strategy only if you want positions recomputed.
+
+### Filtering Without Losing Positions
+
+An application that filters a graph — hiding nodes by label, say — usually does it by removing them and adding them back later. Removing a node destroys the object that held its position, so the node that returns is a new object starting at the origin: off screen, with its links trailing off to nothing.
+
+Capture the positions before the removal and replay them afterwards:
+
+```dart
+// Before applying the filter:
+final snapshot = graph.nodePositionSnapshot();
+
+// …remove the filtered-out nodes, and later add them back…
+
+GraphView(
+  graph: graph,
+  layoutStrategy: GraphSnapshotLayoutStrategy(
+    snapshot: snapshot,
+    fallback: GraphForceDirectedLayoutStrategy(),
+  ),
+);
+```
+
+Restored nodes land exactly where they were, with no physics re-run and no drift for the nodes that never left. Genuinely new nodes — ones the snapshot has no entry for — are placed by the `fallback` strategy, which runs with the restored nodes pinned so it arranges the newcomers around them.
+
+When you already know a node's position at construction time, you can skip the snapshot and build it in place:
+
+```dart
+final restored = GraphNode(
+  id: previousId,
+  properties: properties,
+  logicalPosition: rememberedPosition,
+  isArranged: true, // tell layouts this position is worth keeping
+);
+```
+
+Note that the graph must keep the same `Graph` instance across a filter change. Replacing the instance makes `GraphView` re-initialise, discarding geometry and re-running the layout; apply the difference to the existing graph and call `markNeedsLayout()` instead.
 
 ### Event Handling
 
@@ -663,6 +750,7 @@ See also:
 *   `void bringToFront(GraphId id)`: Brings the entity (node or link) with the given `id` to the front of the display stack. Throws `ArgumentError` if no entity with `id` exists.
 *   `GraphOrderManager getOrderManager([List<GraphId>? ids])`: Returns a `GraphOrderManager` for controlling the z-order of entities (all entities if `ids` is null, specified entities otherwise). Throws `ArgumentError` if any provided ID doesn't exist.
 *   `GraphOrderManager getOrderManagerSync([List<GraphId>? ids])`: Similar to `getOrderManager` but changes take effect immediately. Throws `ArgumentError` if any provided ID doesn't exist.
+*   `Map<GraphId, Offset> nodePositionSnapshot({bool includeUnarranged = false})`: The current logical position of every node, keyed by node id. Take this before removing nodes and hand it back through `GraphSnapshotLayoutStrategy` so nodes that come back land where they were instead of at the origin. Only nodes a layout has actually placed are included unless `includeUnarranged` is true, so a node still waiting at the origin does not enter the snapshot and pin itself there.
 
 #### GraphNode
 
@@ -677,7 +765,7 @@ See also:
 
 ##### Constructor
 
-*   `GraphNode({GraphId? id, Map<String, Object>? properties})`: Creates a node with optional `id` and `properties`. If `id` is not provided, generates a unique identifier.
+*   `GraphNode({GraphId? id, Map<String, Object>? properties, Offset? logicalPosition, bool isArranged = false})`: Creates a node with optional `id` and `properties`. If `id` is not provided, generates a unique identifier. `logicalPosition` places the node immediately, before any layout runs — use it when re-adding a node whose position is already known (one hidden by a filter and then restored, say) so it never flashes at the origin. Pass `isArranged: true` alongside it to tell layouts the position is worth keeping; otherwise a layout may treat the node as new and move it.
 
 ##### Properties (inherits from GraphEntity)
 
@@ -698,6 +786,7 @@ See also:
 *   `Offset get animatedPosition`: The current animated position of this node during transitions.
 *   `GraphNodeViewGeometry? get geometry`: Geometric information for the node's view representation (size, position on screen).
 *   `GraphShape? get shape`: Shape configuration defining the node's visual appearance.
+*   `bool get isArranged`: Whether a layout pass has placed this node. Set once a layout finishes, so it distinguishes nodes holding a position worth preserving from ones that have only just been added. Useful for pinning the former via `GraphLayoutStrategy.nodePositions` when the graph grows and the layout would otherwise move everything.
 
 ##### Methods (inherits from GraphEntity)
 
@@ -1005,13 +1094,42 @@ A widget that provides pan and pinch-to-zoom for its child. The `Transform` is a
 
 *   `double scale`: The current zoom scale.
 *   `Offset panOffset`: The current pan offset in screen pixels.
+*   `Matrix4 get inverse`: The inverse of the current transform matrix (scene ← screen). The single source of truth for screen→scene conversion, so rendering and hit-testing cannot drift apart.
+*   `set suppressDragMovement(bool suppress)`: Whether drags report their progress without moving the entity. Prefer this over `GraphView.suppressDragMovement` when the flag has to change *during* a gesture — drawing a link that begins on Alt+drag, say. Rebuilding the view mid-drag would replace the gesture state and kill the drag; setting it here reaches the live gesture manager instead. No-op before a `GraphView` has attached.
 
 ##### Methods
 
 *   `void reset()`: Resets pan and zoom to the identity transform.
 *   `void pan(Offset delta)`: Pans the viewport by `delta` in screen pixels.
+*   `void setPanOffset(Offset offset)`: Sets the pan offset to an absolute position in screen pixels.
+*   `void setScale(double newScale)`: Sets the zoom scale to an absolute value, preserving the current pan offset. Unlike `zoomAt`, this does not adjust the translation. Clamped to `[minScale, maxScale]`.
 *   `void zoomAt(double scaleDelta, {required Offset focalPoint})`: Zooms by `scaleDelta` (multiplier) around `focalPoint` (screen coordinates). Result is clamped to `[minScale, maxScale]`.
 *   `Future<void> animateTo({required TickerProvider vsync, required Size viewSize, Offset? sceneOffset, double? targetScale, Duration duration, Curve curve})`: Smoothly animates to a target scene position and/or scale.
+*   `Offset screenToScene(Offset screenPosition)`: Converts a screen (viewport-local) position to scene (logical) coordinates.
+*   `Offset sceneToScreen(Offset scenePosition)`: Converts a scene (logical) position to screen (viewport-local) coordinates.
+*   `Offset toScene(Offset globalPosition)`: Converts a global screen position to scene coordinates. Delegates to `screenToScene`.
+
+###### Hit-testing
+
+These use the same hit-testing the gesture layer uses, so they account for node shape (a circular node is not hit at the corners of its bounding box), for a link's rendered path and stroke width, and for stacking order when entities overlap. Comparing against `bounds` directly gets those wrong. All return `null` before a `GraphView` has attached to the controller.
+
+*   `GraphId? nodeIdAt(Offset scenePosition)`: The frontmost node at `scenePosition`, or null if none is there.
+*   `GraphId? linkIdAt(Offset scenePosition)`: The frontmost link at `scenePosition`, or null if none is there.
+*   `GraphId? entityIdAt(Offset scenePosition)`: The frontmost entity at `scenePosition`, node or link, or null. Nodes take precedence over links, matching how the gesture layer resolves a pointer that lands on both. Use `GraphId.type` to tell the two apart.
+
+Plough has no right-click gesture of its own, so a host application building a context menu resolves what sits under the pointer itself:
+
+```dart
+final id = controller.entityIdAt(controller.screenToScene(localPosition));
+switch (id?.type) {
+  case GraphIdType.node:
+    showNodeMenu(id!);
+  case GraphIdType.link:
+    showLinkMenu(id!);
+  case null:
+    showBackgroundMenu();
+}
+```
 
 ### Layout Strategies
 
@@ -1029,20 +1147,33 @@ Subclasses implement `performLayout` and `shouldRelayout`.
 *   `int? seed`: Optional seed for reproducible random number generation.
 *   `EdgeInsets padding`: Padding around the layout area.
 *   `List<GraphNodeLayoutPosition> nodePositions`: List of predefined node positions (initial or fixed).
+*   `List<GraphNodeLayoutPosition> overlaidNodePositions`: Extra positions layered on top of `nodePositions` by the caller. `nodePositions` is final, so a strategy handed to another strategy as a delegate cannot be given more pins at construction; this is the seam for that. `GraphSnapshotLayoutStrategy` uses it to pin the nodes it has already restored before letting a fallback strategy place the rest. Entries in `nodePositions` take precedence.
+*   `Iterable<GraphNodeLayoutPosition> get effectiveNodePositions`: All positions that apply to this run, `nodePositions` first.
 
 ##### Methods to Implement/Override
 
 *   `void performLayout(Graph graph, Size size)`: Calculates and applies node positions based on the algorithm. Override in subclasses.
 *   `bool shouldRelayout(covariant GraphLayoutStrategy oldStrategy)`: Determines if the layout needs to be recalculated. Override in subclasses.
 
+##### Incremental Layout
+
+When `supportsIncrementalLayout` is true, `GraphView` calls `initIncrementalLayout` once, then `stepIncrementalLayout` each frame until it returns `false`, so nodes visibly settle into place instead of snapping.
+
+*   `bool get supportsIncrementalLayout`: Whether this strategy supports frame-by-frame layout. Defaults to `false`.
+*   `void initIncrementalLayout(Graph graph, Size size)`: Initialises the incremental layout state. Called once before the first step.
+*   `bool stepIncrementalLayout(Graph graph)`: Executes one frame's worth of computation. Returns `true` if more steps are needed, `false` when converged.
+
 ##### Helper Methods
 
 *   `bool isSameStrategy(GraphLayoutStrategy other)`: Checks if the given strategy is of the same type.
 *   `Size? getNodeSize(GraphNode node)`: Retrieves the current size of a node.
-*   `GraphNodeLayoutPosition? getNodePosition(GraphNode node)`: Gets the predefined position for a node, if any.
+*   `GraphNodeLayoutPosition? getNodePosition(GraphNode node)`: Gets the predefined position for a node, if any. Searches `effectiveNodePositions`.
 *   `bool isNodeFixed(GraphNode node)`: Checks if a node's position should remain fixed.
-*   `bool baseEquals(covariant GraphLayoutStrategy oldStrategy)`: Compares basic layout properties (padding, nodePositions).
-*   `void positionNode(GraphNode node, Offset position)`: Positions a node at the specified coordinates, respecting fixed state.
+*   `bool baseEquals(covariant GraphLayoutStrategy oldStrategy)`: Compares basic layout properties (padding, nodePositions). `GraphNodeLayoutPosition` has value equality, so this compares what the positions say rather than which objects hold them.
+*   `void applyNodePositions(Graph graph)` (protected): Writes every entry of `effectiveNodePositions` to its node. This is the one place allowed to move a fixed node, and it must run before the algorithm starts iterating — `positionNode` deliberately refuses to move fixed nodes, so without this seeding pass a `fixed: true` entry would pin a node to wherever it already happened to be (the origin, for a node that was just constructed) instead of to the requested position. Called by the base `performLayout`; subclasses that do not call `super.performLayout` must call it themselves before positioning anything.
+*   `void positionNode(GraphNode node, Offset position)`: Positions a node at the specified coordinates, ignoring the call for fixed nodes. Fixed nodes are seeded once by `applyNodePositions`; every later write goes through here and is skipped for them.
+
+> **Writing a custom strategy**: place nodes through `positionNode` so fixed pins are honoured, and skip a node whose `getNodePosition(node)` is non-null when generating initial placements — otherwise you overwrite the position the caller just asked for. The built-in force-directed and random strategies both do this.
 
 #### GraphForceDirectedLayoutStrategy
 
@@ -1129,6 +1260,42 @@ A layout strategy for precise manual node positioning.
 *   `void performLayout(Graph graph, Size size)`: Calculates absolute positions based on `nodePositions`, `origin`, and `originOffset`.
 *   `bool shouldRelayout(covariant GraphManualLayoutStrategy oldStrategy)`: Checks if `origin`, `originOffset`, or base properties changed.
 
+#### GraphSnapshotLayoutStrategy
+
+A layout that puts nodes back where a snapshot says they were. Pair it with `Graph.nodePositionSnapshot` to survive a round-trip through removal.
+
+Filtering a graph by removing nodes destroys the objects that held their positions, so nodes that come back are rebuilt at the origin — usually off screen, with their links trailing off to nothing. Recording the positions before the removal and replaying them here restores the layout exactly, with no physics re-run and no drift for the nodes that stayed.
+
+```dart
+// Before hiding part of the graph:
+final snapshot = graph.nodePositionSnapshot();
+
+// After putting the hidden nodes back:
+GraphView(
+  graph: graph,
+  layoutStrategy: GraphSnapshotLayoutStrategy(
+    snapshot: snapshot,
+    fallback: GraphForceDirectedLayoutStrategy(),
+  ),
+);
+```
+
+##### Constructor
+
+*   `GraphSnapshotLayoutStrategy({required Map<GraphId, Offset> snapshot, GraphLayoutStrategy? fallback, int? seed, EdgeInsets padding = const EdgeInsets.all(100)})`: Creates a layout that restores node positions from `snapshot`.
+
+##### Properties
+
+*   `Map<GraphId, Offset> snapshot`: The positions to restore, keyed by node id. Typically produced by `Graph.nodePositionSnapshot`.
+*   `GraphLayoutStrategy? fallback`: Places nodes that `snapshot` has no entry for — genuinely new ones. Runs with every snapshotted node pinned, so it arranges the newcomers around them without disturbing what was already there. When null, uncovered nodes keep the position they already have.
+*   *(Inherits `seed`, `padding` from `GraphLayoutStrategy`; `nodePositions` is derived from `snapshot` as fixed entries)*
+
+##### Methods
+
+*   `void performLayout(Graph graph, Size size)`: Restores the snapshotted positions, then runs `fallback` if the graph holds a node the snapshot does not cover. With nothing new to place the fallback is skipped entirely, since the pins would discard its every output.
+*   `bool get supportsIncrementalLayout`: Mirrors the fallback's, so an incremental fallback still animates the newcomers into place while the restored nodes stay put.
+*   `bool shouldRelayout(covariant GraphSnapshotLayoutStrategy oldStrategy)`: Checks whether the snapshot contents or the fallback type changed.
+
 #### GraphCustomLayoutStrategy
 
 A layout strategy that enables custom node positioning through a delegate pattern ([`GraphCustomLayoutStrategyDelegate`]). Provides a flexible framework for custom algorithms while handling common features like padding.
@@ -1162,7 +1329,9 @@ Holds position information for a node in the layout system.
 
 *   `GraphId id`: The unique identifier of the node.
 *   `Offset position`: The position of the node in logical coordinates.
-*   `bool fixed`: Whether this node's position should remain fixed during layout.
+*   `bool fixed`: Whether this node's position should remain fixed during layout. A fixed entry is applied once by `GraphLayoutStrategy.applyNodePositions` and then held against the algorithm's later writes — it pins the node *to* `position`, not merely wherever the node already is.
+
+`GraphNodeLayoutPosition` has value equality (`==`/`hashCode` over `id`, `position` and `fixed`), so `baseEquals` and `shouldRelayout` compare what the positions say rather than which objects hold them. Callers that rebuild the list on every build therefore do not trigger a relayout every frame.
 
 #### GraphTreeLayoutRootNodeSelector (Typedef)
 
@@ -1474,14 +1643,14 @@ Combines spatial information needed to render and interact with links.
 
 ##### Properties
 
-*   `Rect bounds`: The bounding rectangle of the link.
+*   `Rect bounds`: The rectangle spanned by the link's two endpoints. It carries no thickness, so an axis-aligned link has a rect of zero height (or width) — use `containsPoint` rather than `bounds.contains` for hit-testing.
 *   `GraphConnectionGeometry connection`: Connection details between nodes.
-*   `double thickness`: The thickness of the link.
+*   `double thickness`: The thickness of the link. This is the width of the band the user sees and aims at, so it defines the hit area.
 *   `double angle`: The angle of the link in radians.
 
 ##### Methods
 
-*   `bool containsPoint(Offset point)`: Determines if a point is within the link's area (considering rotation and thickness).
+*   `bool containsPoint(Offset point)`: Determines if a point is within the link's area. Rotates the point by `-angle` — laying the link along the x axis whatever its on-screen direction — and tests it against a rect as long as the endpoints are apart and `thickness` wide.
 
 #### GraphConnectionGeometry
 
