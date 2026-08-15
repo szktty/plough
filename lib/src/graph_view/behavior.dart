@@ -405,7 +405,11 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
   @override
   bool hitTestNode(GraphNodeImpl node, Offset position) {
     final geometry = node.geometry;
-    if (geometry == null || !node.visible) return false;
+    // isEnabled is the "visible but inert" state: the node keeps being drawn
+    // but answers no pointer, so every gesture over it falls through to
+    // whatever is behind. It had no effect at all before — nothing outside its
+    // own setter read it.
+    if (geometry == null || !node.visible || !node.isEnabled) return false;
 
     // Enable hit testing even during animation
     // Use current animation position during animation
@@ -426,7 +430,8 @@ class GraphViewDefaultBehavior implements GraphViewBehavior {
   @override
   bool hitTestLink(GraphLinkImpl link, Offset position) {
     final geometry = link.geometry;
-    if (geometry == null || !link.visible) return false;
+    // See hitTestNode: a disabled link stays drawn but answers no pointer.
+    if (geometry == null || !link.visible || !link.isEnabled) return false;
     return geometry.containsPoint(position);
   }
 
