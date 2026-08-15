@@ -80,6 +80,37 @@ class GraphViewportController extends ValueNotifier<Matrix4> {
   GraphId? nodeIdAt(Offset scenePosition) =>
       pointerHandlers?.nodeIdAtScene(scenePosition);
 
+  /// The frontmost link at [scenePosition], or null if none is there.
+  ///
+  /// Uses the same hit-testing the gesture layer uses, so it accounts for the
+  /// link's rendered path and stroke width rather than a straight line between
+  /// node centers.
+  ///
+  /// Returns null before a [GraphView] has attached to this controller.
+  GraphId? linkIdAt(Offset scenePosition) =>
+      pointerHandlers?.linkIdAtScene(scenePosition);
+
+  /// The frontmost entity at [scenePosition], node or link, or null if none.
+  ///
+  /// Nodes take precedence over links, matching how the gesture layer resolves
+  /// a pointer that lands on both. Use [GraphId.type] to tell the two apart:
+  ///
+  /// ```dart
+  /// final id = controller.entityIdAt(scenePosition);
+  /// switch (id?.type) {
+  ///   case GraphIdType.node:
+  ///     showNodeMenu(id!);
+  ///   case GraphIdType.link:
+  ///     showLinkMenu(id!);
+  ///   case null:
+  ///     showBackgroundMenu();
+  /// }
+  /// ```
+  ///
+  /// Returns null before a [GraphView] has attached to this controller.
+  GraphId? entityIdAt(Offset scenePosition) =>
+      nodeIdAt(scenePosition) ?? linkIdAt(scenePosition);
+
   /// The current zoom scale.
   double get scale => value.getMaxScaleOnAxis();
 
@@ -267,6 +298,7 @@ class GraphViewportPointerHandlers {
     required this.onPanEnd,
     required this.hitTestsEntityAt,
     required this.nodeIdAtScene,
+    required this.linkIdAtScene,
     required this.setSuppressDragMovement,
   });
 
@@ -290,6 +322,11 @@ class GraphViewportPointerHandlers {
   ///
   /// Backs [GraphViewportController.nodeIdAt].
   final GraphId? Function(Offset scenePosition) nodeIdAtScene;
+
+  /// The frontmost link at a **scene** position, or null if there is none.
+  ///
+  /// Backs [GraphViewportController.linkIdAt].
+  final GraphId? Function(Offset scenePosition) linkIdAtScene;
 
   /// Turns drag-movement suppression on or off.
   ///

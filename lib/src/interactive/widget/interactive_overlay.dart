@@ -117,6 +117,8 @@ class _GraphInteractiveOverlayState extends State<GraphInteractiveOverlay> {
         hitTestsEntityAt: _shouldConsumeGestureAt,
         nodeIdAtScene: (scenePosition) =>
             _gestureManager.findNodeAt(scenePosition)?.id,
+        linkIdAtScene: (scenePosition) =>
+            _gestureManager.findLinkAt(scenePosition)?.id,
         setSuppressDragMovement: (suppress) {
           _gestureManager.suppressDragMovement = suppress;
         },
